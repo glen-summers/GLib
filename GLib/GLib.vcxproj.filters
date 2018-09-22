@@ -1,0 +1,92 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Include Files">
+      <UniqueIdentifier>{20c6bdf0-4b2d-4ad4-abc7-faed1b479ca5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Include Files\win">
+      <UniqueIdentifier>{5c6b3d04-4677-4e43-b624-2ac01ba801fe}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="stdafx.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="targetver.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="filelogger.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\GLib\flogging.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\GLib\formatter.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\GLib\printfformatpolicy.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\GLib\stackorheap.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\GLib\cvt.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\GLib\win\Process.h">
+      <Filter>Include Files\win</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\GLib\win\WinException.h">
+      <Filter>Include Files\win</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\GLib\win\FormatErrorMessage.h">
+      <Filter>Include Files\win</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\GLib\Win\ErrorCheck.h">
+      <Filter>Include Files\win</Filter>
+    </ClInclude>
+    <ClInclude Include="streaminfo.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\GLib\compat.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="buffer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="genericoutstream.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="scope.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="fwd.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="logstate.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="filelogger.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="log.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="LogManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
