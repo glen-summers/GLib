@@ -20,9 +20,7 @@
 		<PlatformOut>$(Out)\$(Platform)</PlatformOut>
 		<Temp>$(PlatformOut)\temp</Temp>
 		<OutputPath>$(PlatformOut)\$(Configuration)</OutputPath>
-
 		<TestExecutable>$(OutputPath)\$(TestProject).exe</TestExecutable>
-
 	</PropertyGroup>
 
 	<Target Name="MakeTempDir">
@@ -36,14 +34,16 @@
 			<FileToDelete Include="$(Source)/**/Release/**/*"/>
 			<FileToDelete Include="$(Source)/**/ipch/**/*"/>
 			<FileToDelete Include="$(Source)/lib/*"/>
+			<FileToDelete Include="$(CMakeBuildDir)/**/*"/>
 		</ItemGroup>
 		<Delete Files="@(FileToDelete)" ContinueOnError="WarnAndContinue"/>
 
 		<ItemGroup>
 			<DirectoriesToRemove Include="$(Out)"/>
-			<DirectoriesToRemove Include="$(Cpp)/Debug"/>
-			<DirectoriesToRemove Include="$(Cpp)/Release"/>
-			<DirectoriesToRemove Include="$(Cpp)/x64"/>
+			<DirectoriesToRemove Include="$(Source)/Debug"/>
+			<DirectoriesToRemove Include="$(Source)/Release"/>
+			<DirectoriesToRemove Include="$(Source)/x64"/>
+			<DirectoriesToRemove Include="$(CMakeBuildDir)"/>
 		</ItemGroup>
 		<RemoveDir Directories="@(DirectoriesToRemove)"/>
 	</Target>
@@ -71,4 +71,25 @@
 	</Target>
 
 	<Target Name="Build" DependsOnTargets="Compile;Test"/>
+
+	<!--cmake-->
+	<PropertyGroup>
+		<CMakeRootDir>$(vsInstallationPath)\Common7\IDE\CommonExtensions\Microsoft\CMake</CMakeRootDir>
+		<CMake>"$(CMakeRootDir)\CMake\bin\CMake.exe"</CMake>
+		<Ninja>"$(CMakeRootDir)\Ninja\ninja.exe"</Ninja>
+
+		<!-- determine, using using directory above == CMakeBuilds-->
+		<CMakeBuildRoot>$(UserProfile)\CMakeBuilds\3667b4a4-2bc3-463f-ad2f-7d42138c4d0a</CMakeBuildRoot>
+		<CMakeBuildDir>$(CMakeBuildRoot)\build\$(Platform)-$(Configuration)</CMakeBuildDir>
+		<CMakeInstallDir>$(CMakeBuildRoot)\install\$(Platform)-$(Configuration)</CMakeInstallDir>
+	</PropertyGroup>
+
+	<Target Name="CMake">
+		<MakeDir Directories="$(CMakeBuildDir)"/>
+
+		<Exec Command='$(CMake) -G "Ninja" -DCMAKE_INSTALL_PREFIX:PATH="$(CMakeInstallDir)" -DCMAKE_BUILD_TYPE="$(Configuration)" -DCMAKE_MAKE_PROGRAM=$(Ninja) $(Root)'
+			WorkingDirectory="$(CMakeBuildDir)"/>
+
+		<Exec Command="$(CMake) --build $(CMakeBuildDir) --config $(Configuration) -- -v"/>
+	</Target>
 </Project>
