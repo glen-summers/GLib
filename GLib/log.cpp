@@ -1,7 +1,7 @@
 #include "stdafx.h"
 
 #include "GLib/flogging.h"
-#include "FileLogger.h"
+#include "filelogger.h"
 
 using GLib::Flog::Log;
 using GLib::Flog::Level;

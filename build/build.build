@@ -86,10 +86,10 @@
 
 	<Target Name="CMake">
 		<MakeDir Directories="$(CMakeBuildDir)"/>
-
 		<Exec Command='$(CMake) -G "Ninja" -DCMAKE_INSTALL_PREFIX:PATH="$(CMakeInstallDir)" -DCMAKE_BUILD_TYPE="$(Configuration)" -DCMAKE_MAKE_PROGRAM=$(Ninja) $(Root)'
 			WorkingDirectory="$(CMakeBuildDir)"/>
-
 		<Exec Command="$(CMake) --build $(CMakeBuildDir) --config $(Configuration) -- -v"/>
+		<Exec Command="$(CMake) --build $(CMakeBuildDir) --config $(Configuration) --target install"/>
+		<Exec Command="$(CMakeBuildDir)\AllTests.exe"/>
 	</Target>
 </Project>

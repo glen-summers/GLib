@@ -8,9 +8,13 @@
 #endif
 
 #ifdef __linux__
+#include <unistd.h>
+#include <sys/types.h>
+#include <string.h>
 #include <experimental/filesystem>
 #elif _WIN32
 #include <filesystem>
+#include "Win/Process.h"
 #else
 //?
 #endif
@@ -80,5 +84,41 @@ namespace GLib
 #endif
 		}
 
+		inline int64_t ProcessId()
+		{
+#ifdef _MSC_VER
+				return Win::CurrentProcess().Id;
+#elif __GNUG__
+				return ::getpid();
+#else
+				// getprogname?
+				//?
+#endif
+
+		}
+
+		inline std::string ProcessPath()
+		{
+#ifdef _MSC_VER
+			return Win::CurrentProcess().Path;
+#elif __GNUG__
+			return program_invocation_name;
+#else
+			// getprogname?
+			//?
+#endif
+		}
+
+		inline std::string ProcessName()
+		{
+#ifdef _MSC_VER
+			return filesystem::path(Win::CurrentProcess().Path).filename().u8string();
+#elif __GNUG__
+			return program_invocation_name;
+#else
+			// getprogname?
+			//?
+#endif
+		}
 	}
 }

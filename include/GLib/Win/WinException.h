@@ -1,5 +1,5 @@
 #pragma once
-
+#include <sstream>
 #include "GLib/Win/FormatErrorMessage.h"
 
 namespace GLib

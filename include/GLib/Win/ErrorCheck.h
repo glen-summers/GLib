@@ -23,6 +23,7 @@ namespace GLib
 				public:
 					template<typename T> static void AssertTrue(T value, const char * message)
 					{
+						UNREFERENCED_PARAMETER(message);
 						static_assert(false, "Invalid check parameter, only bool and BOOL allowed");
 					}
 
@@ -41,6 +42,8 @@ namespace GLib
 
 					static void WarnAssertTrue(bool result, const char * message) noexcept
 					{
+						UNREFERENCED_PARAMETER(result);
+						UNREFERENCED_PARAMETER(message);
 						if (!result)
 						{
 							//Debug::Write(WinException(message, ::GetLastError()).what()); // avoid exception, avoid Debug?

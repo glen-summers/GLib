@@ -4,7 +4,7 @@
 #include "streaminfo.h"
 #include "logstate.h"
 
-#include "glib/compat.h"
+#include "GLib/compat.h"
 
 #include <mutex>
 

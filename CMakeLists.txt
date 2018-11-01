@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.11)
+cmake_minimum_required(VERSION 3.10.2)
 
 function(R_SEARCH_ABOVE search_path search_item return_value)
 while(true)
@@ -28,6 +28,11 @@ if (WIN32)
 	endforeach()
 endif (WIN32)
 
+if (UNIX)
+SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -lstdc++fs")
+message("CMAKE_EXE_LINKER_FLAGS = ${CMAKE_EXE_LINKER_FLAGS}")
+endif (UNIX)
+
 R_SEARCH_ABOVE(${CMAKE_CURRENT_SOURCE_DIR} ExternalDependencies/boost_${BOOST_VER}/Jamroot EXT_DIR)
 if(NOT EXT_DIR)
 	message(FATAL_ERROR "Could not find ExternalDependencies")
@@ -45,7 +50,7 @@ add_library(GLib STATIC
 	GLib/LogManager.cpp
 )
 
-add_executable(Tests
+add_executable(AllTests
 	Tests/Main.cpp
 	Tests/FlogTests.cpp
 	Tests/FormatterTests.cpp
@@ -53,4 +58,10 @@ add_executable(Tests
 
 include_directories(${BOOST_DIR} include)
 
-target_link_libraries(Tests GLib)
+target_link_libraries(AllTests GLib)
+
+install(TARGETS AllTests GLib
+	RUNTIME DESTINATION bin
+	ARCHIVE DESTINATION lib
+	CONFIGURATIONS ${CMAKE_CONFIGURATION_TYPES}
+)

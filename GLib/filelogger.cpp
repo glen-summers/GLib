@@ -17,24 +17,21 @@ using namespace GLib;
 
 namespace
 {
-	std::string GetBaseName()
-	{
-		// compat
-		return fs::path(Win::CurrentProcess().Path).filename().u8string();
-		//qt: return fs::path(QCoreApplication::applicationFilePath().toStdString()).filename().u8string();
-	}
-
 	std::string GetFullName()
 	{
-		// compat
-		return Win::CurrentProcess().Path;
+		return Compat::ProcessPath();
 		// qt: CoreApplication::applicationFilePath().toStdString();
+	}
+
+	std::string GetBaseName()
+	{
+		return Compat::ProcessName();
+		//qt: return fs::path(QCoreApplication::applicationFilePath().toStdString()).filename().u8string();
 	}
 
 	unsigned long long GetProcessId()
 	{
-		// compat
-		return Win::CurrentProcess().Id;
+		return Compat::ProcessId();
 		//qt: return QCoreApplication::applicationPid();
 	}
 
