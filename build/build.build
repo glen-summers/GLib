@@ -90,6 +90,5 @@
 			WorkingDirectory="$(CMakeBuildDir)"/>
 		<Exec Command="$(CMake) --build $(CMakeBuildDir) --config $(Configuration) -- -v"/>
 		<Exec Command="$(CMake) --build $(CMakeBuildDir) --config $(Configuration) --target install"/>
-		<Exec Command="$(CMakeBuildDir)\AllTests.exe"/>
 	</Target>
 </Project>

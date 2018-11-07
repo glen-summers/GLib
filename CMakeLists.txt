@@ -66,3 +66,11 @@ install(TARGETS AllTests GLib
 	ARCHIVE DESTINATION lib
 	CONFIGURATIONS ${CMAKE_CONFIGURATION_TYPES}
 )
+
+set(UNIT_TEST AllTests)
+add_custom_command(
+     TARGET ${UNIT_TEST}
+     COMMENT "Run tests"
+     POST_BUILD 
+     COMMAND ${UNIT_TEST}
+)
