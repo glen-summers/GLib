@@ -26,7 +26,7 @@ namespace GLib
 					template <typename>
 					static no& test(...);
 
-					static const bool value = sizeof(test<T>(0)) == sizeof(yes);
+					static constexpr bool value = sizeof(test<T>(0)) == sizeof(yes);
 			};
 
 			//template <typename T>

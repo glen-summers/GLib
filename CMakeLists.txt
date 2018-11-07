@@ -28,11 +28,6 @@ if (WIN32)
 	endforeach()
 endif (WIN32)
 
-if (UNIX)
-SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -lstdc++fs")
-message("CMAKE_EXE_LINKER_FLAGS = ${CMAKE_EXE_LINKER_FLAGS}")
-endif (UNIX)
-
 R_SEARCH_ABOVE(${CMAKE_CURRENT_SOURCE_DIR} ExternalDependencies/boost_${BOOST_VER}/Jamroot EXT_DIR)
 if(NOT EXT_DIR)
 	message(FATAL_ERROR "Could not find ExternalDependencies")
@@ -55,6 +50,12 @@ add_executable(AllTests
 	Tests/FlogTests.cpp
 	Tests/FormatterTests.cpp
 )
+
+if (UNIX)
+#SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} stdc++fs")
+#message("CMAKE_EXE_LINKER_FLAGS = ${CMAKE_EXE_LINKER_FLAGS}")
+target_link_libraries(${PROJECT_NAME} stdc++fs)
+endif (UNIX)
 
 include_directories(${BOOST_DIR} include)
 
