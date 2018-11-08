@@ -11,7 +11,7 @@
 namespace
 {
 	bool IsInvalidFormat(const std::logic_error & e) { return e.what() == std::string("Invalid format string"); }
-	bool 	IsIndexOutOfRange(const std::logic_error & e) { return e.what() == std::string("IndexOutOfRange"); }
+	bool IsIndexOutOfRange(const std::logic_error & e) { return e.what() == std::string("IndexOutOfRange"); }
 }
 
 using GLib::Formatter;
@@ -330,8 +330,23 @@ BOOST_AUTO_TEST_CASE(MoneyTest)
 {
 	Money m { 123456.7 };
 
-	std::string s = Formatter::Format(std::locale("en-GB"), "{0}", m);
-	BOOST_TEST("�1,234.57" == s);
+
+	// unix uk_utf8 ?
+
+#ifdef __linux__
+	auto ukloc = "en_GB.UTF8";
+#elif _WIN32
+	auto ukloc = "en-GB";
+#else
+#endif
+
+	std::string s = Formatter::Format(std::locale(ukloc), "{0}", m);
+	const auto a3 = "\xA3";
+	const auto pos = s.find(a3, 0);
+	BOOST_TEST(pos != std::string::npos);
+	s.erase(pos, 1);
+	s.insert(pos, u8"£");
+	BOOST_TEST(u8"£1,234.57" == s);
 }
 
 BOOST_AUTO_TEST_CASE(TestLargeObject)

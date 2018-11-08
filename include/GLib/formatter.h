@@ -350,7 +350,7 @@ namespace GLib
 			static auto FormatImpl(std::ostream& os, const T& obj, const std::string &fmt, int)
 					-> decltype(Policy::Format(os, obj, fmt), void())
 			{
-					Policy::Format(os, obj, fmt);
+					return Policy::Format(os, obj, fmt);
 			}
 
 			template <typename T, typename std::enable_if<FormatterDetail::IsFormattable<T>::value>::type* = nullptr>

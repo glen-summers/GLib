@@ -80,6 +80,11 @@ namespace GLib
 				ToStringImpl("%g", stm, value, format);
 			}
 
+			static void Format(std::ostream & stm, void * const & value, const std::string & format)
+			{
+				ToStringImpl("%#p", stm, value, format);
+			}
+
 			static void Format(std::ostream & stm, const std::tm & value, const std::string & fmt)
 			{
 				stm << std::put_time(&value, fmt.empty() ? "%c" : fmt.c_str());
