@@ -326,13 +326,6 @@ namespace GLib
 					return str.str();
 			}
 
-			template <typename... Ts> static std::string Format(const std::locale & l, const char * format, Ts&&... ts)
-			{
-					std::ostringstream str;
-					str.imbue(l);
-					Format(str, format, std::forward<Ts>(ts)...);
-					return str.str();
-			}
 
 	private:
 

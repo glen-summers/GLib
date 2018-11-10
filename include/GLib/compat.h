@@ -3,6 +3,8 @@
 #include <stdexcept>
 #include <ctime>
 
+#include "GLib/stackorheap.h"
+
 #ifdef __GNUG__
 #include <cxxabi.h>
 #endif
@@ -10,6 +12,7 @@
 #ifdef __linux__
 #include <unistd.h>
 #include <sys/types.h>
+#include <sys/stat.h>
 #include <string.h>
 #include <experimental/filesystem>
 #elif _WIN32
@@ -53,7 +56,7 @@ namespace GLib
 #endif
 		}
 
-		inline void StrError()
+		inline void StrError(const char * prefix)
 		{
 			char err[255];
 			char * msg;
@@ -64,7 +67,7 @@ namespace GLib
 #else
 			//?
 #endif
-			throw std::logic_error(std::string("sprintf error : ") + msg);
+			throw std::logic_error(std::string(prefix)+ " : " + msg);
 		}
 
 		inline std::string Unmangle(const char * name)
@@ -88,7 +91,7 @@ namespace GLib
 		{
 #ifdef _MSC_VER
 				return Win::CurrentProcess().Id;
-#elif __GNUG__
+#elif __linux__
 				return ::getpid();
 #else
 				// getprogname?
@@ -101,10 +104,29 @@ namespace GLib
 		{
 #ifdef _MSC_VER
 			return Win::CurrentProcess().Path;
-#elif __GNUG__
-			return program_invocation_name;
+#elif __linux__
+
+			std::ostringstream s;
+			s << "/proc/" << ::getpid() << "/exe";
+
+			struct stat sb;
+			auto ret = ::lstat(s.str().c_str(), &sb);
+			if (ret == -1) // errno?
+			{
+				StrError("lstat failed"); // test
+			}
+
+			Util::StackOrHeap<char, 256> soh;
+			soh.EnsureSize(sb.st_size + 1);
+
+			int readBytes = ::readlink(s.str().c_str(), soh.Get(), soh.size());
+			if (readBytes < 0)
+			{
+				StrError("readlink failed"); // test
+			}
+			soh.Get()[readBytes] = '\0';
+			return soh.Get();
 #else
-			// getprogname?
 			//?
 #endif
 		}

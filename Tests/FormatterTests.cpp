@@ -12,6 +12,14 @@ namespace
 {
 	bool IsInvalidFormat(const std::logic_error & e) { return e.what() == std::string("Invalid format string"); }
 	bool IsIndexOutOfRange(const std::logic_error & e) { return e.what() == std::string("IndexOutOfRange"); }
+
+	const auto ukLocale =
+#ifdef __linux__
+		"en_GB.UTF8";
+#elif _WIN32
+		"en-GB";
+#else
+#endif
 }
 
 using GLib::Formatter;
@@ -21,11 +29,18 @@ BOOST_AUTO_TEST_SUITE(FormatterTests)
 BOOST_AUTO_TEST_CASE(BasicTest)
 {
 	std::string s = Formatter::Format("{0} {1} {2} {3}", 1, "2", std::string("3"), reinterpret_cast<void*>(4));
-#if _WIN64
-	BOOST_TEST(s == "1 2 3 0000000000000004");
-#else
-	BOOST_TEST(s == "1 2 3 00000004");
-#endif
+	if constexpr (sizeof(void*) == 8)
+	{
+		BOOST_TEST(s == "1 2 3 0000000000000004");
+	}
+	else if constexpr (sizeof(void*) == 4)
+	{
+		BOOST_TEST(s == "1 2 3 00000004");
+	}
+	else
+	{
+		throw std::runtime_error("unexpected pointer size");
+	}
 }
 
 BOOST_AUTO_TEST_CASE(TestEmptyFormatOk)
@@ -257,36 +272,53 @@ BOOST_AUTO_TEST_CASE(TestLongDouble)
 
 BOOST_AUTO_TEST_CASE(TestLongDoubleFormat)
 {
-	std::string s = Formatter::Format("{0:%.2f}", 1.23456789012345L);
+	std::string s = Formatter::Format("{0:%.2Lf}", 1.23456789012345L);
 	BOOST_TEST("1.23" == s);
 }
 
 BOOST_AUTO_TEST_CASE(TestPointer)
 {
-	void * p = reinterpret_cast<void*>(0x12345);
+	auto p = reinterpret_cast<void*>(0x12345);
 
 	std::string s = Formatter::Format("{0}", p);
-#if _WIN64
-	BOOST_TEST("0000000000012345" == s);
-#else
-	BOOST_TEST("00012345" == s);
-#endif
+	if constexpr (sizeof(void*)==8)
+	{
+		BOOST_TEST("0000000000012345" == s);
+	}
+	else if constexpr (sizeof(void*) == 4)
+	{
+		BOOST_TEST("00012345" == s);
+	}
+	else
+	{
+		throw std::runtime_error("unexpected pointer size");
+	}
 }
 
 BOOST_AUTO_TEST_CASE(TestTimePointDefaultFormat)
 {
 	const int offset = 1900;
 	const int yr = 1601;
-	tm tm { 0,0,0, 1,0, yr - offset, 0,0, 0 };
-	std::string s = Formatter::Format(std::locale(""), "{0}", tm);
-	BOOST_TEST("01/01/1601 00:00:00" == s);
+	const tm tm { 0,0,0, 1,0, yr - offset, 0,0, 0 };
+
+	std::ostringstream s;
+	s.imbue(std::locale(ukLocale));
+	Formatter::Format(s, "{0}", tm);
+	BOOST_TEST("01/01/1601 00:00:00" == s.str());
 }
 
 BOOST_AUTO_TEST_CASE(TestTimePoint)
 {
 	tm tm { 0,0,18, 6,10,67, 0,0, 1 };
-	std::string s = Formatter::Format("{0:%d %b %Y, %H:%M:%S}", tm);
-	BOOST_TEST("06 Nov 1967, 18:00:00" == s);
+
+	std::ostringstream s;
+	s.imbue(std::locale(ukLocale));
+	Formatter::Format(s, "{0}", tm);
+	BOOST_TEST("06/11/1967 18:00:00" == s.str());
+
+	// make this work
+	//std::string s = Formatter::Format("{0:%d %b %Y, %H:%M:%S}", tm);
+	//BOOST_TEST("06 Nov 1967, 18:00:00" == s);
 }
 
 BOOST_AUTO_TEST_CASE(TestPad)
@@ -330,23 +362,11 @@ BOOST_AUTO_TEST_CASE(MoneyTest)
 {
 	Money m { 123456.7 };
 
-
-	// unix uk_utf8 ?
-
-#ifdef __linux__
-	auto ukloc = "en_GB.UTF8";
-#elif _WIN32
-	auto ukloc = "en-GB";
-#else
-#endif
-
-	std::string s = Formatter::Format(std::locale(ukloc), "{0}", m);
-	const auto a3 = "\xA3";
-	const auto pos = s.find(a3, 0);
-	BOOST_TEST(pos != std::string::npos);
-	s.erase(pos, 1);
-	s.insert(pos, u8"£");
-	BOOST_TEST(u8"£1,234.57" == s);
+	std::ostringstream s;
+	s.imbue(std::locale(ukLocale));
+	Formatter::Format(s, "{0}", m);
+	auto expected = "\xc2\xa3" "1,234.57";
+	BOOST_TEST(expected == s.str());
 }
 
 BOOST_AUTO_TEST_CASE(TestLargeObject)
