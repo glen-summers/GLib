@@ -2,28 +2,46 @@
 #define PRINTF_FORMAT_POLICY_H
 
 #include <ostream>
+#include <iomanip>
 
 #include "stackorheap.h"
 #include "compat.h"
+#include "cvt.h"
 
 namespace GLib
 {
+	// move?
+	struct Money
+	{
+		long double value;
+	};
+
 	namespace FormatterPolicy
 	{
 		namespace Detail
 		{
-			template <typename T>
-			static void ToStringImpl(const char * defaultFormat, std::ostream & stm, const T & value, const std::string & format)
+			inline const char * CheckFormat(const char * defaultFormat, const std::string & format)
 			{
-				//NumberFormatter n(format);
-				// %[flags][width][.precision][length]specifier
-				// %.*x
 				const char * f = format.empty() ? defaultFormat : format.c_str();
 				if (*f != '%')
 				{
 					throw std::logic_error("Invalid format : " + format);
 				}
+				return f;
+			}
 
+			inline void CheckFormatEmpty(const std::string & format)
+			{
+				if (!format.empty())
+				{
+					throw std::logic_error("Invalid format : " + format);
+				}
+			}
+
+			template <typename T>
+			static void ToStringImpl(const char * defaultFormat, std::ostream & stm, const T & value, const std::string & format)
+			{
+				const char * f = CheckFormat(defaultFormat, format);
 				Util::StackOrHeap<char, 21> s;
 				const int len = ::snprintf(nullptr, 0, f, value);
 				if (len < 0)
@@ -34,6 +52,28 @@ namespace GLib
 				::snprintf(s.Get(), s.size(), f, value);
 
 				stm << s.Get();
+			}
+
+			template <>
+			inline void ToStringImpl(const char * defaultFormat, std::ostream & stm, const std::tm & value, const std::string & format)
+			{
+				const char * f = CheckFormat(defaultFormat, format);
+				// stream to wide to correctly convert locale symbols, is there a better better way? maybe when code convert gets fixed
+				std::wstringstream wideStream;
+				wideStream.imbue(stm.getloc());
+				wideStream << std::put_time(&value, Cvt::a2w(f).c_str());
+				stm << Cvt::w2a(wideStream.str());
+			}
+
+			template <>
+			inline void ToStringImpl(const char *, std::ostream & stm, const Money & value, const std::string & format)
+			{
+				CheckFormatEmpty(format);
+				// stream to wide to correctly convert locale symbols, is there a better better way? maybe when code convert gets fixed
+				std::wstringstream wideStream;
+				wideStream.imbue(stm.getloc());
+				wideStream << std::showbase << std::put_money(value.value);
+				stm << Cvt::w2a(wideStream.str());
 			}
 
 			template<unsigned int> void FormatPointer(std::ostream & stm, void * const & value)
@@ -135,6 +175,21 @@ namespace GLib
 				{
 					Detail::ToStringImpl("", stm, value, format);
 				}
+			}
+
+			// actually not printf calls, move to a shared c++ policy?
+			static void Format(std::ostream & stm, const std::tm & value, const std::string & format)
+			{
+				// %c linux:   Sun 06 Nov 1967 18:00:00 BST
+				// %c windows: 06/11/1967 18:00:00
+				// so using a specific default format
+				Detail::ToStringImpl("%d %b %Y, %H:%M:%S", stm, value, format);
+			}
+
+			static void Format(std::ostream & stm, const Money & value, const std::string & format)
+			{
+				// assert format is empty
+				Detail::ToStringImpl("", stm, value, format);
 			}
 
 		private:

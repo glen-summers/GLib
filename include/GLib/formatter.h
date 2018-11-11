@@ -326,9 +326,7 @@ namespace GLib
 					return str.str();
 			}
 
-
 	private:
-
 			// ? http://www.drdobbs.com/cpp/efficient-use-of-lambda-expressions-and/232500059
 			template <typename T>
 			static FormatterDetail::StreamFunction ToStreamFunctions(const T& t)

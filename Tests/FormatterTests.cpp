@@ -304,7 +304,7 @@ BOOST_AUTO_TEST_CASE(TestTimePointDefaultFormat)
 	std::ostringstream s;
 	s.imbue(std::locale(ukLocale));
 	Formatter::Format(s, "{0}", tm);
-	BOOST_TEST("01/01/1601 00:00:00" == s.str());
+	BOOST_TEST("01 Jan 1601, 00:00:00" == s.str());
 }
 
 BOOST_AUTO_TEST_CASE(TestTimePoint)
@@ -313,12 +313,8 @@ BOOST_AUTO_TEST_CASE(TestTimePoint)
 
 	std::ostringstream s;
 	s.imbue(std::locale(ukLocale));
-	Formatter::Format(s, "{0}", tm);
-	BOOST_TEST("06/11/1967 18:00:00" == s.str());
-
-	// make this work
-	//std::string s = Formatter::Format("{0:%d %b %Y, %H:%M:%S}", tm);
-	//BOOST_TEST("06 Nov 1967, 18:00:00" == s);
+	Formatter::Format(s, "{0:%d %b %Y, %H:%M:%S}", tm);
+	BOOST_TEST("06 Nov 1967, 18:00:00" == s.str());
 }
 
 BOOST_AUTO_TEST_CASE(TestPad)
@@ -360,7 +356,7 @@ BOOST_AUTO_TEST_CASE(CustomTypeNonEmptyFormatException)
 
 BOOST_AUTO_TEST_CASE(MoneyTest)
 {
-	Money m { 123456.7 };
+	GLib::Money m { 123456.7 };
 
 	std::ostringstream s;
 	s.imbue(std::locale(ukLocale));
