@@ -133,14 +133,7 @@ namespace GLib
 
 		inline std::string ProcessName()
 		{
-#ifdef _MSC_VER
-			return filesystem::path(Win::CurrentProcess().Path).filename().u8string();
-#elif __GNUG__
-			return program_invocation_name;
-#else
-			// getprogname?
-			//?
-#endif
+			return filesystem::path(ProcessPath()).filename().u8string();
 		}
 	}
 }
