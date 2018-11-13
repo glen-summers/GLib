@@ -2,22 +2,22 @@
 
 #include <ostream>
 
-template <typename T, class BufferType> // BufferType : basic_streambuf<_Elem, _Traits>
+template <typename T, class BufferType>
 class GenericOutStream : public std::basic_ostream<T>
 {
 	typedef std::basic_ostream<T> base;
 
-	BufferType m_buf;
+	BufferType buf;
 
 public:
-	GenericOutStream(std::ios_base::fmtflags f = std::ios_base::fmtflags()) : base(&m_buf)
+	GenericOutStream(std::ios_base::fmtflags f = std::ios_base::fmtflags()) : base(&buf)
 	{
 		base::setf(f);
 	}
 
 	const BufferType & rdbuf()
 	{
-		return m_buf;
+		return buf;
 	}
 };
 

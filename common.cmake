@@ -1,18 +1,25 @@
 
-macro(SetCpp17)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-endmacro()
 
 if (WIN32)
-# force static linkage for msvc
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc")
-	set(CompilerFlags CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELEASE
-			CMAKE_C_FLAGS CMAKE_C_FLAGS_DEBUG CMAKE_C_FLAGS_RELEASE)
+	set(CompilerFlags CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELEASE)
 	foreach(CompilerFlag ${CompilerFlags})
-	  string(REPLACE "/MD" "/MT" ${CompilerFlag} "${${CompilerFlag}}")
+		string(REPLACE "/MD" "/MT" ${CompilerFlag} "${${CompilerFlag}}")
+		#message("static link ${CompilerFlag} ${${CompilerFlag}}")
 	endforeach()
+
+	string(REPLACE "/W3" "/W4 /WX" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+	#message("warnings CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS}")
+else(WIN32)
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -pedantic -Wextra")
 endif (WIN32)
+
+function(AddStdLinkage target)
+if (UNIX)
+	target_link_libraries(${target} stdc++fs)
+endif (UNIX)
+endfunction(AddStdLinkage)
 
 function(R_SEARCH_ABOVE search_path root_item sub_item return_value)
 while(true)

@@ -3,11 +3,14 @@
 #include <streambuf>
 #include <vector>
 
-class Buffer : public std::basic_streambuf<char>
+template <typename T=char, size_t bufferSize = 256>
+class Buffer : public std::basic_streambuf<T>
 {
-	static constexpr int bufferSize = 256;
-	typedef std::vector<char> bufferType;
-	typedef basic_streambuf<char> base;
+	typedef std::vector<T> bufferType;
+	typedef std::basic_streambuf<T> base;
+	using typename base::int_type;
+	using typename base::traits_type;
+
 	mutable bufferType buffer;
 
 	int_type overflow(int_type c) override
@@ -19,6 +22,7 @@ class Buffer : public std::basic_streambuf<char>
 		buffer.push_back(traits_type::to_char_type(c));
 		return c;
 	}
+
 public:
 	Buffer()
 	{

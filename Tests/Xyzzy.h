@@ -17,7 +17,7 @@ struct Xyzzy
 std::ostream & operator << (std::ostream & s, const Xyzzy &)
 {
 	return s << "plover";
-};
+}
 
 struct Xyzzy2
 {};
@@ -25,7 +25,7 @@ struct Xyzzy2
 std::ostream & operator << (std::ostream & s, const Xyzzy2 &)
 {
 	return s << "plover2";
-};
+}
 
 struct CopyCheck
 {

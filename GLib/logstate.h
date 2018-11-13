@@ -8,7 +8,7 @@
 
 struct LogState
 {
-	using Stream = GenericOutStream<char, Buffer>;
+	using Stream = GenericOutStream<char, Buffer<char>>;
 
 	std::stack<Scope> scopes;
 	const char * pendingScope;

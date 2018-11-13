@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "pch.h"
 
 #include "GLib/flogging.h"
 #include "filelogger.h"

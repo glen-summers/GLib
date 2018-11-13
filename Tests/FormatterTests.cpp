@@ -20,6 +20,15 @@ namespace
 		"en-GB";
 #else
 #endif
+
+	tm MakeTm(int tm_sec, int tm_min, int tm_hour, int tm_mday, int tm_mon, int tm_year, int tm_wday, int tm_yday, int tm_isdst)
+	{
+		return { tm_sec, tm_min, tm_hour, tm_mday, tm_mon, tm_year, tm_wday, tm_yday, tm_isdst
+#ifdef __linux__
+			,0,0
+#endif
+		};
+	}
 }
 
 using GLib::Formatter;
@@ -299,7 +308,7 @@ BOOST_AUTO_TEST_CASE(TestTimePointDefaultFormat)
 {
 	const int offset = 1900;
 	const int yr = 1601;
-	const tm tm { 0,0,0, 1,0, yr - offset, 0,0, 0 };
+	const tm tm = MakeTm( 0,0,0, 1,0, yr - offset, 0,0, 0 );
 
 	std::ostringstream s;
 	s.imbue(std::locale(ukLocale));
@@ -309,7 +318,7 @@ BOOST_AUTO_TEST_CASE(TestTimePointDefaultFormat)
 
 BOOST_AUTO_TEST_CASE(TestTimePoint)
 {
-	tm tm { 0,0,18, 6,10,67, 0,0, 1 };
+	const tm tm = MakeTm( 0,0,18, 6,10,67, 0,0, 1 );
 
 	std::ostringstream s;
 	s.imbue(std::locale(ukLocale));
@@ -342,12 +351,6 @@ BOOST_AUTO_TEST_CASE(CustomTypeFormat)
 
 BOOST_AUTO_TEST_CASE(CustomTypeNonEmptyFormatException)
 {
-	auto f = []()
-	{
-		Xyzzy2 plugh;
-		std::string s = Formatter::Format("{0:lentilCustard}", plugh);
-	};
-
 	BOOST_CHECK_EXCEPTION(Xyzzy2 plugh; Formatter::Format("{0:lentilCustard}", plugh), std::logic_error, [](const std::logic_error & e)
 	{
 		return e.what() == std::string("Unexpected non-empty format : lentilCustard");

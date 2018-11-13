@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 3.10.2)
 
 include(../common.cmake)
-SetCpp17()
 
 add_library(GLib STATIC
 	filelogger.cpp
@@ -11,10 +10,7 @@ add_library(GLib STATIC
 
 target_include_directories(GLib PUBLIC ../include)
 
-# move to macro?
-if (UNIX)
-target_link_libraries(GLib stdc++fs)
-endif (UNIX)
+AddStdLinkage(GLib)
 
 install(TARGETS GLib
 	ARCHIVE DESTINATION lib

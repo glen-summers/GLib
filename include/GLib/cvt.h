@@ -7,8 +7,10 @@ namespace GLib
 {
 	namespace Cvt
 	{
+#ifdef _MSC_VER
 #pragma warning(push)
 #pragma warning(disable: 4996)	// until have proper\efficient fix
+#endif
 		inline std::wstring a2w(const char * s)
 		{
 			std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t> convert;
@@ -38,6 +40,8 @@ namespace GLib
 			std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t> convert;
 			return convert.to_bytes(s);
 		}
+#ifdef _MSC_VER
 #pragma warning(pop)
+#endif
 	}
 }

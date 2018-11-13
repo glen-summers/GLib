@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "pch.h"
 
 #include "GLib/flogging.h"
 #include "GLib/compat.h"
@@ -8,10 +8,6 @@
 #include <iomanip>
 #include <sstream>
 #include <thread>
-
-#ifdef _MSC_VER
-#include "GLib/Win/Process.h"
-#endif
 
 using namespace GLib;
 
