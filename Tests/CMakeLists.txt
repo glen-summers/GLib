@@ -22,15 +22,11 @@ add_subdirectory(../GLib GLib)
 
 target_link_libraries(AllTests GLib)
 
+add_test(NAME AllTests COMMAND AllTests)
+
 install(TARGETS AllTests
 	RUNTIME DESTINATION bin
 	CONFIGURATIONS ${CMAKE_CONFIGURATION_TYPES}
 )
 
-set(UNIT_TEST AllTests)
-add_custom_command(
-     TARGET ${UNIT_TEST}
-     COMMENT "Run tests"
-     POST_BUILD 
-     COMMAND ${UNIT_TEST}
-)
+

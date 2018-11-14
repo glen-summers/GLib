@@ -75,7 +75,7 @@
 	<!--cmake-->
 	<PropertyGroup>
 		<CMakeRootDir>$(vsInstallationPath)\Common7\IDE\CommonExtensions\Microsoft\CMake</CMakeRootDir>
-		<CMake>"$(CMakeRootDir)\CMake\bin\CMake.exe"</CMake>
+		<CMake>"$(CMakeRootDir)\CMake\bin\cmake.exe"</CMake>
 		<Ninja>"$(CMakeRootDir)\Ninja\ninja.exe"</Ninja>
 
 		<!-- determine, using using directory above == CMakeBuilds-->
@@ -89,6 +89,7 @@
 		<Exec Command='$(CMake) -G "Ninja" -DCMAKE_INSTALL_PREFIX:PATH="$(CMakeInstallDir)" -DCMAKE_BUILD_TYPE="$(Configuration)" -DCMAKE_MAKE_PROGRAM=$(Ninja) $(Root)'
 			WorkingDirectory="$(CMakeBuildDir)"/>
 		<Exec Command="$(CMake) --build $(CMakeBuildDir) --config $(Configuration) -- -v"/>
+		<Exec Command="set CTEST_OUTPUT_ON_FAILURE=1 &amp;&amp; $(CMake) --build $(CMakeBuildDir) --config $(Configuration) --target test"/>
 		<Exec Command="$(CMake) --build $(CMakeBuildDir) --config $(Configuration) --target install"/>
 	</Target>
 </Project>
