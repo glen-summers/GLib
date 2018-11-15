@@ -4,7 +4,7 @@
 	</PropertyGroup>
 
 	<PropertyGroup>
-		<Solution>GLib.sln</Solution>
+		<Solution>$(Root)\msvc\GLib.sln</Solution>
 		<Source>$(Root)</Source>
 		<MajorVersion>1</MajorVersion>
 		<MinorVersion>0</MinorVersion>
@@ -34,18 +34,16 @@
 			<FileToDelete Include="$(Source)/**/Release/**/*"/>
 			<FileToDelete Include="$(Source)/**/ipch/**/*"/>
 			<FileToDelete Include="$(Source)/lib/*"/>
-			<FileToDelete Include="$(CMakeBuildDir)/**/*"/>
 		</ItemGroup>
 		<Delete Files="@(FileToDelete)" ContinueOnError="WarnAndContinue"/>
 
 		<ItemGroup>
-			<DirectoriesToRemove Include="$(Out)"/>
-			<DirectoriesToRemove Include="$(Source)/Debug"/>
-			<DirectoriesToRemove Include="$(Source)/Release"/>
-			<DirectoriesToRemove Include="$(Source)/x64"/>
-			<DirectoriesToRemove Include="$(CMakeBuildDir)"/>
-		</ItemGroup>
-		<RemoveDir Directories="@(DirectoriesToRemove)"/>
+			<Directories Include="$([System.IO.Directory]::GetDirectories('$(Source)', '*', System.IO.SearchOption.AllDirectories))" />
+			<Directories>
+				<Files>$([System.IO.Directory]::GetFiles("%(Directories.Identity)", "*", System.IO.SearchOption.AllDirectories).get_Length())</Files>
+			</Directories>
+		</ItemGroup>        
+		<RemoveDir Directories="@(Directories)" Condition="%(Files)=='0'" />
 	</Target>
 
 	<Target Name="Restore"/>
@@ -58,7 +56,7 @@
 			<Properties Include="Platform=$(Platform)"/>
 			<Properties Include="@(CustomProperties)"/>
 		</ItemGroup>
-		<MSBuild Projects="$(Source)\$(Solution)" Properties="@(Properties)" BuildInParallel="$(BuildInParallel)"/>
+		<MSBuild Projects="$(Solution)" Properties="@(Properties)" BuildInParallel="$(BuildInParallel)"/>
 	</Target>
 	
 	<!--32bit...
@@ -79,8 +77,8 @@
 		<CTest>"$(CMakeRootDir)\CMake\bin\ctest.exe"</CTest>
 		<Ninja>"$(CMakeRootDir)\Ninja\ninja.exe"</Ninja>
 
-		<CMakeBuildDir>$(Root)\cmake_build\$(Platform)-$(Configuration)</CMakeBuildDir>
-		<CMakeInstallDir>$(Root)\cmake_install\$(Platform)-$(Configuration)</CMakeInstallDir>
+		<CMakeBuildDir>$(Out)\cmake\build\$(Platform)-$(Configuration)</CMakeBuildDir>
+		<CMakeInstallDir>$(Out)\cmake\install\$(Platform)-$(Configuration)</CMakeInstallDir>
 	</PropertyGroup>
 
 	<Target Name="CMake">

@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10.2)
 
 set(BOOST_VER 1_68_0)
-include(../common.cmake)
+include(../cmake/common.cmake)
 
 R_SEARCH_ABOVE(${CMAKE_CURRENT_SOURCE_DIR} ExternalDependencies/boost_${BOOST_VER} Jamroot BOOST_DIR)
 if(NOT BOOST_DIR)

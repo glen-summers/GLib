@@ -10,7 +10,7 @@
     <ClCompile>
       <AdditionalIncludeDirectories>
         $(Boost);
-        $(MSBuildThisFileDirectory)include;
+        $([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)\..\include'));
       </AdditionalIncludeDirectories>
       <PreprocessorDefinitions>%(PreprocessorDefinitions);NOMINMAX;WIN32_LEAN_AND_MEAN;_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS</PreprocessorDefinitions>
       <TreatWarningAsError Condition="'$(Configuration)'=='Debug'">false</TreatWarningAsError>

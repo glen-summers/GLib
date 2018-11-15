@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10.2)
 
-include(../common.cmake)
+include(../cmake/common.cmake)
 
 add_library(GLib STATIC
 	filelogger.cpp

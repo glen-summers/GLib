@@ -15,13 +15,12 @@ Build() {
 }
 
 Clean() {
-	rm -f -r -v "${CMakeBuildDir}" || error_exit "rm ${CMakeBuildDir} failed"
-	rm -f -r -v "${CMakeInstallDir}" || error_exit "rm ${CMakeInstallDir} failed"
+	rm -f -r -v "${RootDir}/out" || error_exit "rm ${RootDir}/out failed"
 }
 
 RootDir=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
-CMakeInstallDir="${RootDir}/cmake_install"
-CMakeBuildDir="${RootDir}/cmake_build"
+CMakeInstallDir="${RootDir}/out/cmake/install"
+CMakeBuildDir="${RootDir}/out/cmake/build"
 
 echo "go $1..."
 case "$1" in

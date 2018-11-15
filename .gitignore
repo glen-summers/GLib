@@ -1,6 +1,4 @@
-# locals
-/cmake_build
-/cmake_install
+/out/
 
 ## https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 ## Ignore Visual Studio temporary files, build results, and
@@ -264,15 +262,3 @@ paket-files/
 # Python Tools for Visual Studio (PTVS)
 __pycache__/
 *.pyc
-
-## https://github.com/github/gitignore/blob/master/CMake.gitignore
-#CMakeCache.txt
-#CMakeFiles
-#CMakeScripts
-#Testing
-#Makefile
-#cmake_install.cmake
-#install_manifest.txt
-#compile_commands.json
-#CTestTestfile.cmake
-

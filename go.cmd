@@ -2,7 +2,7 @@
 cls
 setlocal EnableDelayedExpansion
 
-set buildFile=%~dp0Build\build.build
+set buildFile=%~dp0msvc\build.build
 set msbuildVersion=15.0
 set requires=Microsoft.Component.MSBuild Microsoft.VisualStudio.Component.VC.Tools.x86.x64
 
