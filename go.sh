@@ -8,6 +8,8 @@ error_exit() {
 clear
 cd "$( dirname "${BASH_SOURCE[0]}" )"
 
+# todo, clean install
+
 cmake . -DCMAKE_INSTALL_PREFIX:PATH="./install" || error_exit "cmake failed"
 cmake --build . || error_exit "cmake build failed"
 CTEST_OUTPUT_ON_FAILURE=1 cmake --build . --target test || error_exit "cmake build failed"
