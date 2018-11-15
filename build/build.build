@@ -79,10 +79,8 @@
 		<CTest>"$(CMakeRootDir)\CMake\bin\ctest.exe"</CTest>
 		<Ninja>"$(CMakeRootDir)\Ninja\ninja.exe"</Ninja>
 
-		<!-- determine, using using directory above == CMakeBuilds-->
-		<CMakeBuildRoot>$(UserProfile)\CMakeBuilds\3667b4a4-2bc3-463f-ad2f-7d42138c4d0a</CMakeBuildRoot>
-		<CMakeBuildDir>$(CMakeBuildRoot)\build\$(Platform)-$(Configuration)</CMakeBuildDir>
-		<CMakeInstallDir>$(CMakeBuildRoot)\install\$(Platform)-$(Configuration)</CMakeInstallDir>
+		<CMakeBuildDir>$(Root)\cmake_build\$(Platform)-$(Configuration)</CMakeBuildDir>
+		<CMakeInstallDir>$(Root)\cmake_install\$(Platform)-$(Configuration)</CMakeInstallDir>
 	</PropertyGroup>
 
 	<Target Name="CMake">
