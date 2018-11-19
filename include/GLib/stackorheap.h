@@ -10,61 +10,61 @@ namespace GLib
 		template <typename T, size_t StackElementCount>
 		class StackOrHeap
 		{
-				struct Heap { T* p; size_t elementCount; };
-				bool heapInUse = false;
-				union
-				{
-						T stack[StackElementCount];
-						Heap heap;
-				};
+			struct Heap { T* p; size_t elementCount; };
+			bool heapInUse = false;
+			union
+			{
+					T stack[StackElementCount];
+					Heap heap;
+			};
 
-				size_t GetSize() const { return heapInUse ? heap.elementCount : StackElementCount; }
-				const T* GetPtr() const { return heapInUse ? heap.p : stack; }
+			size_t GetSize() const { return heapInUse ? heap.elementCount : StackElementCount; }
+			const T* GetPtr() const { return heapInUse ? heap.p : stack; }
 
 		public:
-				StackOrHeap() = default;
-				StackOrHeap(const StackOrHeap &) = delete;
-				StackOrHeap & operator=(const StackOrHeap &) = delete;
-				StackOrHeap(StackOrHeap &&) = delete;
-				StackOrHeap & operator=(StackOrHeap &&) = delete;
+			StackOrHeap() = default;
+			StackOrHeap(const StackOrHeap &) = delete;
+			StackOrHeap & operator=(const StackOrHeap &) = delete;
+			StackOrHeap(StackOrHeap &&) = delete;
+			StackOrHeap & operator=(StackOrHeap &&) = delete;
 
-				~StackOrHeap()
-				{
-						if (heapInUse)
-						{
-								delete[] heap.p;
-						}
-				}
+			~StackOrHeap()
+			{
+					if (heapInUse)
+					{
+							delete[] heap.p;
+					}
+			}
 
-				void EnsureSize(size_t newElementCount)
-				{
-						if ((newElementCount > StackElementCount && !heapInUse) || (heapInUse && newElementCount > heap.elementCount))
-						{
-								if (heapInUse)
-								{
-										delete[] heap.p;
-								}
-								heap.p = new T[newElementCount];
-								heap.elementCount = newElementCount;
-								heapInUse = true;
-						}
+			void EnsureSize(size_t newElementCount)
+			{
+					if ((newElementCount > StackElementCount && !heapInUse) || (heapInUse && newElementCount > heap.elementCount))
+					{
+							if (heapInUse)
+							{
+									delete[] heap.p;
+							}
+							heap.p = new T[newElementCount];
+							heap.elementCount = newElementCount;
+							heapInUse = true;
+					}
 
-						// could go back to stack if (heapInUse && newElementCount <= StackElementCount)
-				}
+					// could go back to stack if (heapInUse && newElementCount <= StackElementCount)
+			}
 
-				const T* Get() const { return GetPtr(); }
-				T* Get() { return const_cast<T*>(GetPtr()); }
+			const T* Get() const { return GetPtr(); }
+			T* Get() { return const_cast<T*>(GetPtr()); }
 
-				const T* operator->() const { return Get(); }
-				T* operator->() { return Get(); }
+			const T* operator->() const { return Get(); }
+			T* operator->() { return Get(); }
 
-				size_t size() const { return GetSize(); }
+			size_t size() const { return GetSize(); }
 
-				const T * begin() const { return Get(); }
-				T * begin() { return Get(); }
+			const T * begin() const { return Get(); }
+			T * begin() { return Get(); }
 
-				const T * end() const { return Get() + size(); }
-				T * end() { return Get() + size(); }
+			const T * end() const { return Get() + size(); }
+			T * end() { return Get() + size(); }
 		};
 	}
 }

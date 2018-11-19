@@ -148,6 +148,7 @@
     <ClInclude Include="..\include\GLib\flogging.h" />
     <ClInclude Include="..\include\GLib\formatter.h" />
     <ClInclude Include="..\include\GLib\printfformatpolicy.h" />
+    <ClInclude Include="..\include\GLib\scope.h" />
     <ClInclude Include="..\include\GLib\stackorheap.h" />
     <ClInclude Include="..\include\GLib\Win\ErrorCheck.h" />
     <ClInclude Include="..\include\GLib\win\FormatErrorMessage.h" />

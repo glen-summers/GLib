@@ -5,7 +5,6 @@
 
 #include <sstream>
 #include <functional>
-#include <ctime>
 #include <iomanip>
 
 // namespace Formatter?

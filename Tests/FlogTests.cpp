@@ -2,18 +2,11 @@
 #include "GLib/flogging.h"
 
 #include <boost/test/unit_test.hpp>
-#include <iostream>
+
 
 BOOST_AUTO_TEST_SUITE(FlogTests)
 
 	struct Fred {};
-
-	BOOST_AUTO_TEST_CASE(Info)
-	{
-		std::cout << "Path:" << GLib::Compat::ProcessPath() << std::endl;
-		std::cout << "Name:" << GLib::Compat::ProcessName() << std::endl;
-		std::cout << "Pid:" << GLib::Compat::ProcessId() << std::endl;
-	}
 
 	BOOST_AUTO_TEST_CASE(BasicTest)
 	{

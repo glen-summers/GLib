@@ -1,12 +1,10 @@
 
 #include "GLib/formatter.h"
+#include "Xyzzy.h"
 
 #include <boost/test/unit_test.hpp>
 
 #include <chrono>
-#include <iostream>
-
-#include "Xyzzy.h"
 
 namespace
 {

@@ -16,6 +16,8 @@ add_executable(AllTests
 	Main.cpp
 	FlogTests.cpp
 	FormatterTests.cpp
+	ConverterTests.cpp
+	ScopeTests.cpp
 )
 
 add_subdirectory(../GLib GLib)

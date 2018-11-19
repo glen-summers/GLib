@@ -2,9 +2,6 @@
 
 #include <ostream>
 #include <string>
-#include <iomanip>
-
-#include "GLib/cvt.h"
 
 struct Xyzzy
 {
