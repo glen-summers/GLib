@@ -90,4 +90,11 @@
 		<Exec Command="set CTEST_OUTPUT_ON_FAILURE=1 &amp;&amp; $(CTest) -VV" WorkingDirectory="$(CMakeBuildDir)"/>
 		<Exec Command="$(CMake) --build $(CMakeBuildDir) --config $(Configuration) --target install"/>
 	</Target>
+
+	<Target Name="Clone">
+		<!-- needs sysnative, msbuild running as 32bit?-->
+		<Exec Command="%windir%\sysnative\wsl.exe ./go.sh clone" WorkingDirectory="$(Root)"/>
+	</Target>
+
+	<Target Name="All" DependsOnTargets="Build;CMake;Clone"/>
 </Project>
