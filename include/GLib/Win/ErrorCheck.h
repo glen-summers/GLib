@@ -46,7 +46,7 @@ namespace GLib
 						UNREFERENCED_PARAMETER(message);
 						if (!result)
 						{
-							//Debug::Write(WinException(message, ::GetLastError()).what()); // avoid exception, avoid Debug?
+							// TODO: Debug::Write(WinException(message, ::GetLastError()).what()); // avoid exception, avoid Debug?
 						}
 					}
 
@@ -57,10 +57,14 @@ namespace GLib
 				};
 			}
 
-
 			template <typename T> void AssertTrue(T result, const char * message)
 			{
 				Detail::Checker::AssertTrue(result, message);
+			}
+
+			template <typename T> void WarnAssertTrue(T result, const char * message)
+			{
+				Detail::Checker::WarnAssertTrue(result, message);
 			}
 		}
 	}

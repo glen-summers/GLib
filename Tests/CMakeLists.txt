@@ -3,6 +3,15 @@ cmake_minimum_required(VERSION 3.10.2)
 set(BOOST_VER 1_68_0)
 include(../cmake/common.cmake)
 
+# not working...
+#if(UNIX)
+#include(FindICU)
+#if(ICU_FOUND)
+#	include_directories(${ICU_INCLUDE_DIRS})
+#	link_libraries(${ICU_DATA_LIBRARIES} ${ICU_I18N_LIBRARIES} ${ICU_LIBRARIES})
+#endif(ICU_FOUND)
+#endif()
+
 R_SEARCH_ABOVE(${CMAKE_CURRENT_SOURCE_DIR} ExternalDependencies/boost_${BOOST_VER} Jamroot BOOST_DIR)
 if(NOT BOOST_DIR)
 	message(FATAL_ERROR "Could not find ExternalDependencies")
@@ -23,6 +32,9 @@ add_executable(AllTests
 add_subdirectory(../GLib GLib)
 
 target_link_libraries(AllTests GLib)
+if(UNIX) #hack: just add libs that weren't found by FindICU
+	target_link_libraries(AllTests icui18n icuuc)
+endif()
 
 add_test(NAME AllTests COMMAND AllTests)
 
@@ -30,5 +42,3 @@ install(TARGETS AllTests
 	RUNTIME DESTINATION bin
 	CONFIGURATIONS ${CMAKE_CONFIGURATION_TYPES}
 )
-
-

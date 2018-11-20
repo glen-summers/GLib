@@ -7,6 +7,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Tests", "..\Tests\Tests.vcx
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SolutionItems", "SolutionItems", "{E4242C09-3560-4051-A84A-5D38CA1712AA}"
 	ProjectSection(SolutionItems) = preProject
+		build.build = build.build
+		Default.props = Default.props
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GLib", "..\GLib\GLib.vcxproj", "{AE9CCD38-5A24-4794-AC41-BA9BB82F8B13}"
