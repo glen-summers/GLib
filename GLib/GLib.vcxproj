@@ -143,6 +143,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\include\GLib\checked_cast.h" />
     <ClInclude Include="..\include\GLib\compat.h" />
     <ClInclude Include="..\include\GLib\cvt.h" />
     <ClInclude Include="..\include\GLib\flogging.h" />
@@ -151,7 +152,10 @@
     <ClInclude Include="..\include\GLib\scope.h" />
     <ClInclude Include="..\include\GLib\stackorheap.h" />
     <ClInclude Include="..\include\GLib\Win\ErrorCheck.h" />
+    <ClInclude Include="..\include\GLib\Win\FileSystem.h" />
     <ClInclude Include="..\include\GLib\win\FormatErrorMessage.h" />
+    <ClInclude Include="..\include\GLib\Win\Handle.h" />
+    <ClInclude Include="..\include\GLib\Win\Module.h" />
     <ClInclude Include="..\include\GLib\win\Process.h" />
     <ClInclude Include="..\include\GLib\win\WinException.h" />
     <ClInclude Include="buffer.h" />

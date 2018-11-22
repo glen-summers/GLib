@@ -1,15 +1,12 @@
 #pragma once
 
-#include <stdexcept>
-#include <ctime>
-
-#include "GLib/stackorheap.h"
-
 #ifdef __GNUG__
 #include <cxxabi.h>
 #endif
 
 #ifdef __linux__
+#include "GLib/stackorheap.h"
+
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -21,6 +18,9 @@
 #else
 //?
 #endif
+
+#include <stdexcept>
+#include <ctime>
 
 namespace GLib
 {
@@ -90,20 +90,19 @@ namespace GLib
 		inline int64_t ProcessId()
 		{
 #ifdef _MSC_VER
-				return Win::CurrentProcess().Id;
+				return Win::Process::CurrentProcessId();
 #elif __linux__
 				return ::getpid();
 #else
 				// getprogname?
 				//?
 #endif
-
 		}
 
 		inline std::string ProcessPath()
 		{
 #ifdef _MSC_VER
-			return Win::CurrentProcess().Path;
+			return Win::Process::CurrentProcessPath().u8string();
 #elif __linux__
 
 			std::ostringstream s;

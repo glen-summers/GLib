@@ -27,6 +27,7 @@ add_executable(AllTests
 	FormatterTests.cpp
 	ConverterTests.cpp
 	ScopeTests.cpp
+	CheckedCastTests.cpp
 )
 
 add_subdirectory(../GLib GLib)

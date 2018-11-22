@@ -77,6 +77,18 @@
     <ClInclude Include="..\include\GLib\scope.h">
       <Filter>Include Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\GLib\checked_cast.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\GLib\Win\FileSystem.h">
+      <Filter>Include Files\win</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\GLib\Win\Handle.h">
+      <Filter>Include Files\win</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\GLib\Win\Module.h">
+      <Filter>Include Files\win</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="filelogger.cpp">

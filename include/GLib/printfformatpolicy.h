@@ -1,12 +1,12 @@
 #ifndef PRINTF_FORMAT_POLICY_H
 #define PRINTF_FORMAT_POLICY_H
 
-#include <ostream>
-#include <iomanip>
-
 #include "stackorheap.h"
 #include "compat.h"
 #include "cvt.h"
+
+#include <ostream>
+#include <iomanip>
 
 namespace GLib
 {

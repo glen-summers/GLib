@@ -1,6 +1,8 @@
 #ifndef STACK_OR_HEAP_H
 #define STACK_OR_HEAP_H
 
+#include <stddef.h>
+
 namespace GLib
 {
 	namespace Util

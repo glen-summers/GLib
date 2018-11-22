@@ -110,7 +110,7 @@ namespace GLib
 #pragma warning(pop)
 #endif
 
-		enum class CompareResult : int { Less, Equal , Greater} ;
+		enum class CompareResult : int { Less = -1, Equal = 0 , Greater = +1 };
 
 		inline CompareResult CompareNoCase(const char * s1, size_t s1size, const char * s2, size_t s2size, const char * locale = nullptr)
 		{
@@ -118,13 +118,20 @@ namespace GLib
 			::ucol_setStrength(collator.get(), UCOL_SECONDARY);
 
 			UCharIterator i1, i2;
-			::uiter_setUTF8(&i1, &s1[0], static_cast<int32_t>(s1size));
-			::uiter_setUTF8(&i2, &s2[0], static_cast<int32_t>(s2size));
+			::uiter_setUTF8(&i1, s1, static_cast<int32_t>(s1size));
+			::uiter_setUTF8(&i2, s2, static_cast<int32_t>(s2size));
 
 			UErrorCode error = U_ZERO_ERROR;
 			UCollationResult result = ::ucol_strcollIter(collator.get(), &i1, &i2, &error);
 			Detail::AssertNoError(error, "ucol_strcollIter");
-			return CompareResult { static_cast<int>(result) };
+			switch (result)
+			{
+				case UCOL_LESS: return CompareResult::Less;
+				case UCOL_EQUAL: return CompareResult::Equal;
+				case UCOL_GREATER: return CompareResult::Greater;
+				default:
+					throw std::runtime_error("Unexpected result");
+			}
 		}
 
 		inline CompareResult CompareNoCase(const std::string & s1, const std::string & s2, const char * locale = nullptr)

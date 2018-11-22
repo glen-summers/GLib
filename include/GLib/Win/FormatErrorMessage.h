@@ -1,6 +1,8 @@
 #pragma once
 
-#include "Glib/cvt.h"
+#include <Windows.h>
+
+#include "GLib/cvt.h"
 
 namespace GLib
 {
