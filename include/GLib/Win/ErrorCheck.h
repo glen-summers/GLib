@@ -1,7 +1,6 @@
 #pragma once
 
 #include "GLib/Win/WinException.h"
-//#include "DebugStream.h"
 
 namespace GLib
 {
@@ -13,7 +12,7 @@ namespace GLib
 			{
 				__declspec(noreturn) inline void Throw(const char * message, DWORD result)
 				{
-					WinException(message, result);
+					throw WinException(message, result);
 				}
 
 				// only allow specific params to prevent accidental int -> bool and misinterpreting win32 results

@@ -1,10 +1,14 @@
 
 #include "GLib/formatter.h"
+#if _WIN32
+#include "GLib/Win/DebugStream.h"
+#endif
 #include "Xyzzy.h"
 
 #include <boost/test/unit_test.hpp>
 
 #include <chrono>
+
 
 namespace
 {
@@ -381,5 +385,13 @@ BOOST_AUTO_TEST_CASE(TestLargeObject)
 	s = Formatter::Format("{0}", CopyCheck());
 	BOOST_TEST("0:0" == s);
 }
+
+#if _WIN32
+BOOST_AUTO_TEST_CASE(DebugStream)
+{
+	GLib::Win::Debug::Write("DebugStreamTest1");
+	GLib::Win::Debug::Write("DebugStreamTest2 {0} {1} {2}", 1, 2, 3);
+}
+#endif
 
 BOOST_AUTO_TEST_SUITE_END()

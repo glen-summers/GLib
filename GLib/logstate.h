@@ -1,14 +1,14 @@
 #pragma once
 
-#include "genericoutstream.h"
-#include "buffer.h"
+#include "GLib/genericoutstream.h"
+#include "GLib/vectorstreambuffer.h"
 #include "scope.h"
 
 #include <stack>
 
 struct LogState
 {
-	using Stream = GenericOutStream<char, Buffer<char>>;
+	using Stream = GLib::Util::GenericOutStream<char, GLib::Util::VectorStreamBuffer<char>>;
 
 	std::stack<Scope> scopes;
 	const char * pendingScope;

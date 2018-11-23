@@ -56,12 +56,6 @@
     <ClInclude Include="..\include\GLib\compat.h">
       <Filter>Include Files</Filter>
     </ClInclude>
-    <ClInclude Include="buffer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="genericoutstream.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="scope.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -88,6 +82,15 @@
     </ClInclude>
     <ClInclude Include="..\include\GLib\Win\Module.h">
       <Filter>Include Files\win</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\GLib\Win\DebugStream.h">
+      <Filter>Include Files\win</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\GLib\genericoutstream.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\GLib\vectorstreambuffer.h">
+      <Filter>Include Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

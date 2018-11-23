@@ -304,8 +304,8 @@ void FileLogger::ScopeStart(GLib::Flog::Level level, const char * logName, const
 
 void FileLogger::Commit(Flog::Level level, const char * name)
 {
-	Write(level, name, logState.stream.rdbuf().Get());
-	logState.stream.rdbuf().Reset(); // had AV here
+	Write(level, name, logState.stream.Buffer().Get());
+	logState.stream.Buffer().Reset(); // had AV here
 }
 
 void FileLogger::CommitScope(const char* name)

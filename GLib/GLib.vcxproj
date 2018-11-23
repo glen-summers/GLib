@@ -148,9 +148,12 @@
     <ClInclude Include="..\include\GLib\cvt.h" />
     <ClInclude Include="..\include\GLib\flogging.h" />
     <ClInclude Include="..\include\GLib\formatter.h" />
+    <ClInclude Include="..\include\GLib\genericoutstream.h" />
     <ClInclude Include="..\include\GLib\printfformatpolicy.h" />
     <ClInclude Include="..\include\GLib\scope.h" />
     <ClInclude Include="..\include\GLib\stackorheap.h" />
+    <ClInclude Include="..\include\GLib\vectorstreambuffer.h" />
+    <ClInclude Include="..\include\GLib\Win\DebugStream.h" />
     <ClInclude Include="..\include\GLib\Win\ErrorCheck.h" />
     <ClInclude Include="..\include\GLib\Win\FileSystem.h" />
     <ClInclude Include="..\include\GLib\win\FormatErrorMessage.h" />
@@ -158,10 +161,8 @@
     <ClInclude Include="..\include\GLib\Win\Module.h" />
     <ClInclude Include="..\include\GLib\win\Process.h" />
     <ClInclude Include="..\include\GLib\win\WinException.h" />
-    <ClInclude Include="buffer.h" />
     <ClInclude Include="filelogger.h" />
     <ClInclude Include="fwd.h" />
-    <ClInclude Include="genericoutstream.h" />
     <ClInclude Include="logstate.h" />
     <ClInclude Include="scope.h" />
     <ClInclude Include="pch.h" />
