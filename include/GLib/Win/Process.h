@@ -100,6 +100,12 @@ namespace GLib
 					return ExitCode() == STILL_ACTIVE;
 				}
 
+				void ReadMemory(const void * address, void * buffer, size_t size)
+				{
+					BOOL result = ::ReadProcessMemory(p.get(), address, buffer, size, nullptr);
+					Util::AssertTrue(result, "ReadProcessMemory");
+				}
+
 			private:
 				static Handle Create(const std::string & app, DWORD creationFlags, const std::string & desktop)
 				{
