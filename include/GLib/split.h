@@ -1,86 +1,102 @@
 #pragma once
 
 #include <string>
+#include <algorithm>
 
 namespace GLib
 {
 	namespace Util
 	{
-		class Splitter
+		namespace Detail
 		{
-			const std::string value;
-			const std::string delimiter;
-
-		public:
-			Splitter(const std::string & value, const std::string & delimiter = ",")
-				: value(value)
-				, delimiter(delimiter)
-			{}
-
-			class iterator : std::iterator<std::input_iterator_tag, std::string>
+			template <typename T>
+			class Splitter
 			{
-				const Splitter * const splitter;
-				std::size_t current, previous;
+				typedef std::basic_string<T> StringType;
+				const StringType value;
+				const StringType delimiter;
 
 			public:
-				iterator(const Splitter & splitter)
-					: splitter(&splitter)
-					, current(CheckEnd(splitter.value.find(splitter.delimiter, 0)))
-					, previous()
+				Splitter(const StringType & value, const StringType & delimiter = std::basic_string<T>(1, T(',')))
+					: value(value)
+					, delimiter(delimiter)
 				{}
 
-				iterator() : splitter(), current(std::string::npos), previous(std::string::npos)
-				{}
-
-				bool operator==(const iterator& it) const
+				class iterator
 				{
-					return current == it.current;
-				}
+					const Splitter * const splitter;
+					std::size_t current, nextDelimiter;
 
-				bool operator!=(const iterator& it) const
-				{
-					return !(*this == it);
-				}
+				public:
+					using iterator_category = std::forward_iterator_tag;
+					using value_type = void; // StringType;
+					using difference_type = void;
+					using pointer = void;
+					using reference = void;
 
-				iterator operator++()
-				{
-					if (current == splitter->value.size())
+					iterator(const Splitter & splitter)
+						: splitter(&splitter)
+						, current(splitter.value.empty() ? StringType::npos : 0)
+						, nextDelimiter(splitter.value.find(splitter.delimiter, 0))
+					{}
+
+					iterator() : splitter(), current(StringType::npos), nextDelimiter(StringType::npos)
+					{}
+
+					bool operator==(const iterator& it) const
 					{
-						current = std::string::npos;
+						return current == it.current;
 					}
-					else if (current != std::string::npos)
+
+					bool operator!=(const iterator& it) const
 					{
-						previous = current + splitter->delimiter.size();
-						current = CheckEnd(splitter->value.find(splitter->delimiter, previous));
+						return !(*this == it);
 					}
 
-					return *this;
+					iterator operator++()
+					{
+						if (nextDelimiter != StringType::npos)
+						{
+							current = nextDelimiter + splitter->delimiter.size();
+							nextDelimiter = splitter->value.find(splitter->delimiter, current);
+						}
+						else
+						{
+							current = nextDelimiter;
+						}
+
+						return *this;
+					}
+
+					StringType operator*() const
+					{
+						auto end = nextDelimiter != StringType::npos
+							? nextDelimiter
+							: splitter->value.size();
+						return splitter->value.substr(current, end - current);
+					}
+				};
+
+				iterator begin() const
+				{
+					return iterator(*this);
 				}
 
-				std::string operator*() const
+				iterator end() const
 				{
-					auto n = current != std::string::npos
-						? current - previous
-						: std::string::npos;
-					return splitter->value.substr(previous, n);
-				}
-
-			private:
-				std::size_t CheckEnd(std::size_t value)
-				{
-					return !splitter->value.empty() && value == std::string::npos ? splitter->value.size() : value;
+					return iterator();
 				}
 			};
+		}
 
-			iterator begin() const
-			{
-				return iterator(*this);
-			}
+		typedef Detail::Splitter<char> Splitter;
 
-			static iterator end()
-			{
-				return iterator();
-			}
-		};
+		template <typename T, typename OutputIterator>
+		void Split(const std::basic_string<T> & value, OutputIterator it,
+			const std::basic_string<T> & delimiter = std::basic_string<T>(1, T(',')))
+		{
+			Detail::Splitter<T> splitter { value, delimiter };
+			std::copy(splitter.begin(), splitter.end(), it);
+		}
 	}
 }

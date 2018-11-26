@@ -12,7 +12,7 @@
         $(Boost);
         $([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)\..\include'));
       </AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions);NOMINMAX;WIN32_LEAN_AND_MEAN;_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS</PreprocessorDefinitions>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);NOMINMAX;WIN32_LEAN_AND_MEAN</PreprocessorDefinitions>
       <TreatWarningAsError Condition="'$(Configuration)'=='Debug'">false</TreatWarningAsError>
       <TreatWarningAsError Condition="'$(Configuration)'!='Debug'">true</TreatWarningAsError>
       <WarningLevel>Level4</WarningLevel>
