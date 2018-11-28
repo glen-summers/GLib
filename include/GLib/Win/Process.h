@@ -16,17 +16,35 @@ namespace GLib
 		{
 			namespace Detail
 			{
+				inline void Terminate(HANDLE process, UINT exitCode = 1)
+				{
+					//if (exitCode == STILL_ACTIVE)?
+					Util::WarnAssertTrue(::TerminateProcess(process, exitCode), "TerminateProcess");
+				}
+
 				struct Terminator
 				{
 					void operator()(HANDLE process) const noexcept
 					{
-						//if (exitCode == STILL_ACTIVE)?
-						Util::WarnAssertTrue(::TerminateProcess(process, 1), "TerminateProcess");
+						Terminate(process);
 					}
 				};
-			}
+				typedef std::unique_ptr<void, Terminator> TerminatorHolder;
 
-			typedef std::unique_ptr<void, Detail::Terminator> Handle;
+				// move?
+				inline std::string EnvironmentVariable(const std::string & name)
+				{
+					std::wstring w = Cvt::a2w(name);
+					GLib::Util::StackOrHeap<wchar_t, 256> s;
+					size_t size = ::GetEnvironmentVariableW(w.c_str(), s.Get(), static_cast<DWORD>(s.size()));
+					if (size >= s.size())
+					{
+						s.EnsureSize(size);
+						size = ::GetEnvironmentVariableW(w.c_str(), s.Get(), static_cast<DWORD>(s.size()));
+					}
+					return size == 0 ? "" : Cvt::w2a(s.Get());
+				}
+			}
 
 			inline std::filesystem::path CurrentProcessPath()
 			{
@@ -58,15 +76,19 @@ namespace GLib
 					CheckWaitResult(::WaitForInputIdle(p.get(), timeoutMilliseconds));
 				}
 
-				void Terminate(unsigned int exitCode = 1) const
+				const Handle & Handle() const
 				{
-					//assert(exitCode == STILL_ACTIVE)
-					Util::AssertTrue(::TerminateProcess(p.get(), exitCode), "Terminate");
+					return p;
 				}
 
-				Handle ScopedTerminator() const
+				void Terminate(unsigned int exitCode = 1) const
 				{
-					return Handle(p.get());
+					Detail::Terminate(p.get(), exitCode);
+				}
+
+				Detail::TerminatorHolder ScopedTerminator() const
+				{
+					return Detail::TerminatorHolder(p.get());
 				}
 
 				DWORD Id() const
@@ -100,28 +122,29 @@ namespace GLib
 					return ExitCode() == STILL_ACTIVE;
 				}
 
-				void ReadMemory(const void * address, void * buffer, size_t size)
+				void ReadMemory(const void * address, void * buffer, size_t size) const
 				{
 					BOOL result = ::ReadProcessMemory(p.get(), address, buffer, size, nullptr);
 					Util::AssertTrue(result, "ReadProcessMemory");
 				}
 
 			private:
-				static Handle Create(const std::string & app, DWORD creationFlags, const std::string & desktop)
+				static Win::Handle Create(const std::string & app, DWORD creationFlags, const std::string & desktop)
 				{
 					return Create(Cvt::a2w(app), creationFlags, Cvt::a2w(desktop));
 				}
 
-				static Handle Create(const std::wstring & app, DWORD creationFlags, const std::wstring & desktop)
+				static Win::Handle Create(const std::wstring & app, DWORD creationFlags, const std::wstring & desktop)
 				{
+					// add standard handles? verify
 					STARTUPINFOW sui = {};
 					sui.cb = sizeof(STARTUPINFOW);
 					sui.lpDesktop = desktop.empty() ? nullptr : const_cast<LPWSTR>(desktop.c_str());
 					PROCESS_INFORMATION pi = {};
 					Util::AssertTrue(::CreateProcessW(app.c_str(), nullptr, nullptr, nullptr, FALSE, creationFlags,
 						nullptr, nullptr, &sui, &pi), "CreateProcess");
-					Handle p(pi.hProcess);
-					Handle t(pi.hThread);
+					Win::Handle p(pi.hProcess);
+					Win::Handle t(pi.hThread);
 					//DWORD pid = pi.dwProcessId;
 					return p;
 				}

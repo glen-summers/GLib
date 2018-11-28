@@ -2,6 +2,10 @@
 
 #include "GLib/Win/WinException.h"
 
+#ifdef _DEBUG // || defined(GLIB_DEBUG)
+#include "GLib/Win/DebugStream.h"
+#endif
+
 namespace GLib
 {
 	namespace Win
@@ -12,7 +16,11 @@ namespace GLib
 			{
 				__declspec(noreturn) inline void Throw(const char * message, DWORD result)
 				{
-					throw WinException(message, result);
+					WinException e(message, result);
+#ifdef _DEBUG // || defined(GLIB_DEBUG)
+					Debug::Stream() << e.what() << std::endl;
+#endif
+					throw e;
 				}
 
 				// only allow specific params to prevent accidental int -> bool and misinterpreting win32 results
@@ -41,12 +49,15 @@ namespace GLib
 
 					static void WarnAssertTrue(bool result, const char * message) noexcept
 					{
-						UNREFERENCED_PARAMETER(result);
-						UNREFERENCED_PARAMETER(message);
+#ifdef _DEBUG // || defined(GLIB_DEBUG)
 						if (!result)
 						{
-							// TODO: Debug::Write(WinException(message, ::GetLastError()).what()); // avoid exception, avoid Debug?
+							Debug::Stream() << WinException(message, result).what() << std::endl;
 						}
+#else
+						UNREFERENCED_PARAMETER(result);
+						UNREFERENCED_PARAMETER(message);
+#endif
 					}
 
 					static void WarnAssertTrue(BOOL result, const char * message) noexcept
