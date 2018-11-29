@@ -154,6 +154,11 @@
     <ClInclude Include="..\include\GLib\split.h" />
     <ClInclude Include="..\include\GLib\stackorheap.h" />
     <ClInclude Include="..\include\GLib\vectorstreambuffer.h" />
+    <ClInclude Include="..\include\GLib\Win\ComErrorCheck.h" />
+    <ClInclude Include="..\include\GLib\Win\ComException.h" />
+    <ClInclude Include="..\include\GLib\Win\ComPtr.h" />
+    <ClInclude Include="..\include\GLib\Win\ComUtil.h" />
+    <ClInclude Include="..\include\GLib\Win\DebugWrite.h" />
     <ClInclude Include="..\include\GLib\Win\DebugStream.h" />
     <ClInclude Include="..\include\GLib\Win\ErrorCheck.h" />
     <ClInclude Include="..\include\GLib\Win\FileSystem.h" />
@@ -161,6 +166,7 @@
     <ClInclude Include="..\include\GLib\Win\Handle.h" />
     <ClInclude Include="..\include\GLib\win\Process.h" />
     <ClInclude Include="..\include\GLib\Win\Symbols.h" />
+    <ClInclude Include="..\include\GLib\Win\Uuid.h" />
     <ClInclude Include="..\include\GLib\win\WinException.h" />
     <ClInclude Include="filelogger.h" />
     <ClInclude Include="fwd.h" />

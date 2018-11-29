@@ -18,7 +18,7 @@ namespace GLib
 				{
 					WinException e(message, result);
 #ifdef _DEBUG // || defined(GLIB_DEBUG)
-					Debug::Stream() << e.what() << std::endl;
+					Debug::Stream() << "WinException : " << e.what() << std::endl;
 #endif
 					throw e;
 				}
@@ -52,7 +52,7 @@ namespace GLib
 #ifdef _DEBUG // || defined(GLIB_DEBUG)
 						if (!result)
 						{
-							Debug::Stream() << WinException(message, result).what() << std::endl;
+							Debug::Stream() << "WinException : " << WinException(message, result).what() << std::endl;
 						}
 #else
 						UNREFERENCED_PARAMETER(result);

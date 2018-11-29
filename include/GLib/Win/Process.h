@@ -1,10 +1,10 @@
 #pragma once
 
-#include "ErrorCheck.h"
-#include "Handle.h"
+#include "GLib/Win/ErrorCheck.h"
+#include "GLib/Win/Handle.h"
+#include "GLib/Win/FileSystem.h"
 
-#include <GLib/Win/FileSystem.h>
-#include <GLib/checked_cast.h>
+#include "GLib/checked_cast.h"
 
 #include <filesystem>
 
@@ -54,6 +54,14 @@ namespace GLib
 			inline int CurrentProcessId()
 			{
 				return ::GetCurrentProcessId();
+			}
+
+			EXTERN_C IMAGE_DOS_HEADER __ImageBase;
+
+			inline HMODULE CurrentModule()
+			{
+				// http://blogs.msdn.com/b/oldnewthing/archive/2004/10/25/247180.aspx
+				return reinterpret_cast<HMODULE>(&__ImageBase);
 			}
 
 			class Process

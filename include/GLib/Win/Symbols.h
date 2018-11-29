@@ -1,7 +1,7 @@
 #pragma once
 
-#include <GLib/cvt.h>
-#include <GLib/Win/Process.h>
+#include "GLib/cvt.h"
+#include "GLib/Win/Process.h"
 
 #include <DbgHelp.h>
 #pragma comment(lib , "DbgHelp.lib")
@@ -94,11 +94,27 @@ namespace GLib
 					};
 					Util::AssertTrue(::SymEnumLinesW(process, reinterpret_cast<ULONG64>(base), nullptr, nullptr, EnumLines, &f), "SymEnumLines failed");
 				}
+				
+				template <typename inserter>
+				void Processes(inserter && back_inserter)
+				{
+					std::function<void(HANDLE)> f = [&](HANDLE h)
+					{
+						*back_inserter++ = h;
+					};
+					Util::AssertTrue(::SymEnumProcesses(EnumProcesses, &f), "SymEnumLines failed");
+				}
 
 			private:
 				static BOOL CALLBACK EnumLines(PSRCCODEINFOW lineInfo, PVOID context)
 				{
 					(*static_cast<std::function<void(PSRCCODEINFOW)>*>(context))(lineInfo);
+					return TRUE;
+				}
+
+				static BOOL CALLBACK EnumProcesses(HANDLE hProcess, PVOID context)
+				{
+					(*static_cast<std::function<void(HANDLE)>*>(context))(hProcess);
 					return TRUE;
 				}
 			};

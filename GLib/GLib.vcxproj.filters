@@ -95,6 +95,24 @@
     <ClInclude Include="..\include\GLib\Win\Symbols.h">
       <Filter>Include Files\win</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\GLib\Win\DebugWrite.h">
+      <Filter>Include Files\win</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\GLib\Win\Uuid.h">
+      <Filter>Include Files\win</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\GLib\Win\ComErrorCheck.h">
+      <Filter>Include Files\win</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\GLib\Win\ComException.h">
+      <Filter>Include Files\win</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\GLib\Win\ComPtr.h">
+      <Filter>Include Files\win</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\GLib\Win\ComUtil.h">
+      <Filter>Include Files\win</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="filelogger.cpp">

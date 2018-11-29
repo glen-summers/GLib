@@ -1,6 +1,7 @@
 #pragma once
 
-#include "ErrorCheck.h"
+#include "GLib/Win/ErrorCheck.h"
+#include "GLib/Win/Handle.h"
 #include "GLib/stackorheap.h"
 
 #include <vector>
@@ -10,6 +11,7 @@ namespace GLib
 {
 	namespace Win
 	{
+		// try again to use fs:path as return values
 		namespace FileSystem
 		{
 			// return an iterator?
@@ -134,6 +136,14 @@ namespace GLib
 				Util::AssertTrue(::QueryFullProcessImageNameW(process, 0, s.Get(), &requiredSize), "QueryFullProcessImageNameW");
 
 				return Cvt::w2a(s.Get());
+			}
+
+			inline Handle CreateAutoDeleteFile(const std::string & name)
+			{
+				HANDLE h = ::CreateFileW(Cvt::a2w(name).c_str(), GENERIC_READ | GENERIC_WRITE, 0, nullptr, CREATE_ALWAYS,
+					FILE_ATTRIBUTE_TEMPORARY | FILE_FLAG_DELETE_ON_CLOSE, nullptr);
+				Util::AssertTrue(!!h, "CreateFile failed");
+				return Handle(h);
 			}
 		}
 	}

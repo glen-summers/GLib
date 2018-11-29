@@ -162,6 +162,7 @@
     <ClCompile Include="FlogTests.cpp" />
     <ClCompile Include="ScopeTests.cpp" />
     <ClCompile Include="SplitTests.cpp" />
+    <ClCompile Include="WinTests.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\GLib\GLib.vcxproj">
@@ -169,6 +170,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="TestUtils.h" />
     <ClInclude Include="wstringfix.h" />
     <ClInclude Include="Xyzzy.h" />
   </ItemGroup>

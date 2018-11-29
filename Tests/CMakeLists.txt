@@ -21,26 +21,31 @@ message("boost = ${BOOST_DIR}")
 include_directories(${BOOST_DIR})
 link_directories(${BOOST_DIR}/stage/lib)
 
-add_executable(AllTests
-	Main.cpp
+
+set(SOURCES Main.cpp
 	FlogTests.cpp
 	FormatterTests.cpp
 	ConverterTests.cpp
 	ScopeTests.cpp
 	CheckedCastTests.cpp
-	SplitTests.cpp
-)
+	SplitTests.cpp)
+
+if(WIN32)
+	set(SOURCES ${SOURCES} WinTests.cpp)
+endif(WIN32)
+
+add_executable(Tests ${SOURCES})
 
 add_subdirectory(../GLib GLib)
 
-target_link_libraries(AllTests GLib)
+target_link_libraries(Tests GLib)
 if(UNIX) #hack: just add libs that weren't found by FindICU
-	target_link_libraries(AllTests icui18n icuuc)
+	target_link_libraries(Tests icui18n icuuc)
 endif()
 
-add_test(NAME AllTests COMMAND AllTests)
+add_test(NAME Tests COMMAND Tests)
 
-install(TARGETS AllTests
+install(TARGETS Tests
 	RUNTIME DESTINATION bin
 	CONFIGURATIONS ${CMAKE_CONFIGURATION_TYPES}
 )
