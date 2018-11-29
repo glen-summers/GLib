@@ -2,8 +2,8 @@
 
 #include "ErrorCheck.h"
 #include "Handle.h"
-#include "Module.h"
 
+#include <GLib/Win/FileSystem.h>
 #include <GLib/checked_cast.h>
 
 #include <filesystem>
@@ -46,9 +46,9 @@ namespace GLib
 				}
 			}
 
-			inline std::filesystem::path CurrentProcessPath()
+			inline std::string CurrentProcessPath()
 			{
-				return Module::FileName(nullptr);
+				return FileSystem::PathOfModule(nullptr);
 			}
 
 			inline int CurrentProcessId()

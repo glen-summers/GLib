@@ -52,13 +52,13 @@ namespace GLib
 				return result;
 			}
 
-			inline std::string PathOfHandle(HANDLE fileHandle)
+			inline std::string PathOfFileHandle(HANDLE fileHandle, DWORD flags)
 			{
 				GLib::Util::StackOrHeap<wchar_t, 256> s;
-				DWORD pathLen = ::GetFinalPathNameByHandleW(fileHandle, nullptr, 0, VOLUME_NAME_NT);
+				DWORD pathLen = ::GetFinalPathNameByHandleW(fileHandle, nullptr, 0, flags);
 				Util::AssertTrue(pathLen != 0 && pathLen != s.size(), "GetFinalPathNameByHandleW failed");
 				s.EnsureSize(static_cast<size_t>(pathLen) + 1);
-				pathLen = ::GetFinalPathNameByHandleW(fileHandle, s.Get(), static_cast<DWORD>(s.size()), VOLUME_NAME_NT);
+				pathLen = ::GetFinalPathNameByHandleW(fileHandle, s.Get(), static_cast<DWORD>(s.size()), flags);
 				Util::AssertTrue(pathLen != 0 && pathLen != s.size(), "GetFinalPathNameByHandleW failed");
 				return Cvt::w2a(s.Get());
 			}
@@ -78,6 +78,62 @@ namespace GLib
 					}
 				}
 				throw std::runtime_error("Drive not mapped"); // or just return path?
+			}
+
+			inline std::string PathOfModule(HMODULE module)
+			{
+				GLib::Util::StackOrHeap<wchar_t, 256> s;
+
+				unsigned int length;
+				for (;;)
+				{
+					// this could return prefix "\\?\"
+					unsigned int len = ::GetModuleFileNameW(module, s.Get(), static_cast<unsigned int>(s.size()));
+					Util::AssertTrue(len != 0, "GetModuleFileName failed");
+					if (len < s.size())
+					{
+						length = len + 1;
+						break;
+					}
+					if (s.size() >= 32768U)
+					{
+						throw std::runtime_error("Path too long");
+					}
+					s.EnsureSize(s.size() * 2);
+				}
+
+				s.EnsureSize(length);
+				length = ::GetModuleFileNameW(module, s.Get(), static_cast<unsigned int>(s.size()));
+				Util::AssertTrue(length != 0 && length != s.size(), "GetModuleFileName failed");
+
+				return Cvt::w2a(s.Get());
+			}
+
+			inline std::string PathOfProcessHandle(HANDLE process)
+			{
+				GLib::Util::StackOrHeap<wchar_t, 256> s;
+
+				DWORD requiredSize;
+				for (;;)
+				{
+					auto size = static_cast<DWORD>(s.size());
+					Util::AssertTrue(::QueryFullProcessImageNameW(process, 0, s.Get(), &size), "QueryFullProcessImageNameW");
+					if (size < s.size())
+					{
+						requiredSize = size + 1;
+						break;
+					}
+					if (s.size() >= 32768U)
+					{
+						throw std::runtime_error("Path too long");
+					}
+					s.EnsureSize(s.size() * 2);
+				}
+
+				s.EnsureSize(requiredSize);
+				Util::AssertTrue(::QueryFullProcessImageNameW(process, 0, s.Get(), &requiredSize), "QueryFullProcessImageNameW");
+
+				return Cvt::w2a(s.Get());
 			}
 		}
 	}

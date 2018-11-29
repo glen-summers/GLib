@@ -102,7 +102,7 @@ namespace GLib
 		inline std::string ProcessPath()
 		{
 #ifdef _MSC_VER
-			return Win::Process::CurrentProcessPath().u8string();
+			return Win::Process::CurrentProcessPath();
 #elif __linux__
 
 			std::ostringstream s;

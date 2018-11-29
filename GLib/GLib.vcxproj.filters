@@ -80,9 +80,6 @@
     <ClInclude Include="..\include\GLib\Win\Handle.h">
       <Filter>Include Files\win</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\GLib\Win\Module.h">
-      <Filter>Include Files\win</Filter>
-    </ClInclude>
     <ClInclude Include="..\include\GLib\Win\DebugStream.h">
       <Filter>Include Files\win</Filter>
     </ClInclude>
@@ -94,6 +91,9 @@
     </ClInclude>
     <ClInclude Include="..\include\GLib\split.h">
       <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\GLib\Win\Symbols.h">
+      <Filter>Include Files\win</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
