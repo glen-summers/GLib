@@ -6,20 +6,21 @@
 
 #include <stack>
 
+// class\accesors
 struct LogState
 {
 	using Stream = GLib::Util::GenericOutStream<char, GLib::Util::VectorStreamBuffer<char>>;
 
 	std::stack<Scope> scopes;
-	const char * pendingScope;
 	int depth;
+	bool pending;
 	const char * threadName;
 	Stream stream;
 
 	LogState()
-		: pendingScope()
-		, depth()
-		, threadName()
+		: depth()
+		, pending()
+		, threadName(nullptr)
 		, stream { std::ios_base::boolalpha }
 	{}
 };

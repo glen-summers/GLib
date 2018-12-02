@@ -1,7 +1,9 @@
 #include "pch.h"
 
+
 #include "GLib/flogging.h"
 #include "GLib/compat.h"
+
 #include "filelogger.h"
 
 using GLib::Flog::LogManager;
@@ -21,4 +23,10 @@ void LogManager::SetThreadName(const char * name)
 	FileLogger::Write(Level::Info, "ThreadName", name ? name : "(null)");
 	FileLogger::logState.threadName = name;
 }
+
+std::string LogManager::GetLogPath()
+{
+	return FileLogger::Instance().streamInfo.FileName();
+}
+
 

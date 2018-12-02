@@ -113,6 +113,9 @@
     <ClInclude Include="..\include\GLib\Win\ComUtil.h">
       <Filter>Include Files\win</Filter>
     </ClInclude>
+    <ClInclude Include="scope.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="filelogger.cpp">

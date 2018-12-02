@@ -18,15 +18,10 @@ void Log::ScopeStart(Level level, const char * scope, const char * stem) const
 
 void Log::ScopeEnd() const
 {
-	FileLogger::CommitScope(name.c_str());
-}
-
-std::ostream & Log::Stream() const
-{
-	return FileLogger::Stream();
+	FileLogger::ScopeEnd(name.c_str());
 }
 
 void Log::CommitStream(Level level) const
 {
-	FileLogger::Commit(level, name.c_str());
+	FileLogger::CommitBuffer(level, name.c_str());
 }

@@ -1,10 +1,12 @@
 #ifndef FILE_LOGGER_H
 #define FILE_LOGGER_H
 
+#include "filelogger.h"
 #include "streaminfo.h"
 #include "logstate.h"
 
-#include "GLib/compat.h"
+//#include "GLib/compat.h"
+#include "GLib/flogging.h"
 
 #include <mutex>
 
@@ -14,9 +16,9 @@ class FileLogger
 {
 	static constexpr const char * HeaderFooterSeparator = "------------------------------------------------";
 	static constexpr const char * Delimiter = " : ";
-	static constexpr int THREAD_ID_WIDTH = 5;
+	static constexpr int THREAD_ID_WIDTH = 5; // make dynamic
 	static constexpr int LEVEL_WIDTH = 8;
-	static constexpr int PREFIX_WIDTH = 12;
+	static constexpr int PREFIX_WIDTH = 16; // make dynamic
 	static constexpr size_t maxFileSize = 5 * 1024 * 1024;
 	static constexpr size_t ReserveDiskSpace = 10 * 1024 * 1024;
 
@@ -37,17 +39,19 @@ public:
 	FileLogger& operator=(const FileLogger&) = delete;
 	FileLogger& operator=(FileLogger&&) = delete;
 
-	static void Write(GLib::Flog::Level level, const char * prefix, const char * message);
+	static void Write(char c);
 
 private:
+	static void Write(GLib::Flog::Level level, const char * prefix, const char * message);
 	~FileLogger();
 
 	StreamInfo GetStream() const;
 	void InternalWrite(GLib::Flog::Level level, const char * prefix, const char * message);
+	void WriteToStream(GLib::Flog::Level level, const char * prefix, const char * message);
 	void EnsureStreamIsOpen();
 	void HandleFileRollover(size_t newEntrySize);
 	void CloseStream();
-	void WriteHeader(std::ostream & writer) const;
+	static void WriteHeader(std::ostream & writer);
 	static void WriteFooter(std::ostream & writer);
 	bool ResourcesAvailable(size_t newEntrySize) const;
 	//std::string RenameOldFile(const std::string & oldFileName) const;
@@ -60,9 +64,10 @@ private:
 	static unsigned int GetDate();
 	static uintmax_t GetFreeDiskSpace(const fs::path & path);
 
-	static void ScopeStart(GLib::Flog::Level level, const char * logName, const char * scope, const char * stem);
-	static void Commit(GLib::Flog::Level level, const char * name); // name?
-	static void CommitScope(const char * name);
+	static void CommitPendingScope();
+	static void ScopeStart(GLib::Flog::Level level, const char * prefix, const char * scope, const char * stem);
+	static void CommitBuffer(GLib::Flog::Level level, const char * prefix);
+	static void ScopeEnd(const char * prefix);
 };
 
 #endif // FILE_LOGGER_H
