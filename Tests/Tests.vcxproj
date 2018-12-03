@@ -156,6 +156,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="CheckedCastTests.cpp" />
+    <ClCompile Include="ComPtrTests.cpp" />
     <ClCompile Include="ConverterTests.cpp" />
     <ClCompile Include="FormatterTests.cpp" />
     <ClCompile Include="Main.cpp" />
@@ -170,6 +171,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="TestInterfaces.h" />
     <ClInclude Include="TestUtils.h" />
     <ClInclude Include="wstringfix.h" />
     <ClInclude Include="Xyzzy.h" />

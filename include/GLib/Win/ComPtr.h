@@ -320,10 +320,16 @@ namespace GLib
 			return ComPtr<T>::Attach(new T(std::forward<Args>(args)...));
 		}
 
+		template <typename T, typename I, typename... Args>
+		ComPtr<I> Make(Args&&... args)
+		{
+			return ComPtr<I>::Attach(static_cast<I*>(new T(std::forward<Args>(args)...)));
+		}
+
 		template <typename T, typename... Args>
 		ComPtr<typename T::DefaultInterface> Make(Args&&... args)
 		{
-			return ComPtr<typename T::DefaultInterface>::Attach(static_cast<typename T::DefaultInterface*>(new T(std::forward<Args>(args)...)));
+			return Make<T, typename T::DefaultInterface>(std::forward<Args>(args)...);
 		}
 	}
 }
