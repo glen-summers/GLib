@@ -315,7 +315,7 @@ namespace GLib
 		//}
 
 		template <typename T, typename... Args>
-		ComPtr<T> MakeT(Args&&... args)
+		ComPtr<T> MakeConcrete(Args&&... args)
 		{
 			return ComPtr<T>::Attach(new T(std::forward<Args>(args)...));
 		}

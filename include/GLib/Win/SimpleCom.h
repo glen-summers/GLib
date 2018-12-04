@@ -4,10 +4,23 @@
 
 #include <atomic>
 
+#define GLIB_COM_RULE_OF_FIVE(ClassName)\
+public:\
+	ClassName() = default;\
+	ClassName(const ClassName& other) = delete;\
+	ClassName(ClassName&& other) noexcept = delete;\
+	ClassName& operator=(const ClassName& other) = delete;\
+	ClassName& operator=(ClassName&& other) noexcept = delete;\
+protected:\
+	virtual ~ClassName() = default;\
+
 namespace GLib
 {
 	namespace Win
 	{
+		template <typename T> class ComPtrBase;
+		template <typename T> class ComPtr;
+
 		namespace Detail
 		{
 			template <typename Last>
@@ -21,7 +34,7 @@ namespace GLib
 			{
 				if (iid == __uuidof(Last))
 				{
-					Last * i = static_cast<Last*>(t);
+					auto * i = static_cast<Last*>(t);
 					i->AddRef();
 					*ppvObject = i;
 					return S_OK;
@@ -40,7 +53,7 @@ namespace GLib
 			{
 				if (iid == __uuidof(First)) // just call above?
 				{
-					First * i = static_cast<First*>(t);
+					auto * i = static_cast<First*>(t);
 					i->AddRef();
 					*ppvObject = i;
 					return S_OK;
@@ -52,45 +65,35 @@ namespace GLib
 		template <typename I1, typename... I2> // i1,i2 :: IUnknown
 		class __declspec(novtable) Unknown : public I1, public I2...
 		{
-			//template <typename T> friend class ComPtrBase; // allows ComPtr<Unknown derived>
+			template <typename T> friend class ComPtrBase; // allows ComPtr to hold concrete class
 
-			std::atomic<ULONG> ref;
+			std::atomic<ULONG> ref = 1;
 
 		public:
 			typedef I1 DefaultInterface;
 			typedef ComPtr<I1> PtrType;
 
-			Unknown() : ref(1)
-			{}
-
-			Unknown(Unknown &&) = default;
-			Unknown & operator=(Unknown &&) = default;
-
-			Unknown(const Unknown &) = delete;
-			Unknown & operator=(const Unknown &) = delete;
-
-		protected:
-			virtual ~Unknown() = default;
+			GLIB_COM_RULE_OF_FIVE(Unknown)
 
 			ULONG ReferenceCount() const
 			{
 				return ref;
 			}
 
-			virtual HRESULT STDMETHODCALLTYPE QueryInterface(const IID& riid, void** ppvObject) override
+			virtual HRESULT STDMETHODCALLTYPE QueryInterface(const IID& id, void** ppvObject) override
 			{
 				if (!ppvObject)
 				{
 					return E_POINTER;
 				}
-				if (riid == __uuidof(IUnknown))
+				if (id == __uuidof(IUnknown))
 				{
 					auto i = static_cast<IUnknown*>(static_cast<I1*>(this));
 					i->AddRef();
 					*ppvObject = i;
 					return S_OK;
 				}
-				return Detail::Qi<Unknown, I1,  I2...>(this, riid, ppvObject);
+				return Detail::Qi<Unknown, I1,  I2...>(this, id, ppvObject);
 			}
 
 			ULONG STDMETHODCALLTYPE AddRef() override
