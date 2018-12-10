@@ -119,6 +119,9 @@
     <ClInclude Include="..\include\GLib\Win\SimpleCom.h">
       <Filter>Include Files\win</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\GLib\TypeFilter.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="filelogger.cpp">

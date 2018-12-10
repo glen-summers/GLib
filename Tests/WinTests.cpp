@@ -6,8 +6,6 @@
 #include <GLib/Win/Process.h>
 #include <GLib/Win/Symbols.h>
 #include <GLib/Win/Uuid.h>
-#include "GLib/Win/ComPtr.h"
-#include "GLib/Win/ComUtil.h"
 
 #include "TestUtils.h"
 
@@ -70,32 +68,6 @@ BOOST_AUTO_TEST_SUITE(WinTests)
 		::SetLastError(ERROR_ACCESS_DENIED);
 		BOOST_CHECK_EXCEPTION_EX(GLib::Win::Util::AssertTrue(false, "test fail"),
 			GLib::Win::WinException, TestUtils::ExpectException, "test fail : Access is denied. (5)");
-	}
-
-	BOOST_AUTO_TEST_CASE(TestComErrorCheck)
-	{
-		::SetErrorInfo(0, nullptr);
-		BOOST_CHECK_EXCEPTION_EX(GLib::Win::CheckHr(E_FAIL, "test E_FAIL"),
-			GLib::Win::ComException, TestUtils::ExpectException, "test E_FAIL : Unspecified error (80004005)");
-	}
-
-	BOOST_AUTO_TEST_CASE(TestComErrorCheck2)
-	{
-		::SetErrorInfo(0, nullptr);
-		BOOST_CHECK_EXCEPTION_EX(GLib::Win::CheckHr(E_UNEXPECTED, "test E_UNEXPECTED"),
-			GLib::Win::ComException, TestUtils::ExpectException, "test E_UNEXPECTED : Catastrophic failure (8000FFFF)");
-	}
-
-	BOOST_AUTO_TEST_CASE(TestComErrorCheckWithErrorInfo)
-	{
-		GLib::Win::ComPtr<ICreateErrorInfo> p;
-		GLib::Win::CheckHr(::CreateErrorInfo(&p), "CreateErrorInfo");
-		auto ei = GLib::Win::ComCast<IErrorInfo>(p);
-		p->SetDescription(const_cast<LPOLESTR>(L"hello"));
-		GLib::Win::CheckHr(::SetErrorInfo(0, ei.Get()), "SetErrorInfo");
-	
-		BOOST_CHECK_EXCEPTION_EX(GLib::Win::CheckHr(E_OUTOFMEMORY, "fail"),
-			GLib::Win::ComException, TestUtils::ExpectException, "fail : hello (8007000E)");
 	}
 
 BOOST_AUTO_TEST_SUITE_END()

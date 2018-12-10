@@ -153,6 +153,7 @@
     <ClInclude Include="..\include\GLib\scope.h" />
     <ClInclude Include="..\include\GLib\split.h" />
     <ClInclude Include="..\include\GLib\stackorheap.h" />
+    <ClInclude Include="..\include\GLib\TypeFilter.h" />
     <ClInclude Include="..\include\GLib\vectorstreambuffer.h" />
     <ClInclude Include="..\include\GLib\Win\ComErrorCheck.h" />
     <ClInclude Include="..\include\GLib\Win\ComException.h" />

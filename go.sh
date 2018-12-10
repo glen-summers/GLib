@@ -12,6 +12,7 @@ Build() {
 	cmake --build "${CMakeBuildDir}" || error_exit "cmake build failed"
 	CTEST_OUTPUT_ON_FAILURE=1 cmake --build "${CMakeBuildDir}" --target test || error_exit "cmake build failed"
 	cmake --build "${CMakeBuildDir}" --target install || error_exit "cmake install failed"
+	cat ${RootDir}/out/cmake/build/Testing/Temporary/LastTest.log || error_exit "test log missing"
 }
 
 Clean() {

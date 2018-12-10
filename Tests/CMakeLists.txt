@@ -28,10 +28,13 @@ set(SOURCES Main.cpp
 	ConverterTests.cpp
 	ScopeTests.cpp
 	CheckedCastTests.cpp
-	SplitTests.cpp)
+	SplitTests.cpp
+	TypeFilterTests.cpp
+)
 
 if(WIN32)
 	set(SOURCES ${SOURCES} WinTests.cpp)
+	set(SOURCES ${SOURCES} ComPtrTests.cpp)
 endif(WIN32)
 
 add_executable(Tests ${SOURCES})

@@ -163,6 +163,7 @@
     <ClCompile Include="FlogTests.cpp" />
     <ClCompile Include="ScopeTests.cpp" />
     <ClCompile Include="SplitTests.cpp" />
+    <ClCompile Include="TypeFilterTests.cpp" />
     <ClCompile Include="WinTests.cpp" />
   </ItemGroup>
   <ItemGroup>

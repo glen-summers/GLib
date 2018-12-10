@@ -7,6 +7,32 @@
 
 BOOST_AUTO_TEST_SUITE(ComPtrTests)
 
+BOOST_AUTO_TEST_CASE(TestComErrorCheckWithErrorInfo)
+{
+	GLib::Win::ComPtr<ICreateErrorInfo> p;
+	GLib::Win::CheckHr(::CreateErrorInfo(&p), "CreateErrorInfo");
+	auto ei = GLib::Win::ComCast<IErrorInfo>(p);
+	p->SetDescription(const_cast<LPOLESTR>(L"hello"));
+	GLib::Win::CheckHr(::SetErrorInfo(0, ei.Get()), "SetErrorInfo");
+
+	BOOST_CHECK_EXCEPTION_EX(GLib::Win::CheckHr(E_OUTOFMEMORY, "fail"),
+		GLib::Win::ComException, TestUtils::ExpectException, "fail : hello (8007000E)");
+}
+
+BOOST_AUTO_TEST_CASE(TestComErrorCheck)
+{
+	::SetErrorInfo(0, nullptr);
+	BOOST_CHECK_EXCEPTION_EX(GLib::Win::CheckHr(E_FAIL, "test E_FAIL"),
+		GLib::Win::ComException, TestUtils::ExpectException, "test E_FAIL : Unspecified error (80004005)");
+}
+
+BOOST_AUTO_TEST_CASE(TestComErrorCheck2)
+{
+	::SetErrorInfo(0, nullptr);
+	BOOST_CHECK_EXCEPTION_EX(GLib::Win::CheckHr(E_UNEXPECTED, "test E_UNEXPECTED"),
+		GLib::Win::ComException, TestUtils::ExpectException, "test E_UNEXPECTED : Catastrophic failure (8000FFFF)");
+}
+
 BOOST_AUTO_TEST_CASE(UninitialisedComPtrHasZeroUseCount)
 {
 	GLib::Win::ComPtr<ITest1> p;
@@ -128,7 +154,7 @@ BOOST_AUTO_TEST_CASE(TestComCast)
 	BOOST_TEST(true == static_cast<bool>(GLib::Win::ComCast<ITest1ExtendedAlt>(p12)));
 }
 
-BOOST_AUTO_TEST_CASE(TestComFail)
+BOOST_AUTO_TEST_CASE(TestComCastOkWithCastOverloadFix)
 {
 	GLib::Win::ComPtr<ITest1Extended> p12 = GLib::Win::Make<ImplementsITest1ExtendedAndITest1ExtendedAlt>();
 	BOOST_TEST(static_cast<bool>(GLib::Win::ComCast<ITest1ExtendedAlt>(p12)));
