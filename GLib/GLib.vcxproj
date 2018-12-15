@@ -159,6 +159,7 @@
     <ClInclude Include="..\include\GLib\Win\ComException.h" />
     <ClInclude Include="..\include\GLib\Win\ComPtr.h" />
     <ClInclude Include="..\include\GLib\Win\ComUtil.h" />
+    <ClInclude Include="..\include\GLib\Win\Debugger.h" />
     <ClInclude Include="..\include\GLib\Win\DebugWrite.h" />
     <ClInclude Include="..\include\GLib\Win\DebugStream.h" />
     <ClInclude Include="..\include\GLib\Win\ErrorCheck.h" />

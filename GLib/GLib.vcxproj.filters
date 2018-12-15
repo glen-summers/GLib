@@ -122,6 +122,9 @@
     <ClInclude Include="..\include\GLib\TypeFilter.h">
       <Filter>Include Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\GLib\Win\Debugger.h">
+      <Filter>Include Files\win</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="filelogger.cpp">

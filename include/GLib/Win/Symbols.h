@@ -25,6 +25,14 @@ namespace GLib
 					}
 				};
 				typedef std::unique_ptr<void, Cleanup> SymbolHandle;
+
+				inline Handle Duplicate(HANDLE handle)
+				{
+					HANDLE duplicatedHandle;
+					Util::AssertTrue(::DuplicateHandle(::GetCurrentProcess(), handle, ::GetCurrentProcess(),
+						&duplicatedHandle, 0, FALSE, DUPLICATE_SAME_ACCESS), "DuplicateHandle");
+					return Handle { duplicatedHandle };
+				}
 			}
 
 			class SymProcess
@@ -34,7 +42,7 @@ namespace GLib
 				const char * baseOfImage;
 
 			public:
-				SymProcess(Win::Handle && handle, const void * baseOfImage)
+				SymProcess(Handle && handle, const void * baseOfImage)
 					: process(std::move(handle))
 					, symbolHandle(process.Handle().get())
 					, baseOfImage(reinterpret_cast<const char *>(baseOfImage))
@@ -68,10 +76,7 @@ namespace GLib
 			public:
 				SymProcess & AddProcess(DWORD processId, HANDLE processHandle, const void * baseOfImage, HANDLE imageFile, const std::string & imageName)
 				{
-					HANDLE duplicatedHandle; // holder
-					// to utils, duplicate avoids having Process have ownership policy
-					Util::AssertTrue(::DuplicateHandle(::GetCurrentProcess(), processHandle, ::GetCurrentProcess(),
-						&duplicatedHandle, 0, FALSE, DUPLICATE_SAME_ACCESS), "DuplicateHandle");
+					Handle duplicate = Detail::Duplicate(processHandle);
 
 					// set sym opts, add exe to sym path, legacy code, still needed?
 					std::ostringstream searchPath;
@@ -86,28 +91,24 @@ namespace GLib
 						searchPath << value << ";";
 					}
 
-					auto processPath = std::filesystem::path(FileSystem::PathOfProcessHandle(duplicatedHandle)).parent_path().u8string();
+					auto const processPath = std::filesystem::path(FileSystem::PathOfProcessHandle(duplicate.get())).parent_path().u8string();
 					searchPath << processPath << ";";
 
-					// when debugging processHandle and enumerateModules = true
-					// causes errorCode=0x8000000d : An illegal state change was requested
-					// as does SymRefreshModuleList
-					Util::AssertTrue(::SymInitializeW(duplicatedHandle, Cvt::a2w(searchPath.str()).c_str(), FALSE),
+					// when debugging processHandle and enumerateModules = true, get errorCode=0x8000000d : An illegal state change was requested
+					Util::AssertTrue(::SymInitializeW(duplicate.get(), Cvt::a2w(searchPath.str()).c_str(), FALSE),
 						"SymInitialize failed");
 
-					auto ret = ::SymLoadModuleExW(duplicatedHandle, imageFile, Cvt::a2w(imageName).c_str(), nullptr,
+					auto const ret = ::SymLoadModuleExW(duplicate.get(), imageFile, Cvt::a2w(imageName).c_str(), nullptr,
 						reinterpret_cast<DWORD64>(baseOfImage), 0, nullptr, 0);
 						Util::AssertTrue(0 != ret, "SymLoadModuleEx failed");
 
-					Handle wh { duplicatedHandle };
-					SymProcess sp { std::move(wh), baseOfImage };
-					auto it = handles.insert(std::make_pair(processId, std::move(sp))).first;
+					auto it = handles.insert(std::make_pair(processId, SymProcess { std::move(duplicate), baseOfImage })).first;
 					return it->second;
 				}
 
 				const SymProcess & GetProcess(DWORD processId) const
 				{
-					auto it = handles.find(processId);
+					auto const it = handles.find(processId);
 					if (it == handles.end())
 					{
 						throw std::runtime_error("Process not found");

@@ -52,7 +52,7 @@ namespace GLib
 #ifdef _DEBUG // || defined(GLIB_DEBUG)
 						if (!result)
 						{
-							Debug::Stream() << "WinException : " << WinException(message, result).what() << std::endl;
+							Debug::Stream() << "GLib warning: " << WinException(message, result).what() << std::endl;
 						}
 #else
 						UNREFERENCED_PARAMETER(result);
