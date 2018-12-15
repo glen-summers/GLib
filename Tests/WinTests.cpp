@@ -57,10 +57,15 @@ BOOST_AUTO_TEST_SUITE(WinTests)
 	BOOST_AUTO_TEST_CASE(TestProcess)
 	{
 		// capture output
-		GLib::Win::Process::Process p(R"(c:\windows\system32\cmd.exe)"); //  /c echo hello
-		GLib::Win::Symbols::Engine e(p.Handle().get());
-		p.Terminate();
-		//p.WaitForExit(std::chrono::seconds(5));
+		GLib::Win::Process p(R"(c:\windows\system32\cmd.exe)"); //  /c echo hello
+		{
+			auto scopedTerminator = p.ScopedTerminator();
+			BOOST_TEST(p.IsRunning());
+			(void)scopedTerminator;
+		}
+
+		BOOST_TEST(!p.IsRunning());
+		BOOST_TEST(1u == p.ExitCode());
 	}
 
 	BOOST_AUTO_TEST_CASE(TestErrorCheck)

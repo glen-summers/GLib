@@ -90,7 +90,7 @@ namespace GLib
 		inline int64_t ProcessId()
 		{
 #ifdef _MSC_VER
-				return Win::Process::CurrentProcessId();
+				return Win::Process::CurrentId();
 #elif __linux__
 				return ::getpid();
 #else
@@ -102,7 +102,7 @@ namespace GLib
 		inline std::string ProcessPath()
 		{
 #ifdef _MSC_VER
-			return Win::Process::CurrentProcessPath();
+			return Win::Process::CurrentPath();
 #elif __linux__
 
 			std::ostringstream s;
