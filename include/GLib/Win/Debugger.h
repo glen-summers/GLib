@@ -7,6 +7,8 @@
 #include <GLib/scope.h>
 #include <GLib/split.h>
 
+#include <optional>
+
 namespace GLib
 {
 	namespace Win
@@ -17,7 +19,7 @@ namespace GLib
 			std::map<std::string, std::string> driveMap;
 			Process mainProcess;
 			DWORD const debugProcessId;
-			DWORD exitCode;
+			std::optional<DWORD> exitCode;
 			std::string pendingDebugOut;
 
 		public:
@@ -41,21 +43,22 @@ namespace GLib
 
 			DWORD ExitCode() const 
 			{
-				return exitCode;
+				return exitCode.value();
 			}
 
 			bool ProcessEvents(DWORD timeout)
 			{
 				DEBUG_EVENT debugEvent {};
 				BOOL const result = ::WaitForDebugEventEx(&debugEvent, timeout);
-				Util::WarnAssertTrue(result, "WaitForDebugEventEx");
-				if (!result)
+				Util::WarnAssertTrue(result==TRUE || ::GetLastError()==ERROR_SEM_TIMEOUT, "WaitForDebugEventEx");
+				if (result == FALSE)
 				{
-					return false;
+					return !exitCode.has_value();
 				}
 
 				DWORD const processId = debugEvent.dwProcessId;
 				DWORD const threadId = debugEvent.dwThreadId;
+				DWORD continueStatus = DBG_CONTINUE;
 
 				switch (debugEvent.dwDebugEventCode)
 				{
@@ -99,7 +102,7 @@ namespace GLib
 
 					case EXCEPTION_DEBUG_EVENT:
 					{
-						OnException(processId, threadId, debugEvent.u.Exception);
+						continueStatus = OnException(processId, threadId, debugEvent.u.Exception);
 						break;
 					}
 
@@ -127,7 +130,7 @@ namespace GLib
 					}
 				}
 
-				Util::AssertTrue(::ContinueDebugEvent(debugEvent.dwProcessId, debugEvent.dwThreadId, DBG_CONTINUE), "ContinueDebugEvent failed");
+				Util::AssertTrue(::ContinueDebugEvent(debugEvent.dwProcessId, debugEvent.dwThreadId, continueStatus), "ContinueDebugEvent failed");
 				return true;
 			}
 
@@ -140,7 +143,7 @@ namespace GLib
 				std::string const name = FileSystem::NormalisePath(logicalName, driveMap);
 
 				// when using DEBUG_ONLY_THIS_PROCESS only get called here for main executable
-				const Symbols::SymProcess & process = symbols.AddProcess(processId, info.hProcess, info.lpBaseOfImage, info.hFile, name);
+				const Symbols::SymProcess & process = symbols.AddProcess(processId, info.hProcess, (uint64_t)info.lpBaseOfImage, info.hFile, name);
 
 				IMAGE_DOS_HEADER header {};
 				process.ReadMemory(0, &header, sizeof(header));
@@ -227,12 +230,13 @@ namespace GLib
 				Debug::Detail::DebugStream() << "GDB ThreadExit code: " << info.dwExitCode << std::endl;
 			}
 
-			virtual void OnException(DWORD processId, DWORD threadId, const EXCEPTION_DEBUG_INFO & info)
+			virtual DWORD OnException(DWORD processId, DWORD threadId, const EXCEPTION_DEBUG_INFO & info)
 			{
 				UNREFERENCED_PARAMETER(processId);
 				UNREFERENCED_PARAMETER(threadId);
-
+				UNREFERENCED_PARAMETER(info);
 				Debug::Detail::DebugStream() << "GDB Exception: " << std::hex << info.ExceptionRecord.ExceptionCode << std::dec << std::endl;
+				return DBG_CONTINUE;
 			}
 
 			virtual void OnDebugString(DWORD processId, DWORD threadId, const OUTPUT_DEBUG_STRING_INFO & info)
@@ -241,7 +245,7 @@ namespace GLib
 				UNREFERENCED_PARAMETER(threadId);
 
 				auto buffer = std::make_unique<unsigned char[]>(info.nDebugStringLength);
-				mainProcess.ReadMemory(info.lpDebugStringData, buffer.get(), info.nDebugStringLength);
+				mainProcess.ReadMemory((uint64_t)info.lpDebugStringData, buffer.get(), info.nDebugStringLength);
 
 				std::string message;
 				if (info.fUnicode)

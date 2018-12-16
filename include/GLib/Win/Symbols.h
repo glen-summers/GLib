@@ -39,13 +39,13 @@ namespace GLib
 			{
 				Process process;
 				Detail::SymbolHandle symbolHandle;
-				const char * baseOfImage;
+				uint64_t baseOfImage;
 
 			public:
-				SymProcess(Handle && handle, const void * baseOfImage)
+				SymProcess(Handle && handle, uint64_t baseOfImage)
 					: process(std::move(handle))
 					, symbolHandle(process.Handle().get())
-					, baseOfImage(reinterpret_cast<const char *>(baseOfImage))
+					, baseOfImage(baseOfImage)
 				{}
 
 				const Handle & Handle() const
@@ -53,19 +53,32 @@ namespace GLib
 					return process.Handle();
 				}
 
-				void ReadMemory(size_t offset, void * buffer, size_t size) const
+				void ReadMemory(uint64_t address, void * buffer, size_t size, bool fromBase = true) const
 				{
-					process.ReadMemory(baseOfImage + offset, buffer, size);
+					process.ReadMemory(fromBase ? baseOfImage + address : address, buffer, size);
 				}
 
-				void ReadMemoryAbsolute(size_t address, void * buffer, size_t size) const
+				void WriteMemory(uint64_t address, const void * buffer, size_t size, bool fromBase = true) const
 				{
-					process.ReadMemory(reinterpret_cast<const void*>(address), buffer, size);
+					process.WriteMemory(fromBase ? baseOfImage + address : address, buffer, size);
 				}
 
-				void WriteMemoryAbsolute(size_t address, void * buffer, size_t size) const
+				template <typename T> T Read(uint64_t address, bool absolute = false) const
 				{
-					process.WriteMemory(reinterpret_cast<void*>(address), buffer, size);
+					T value;
+					ReadMemory(address, &value, sizeof(T), absolute);
+					return value;
+				}
+
+				template <typename T> void Write(uint64_t address, const T & value, bool absolute = false) const
+				{
+					WriteMemory(address, &value, sizeof(T), absolute);
+				}
+
+			private:
+				uint64_t Address(uint64_t address, bool fromBase)
+				{
+					return fromBase ? baseOfImage + address : address;
 				}
 			};
 
@@ -74,7 +87,7 @@ namespace GLib
 				std::unordered_map<DWORD, SymProcess> handles;
 
 			public:
-				SymProcess & AddProcess(DWORD processId, HANDLE processHandle, const void * baseOfImage, HANDLE imageFile, const std::string & imageName)
+				SymProcess & AddProcess(DWORD processId, HANDLE processHandle, uint64_t baseOfImage, HANDLE imageFile, const std::string & imageName)
 				{
 					Handle duplicate = Detail::Duplicate(processHandle);
 
@@ -99,7 +112,7 @@ namespace GLib
 						"SymInitialize failed");
 
 					auto const ret = ::SymLoadModuleExW(duplicate.get(), imageFile, Cvt::a2w(imageName).c_str(), nullptr,
-						reinterpret_cast<DWORD64>(baseOfImage), 0, nullptr, 0);
+						static_cast<DWORD64>(baseOfImage), 0, nullptr, 0);
 						Util::AssertTrue(0 != ret, "SymLoadModuleEx failed");
 
 					auto it = handles.insert(std::make_pair(processId, SymProcess { std::move(duplicate), baseOfImage })).first;
@@ -126,18 +139,21 @@ namespace GLib
 
 				void SourceFiles(std::function<void(PSOURCEFILEW)> f, HANDLE process, void * base) const
 				{
+					(void) this;
 					Util::AssertTrue(::SymEnumSourceFilesW(process, reinterpret_cast<ULONG64>(base), nullptr, EnumSourceFiles, &f),
 						"EnumSourceFiles failed");
 				}
 
 				void Lines(std::function<void(PSRCCODEINFOW)> f, HANDLE process, void * base) const
 				{
+					(void) this;
 					Util::AssertTrue(::SymEnumLinesW(process, reinterpret_cast<ULONG64>(base), nullptr, nullptr, EnumLines, &f), "SymEnumLines failed");
 				}
 				
 				template <typename inserter>
 				void Processes(inserter && back_inserter) const
 				{
+					(void) this;
 					std::function<void(HANDLE)> f = [&](HANDLE h) { *back_inserter++ = h; };
 					Util::AssertTrue(::SymEnumProcesses(EnumProcesses, &f), "SymEnumLines failed");
 				}

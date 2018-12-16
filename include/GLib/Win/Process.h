@@ -138,15 +138,15 @@ namespace GLib
 				return ExitCode() == STILL_ACTIVE;
 			}
 
-			void ReadMemory(const void * address, void * buffer, size_t size) const
+			void ReadMemory(uint64_t address, void * buffer, size_t size) const
 			{
-				BOOL result = ::ReadProcessMemory(p.get(), address, buffer, size, nullptr);
+				BOOL result = ::ReadProcessMemory(p.get(), (const void *)address, buffer, size, nullptr);
 				Util::AssertTrue(result, "ReadProcessMemory");
 			}
 
-			void WriteMemory(void * address, const void * buffer, size_t size) const
+			void WriteMemory(uint64_t address, const void * buffer, size_t size) const
 			{
-				BOOL result = ::WriteProcessMemory(p.get(), address, buffer, size, nullptr);
+				BOOL result = ::WriteProcessMemory(p.get(), (void*)address, buffer, size, nullptr);
 				Util::AssertTrue(result, "WriteProcessMemory");
 			}
 
