@@ -3,6 +3,7 @@
 #include "GLib/cvt.h"
 #include "GLib/Win/Process.h"
 
+#define _NO_CVCONST_H
 #include <DbgHelp.h>
 #pragma comment(lib , "DbgHelp.lib")
 
@@ -34,6 +35,14 @@ namespace GLib
 					return Handle { duplicatedHandle };
 				}
 			}
+
+			struct Symbol
+			{
+				ULONG Index;
+				ULONG TypeIndex;
+				enum SymTagEnum Tag;
+				std::string name;
+			};
 
 			class SymProcess
 			{
@@ -75,8 +84,47 @@ namespace GLib
 					WriteMemory(address, &value, sizeof(T), absolute);
 				}
 
+				Symbol GetSymbolFromAddress(uint64_t address) const
+				{
+					char buffer[sizeof(SYMBOL_INFO) + MAX_SYM_NAME * sizeof(wchar_t)];
+					auto const symbol = reinterpret_cast<PSYMBOL_INFOW>(buffer);
+					symbol->SizeOfStruct = sizeof(SYMBOL_INFOW);
+					symbol->MaxNameLen = MAX_SYM_NAME;
+					Util::AssertTrue(::SymFromAddrW(process.Handle().get(), address, nullptr, symbol), "SymFromAddr");
+					return { symbol->Index, symbol->TypeIndex, static_cast<enum SymTagEnum>(symbol->Tag), Cvt::w2a(symbol->Name) };
+				}
+
+				bool TryGetClassParent(const Symbol & symbol, Symbol & result) const
+				{
+					DWORD typeIndexOfClassParent;
+
+					// docs say TypeId param should be the TypeIndex member of returned SYMBOL_INFO
+					// and the result from TI_GET_CLASSPARENTID is "The type index of the class parent."
+					// so we then get TI_GET_SYMINDEX for indexOfClassParent
+					// but seems to get indexOfClassParent having the same value of typeIndexOfClassParent
+					if (!::SymGetTypeInfo(process.Handle().get(), baseOfImage, symbol.TypeIndex, TI_GET_CLASSPARENTID, &typeIndexOfClassParent))
+					{
+						return false;
+					}
+
+					DWORD indexOfClassParent;
+					if (!::SymGetTypeInfo(process.Handle().get(), baseOfImage, typeIndexOfClassParent, TI_GET_SYMINDEX, &indexOfClassParent))
+					{
+						return false;
+					}
+
+					WCHAR * name;
+					Util::AssertTrue(::SymGetTypeInfo(process.Handle().get(), baseOfImage, indexOfClassParent, TI_GET_SYMNAME, &name), "SymGetTypeInfo");
+
+					result.Index = indexOfClassParent;
+					result.TypeIndex = typeIndexOfClassParent;
+					result.name = Cvt::w2a(name);
+					Util::Detail::Checker::WarnAssertTrue(!::LocalFree(name), "LocalFree");
+					return true;
+				}
+
 			private:
-				uint64_t Address(uint64_t address, bool fromBase)
+				uint64_t Address(uint64_t address, bool fromBase) const
 				{
 					return fromBase ? baseOfImage + address : address;
 				}
@@ -87,12 +135,23 @@ namespace GLib
 				std::unordered_map<DWORD, SymProcess> handles;
 
 			public:
+#ifdef _DEBUG
+				Engine()
+				{
+					::SymSetOptions(::SymGetOptions() | SYMOPT_DEBUG);
+				}
+#endif
+
 				SymProcess & AddProcess(DWORD processId, HANDLE processHandle, uint64_t baseOfImage, HANDLE imageFile, const std::string & imageName)
 				{
 					Handle duplicate = Detail::Duplicate(processHandle);
 
 					// set sym opts, add exe to sym path, legacy code, still needed?
 					std::ostringstream searchPath;
+
+					auto const processPath = std::filesystem::path(FileSystem::PathOfProcessHandle(duplicate.get())).parent_path().u8string();
+					searchPath << processPath << ";";
+
 					std::string value = Win::Detail::EnvironmentVariable("_NT_SYMBOL_PATH");
 					if (!value.empty())
 					{
@@ -104,19 +163,15 @@ namespace GLib
 						searchPath << value << ";";
 					}
 
-					auto const processPath = std::filesystem::path(FileSystem::PathOfProcessHandle(duplicate.get())).parent_path().u8string();
-					searchPath << processPath << ";";
-
 					// when debugging processHandle and enumerateModules = true, get errorCode=0x8000000d : An illegal state change was requested
 					Util::AssertTrue(::SymInitializeW(duplicate.get(), Cvt::a2w(searchPath.str()).c_str(), FALSE),
 						"SymInitialize failed");
 
-					auto const ret = ::SymLoadModuleExW(duplicate.get(), imageFile, Cvt::a2w(imageName).c_str(), nullptr,
+					DWORD64 const loadBase = ::SymLoadModuleExW(duplicate.get(), imageFile, Cvt::a2w(imageName).c_str(), nullptr,
 						static_cast<DWORD64>(baseOfImage), 0, nullptr, 0);
-						Util::AssertTrue(0 != ret, "SymLoadModuleEx failed");
+						Util::AssertTrue(0 != loadBase, "SymLoadModuleEx failed");
 
-					auto it = handles.insert(std::make_pair(processId, SymProcess { std::move(duplicate), baseOfImage })).first;
-					return it->second;
+					return handles.insert(std::make_pair(processId, SymProcess{ std::move(duplicate), baseOfImage })).first->second;
 				}
 
 				const SymProcess & GetProcess(DWORD processId) const

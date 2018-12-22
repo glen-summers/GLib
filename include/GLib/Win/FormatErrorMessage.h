@@ -4,6 +4,8 @@
 
 #include "GLib/cvt.h"
 
+#include <ostream>
+
 namespace GLib
 {
 	namespace Win

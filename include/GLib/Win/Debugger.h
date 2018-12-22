@@ -125,7 +125,7 @@ namespace GLib
 
 					default:
 					{
-						Debug::Detail::DebugStream() << "GDB Unknown Event: " << debugEvent.dwDebugEventCode << std::endl;
+						Debug::Stream() << "GDB Unknown Event: " << debugEvent.dwDebugEventCode << std::endl;
 						break;
 					}
 				}
@@ -203,7 +203,7 @@ namespace GLib
 				std::string const logicalName = FileSystem::PathOfFileHandle(info.hFile, VOLUME_NAME_NT);
 				std::string const name = FileSystem::NormalisePath(logicalName, driveMap);
 
-				Debug::Detail::DebugStream() << "GDB LoadDll: " << name << " " << info.lpBaseOfDll << std::endl;
+				Debug::Stream() << "GDB LoadDll: " << name << " " << info.lpBaseOfDll << std::endl;
 			}
 
 			virtual void OnUnloadDll(DWORD processId, DWORD threadId, const UNLOAD_DLL_DEBUG_INFO & info) const
@@ -211,7 +211,7 @@ namespace GLib
 				UNREFERENCED_PARAMETER(processId);
 				UNREFERENCED_PARAMETER(threadId);
 
-				Debug::Detail::DebugStream() << "GDB UnloadDll: " << info.lpBaseOfDll << std::endl;
+				Debug::Stream() << "GDB UnloadDll: " << info.lpBaseOfDll << std::endl;
 			}
 
 			virtual void OnCreateThread(DWORD processId, DWORD threadId, const CREATE_THREAD_DEBUG_INFO & info)
@@ -219,7 +219,7 @@ namespace GLib
 				UNREFERENCED_PARAMETER(processId);
 				UNREFERENCED_PARAMETER(threadId);
 
-				Debug::Detail::DebugStream() << "GDB CreateThread: " << info.hThread << std::endl;
+				Debug::Stream() << "GDB CreateThread: " << info.hThread << std::endl;
 			}
 
 			virtual void OnExitThread(DWORD processId, DWORD threadId, const EXIT_THREAD_DEBUG_INFO & info)
@@ -227,7 +227,7 @@ namespace GLib
 				UNREFERENCED_PARAMETER(processId);
 				UNREFERENCED_PARAMETER(threadId);
 
-				Debug::Detail::DebugStream() << "GDB ThreadExit code: " << info.dwExitCode << std::endl;
+				Debug::Stream() << "GDB ThreadExit code: " << info.dwExitCode << std::endl;
 			}
 
 			virtual DWORD OnException(DWORD processId, DWORD threadId, const EXCEPTION_DEBUG_INFO & info)
@@ -235,7 +235,7 @@ namespace GLib
 				UNREFERENCED_PARAMETER(processId);
 				UNREFERENCED_PARAMETER(threadId);
 				UNREFERENCED_PARAMETER(info);
-				Debug::Detail::DebugStream() << "GDB Exception: " << std::hex << info.ExceptionRecord.ExceptionCode << std::dec << std::endl;
+				Debug::Stream() << "GDB Exception: " << std::hex << info.ExceptionRecord.ExceptionCode << std::dec << std::endl;
 				return DBG_CONTINUE;
 			}
 
@@ -264,7 +264,7 @@ namespace GLib
 					std::string s = *it;
 					if (++it != end)
 					{
-						Debug::Detail::DebugStream() << "GDB: " << pendingDebugOut << s << std::endl;
+						Debug::Stream() << "GDB: " << pendingDebugOut << s << std::endl;
 						pendingDebugOut.clear();
 					}
 					else

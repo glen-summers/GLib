@@ -33,13 +33,11 @@ namespace GLib
 						Reset();
 					}
 				};
-
-				using DebugStream = GLib::Util::GenericOutStream<char, DebugBuffer>;
 			}
 
 			inline std::ostream & Stream()
 			{
-				static thread_local Detail::DebugStream debugStream(std::ios_base::boolalpha);
+				static thread_local GLib::Util::GenericOutStream<char, Detail::DebugBuffer> debugStream(std::ios_base::boolalpha);
 				return debugStream;
 			}
 		}
