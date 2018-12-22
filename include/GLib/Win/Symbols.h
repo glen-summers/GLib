@@ -2,6 +2,7 @@
 
 #include "GLib/cvt.h"
 #include "GLib/Win/Process.h"
+#include "GLib/scope.h"
 
 #define _NO_CVCONST_H
 #include <DbgHelp.h>
@@ -113,13 +114,16 @@ namespace GLib
 						return false;
 					}
 
-					WCHAR * name;
+					WCHAR * name = nullptr;
+					SCOPE(freeName, [&]() // or wrap name in a Local holder
+					{
+							Util::Detail::Checker::WarnAssertTrue(::LocalFree(name) == nullptr, "LocalFree");
+					});
 					Util::AssertTrue(::SymGetTypeInfo(process.Handle().get(), baseOfImage, indexOfClassParent, TI_GET_SYMNAME, &name), "SymGetTypeInfo");
 
 					result.Index = indexOfClassParent;
 					result.TypeIndex = typeIndexOfClassParent;
 					result.name = Cvt::w2a(name);
-					Util::Detail::Checker::WarnAssertTrue(!::LocalFree(name), "LocalFree");
 					return true;
 				}
 
