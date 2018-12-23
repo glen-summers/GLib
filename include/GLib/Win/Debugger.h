@@ -3,6 +3,7 @@
 #include <GLib/Win/FileSystem.h>
 #include <GLib/Win/Process.h>
 #include <GLib/Win/Symbols.h>
+#include <GLib/Win/DebugStream.h>
 
 #include <GLib/scope.h>
 #include <GLib/split.h>
@@ -27,7 +28,6 @@ namespace GLib
 				: driveMap(FileSystem::DriveMap())
 				, mainProcess(path, DEBUG_ONLY_THIS_PROCESS) // option for DEBUG_PROCESS
 				, debugProcessId(mainProcess.Id())
-				, exitCode()
 			{}
 
 			Debugger(const Debugger&) = delete;

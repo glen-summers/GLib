@@ -1,0 +1,15 @@
+cmake_minimum_required(VERSION 3.10.2)
+
+include(../cmake/common.cmake)
+
+#todo pch
+set(SOURCES Main.cpp Coverage.cpp)
+
+include_directories(../include)
+
+add_executable(Coverage ${SOURCES})
+
+install(TARGETS Coverage
+	RUNTIME DESTINATION bin
+	CONFIGURATIONS ${CMAKE_CONFIGURATION_TYPES}
+)

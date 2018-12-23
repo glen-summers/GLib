@@ -1,6 +1,8 @@
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="14.0">
 	<PropertyGroup>
 		<Root>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)\..'))</Root>
+		<Nuget>https://dist.nuget.org/win-x86-commandline/v4.8.1/nuget.exe</Nuget>
+		<ReportGeneratorVersion>4.0.4</ReportGeneratorVersion>
 	</PropertyGroup>
 
 	<PropertyGroup>
@@ -21,6 +23,9 @@
 		<Temp>$(PlatformOut)\temp</Temp>
 		<OutputPath>$(PlatformOut)\$(Configuration)</OutputPath>
 		<TestExecutable>$(OutputPath)\$(TestProject).exe</TestExecutable>
+		<CoverageExecutable>$(OutputPath)\Coverage.exe</CoverageExecutable>
+		<Downloads>$(Out)\downloads</Downloads>
+		<ReportGenerator>$(Downloads)\ReportGenerator.$(ReportGeneratorVersion)\tools\net47\ReportGenerator.exe</ReportGenerator>
 	</PropertyGroup>
 
 	<Target Name="MakeTempDir">
@@ -42,7 +47,7 @@
 			<Directories>
 				<Files>$([System.IO.Directory]::GetFiles("%(Directories.Identity)", "*", System.IO.SearchOption.AllDirectories).get_Length())</Files>
 			</Directories>
-		</ItemGroup>        
+		</ItemGroup>
 		<RemoveDir Directories="@(Directories)" Condition="%(Files)=='0'" />
 	</Target>
 
@@ -59,6 +64,17 @@
 		<MSBuild Projects="$(Solution)" Properties="@(Properties)" BuildInParallel="$(BuildInParallel)"/>
 	</Target>
 	
+	<Target Name="CompileTests">
+		<ItemGroup>
+			<Properties Remove="@(Properties)"/>
+			<Properties Include="Configuration=$(Configuration)"/>
+			<Properties Include="OutDir=$(OutputPath)\"/>
+			<Properties Include="Platform=$(Platform)"/>
+			<Properties Include="@(CustomProperties)"/>
+		</ItemGroup>
+		<MSBuild Projects="$(Solution)" Properties="@(Properties)" Targets="Tests"/>
+	</Target>
+
 	<!--32bit...
 	<Target Name="CompileX86">
 		<MSBuild Condition="'$(Platform)'!='x86'" Projects="$(MSBuildProjectFile)" Targets="Compile" Properties="Platform=x86"/>
@@ -97,4 +113,34 @@
 	</Target>
 
 	<Target Name="All" DependsOnTargets="Build;CMake;Wsl"/>
+
+	<UsingTask TaskName="DownloadFile" TaskFactory="CodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll">
+		<ParameterGroup>
+			<Address ParameterType="System.String" Required="true"/>
+			<FileName ParameterType="System.String" Required="true" />
+		</ParameterGroup>
+		<Task>
+			<Reference Include="System" />
+			<Code Type="Fragment" Language="cs"><![CDATA[new System.Net.WebClient().DownloadFile(Address, FileName);]]>
+			</Code>
+		</Task>
+	</UsingTask>
+
+	<Target Name="DownloadTools" Condition="!Exists($(ReportGenerator))">
+		<MakeDir Directories="$(Downloads)"/>
+		<DownloadFile Condition="!Exists($(Nuget))" Address="$(Nuget)" FileName="$(Downloads)\nuget.exe" />
+		<Exec Command="nuget.exe install ReportGenerator -version $(ReportGeneratorVersion)" WorkingDirectory="$(Downloads)"/>
+	</Target>
+
+	<Target Name="Coverage" DependsOnTargets="Compile;DownloadTools">
+		<MSBuild Projects="$(MSBuildProjectFile)" Targets="CompileTests" Properties="Configuration=Debug"/>
+
+		<PropertyGroup>
+			<DebugTestExecutable>$(PlatformOut)\Debug\$(TestProject).exe</DebugTestExecutable>
+		</PropertyGroup>
+
+		<Exec Command="$(CoverageExecutable) $(TestExecutable) $(Out)\coverage.xml"/>
+		<Exec Command="$(ReportGenerator) -reports:$(Out)\coverage.xml -targetdir:$(Out)\CoverageReport -verbosity:Error -Reporttypes:HTML"/>
+		<Exec Command="start $(Out)\CoverageReport\index.htm"/>
+	</Target>
 </Project>

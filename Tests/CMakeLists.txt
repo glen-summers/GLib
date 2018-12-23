@@ -21,7 +21,6 @@ message("boost = ${BOOST_DIR}")
 include_directories(${BOOST_DIR})
 link_directories(${BOOST_DIR}/stage/lib)
 
-
 set(SOURCES Main.cpp
 	FlogTests.cpp
 	FormatterTests.cpp

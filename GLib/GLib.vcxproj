@@ -23,7 +23,7 @@
     <ProjectGuid>{AE9CCD38-5A24-4794-AC41-BA9BB82F8B13}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>GLib</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -171,6 +171,7 @@
     <ClInclude Include="..\include\GLib\Win\Symbols.h" />
     <ClInclude Include="..\include\GLib\Win\Uuid.h" />
     <ClInclude Include="..\include\GLib\win\WinException.h" />
+    <ClInclude Include="..\include\GLib\XmlPrinter.h" />
     <ClInclude Include="filelogger.h" />
     <ClInclude Include="fwd.h" />
     <ClInclude Include="logstate.h" />
