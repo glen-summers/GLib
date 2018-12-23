@@ -114,16 +114,11 @@ namespace GLib
 						return false;
 					}
 
-					WCHAR * name = nullptr;
-					SCOPE(freeName, [&]() // or wrap name in a Local holder
-					{
-							Util::Detail::Checker::WarnAssertTrue(::LocalFree(name) == nullptr, "LocalFree");
-					});
-					Util::AssertTrue(::SymGetTypeInfo(process.Handle().get(), baseOfImage, indexOfClassParent, TI_GET_SYMNAME, &name), "SymGetTypeInfo");
-
+					Local<WCHAR> name;
+					Util::AssertTrue(::SymGetTypeInfo(process.Handle().get(), baseOfImage, indexOfClassParent, TI_GET_SYMNAME, name.GetPtr().Address()), "SymGetTypeInfo");
 					result.Index = indexOfClassParent;
 					result.TypeIndex = typeIndexOfClassParent;
-					result.name = Cvt::w2a(name);
+					result.name = Cvt::w2a(name.Get());
 					return true;
 				}
 
