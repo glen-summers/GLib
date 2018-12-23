@@ -22,15 +22,22 @@ void Coverage::OnCreateProcess(DWORD processId, DWORD threadId, const CREATE_PRO
 	{
 		if (wideFiles.find(lineInfo->FileName) == wideFiles.end())
 		{
+			bool include = includes.empty();
 			bool exclude = false;
 
-			for (const auto & value : excludeFilter)
+			for (const auto & value : includes)
+			{
+				bool const isMatch = ::_wcsnicmp(value.c_str(), lineInfo->FileName, value.size()) == 0;
+				include |= isMatch;
+			}
+
+			for (const auto & value : excludes)
 			{
 				bool const isMatch = ::_wcsnicmp(value.c_str(), lineInfo->FileName, value.size()) == 0;
 				exclude |= isMatch;
 			}
 
-			if (exclude)
+			if (!include || exclude)
 			{
 				return;
 			}

@@ -139,7 +139,7 @@
 			<DebugTestExecutable>$(PlatformOut)\Debug\$(TestProject).exe</DebugTestExecutable>
 		</PropertyGroup>
 
-		<Exec Command="$(CoverageExecutable) $(TestExecutable) $(Out)\coverage.xml"/>
+		<Exec Command="$(CoverageExecutable) $(TestExecutable) $(Out)\coverage.xml -i $(Root) -x $(Root)\tests\"/>
 		<Exec Command="$(ReportGenerator) -reports:$(Out)\coverage.xml -targetdir:$(Out)\CoverageReport -verbosity:Error -Reporttypes:HTML"/>
 		<Exec Command="start $(Out)\CoverageReport\index.htm"/>
 	</Target>

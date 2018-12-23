@@ -73,4 +73,22 @@ BOOST_AUTO_TEST_SUITE(ConverterTests)
 		BOOST_TEST(0 == static_cast<int>(GLib::Cvt::CompareNoCase(s1, 6, s1, 6)));
 	}
 
+	BOOST_AUTO_TEST_CASE(NoCaseLessChar)
+	{
+		BOOST_TEST(!GLib::Cvt::NoCaseLess<char>()("a", "a"));
+		BOOST_TEST(!GLib::Cvt::NoCaseLess<char>()("a", ""));
+		BOOST_TEST(GLib::Cvt::NoCaseLess<char>()("", "a"));
+		BOOST_TEST(GLib::Cvt::NoCaseLess<char>()("a", "b"));
+		BOOST_TEST(!GLib::Cvt::NoCaseLess<char>()("b", "a"));
+	}
+
+	BOOST_AUTO_TEST_CASE(NoCaseLessWChar)
+	{
+		BOOST_TEST(!GLib::Cvt::NoCaseLess<wchar_t>()(L"a", L"a"));
+		BOOST_TEST(!GLib::Cvt::NoCaseLess<wchar_t>()(L"a", L""));
+		BOOST_TEST(GLib::Cvt::NoCaseLess<wchar_t>()(L"", L"a"));
+		BOOST_TEST(GLib::Cvt::NoCaseLess<wchar_t>()(L"a", L"b"));
+		BOOST_TEST(!GLib::Cvt::NoCaseLess<wchar_t>()(L"b", L"a"));
+	}
+
 BOOST_AUTO_TEST_SUITE_END()

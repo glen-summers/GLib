@@ -138,5 +138,21 @@ namespace GLib
 		{
 			return CompareNoCase(s1.c_str(), s1.size(), s2.c_str(), s2.size(), locale);
 		}
+
+		template <typename T, typename StringType = std::basic_string<T>>
+		struct NoCaseLess
+		{
+			bool operator()(const StringType & s1, const StringType & s2) const;
+		};
+
+		inline bool NoCaseLess<char>::operator()(const std::string & s1, const std::string & s2) const
+		{
+			return CompareNoCase(s1, s2) == CompareResult::Less;
+		}
+
+		inline bool NoCaseLess<wchar_t>::operator()(const std::wstring & s1, const std::wstring & s2) const
+		{
+			return s1.compare(s2) < 0;
+		}
 	}
 }

@@ -9,17 +9,21 @@
 
 namespace GLib
 {
+	template <typename T, typename Value> using CaseInsensitiveMap = std::map<std::basic_string<T>, Value, Cvt::NoCaseLess<T>>;
+	template <typename T> using CaseInsensitiveSet = std::set<std::basic_string<T>, Cvt::NoCaseLess<T>>;
+
+	typedef CaseInsensitiveSet<wchar_t> WideStrings;
+	typedef CaseInsensitiveSet<char> Strings;
+
 	class Coverage : public Win::Debugger
 	{
 		static constexpr unsigned char debugBreakByte = 0xCC;
 		std::regex const namespaceRegex{ R"(^(?:[A-Za-z_][A-Za-z_0-9]*::)*)" }; // +some extra unicode chars?
 
 		typedef std::set<unsigned int> Lines;
-		typedef std::map<std::wstring, Lines> FileLines;
+		typedef CaseInsensitiveMap<wchar_t, Lines> FileLines;
 		class Address;
 		typedef std::map<uint64_t, Address> Addresses;
-		typedef std::set<std::wstring> WideStrings;
-		typedef std::set<std::string> Strings;
 
 		struct LinesCoverage
 		{
@@ -62,16 +66,19 @@ namespace GLib
 		std::string executable;
 		std::string reportPath;
 		Addresses addresses;
+		WideStrings includes;
+		WideStrings excludes;
+		
 		std::map<unsigned int, HANDLE> threads;
-		WideStrings excludeFilter; // make case insensitive
 		std::map<std::wstring, size_t> files;
 
 	public:
-		Coverage(const std::string & executable, const std::string & reportPath, const std::set<std::string> & excludes)
+		Coverage(const std::string & executable, const std::string & reportPath, const Strings & includes, const Strings & excludes)
 			: Debugger(executable)
 			, executable(executable)
 			, reportPath(reportPath)
-			, excludeFilter(a2w(excludes))
+			, includes(a2w(includes))
+			, excludes(a2w(excludes))
 		{}
 
 		std::string CreateReport(unsigned int processId);
