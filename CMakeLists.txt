@@ -6,4 +6,7 @@ enable_testing()
 
 #add_subdirectory(GLib) # is dep of Tests, try https://stackoverflow.com/questions/33443164/cmake-share-library-with-multiple-executables
 add_subdirectory(Tests)
-add_subdirectory(Coverage)
+
+if(WIN32)
+	add_subdirectory(Coverage)
+endif(WIN32)

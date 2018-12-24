@@ -20,6 +20,12 @@ void Coverage::OnCreateProcess(DWORD processId, DWORD threadId, const CREATE_PRO
 
 	Symbols().Lines([&](PSRCCODEINFOW lineInfo)
 	{
+		// filter out unknown source lines, looks like these cause the out of memory exceptions in ReportGenerator
+		if (lineInfo->LineNumber == 0xf00f00 || lineInfo->LineNumber == 0xfeefee)
+		{
+			return;
+		}
+
 		if (wideFiles.find(lineInfo->FileName) == wideFiles.end())
 		{
 			bool include = includes.empty();
@@ -163,25 +169,27 @@ std::string Coverage::CreateReport(unsigned int processId)
 			std::string functionName = symbol.name;
 			std::string namespaceName;
 
-			std::regex_search(functionName, m, namespaceRegex);
-			size_t len = m[0].str().size();
-			if (len >= 2)
-			{
-				namespaceName = functionName.substr(0, len - 2);
-				functionName.erase(0, len);
-			}
-
 			std::string className;
 			if (process.TryGetClassParent(symbol, parent))
 			{
 				className = parent.name;
-				if (className.find(namespaceName)==0)
+				std::regex_search(className, m, namespaceRegex);
+				size_t len = m[0].str().size();
+				if (len >= 2)
 				{
+					namespaceName = functionName.substr(0, len - 2);
 					className.erase(0, len);
+					functionName.erase(0, len);
 				}
-				if (functionName.find(className+"::") == 0)
+			}
+			else
+			{
+				std::regex_search(functionName, m, namespaceRegex);
+				size_t len = m[0].str().size();
+				if (len >= 2)
 				{
-					functionName.erase(0, className.size() + 2);
+					namespaceName = functionName.substr(0, len - 2);
+					functionName.erase(0, len);
 				}
 			}
 

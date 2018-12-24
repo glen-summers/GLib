@@ -145,11 +145,13 @@ namespace GLib
 			bool operator()(const StringType & s1, const StringType & s2) const;
 		};
 
+		template <>
 		inline bool NoCaseLess<char>::operator()(const std::string & s1, const std::string & s2) const
 		{
 			return CompareNoCase(s1, s2) == CompareResult::Less;
 		}
 
+		template <>
 		inline bool NoCaseLess<wchar_t>::operator()(const std::wstring & s1, const std::wstring & s2) const
 		{
 			return s1.compare(s2) < 0;
