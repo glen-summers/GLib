@@ -3,6 +3,15 @@
 
 #include <boost/test/unit_test.hpp>
 
+#include <set>
+#include <unordered_set>
+
+template <typename CharType> using CaseInsensitiveSet = std::set<std::basic_string<CharType>,
+	GLib::Cvt::NoCaseLess<CharType>>;
+
+template <typename CharType> using UnorderedCaseInsensitiveSet = std::unordered_set<std::basic_string<CharType>,
+	GLib::Cvt::NoCaseHash<CharType>, GLib::Cvt::NoCaseEquality<CharType>>;
+
 BOOST_AUTO_TEST_SUITE(ConverterTests)
 
 	BOOST_AUTO_TEST_CASE(EuroSymbol)
@@ -11,7 +20,7 @@ BOOST_AUTO_TEST_SUITE(ConverterTests)
 		std::wstring utf16Value = L"\u20AC";
 
 		BOOST_TEST(Hold(utf16Value) == Hold(GLib::Cvt::a2w(utf8Value)));
-		BOOST_TEST(Hold(utf8Value) == Hold(GLib::Cvt::w2a(utf16Value)));
+		BOOST_TEST(utf8Value == GLib::Cvt::w2a(utf16Value));
 	}
 
 	BOOST_AUTO_TEST_CASE(DeseretSmallLetterYee)
@@ -20,7 +29,7 @@ BOOST_AUTO_TEST_SUITE(ConverterTests)
 		std::wstring expectedWideValue = L"\U00010437";
 
 		BOOST_TEST(Hold(expectedWideValue) == Hold(GLib::Cvt::a2w(utf8Value)));
-		BOOST_TEST(Hold(utf8Value) == Hold(GLib::Cvt::w2a(expectedWideValue)));
+		BOOST_TEST(utf8Value == GLib::Cvt::w2a(expectedWideValue));
 	}
 
 	BOOST_AUTO_TEST_CASE(CjkUnifiedIdeograph24B62)
@@ -29,7 +38,7 @@ BOOST_AUTO_TEST_SUITE(ConverterTests)
 		std::wstring utf16Value = L"\U00024B62";
 
 		BOOST_TEST(Hold(utf16Value) == Hold(GLib::Cvt::a2w(utf8Value)));
-		BOOST_TEST(Hold(utf8Value) == Hold(GLib::Cvt::w2a(utf16Value)));
+		BOOST_TEST(utf8Value == GLib::Cvt::w2a(utf16Value));
 	}
 
 	BOOST_AUTO_TEST_CASE(SharpS)
@@ -37,7 +46,7 @@ BOOST_AUTO_TEST_SUITE(ConverterTests)
 		std::string utf8Value = "\xC3\x9F";
 		std::wstring utf16Value = L"\u00DF";
 		BOOST_TEST(Hold(utf16Value) == Hold(GLib::Cvt::a2w(utf8Value)));
-		BOOST_TEST(Hold(utf8Value) == Hold(GLib::Cvt::w2a(utf16Value)));
+		BOOST_TEST(utf8Value == GLib::Cvt::w2a(utf16Value));
 	}
 
 	BOOST_AUTO_TEST_CASE(CompareSimpleCases)
@@ -80,6 +89,9 @@ BOOST_AUTO_TEST_SUITE(ConverterTests)
 		BOOST_TEST(GLib::Cvt::NoCaseLess<char>()("", "a"));
 		BOOST_TEST(GLib::Cvt::NoCaseLess<char>()("a", "b"));
 		BOOST_TEST(!GLib::Cvt::NoCaseLess<char>()("b", "a"));
+
+		CaseInsensitiveSet<char> set{ "AbCdE", "aBcDe" };
+		BOOST_TEST(1 == set.size());
 	}
 
 	BOOST_AUTO_TEST_CASE(NoCaseLessWChar)
@@ -89,6 +101,36 @@ BOOST_AUTO_TEST_SUITE(ConverterTests)
 		BOOST_TEST(GLib::Cvt::NoCaseLess<wchar_t>()(L"", L"a"));
 		BOOST_TEST(GLib::Cvt::NoCaseLess<wchar_t>()(L"a", L"b"));
 		BOOST_TEST(!GLib::Cvt::NoCaseLess<wchar_t>()(L"b", L"a"));
+
+		CaseInsensitiveSet<wchar_t> set{ L"AbCdE", L"aBcDe" };
+		BOOST_TEST(1 == set.size());
+	}
+
+	BOOST_AUTO_TEST_CASE(NoCaseHashChar)
+	{
+		BOOST_TEST(GLib::Cvt::NoCaseHash<char>()("AbCdE") == GLib::Cvt::NoCaseHash<char>()("aBcDe"));
+		BOOST_TEST(GLib::Cvt::NoCaseEquality<char>()("AbCdE", "aBcDe"));
+
+		UnorderedCaseInsensitiveSet<char> set{ "AbCdE", "aBcDe" };
+		BOOST_TEST(1 == set.size());
+	}
+
+	BOOST_AUTO_TEST_CASE(LowerUpper)
+	{
+		BOOST_TEST("abcde" == GLib::Cvt::ToLower("AbCdE"));
+		BOOST_TEST("ABCDE" == GLib::Cvt::ToUpper("AbCdE"));
+
+		BOOST_TEST("GROSS" == GLib::Cvt::ToUpper("gro\xC3\x9F"));
+		BOOST_TEST("gross" == GLib::Cvt::ToLower("GROSS", "de"));
+
+		BOOST_TEST("perch\xC3\xA9" == GLib::Cvt::ToLower("PERCH\xC3\x89"));
+		BOOST_TEST("PERCH\xC3\x89" == GLib::Cvt::ToUpper("perch\xC3\xA9"));
+	}
+
+	BOOST_AUTO_TEST_CASE(TurkishI)
+	{
+		BOOST_TEST("I" == GLib::Cvt::ToUpper("i"));
+		BOOST_TEST("\xC4\xB0" == GLib::Cvt::ToUpper("i", "tr"));
 	}
 
 BOOST_AUTO_TEST_SUITE_END()

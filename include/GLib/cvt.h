@@ -1,11 +1,14 @@
 #pragma once
 
+#include <GLib/stackorheap.h>
+
 #include <string>
 #include <codecvt>
 #include <locale>
 
 #ifdef __linux__
 #include <unicode/ucol.h>
+#include <unicode/ucasemap.h>
 #elif _MSC_VER
 #include <icu.h>
 #pragma comment (lib, "icuuc.lib")
@@ -64,6 +67,24 @@ namespace GLib
 				// throw if locale is specified but is not used
 				AssertTrue(locale == nullptr || error != U_USING_DEFAULT_WARNING, "ucol_open");
 				return CollatorPtr(col);
+			}
+
+			struct UCaseMapCloser
+			{
+				void operator()(UCaseMap * map) const noexcept
+				{
+					::ucasemap_close(map);
+				}
+			};
+
+			typedef std::unique_ptr<UCaseMap, UCaseMapCloser> UCaseMapPtr;
+
+			inline UCaseMapPtr MakeUCaseMap(const char * locale = nullptr)
+			{
+				UErrorCode error = U_ZERO_ERROR;
+				UCaseMap * ucaseMap = ::ucasemap_open(locale, U_FOLD_CASE_DEFAULT, &error);
+				AssertNoError(error, "ucasemap_open");
+				return UCaseMapPtr(ucaseMap);
 			}
 		}
 
@@ -134,12 +155,46 @@ namespace GLib
 			}
 		}
 
+		inline std::string ToLower(const std::string & value, const char * locale = nullptr)
+		{
+			UErrorCode error = U_ZERO_ERROR;
+			auto map = Detail::MakeUCaseMap(locale); // cache
+
+			const int32_t sourceLength = static_cast<int32_t>(value.size());
+			const int32_t destLength = ::ucasemap_utf8ToLower(map.get(), nullptr, 0, value.c_str(), sourceLength, &error);
+			Detail::AssertTrue(error== U_BUFFER_OVERFLOW_ERROR, "ucasemap_utf8ToLower");
+		
+			error = U_ZERO_ERROR;
+			Util::StackOrHeap<char, 256> s;
+			s.EnsureSize(destLength);
+			::ucasemap_utf8ToLower(map.get(), s.Get(), destLength, value.c_str(), sourceLength, &error);
+			Detail::AssertNoError(error, "ucasemap_utf8ToLower");
+			return { s.Get(), static_cast<size_t>(destLength) };
+		}
+		
+		inline std::string ToUpper(const std::string & value, const char * locale = nullptr)
+		{
+			UErrorCode error = U_ZERO_ERROR;
+			auto map = Detail::MakeUCaseMap(locale); // cache
+
+			const int32_t sourceLength = static_cast<int32_t>(value.size());
+			const int32_t destLength = ::ucasemap_utf8ToUpper(map.get(), nullptr, 0, value.c_str(), sourceLength, &error);
+			Detail::AssertTrue(error== U_BUFFER_OVERFLOW_ERROR, "ucasemap_utf8ToUpper");
+		
+			error = U_ZERO_ERROR;
+			Util::StackOrHeap<char, 256> s;
+			s.EnsureSize(destLength);
+			::ucasemap_utf8ToUpper(map.get(), s.Get(), destLength, value.c_str(), sourceLength, &error);
+			Detail::AssertNoError(error, "ucasemap_utf8ToUpper");
+			return { s.Get(), static_cast<size_t>(destLength) };
+		}
+
 		inline CompareResult CompareNoCase(const std::string & s1, const std::string & s2, const char * locale = nullptr)
 		{
 			return CompareNoCase(s1.c_str(), s1.size(), s2.c_str(), s2.size(), locale);
 		}
 
-		template <typename T, typename StringType = std::basic_string<T>>
+		template <typename CharType, typename StringType = std::basic_string<CharType>>
 		struct NoCaseLess
 		{
 			bool operator()(const StringType & s1, const StringType & s2) const;
@@ -154,7 +209,35 @@ namespace GLib
 		template <>
 		inline bool NoCaseLess<wchar_t>::operator()(const std::wstring & s1, const std::wstring & s2) const
 		{
-			return s1.compare(s2) < 0;
+			return ::_wcsicmp(s1.c_str(), s2.c_str()) < 0;
 		}
+
+		template<class CharType> class NoCaseHash
+		{
+#ifdef _WIN64
+			static constexpr size_t fnvPrime = 1099511628211ULL;
+#else
+			static constexpr size_t fnvPrime = 16777619U;
+#endif
+		public:
+			size_t operator()(const std::basic_string<CharType> & key) const noexcept
+			{
+				size_t val{};
+				for (CharType c : ToLower(key))
+				{
+					val ^= static_cast<size_t>(c);
+					val *= fnvPrime;
+				}
+				return val;
+			}
+		};
+
+		template<class CharType> struct NoCaseEquality
+		{
+			constexpr bool operator()(const std::basic_string<CharType> & left, const std::basic_string<CharType> & right) const
+			{
+				return CompareNoCase(left, right) == CompareResult::Equal;
+			}
+		};
 	}
 }
