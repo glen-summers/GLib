@@ -159,8 +159,10 @@
     <ClCompile Include="ComPtrTests.cpp" />
     <ClCompile Include="ConverterTests.cpp" />
     <ClCompile Include="FormatterTests.cpp" />
+    <ClCompile Include="IcuUtilsTests.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="FlogTests.cpp" />
+    <ClCompile Include="NoCaseTests.cpp" />
     <ClCompile Include="ScopeTests.cpp" />
     <ClCompile Include="SplitTests.cpp" />
     <ClCompile Include="TypeFilterTests.cpp" />

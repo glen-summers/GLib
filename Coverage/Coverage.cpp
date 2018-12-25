@@ -5,6 +5,7 @@
 #include <GLib/XmlPrinter.h>
 
 #include <fstream>
+//#include <iostream>
 
 using GLib::Coverage;
 
@@ -17,6 +18,10 @@ void Coverage::OnCreateProcess(DWORD processId, DWORD threadId, const CREATE_PRO
 	WideStrings wideFiles;
 
 	// todo, handle child processes, currently disabled via DEBUG_ONLY_THIS_PROCESS
+
+	// timing check, 6s with a2w, 1s with no convert, unordered map 1.6s (needs tolower on string for hash)
+	//using Clock = std::chrono::high_resolution_clock;
+	//auto startValue = Clock::now();
 
 	Symbols().Lines([&](PSRCCODEINFOW lineInfo)
 	{
@@ -66,8 +71,13 @@ void Coverage::OnCreateProcess(DWORD processId, DWORD threadId, const CREATE_PRO
 	size_t fileId = 0;
 	for (const auto & f : wideFiles)
 	{
-		files.insert({ f, fileId++});
+		files.insert({ f, fileId++ });
 	}
+
+	// auto now = Clock::now();
+	// std::chrono::duration<double> elapsedSeconds = now - startValue;
+	// auto elapsed = elapsedSeconds.count();
+	// std::cout << "Symbol lines processed in " << elapsed << " s" << std::endl;
 
 	CREATE_THREAD_DEBUG_INFO threadInfo {};
 	threadInfo.hThread = info.hThread;
@@ -201,7 +211,7 @@ std::string Coverage::CreateReport(unsigned int processId)
 
 		for (const auto & fileLineIt : address.FileLines())
 		{
-			const std::set<unsigned> & lines = fileLineIt.second;
+			const auto & lines = fileLineIt.second;
 
 			size_t lineCount = lines.size();
 			if (visited)
@@ -267,7 +277,7 @@ std::string Coverage::CreateReport(unsigned int processId)
 		{
 			// <range source_id = "23" covered = "yes" start_line = "27" start_column = "0" end_line = "27" end_column = "0" / >
 			const std::wstring & fileName = fileLines.first;
-			const std::set<unsigned> & lines = fileLines.second;  // sort lines
+			const auto & lines = fileLines.second;  // sort lines
 
 			std::vector<unsigned> sortedLines{ lines.begin(), lines.end() };
 			std::sort(sortedLines.begin(), sortedLines.end());

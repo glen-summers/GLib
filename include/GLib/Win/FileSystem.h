@@ -3,9 +3,11 @@
 #include "GLib/Win/ErrorCheck.h"
 #include "GLib/Win/Handle.h"
 #include "GLib/stackorheap.h"
+#include "GLib/IcuUtils.h"
 
 #include <vector>
 #include <map>
+
 
 namespace GLib
 {
@@ -74,7 +76,7 @@ namespace GLib
 					const auto& logicalName = drive.second;
 
 					size_t compareSize = logicalName.size();
-					if (Cvt::CompareNoCase(path.c_str(), compareSize, logicalName.c_str(), compareSize) == Cvt::CompareResult::Equal)
+					if (IcuUtils::CompareNoCase(path.c_str(), compareSize, logicalName.c_str(), compareSize) == IcuUtils::CompareResult::Equal)
 					{
 						return deviceName + path.substr(compareSize);
 					}

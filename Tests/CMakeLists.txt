@@ -22,11 +22,13 @@ include_directories(${BOOST_DIR})
 link_directories(${BOOST_DIR}/stage/lib)
 
 set(SOURCES Main.cpp
+	CheckedCastTests.cpp
+	ConverterTests.cpp
 	FlogTests.cpp
 	FormatterTests.cpp
-	ConverterTests.cpp
+	IcuUtilsTests.cpp
+	NoCaseTests.cpp
 	ScopeTests.cpp
-	CheckedCastTests.cpp
 	SplitTests.cpp
 	TypeFilterTests.cpp
 )

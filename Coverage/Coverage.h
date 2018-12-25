@@ -2,15 +2,26 @@
 
 #include <GLib/Win/Debugger.h>
 
+#include "GLib/NoCase.h"
+
 #include <map>
 #include <set>
 #include <iterator>
 #include <regex>
 
+
 namespace GLib
 {
-	template <typename T, typename Value> using CaseInsensitiveMap = std::map<std::basic_string<T>, Value, Cvt::NoCaseLess<T>>;
-	template <typename T> using CaseInsensitiveSet = std::set<std::basic_string<T>, Cvt::NoCaseLess<T>>;
+	template<> struct NoCaseLess<wchar_t>
+	{
+		bool operator()(const std::wstring & s1, const std::wstring &s2) const
+		{
+			return _wcsicmp(s1.c_str(), s2.c_str()) < 0;
+		}
+	};
+
+	template <typename T, typename Value> using CaseInsensitiveMap = std::map<std::basic_string<T>, Value, NoCaseLess<T>>;
+	template <typename T> using CaseInsensitiveSet = std::set<std::basic_string<T>, NoCaseLess<T>>;
 
 	typedef CaseInsensitiveSet<wchar_t> WideStrings;
 	typedef CaseInsensitiveSet<char> Strings;
