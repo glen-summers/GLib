@@ -41,12 +41,15 @@ void Coverage::AddLine(const std::wstring & fileName, unsigned lineNumber, const
 		wideFiles.insert(fileName);
 	}
 
-	const auto oldByte = process.Read<unsigned char>(address);
-
 	auto it = addresses.find(address);
 	if (it == addresses.end())
 	{
+		const auto oldByte = process.Read<unsigned char>(address);
 		it = addresses.insert({ address, oldByte }).first;
+	}
+	else
+	{
+		throw std::runtime_error("Can a address be used by two separate lines of code? optimiser?");
 	}
 	it->second.AddFileLine(fileName, lineNumber);
 
@@ -162,8 +165,6 @@ std::string Coverage::CreateReport(unsigned int processId)
 {
 	const GLib::Win::Symbols::SymProcess & process = Symbols().GetProcess(processId);
 
-	LinesCoverage allCoverage;
-
 	std::map<ULONG, Function> indexToFunction;
 
 	for (const auto & a : addresses)
@@ -174,31 +175,40 @@ std::string Coverage::CreateReport(unsigned int processId)
 		auto it = indexToFunction.find(symbol.Index);
 		if (it == indexToFunction.end())
 		{
-			std::string functionName = symbol.name;
 			GLib::Win::Symbols::Symbol parent;
-			std::string className;
-			if (process.TryGetClassParent(symbol, parent))
-			{
-				className = parent.name;
-			}
-
-			std::string namespaceName;
+			process.TryGetClassParent(symbol, parent);
 
 			// ok need to merge multiple hits from templates, but not overloads?
 			// store namespaceName+className+functionName+isTemplate
 			 // if not a template then generate additional inserts?
-			it = indexToFunction.insert({ symbol.Index, { functionName, className } }).first;
+			it = indexToFunction.insert({ symbol.Index, { std::move(symbol.name), std::move(parent.name) } }).first;
 		}
 
-		it->second.Accumulate(address, allCoverage);
+		it->second.Accumulate(address);
 	}
 
-	// merge templates here. then maybe change above loop to do it
-	// std::set<std::string, Function> nameToFunction;
-	// for (std::pair<ULONG, Function> p : indexToFunction)
-	// {
-	// 	//if (nameToFunction.find(p.second.FullName())) {}
-	// }
+	// merge templates here. then maybe change above loop to do it?
+	std::map<std::string, Function> nameToFunction;
+	for (const auto & p : indexToFunction)
+	{
+		const auto & key = p.second.FullName();
+		auto it = nameToFunction.find(key);
+		if (it == nameToFunction.end())
+		{
+			nameToFunction.insert({ key, p.second });
+		}
+		else
+		{
+			it->second.Merge(p.second);
+		}
+	}
+
+	size_t allLines{}, coveredLines{};
+	for (const auto & x : nameToFunction)
+	{
+		allLines += x.second.AllLines();
+		coveredLines += x.second.CoveredLines();
+	}
 
 	size_t fileId = 0;
 	std::map<std::wstring, size_t> files;
@@ -224,12 +234,12 @@ std::string Coverage::CreateReport(unsigned int processId)
 	p.PushAttribute("blocks_covered", "0");
 	p.PushAttribute("blocks_not_covered", "0");
 
-	p.PushAttribute("lines_covered", allCoverage.linesCovered);
-	p.PushAttribute("lines_partially_covered", allCoverage.linesCovered);
-	p.PushAttribute("lines_not_covered", allCoverage.linesNotCovered);
+	p.PushAttribute("lines_covered", coveredLines);
+	p.PushAttribute("lines_partially_covered", coveredLines); //?
+	p.PushAttribute("lines_not_covered", allLines);
 
 	p.OpenElement("functions");
-	for (const auto & idFunctionPair : indexToFunction) // sort
+	for (const auto & idFunctionPair : nameToFunction)
 	{
 		const Function & function = idFunctionPair.second;
 		p.OpenElement("function");
@@ -245,25 +255,31 @@ std::string Coverage::CreateReport(unsigned int processId)
 		p.PushAttribute("blocks_covered", "0");
 		p.PushAttribute("blocks_not_covered", "0");
 
-		p.PushAttribute("lines_covered", function.Coverage().linesCovered);
+		p.PushAttribute("lines_covered", function.CoveredLines());
 		// todo p.PushAttribute("lines_partially_covered", "0");
-		p.PushAttribute("lines_not_covered", function.Coverage().linesNotCovered);
+		p.PushAttribute("lines_not_covered", function.AllLines() - function.CoveredLines());
 
 		p.OpenElement("ranges");
-		for (const auto & fileLines : function.FileLines())
+
+		const FileLines & functionCoveredLines = function.VisitedFileLines();
+		for (const auto & allFileLines : function.AllFileLines())
 		{
 			// <range source_id = "23" covered = "yes" start_line = "27" start_column = "0" end_line = "27" end_column = "0" / >
-			const std::wstring & fileName = fileLines.first;
-			const auto & lines = fileLines.second;  // sort lines
+			const std::wstring & fileName = allFileLines.first;
+			const auto & lines = allFileLines.second;
+
+			const auto & fclIt = functionCoveredLines.find(fileName);
 
 			std::vector<unsigned> sortedLines{ lines.begin(), lines.end() };
 			std::sort(sortedLines.begin(), sortedLines.end());
 
 			for (unsigned line : sortedLines)
 			{
+				bool covered = fclIt != functionCoveredLines.end() && fclIt->second.find(line) != fclIt->second.end();
+
 				p.OpenElement("range");
 				p.PushAttribute("source_id", files[fileName]);
-				p.PushAttribute("covered", "yes");
+				p.PushAttribute("covered", covered ? "yes" : "no");
 				p.PushAttribute("start_line", line);
 				// todo? p.PushAttribute("start_column", "0");
 				p.PushAttribute("end_line", line);

@@ -3,11 +3,7 @@
 #include "Types.h"
 
 #include <regex>
-
-struct LinesCoverage
-{
-	size_t linesCovered{}, linesNotCovered{};
-};
+#include <utility>
 
 class Function
 {
@@ -19,13 +15,14 @@ class Function
 	std::string functionName;
 	std::string className;
 	std::string nameSpace;
-	LinesCoverage coverage;
-	FileLines fileLines;
+
+	FileLines visitedFileLines;
+	FileLines allFileLines;
 
 public:
-	Function(const std::string & name, const std::string & typeName)
-		: functionName(name)
-		, className(typeName)
+	Function(std::string name, std::string typeName)
+		: functionName(std::move(name))
+		, className(std::move(typeName))
 	{
 		std::smatch m;
 		if (!className.empty())
@@ -76,14 +73,14 @@ public:
 	std::string ClassName() const { return className; }
 	std::string FunctionName() const { return functionName; }
 
-	const LinesCoverage & Coverage() const
+	const FileLines & VisitedFileLines() const
 	{
-		return coverage;
+		return visitedFileLines;
 	}
 
-	const FileLines& FileLines() const
+	const FileLines & AllFileLines() const
 	{
-		return fileLines;
+		return allFileLines;
 	}
 
 	std::string FullName() const
@@ -93,27 +90,76 @@ public:
 			: nameSpace + "::" + className + "::" + functionName;
 	}
 
-	void Accumulate(const Address & address, LinesCoverage & allCoverage)
+	// called when another address seen for the same function symbolId
+	void Accumulate(const Address & address)
 	{
 		for (const auto & fileLineIt : address.FileLines())
 		{
 			const auto & lines = fileLineIt.second;
 
-			const size_t lineCount = lines.size();
 			if (address.Visited())
 			{
-				allCoverage.linesCovered += lineCount;
-				coverage.linesCovered += lineCount;
-
 				auto copy = lines;
-				fileLines[fileLineIt.first].merge(copy);
+				visitedFileLines[fileLineIt.first].merge(copy);
 			}
-			else
+			auto copy = lines;
+			allFileLines[fileLineIt.first].merge(copy);
+		}
+	}
+
+	// called for e.g. class templates
+	void Merge(const Function & other)
+	{
+		// find any extra lines, so need set difference of fileLines
+		for (auto & x :other.visitedFileLines)
+		{
+			auto it = visitedFileLines.find(x.first);
+			if (it != visitedFileLines.end()) // file already seen, merge lines
 			{
-				allCoverage.linesNotCovered += lineCount;
-				coverage.linesNotCovered += lineCount;
+				auto copy = x.second;
+				it->second.merge(copy);
+			}
+			else // file not seen
+			{
+				auto copy = x.second;
+				visitedFileLines.insert({ x.first, copy});
 			}
 		}
+
+		for (auto & x :other.allFileLines)
+		{
+			auto it = allFileLines.find(x.first);
+			if (it != allFileLines.end()) // file already seen, merge lines
+			{
+				auto copy = x.second;
+				it->second.merge(copy);
+			}
+			else // file not seen
+			{
+				auto copy = x.second;
+				allFileLines.insert({ x.first, copy });
+			}
+		}
+	}
+
+	size_t CoveredLines() const
+	{
+		size_t total{};
+		for (const auto & x : visitedFileLines)
+		{
+			total += x.second.size();
+		}
+		return total;
+	}
+
+	size_t AllLines() const
+	{
+		size_t total{};
+		for (const auto & x : allFileLines)
+		{
+			total += x.second.size();
+		}
+		return total;
 	}
 
 private:
