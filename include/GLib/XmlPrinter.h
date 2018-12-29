@@ -74,6 +74,14 @@ public:
 		s << '"';
 	}
 
+	void PushAttribute(const char * name, const std::string & value)
+	{
+		AssertTrue(elementOpen, "Element not open");
+		s << ' ' << name << R"(=")";
+		Text(value.c_str());
+		s << '"';
+	}
+
 	void PushAttribute(const char * name, int64_t value)
 	{
 		PushAttribute(name, std::to_string(value).c_str());

@@ -143,8 +143,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Address.h" />
     <ClInclude Include="Coverage.h" />
+    <ClInclude Include="Function.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="Types.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Coverage.cpp" />

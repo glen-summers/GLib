@@ -18,7 +18,7 @@ int main(int argc, char *argv[])
 		const auto executable = argv[1];
 		const auto report = argv[2];
 
-		GLib::Strings includes, excludes;
+		Strings includes, excludes;
 		for (int i = 3; i < argc; ++i)
 		{
 			if (strcmp(argv[i], "-i") == 0)
@@ -43,7 +43,7 @@ int main(int argc, char *argv[])
 			}
 		}
 
-		GLib::Coverage dbg(executable, report, includes, excludes);
+		Coverage dbg(executable, report, includes, excludes);
 		for(;dbg.ProcessEvents(1000);) // just use INFINITE?
 		{}
 		std::cout << "Exited: Process exited with code: " << dbg.ExitCode() << std::endl;
