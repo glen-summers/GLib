@@ -143,7 +143,7 @@ namespace GLib
 				std::string const name = FileSystem::NormalisePath(logicalName, driveMap);
 
 				// when using DEBUG_ONLY_THIS_PROCESS only get called here for main executable
-				const Symbols::SymProcess & process = symbols.AddProcess(processId, info.hProcess, (uint64_t)info.lpBaseOfImage, info.hFile, name);
+				const Symbols::SymProcess & process = symbols.AddProcess(processId, info.hProcess, reinterpret_cast<uint64_t>(info.lpBaseOfImage), info.hFile, name);
 
 				IMAGE_DOS_HEADER header {};
 				process.ReadMemory(0, &header, sizeof(header));
@@ -235,7 +235,6 @@ namespace GLib
 				UNREFERENCED_PARAMETER(processId);
 				UNREFERENCED_PARAMETER(threadId);
 				UNREFERENCED_PARAMETER(info);
-				Debug::Stream() << "GDB Exception: " << std::hex << info.ExceptionRecord.ExceptionCode << std::dec << std::endl;
 				return DBG_CONTINUE;
 			}
 
@@ -245,7 +244,7 @@ namespace GLib
 				UNREFERENCED_PARAMETER(threadId);
 
 				auto buffer = std::make_unique<unsigned char[]>(info.nDebugStringLength);
-				mainProcess.ReadMemory((uint64_t)info.lpDebugStringData, buffer.get(), info.nDebugStringLength);
+				mainProcess.ReadMemory(reinterpret_cast<uint64_t>(info.lpDebugStringData), buffer.get(), info.nDebugStringLength);
 
 				std::string message;
 				if (info.fUnicode)

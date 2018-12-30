@@ -21,7 +21,7 @@ BOOST_AUTO_TEST_CASE(NoCaseLessChar)
 	BOOST_TEST(!GLib::NoCaseLess<char>()("b", "a"));
 
 	CaseInsensitiveSet<char> set{ "AbCdE", "aBcDe" };
-	BOOST_TEST(1 == set.size());
+	BOOST_TEST(size_t{1} == set.size());
 }
 
 BOOST_AUTO_TEST_CASE(NoCaseHashChar)
@@ -30,7 +30,7 @@ BOOST_AUTO_TEST_CASE(NoCaseHashChar)
 	BOOST_TEST(GLib::NoCaseEquality<char>()("AbCdE", "aBcDe"));
 
 	UnorderedCaseInsensitiveSet<char> set{ "AbCdE", "aBcDe" };
-	BOOST_TEST(1 == set.size());
+	BOOST_TEST(size_t{1} == set.size());
 }
 
 BOOST_AUTO_TEST_SUITE_END()

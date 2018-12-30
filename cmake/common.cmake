@@ -14,7 +14,7 @@ if(WIN32)
 	string(REPLACE "/W3" "/W4 /WX" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 	#message("warnings CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS}")
 else(WIN32)
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -pedantic -Wextra")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -pedantic -Wextra -Werror")
 endif(WIN32)
 
 function(AddStdLinkage target)

@@ -2,6 +2,7 @@
 
 #include <string>
 #include <codecvt>
+#include <locale>
 
 namespace GLib
 {

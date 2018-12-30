@@ -63,6 +63,7 @@ public:
 					functionName.erase(0, len);
 				}
 				RemoveTemplateDefinition(functionName);
+				className = "<Functions>"; // avoid blank line in ReportGenerator
 			}
 		}
 	}

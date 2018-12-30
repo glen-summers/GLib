@@ -27,6 +27,8 @@
 		<CoverageExecutable>$(OutputPath)\Coverage.exe</CoverageExecutable>
 		<Downloads>$(Out)\downloads</Downloads>
 		<ReportGenerator>$(Downloads)\ReportGenerator.$(ReportGeneratorVersion)\tools\net47\ReportGenerator.exe</ReportGenerator>
+		<CoverageInclude>$(Root)\</CoverageInclude>
+		<CoverageExclude>$(Root)\Tests\</CoverageExclude>
 	</PropertyGroup>
 
 	<Target Name="MakeTempDir">
@@ -134,13 +136,14 @@
 	</Target>
 
 	<Target Name="Coverage" DependsOnTargets="Compile;DownloadTools">
-		<PropertyGroup>
-			<CoverageInclude>$(Root)\</CoverageInclude>
-			<CoverageExclude>$(Root)\tests\</CoverageExclude>
-		</PropertyGroup>
-
 		<MSBuild Projects="$(MSBuildProjectFile)" Targets="CompileTests" Properties="Configuration=Debug"/>
 		<Exec Command="$(CoverageExecutable) $(DebugTestExecutable) $(Out)\coverage.xml -i $(CoverageInclude) -x $(CoverageExclude)"/>
+		<Exec Command="$(ReportGenerator) -reports:$(Out)\coverage.xml -targetdir:$(Out)\CoverageReport -verbosity:Error -Reporttypes:HTML"/>
+		<Exec Command="start $(Out)\CoverageReport\index.htm"/>
+	</Target>
+
+	<Target Name="CoverageRelease" DependsOnTargets="Compile;DownloadTools">
+		<Exec Command="$(CoverageExecutable) $(TestExecutable) $(Out)\coverage.xml -i $(CoverageInclude) -x $(CoverageExclude)"/>
 		<Exec Command="$(ReportGenerator) -reports:$(Out)\coverage.xml -targetdir:$(Out)\CoverageReport -verbosity:Error -Reporttypes:HTML"/>
 		<Exec Command="start $(Out)\CoverageReport\index.htm"/>
 	</Target>

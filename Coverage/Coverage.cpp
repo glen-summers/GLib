@@ -47,10 +47,6 @@ void Coverage::AddLine(const std::wstring & fileName, unsigned lineNumber, const
 		const auto oldByte = process.Read<unsigned char>(address);
 		it = addresses.insert({ address, oldByte }).first;
 	}
-	else
-	{
-		throw std::runtime_error("Can a address be used by two separate lines of code? optimiser?");
-	}
 	it->second.AddFileLine(fileName, lineNumber);
 
 	process.Write(address, debugBreakByte);
@@ -68,7 +64,7 @@ void Coverage::OnCreateProcess(DWORD processId, DWORD threadId, const CREATE_PRO
 	//using Clock = std::chrono::high_resolution_clock;
 	//auto startValue = Clock::now();
 
-	Symbols().Lines([&](PSRCCODEINFOW lineInfo)
+	Symbols().Lines([&](PSRCCODEINFOW lineInfo) noexcept
 	{
 		// filter out unknown source lines, looks like these cause the out of memory exceptions in ReportGenerator
 		if (lineInfo->LineNumber == 0xf00f00 || lineInfo->LineNumber == 0xfeefee)
@@ -117,12 +113,9 @@ void Coverage::OnExitThread(DWORD processId, DWORD threadId, const EXIT_THREAD_D
 
 DWORD Coverage::OnException(DWORD processId, DWORD threadId, const EXCEPTION_DEBUG_INFO& info)
 {
-	const bool isBreakpoint = info.ExceptionRecord.ExceptionCode == EXCEPTION_BREAKPOINT;
+	Debugger::OnException(processId, threadId, info);
 
-	if (!isBreakpoint)
-	{
-		Debugger::OnException(processId, threadId, info); // for debug log
-	}
+	const bool isBreakpoint = info.ExceptionRecord.ExceptionCode == EXCEPTION_BREAKPOINT;
 
 	if (info.dwFirstChance!=0 && isBreakpoint)
 	{
