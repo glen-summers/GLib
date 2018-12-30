@@ -23,7 +23,7 @@ using CaseInsensitiveSet = std::set<std::basic_string<T>, GLib::NoCaseLess<T>>;
 typedef CaseInsensitiveSet<wchar_t> WideStrings;
 typedef CaseInsensitiveSet<char> Strings;
 
-typedef std::set<unsigned int> Lines;
+typedef std::map<unsigned int, bool> Lines;
 typedef CaseInsensitiveMap<wchar_t, Lines> FileLines;
 class Address;
 typedef std::map<uint64_t, Address> Addresses;

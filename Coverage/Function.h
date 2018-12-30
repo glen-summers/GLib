@@ -16,8 +16,7 @@ class Function
 	std::string className;
 	std::string nameSpace;
 
-	FileLines visitedFileLines;
-	FileLines allFileLines;
+	FileLines fileLines;
 
 public:
 	Function(std::string name, std::string typeName)
@@ -73,14 +72,9 @@ public:
 	std::string ClassName() const { return className; }
 	std::string FunctionName() const { return functionName; }
 
-	const FileLines & VisitedFileLines() const
+	const FileLines & FileLines() const
 	{
-		return visitedFileLines;
-	}
-
-	const FileLines & AllFileLines() const
-	{
-		return allFileLines;
+		return fileLines;
 	}
 
 	std::string FullName() const
@@ -93,51 +87,30 @@ public:
 	// called when another address seen for the same function symbolId
 	void Accumulate(const Address & address)
 	{
+		bool const visited = address.Visited();
 		for (const auto & fileLineIt : address.FileLines())
 		{
-			const auto & lines = fileLineIt.second;
+			const std::map<unsigned int, bool> & lines = fileLineIt.second;
+			std::map<unsigned, bool> & pairs = fileLines[fileLineIt.first];
 
-			if (address.Visited())
+			for (const auto & lineIt : lines) // map merge method?
 			{
-				auto copy = lines;
-				visitedFileLines[fileLineIt.first].merge(copy);
+				pairs[lineIt.first] |= visited;
 			}
-			auto copy = lines;
-			allFileLines[fileLineIt.first].merge(copy);
 		}
 	}
 
-	// called for e.g. class templates
+	// called for e.g. class templates, merge with above
 	void Merge(const Function & other)
 	{
-		// find any extra lines, so need set difference of fileLines
-		for (auto & x :other.visitedFileLines)
+		for (const auto & fileLineIt : other.FileLines())
 		{
-			auto it = visitedFileLines.find(x.first);
-			if (it != visitedFileLines.end()) // file already seen, merge lines
-			{
-				auto copy = x.second;
-				it->second.merge(copy);
-			}
-			else // file not seen
-			{
-				auto copy = x.second;
-				visitedFileLines.insert({ x.first, copy});
-			}
-		}
+			const std::map<unsigned int, bool> & lines = fileLineIt.second;
+			std::map<unsigned, bool> & pairs = fileLines[fileLineIt.first];
 
-		for (auto & x :other.allFileLines)
-		{
-			auto it = allFileLines.find(x.first);
-			if (it != allFileLines.end()) // file already seen, merge lines
+			for (const auto & lineIt : lines) // map merge method?
 			{
-				auto copy = x.second;
-				it->second.merge(copy);
-			}
-			else // file not seen
-			{
-				auto copy = x.second;
-				allFileLines.insert({ x.first, copy });
+				pairs[lineIt.first] |= lineIt.second;
 			}
 		}
 	}
@@ -145,9 +118,16 @@ public:
 	size_t CoveredLines() const
 	{
 		size_t total{};
-		for (const auto & x : visitedFileLines)
+		for (const auto & x : fileLines)
 		{
-			total += x.second.size();
+			for (const auto & y : x.second)
+			{
+				// improve? keep tally?
+				if (y.second)
+				{
+					++total;
+				}
+			}
 		}
 		return total;
 	}
@@ -155,7 +135,7 @@ public:
 	size_t AllLines() const
 	{
 		size_t total{};
-		for (const auto & x : allFileLines)
+		for (const auto & x : fileLines)
 		{
 			total += x.second.size();
 		}

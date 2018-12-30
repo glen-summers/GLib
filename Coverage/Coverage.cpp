@@ -236,7 +236,7 @@ std::string Coverage::CreateReport(unsigned int processId)
 
 	p.PushAttribute("lines_covered", coveredLines);
 	p.PushAttribute("lines_partially_covered", coveredLines); //?
-	p.PushAttribute("lines_not_covered", allLines);
+	p.PushAttribute("lines_not_covered", allLines - coveredLines);
 
 	p.OpenElement("functions");
 	for (const auto & idFunctionPair : nameToFunction)
@@ -261,28 +261,23 @@ std::string Coverage::CreateReport(unsigned int processId)
 
 		p.OpenElement("ranges");
 
-		const FileLines & functionCoveredLines = function.VisitedFileLines();
-		for (const auto & allFileLines : function.AllFileLines())
+		for (const auto & allFileLines : function.FileLines())
 		{
 			// <range source_id = "23" covered = "yes" start_line = "27" start_column = "0" end_line = "27" end_column = "0" / >
 			const std::wstring & fileName = allFileLines.first;
 			const auto & lines = allFileLines.second;
 
-			const auto & fclIt = functionCoveredLines.find(fileName);
-
-			std::vector<unsigned> sortedLines{ lines.begin(), lines.end() };
-			std::sort(sortedLines.begin(), sortedLines.end());
-
-			for (unsigned line : sortedLines)
+			for (const auto & line : lines)
 			{
-				bool covered = fclIt != functionCoveredLines.end() && fclIt->second.find(line) != fclIt->second.end();
+				unsigned lineNumber = line.first;
+				bool covered = line.second;
 
 				p.OpenElement("range");
 				p.PushAttribute("source_id", files[fileName]);
 				p.PushAttribute("covered", covered ? "yes" : "no");
-				p.PushAttribute("start_line", line);
+				p.PushAttribute("start_line", lineNumber);
 				// todo? p.PushAttribute("start_column", "0");
-				p.PushAttribute("end_line", line);
+				p.PushAttribute("end_line", lineNumber);
 				// todo ?p.PushAttribute("end_column", "0");
 				p.CloseElement(); // range
 			}

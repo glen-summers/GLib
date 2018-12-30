@@ -23,7 +23,7 @@ public:
 
 	void AddFileLine(const std::wstring & fileName, unsigned int lineNumber)
 	{
-		fileLines[fileName].insert(lineNumber);
+		fileLines[fileName].insert({ lineNumber, false });
 	}
 };
 
