@@ -9,19 +9,16 @@ class Function
 {
 	inline static std::regex const namespaceRegex{ R"(^(?:[A-Za-z_][A-Za-z_0-9]*::)*)" }; // +some extra unicode chars?
 
-	inline static size_t counter {};
-
-	size_t id = counter++;
-	std::string functionName;
-	std::string className;
 	std::string nameSpace;
+	std::string className;
+	std::string functionName;
 
-	FileLines fileLines;
+	FileLines mutable fileLines;
 
 public:
 	Function(std::string name, std::string typeName)
-		: functionName(std::move(name))
-		, className(std::move(typeName))
+		: className(std::move(typeName))
+		, functionName(std::move(name))
 	{
 		std::smatch m;
 		if (!className.empty())
@@ -68,25 +65,17 @@ public:
 		}
 	}
 
-	size_t Id() const { return id; }
-	std::string Namespace() const { return nameSpace; }
-	std::string ClassName() const { return className; }
-	std::string FunctionName() const { return functionName; }
+	const std::string & Namespace() const { return nameSpace; }
+	const std::string & ClassName() const { return className; }
+	const std::string & FunctionName() const { return functionName; }
 
 	const FileLines & FileLines() const
 	{
 		return fileLines;
 	}
 
-	std::string FullName() const
-	{
-		return className.empty()
-			? nameSpace + "::" + functionName
-			: nameSpace + "::" + className + "::" + functionName;
-	}
-
 	// called when another address seen for the same function symbolId
-	void Accumulate(const Address & address)
+	void Accumulate(const Address & address) const
 	{
 		bool const visited = address.Visited();
 		for (const auto & fileLineIt : address.FileLines())
@@ -102,7 +91,7 @@ public:
 	}
 
 	// called for e.g. class templates, merge with above
-	void Merge(const Function & other)
+	void Merge(const Function & other) const
 	{
 		for (const auto & fileLineIt : other.FileLines())
 		{
@@ -158,3 +147,9 @@ private:
 		}
 	}
 };
+
+inline bool operator < (const Function & f1, const Function & f2)
+{
+	return std::tie(f1.Namespace(), f1.ClassName(), f1.FunctionName()) < std::tie(f2.Namespace(), f2.ClassName(), f2.FunctionName());
+}
+

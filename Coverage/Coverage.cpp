@@ -181,26 +181,26 @@ std::string Coverage::CreateReport(unsigned int processId)
 	}
 
 	// merge templates here. then maybe change above loop to do it?
-	std::map<std::string, Function> nameToFunction;
+	std::set<Function> nameToFunction;
 	for (const auto & p : indexToFunction)
 	{
-		const auto & key = p.second.FullName();
-		auto it = nameToFunction.find(key);
+		const Function & function = p.second;
+		const auto & it = nameToFunction.find(function);
 		if (it == nameToFunction.end())
 		{
-			nameToFunction.insert({ key, p.second });
+			nameToFunction.insert(function);
 		}
 		else
 		{
-			it->second.Merge(p.second);
+			it->Merge(p.second);
 		}
 	}
 
 	size_t allLines{}, coveredLines{};
 	for (const auto & x : nameToFunction)
 	{
-		allLines += x.second.AllLines();
-		coveredLines += x.second.CoveredLines();
+		allLines += x.AllLines();
+		coveredLines += x.CoveredLines();
 	}
 
 	size_t fileId = 0;
@@ -232,12 +232,13 @@ std::string Coverage::CreateReport(unsigned int processId)
 	p.PushAttribute("lines_not_covered", allLines - coveredLines);
 
 	p.OpenElement("functions");
+	size_t functionId{};
 	for (const auto & idFunctionPair : nameToFunction)
 	{
-		const Function & function = idFunctionPair.second;
+		const Function & function = idFunctionPair;
 		p.OpenElement("function");
 		// id="3048656" name="TestCollision" namespace="Sat" type_name="" block_coverage="0.00" line_coverage="0.00" blocks_covered="0" blocks_not_covered="30" lines_covered="0" lines_partially_covered="0" lines_not_covered="20">
-		p.PushAttribute("id", function.Id());
+		p.PushAttribute("id", functionId++);
 		p.PushAttribute("name", function.FunctionName());
 		p.PushAttribute("namespace", function.Namespace());
 		p.PushAttribute("type_name", function.ClassName());
