@@ -148,9 +148,6 @@ DWORD Coverage::OnException(DWORD processId, DWORD threadId, const EXCEPTION_DEB
 		return DBG_CONTINUE;
 	}
 
-	GLib::Win::Debug::Stream() << "Exception: FirstChance: " << info.dwFirstChance << " " <<
-		std::hex << info.ExceptionRecord.ExceptionCode << std::dec << std::endl;
-
 	return DBG_EXCEPTION_NOT_HANDLED;
 }
 
@@ -173,7 +170,7 @@ std::string Coverage::CreateReport(unsigned int processId)
 
 			// ok need to merge multiple hits from templates, but not overloads?
 			// store namespaceName+className+functionName+isTemplate
-			 // if not a template then generate additional inserts?
+			 // if not a template then generate additional inserts? template specialisations?
 			it = indexToFunction.insert({ symbol.Index, { std::move(symbol.name), std::move(parent.name) } }).first;
 		}
 

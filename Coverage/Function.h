@@ -20,6 +20,9 @@ public:
 		: className(std::move(typeName))
 		, functionName(std::move(name))
 	{
+		Delaminate(className);
+		Delaminate(functionName);
+
 		std::smatch m;
 		if (!className.empty())
 		{
@@ -39,13 +42,13 @@ public:
 					{
 						functionName.erase(0, len);
 					}
-					if (functionName.compare(0, className.size(), className) == 0)
-					{
-						functionName.erase(0, className.size() + 2);
-					}
-					RemoveTemplateDefinition(className);
-					RemoveTemplateDefinition(functionName);
 				}
+				if (functionName.compare(0, className.size(), className) == 0)
+				{
+					functionName.erase(0, className.size() + 2);
+				}
+				RemoveTemplateDefinition(className);
+				RemoveTemplateDefinition(functionName);
 			}
 		}
 		else
@@ -133,10 +136,22 @@ public:
 	}
 
 private:
+	static void Delaminate(std::string & name)
+	{
+		for (size_t pos = name.find("<lambda"); pos != std::string::npos; pos = name.find("<lambda", pos))
+		{
+			name.erase(pos, 1);
+			pos = name.find('>', pos);
+			if (pos != std::string::npos)
+			{
+				name.erase(pos, 1);
+			}
+		}
+	}
+
 	static void RemoveTemplateDefinition(std::string & name)
 	{
 		const auto bra = name.find('<');
-		// remove Class[<...>],  ignore functionName like "<lambda_94309dc8705386c058f3254e10a42590>"
 		if (bra != 0 && bra != std::string::npos)
 		{
 			const auto ket = name.rfind('>');
