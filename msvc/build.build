@@ -112,7 +112,7 @@
 
 	<Target Name="Wsl">
 		<!-- needs sysnative, msbuild running as 32bit?-->
-		<Exec Command="%windir%\sysnative\wsl.exe ./go.sh clone" WorkingDirectory="$(Root)"/>
+		<Exec Command="%windir%\sysnative\wsl.exe ./go.sh" WorkingDirectory="$(Root)"/>
 	</Target>
 
 	<Target Name="All" DependsOnTargets="Build;CMake;Wsl"/>

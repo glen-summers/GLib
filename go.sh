@@ -6,33 +6,31 @@ error_exit() {
 }
 
 Build() {
+	CMakeInstallDir="${RootDir}/out/cmake/install/${Configuration}"
+	CMakeBuildDir="${RootDir}/out/cmake/build/${Configuration}"
+
 	clear
 	mkdir -p "${CMakeBuildDir}" || error_exit "mkdir ${CMakeBuildDir} failed"
-	(cd "${CMakeBuildDir}" && cmake -DCMAKE_INSTALL_PREFIX:PATH="${CMakeInstallDir}" "${RootDir}" || error_exit "cmake failed")
-	cmake --build "${CMakeBuildDir}" || error_exit "cmake build failed"
-	CTEST_OUTPUT_ON_FAILURE=1 cmake --build "${CMakeBuildDir}" --target test || error_exit "cmake build failed"
+	(cd "${CMakeBuildDir}" && cmake -DCMAKE_INSTALL_PREFIX:PATH="${CMakeInstallDir}" -DCMAKE_BUILD_TYPE=${Configuration} "${RootDir}" || error_exit "cmake failed")
+	cmake --build "${CMakeBuildDir}" --config $(Configuration) || error_exit "cmake build failed"
+	CTEST_OUTPUT_ON_FAILURE=1 cmake --build "${CMakeBuildDir}" --config $(Configuration) --target test || error_exit "cmake build failed"
 	cmake --build "${CMakeBuildDir}" --target install || error_exit "cmake install failed"
-	cat ${RootDir}/out/cmake/build/Testing/Temporary/LastTest.log || error_exit "test log missing"
+	cat ${CMakeBuildDir}/Testing/Temporary/LastTest.log || error_exit "test log missing"
 }
 
 Clean() {
 	rm -f -r -v "${RootDir}/out" || error_exit "rm ${RootDir}/out failed"
 }
 
-Clone() {
-	local CloneDir="${RootDir}/out/GLibClone"
-	rm -f -r "${CloneDir}" || error_exit "rm ${CloneDir} failed"
-	git clone "${RootDir}" "${CloneDir}" || error_exit "git clone failed"
-	"${CloneDir}/go.sh" || error_exit "cloned go.sh failed"
-	rm -f -r "${CloneDir}" || error_exit "rm ${CloneDir} failed"
-}
-
 RootDir=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
-CMakeInstallDir="${RootDir}/out/cmake/install"
-CMakeBuildDir="${RootDir}/out/cmake/build"
+Configuration=Release
 
 echo "go $1..."
 case "$1" in
+
+	debug)
+		Configuration=Debug
+		;&
 	"build")
 		;&
 	"")
@@ -40,9 +38,6 @@ case "$1" in
 		;;
 	clean)
 		Clean
-		;;
-	clone)
-		Clone
 		;;
 	*)
 		error_exit "Usage: $0 {build*|clean}"

@@ -9,6 +9,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SolutionItems", "SolutionIt
 	ProjectSection(SolutionItems) = preProject
 		build.build = build.build
 		Default.props = Default.props
+		..\go.cmd = ..\go.cmd
+		..\go.sh = ..\go.sh
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GLib", "..\GLib\GLib.vcxproj", "{AE9CCD38-5A24-4794-AC41-BA9BB82F8B13}"
