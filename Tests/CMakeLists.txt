@@ -12,6 +12,12 @@ include(../cmake/common.cmake)
 #endif(ICU_FOUND)
 #endif()
 
+if(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g -O0 --coverage -fprofile-arcs -ftest-coverage")
+	link_libraries(gcov)
+	message("Set config for coverage")
+endif()
+	
 R_SEARCH_ABOVE(${CMAKE_CURRENT_SOURCE_DIR} ExternalDependencies/boost_${BOOST_VER} Jamroot BOOST_DIR)
 if(NOT BOOST_DIR)
 	message(FATAL_ERROR "Could not find ExternalDependencies")

@@ -115,6 +115,11 @@
 		<Exec Command="%windir%\sysnative\wsl.exe ./go.sh" WorkingDirectory="$(Root)"/>
 	</Target>
 
+	<Target Name="WslCoverage">
+		<Exec Command="%windir%\sysnative\wsl.exe ./go.sh coverage" WorkingDirectory="$(Root)"/>
+		<Exec Command="start $(Out)\cmake\build\Debug\TestsCoverage\index.html"/>
+	</Target>
+	
 	<Target Name="All" DependsOnTargets="Build;CMake;Wsl"/>
 
 	<UsingTask TaskName="DownloadFile" TaskFactory="CodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll">
