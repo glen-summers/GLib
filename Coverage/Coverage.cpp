@@ -7,6 +7,8 @@
 
 #include <fstream>
 
+enum class ReportType { Msvc, GCov, Cobertura };
+
 WideStrings Coverage::a2w(const Strings& strings)
 {
 	WideStrings wideStrings;
@@ -177,27 +179,49 @@ std::string Coverage::CreateReport(unsigned int processId)
 		it->second.Accumulate(address);
 	}
 
-	// merge templates here. then maybe change above loop to do it?
-	std::set<Function> nameToFunction;
-	for (const auto & p : indexToFunction)
+	ReportType reportType = ReportType::Msvc; // from parameter
+	switch (reportType)
 	{
-		const Function & function = p.second;
-		const auto & it = nameToFunction.find(function);
-		if (it == nameToFunction.end())
+		case ReportType::Msvc:
 		{
-			nameToFunction.insert(function);
+			return CreateMsVcReport(indexToFunction);
 		}
-		else
+		case ReportType::GCov:
 		{
-			it->Merge(p.second);
+			return CreateGCovReport(indexToFunction);
+		}
+		case ReportType::Cobertura:
+		{
+			return CreateCoberturaReport(indexToFunction);
 		}
 	}
 
+	return {};
+}
+
+std::string Coverage::CreateMsVcReport(const std::map<ULONG, Function> & indexToFunction) const
+{
+	// merge templates here?
+	// std::set<Function> nameToFunction;
+	// for (const auto & p : indexToFunction)
+	// {
+	// 	const Function & function = p.second;
+	// 	const auto & it = nameToFunction.find(function);
+	// 	if (it == nameToFunction.end())
+	// 	{
+	// 		nameToFunction.insert(function);
+	// 	}
+	// 	else
+	// 	{
+	// 		it->Merge(p.second);
+	// 	}
+	// }
+
 	size_t allLines{}, coveredLines{};
-	for (const auto & x : nameToFunction)
+	for (const auto & x : indexToFunction)
 	{
-		allLines += x.AllLines();
-		coveredLines += x.CoveredLines();
+		allLines += x.second.AllLines();
+		coveredLines += x.second.CoveredLines();
 	}
 
 	size_t fileId = 0;
@@ -218,8 +242,8 @@ std::string Coverage::CreateReport(unsigned int processId)
 
 	p.PushAttribute("id", "0"); // todo, hash of exe?
 
-	// report generator AVs without these, todo calculate them
-	p.PushAttribute("block_coverage", "0"); 
+	// report generator AVs without these, todo calculate them?
+	p.PushAttribute("block_coverage", "0");
 	p.PushAttribute("line_coverage", "0");
 	p.PushAttribute("blocks_covered", "0");
 	p.PushAttribute("blocks_not_covered", "0");
@@ -230,9 +254,9 @@ std::string Coverage::CreateReport(unsigned int processId)
 
 	p.OpenElement("functions");
 	size_t functionId{};
-	for (const auto & idFunctionPair : nameToFunction)
+	for (const auto & idFunctionPair : indexToFunction)
 	{
-		const Function & function = idFunctionPair;
+		const Function & function = idFunctionPair.second;
 		p.OpenElement("function");
 		// id="3048656" name="TestCollision" namespace="Sat" type_name="" block_coverage="0.00" line_coverage="0.00" blocks_covered="0" blocks_not_covered="30" lines_covered="0" lines_partially_covered="0" lines_not_covered="20">
 		p.PushAttribute("id", functionId++);
@@ -252,19 +276,21 @@ std::string Coverage::CreateReport(unsigned int processId)
 
 		p.OpenElement("ranges");
 
-		for (const auto & allFileLines : function.FileLines())
+		for (const auto & fileLines : function.FileLines())
 		{
 			// <range source_id = "23" covered = "yes" start_line = "27" start_column = "0" end_line = "27" end_column = "0" / >
-			const std::wstring & fileName = allFileLines.first;
-			const auto & lines = allFileLines.second;
+			const std::wstring & fileName = fileLines.first;
+			const auto & lines = fileLines.second;
+			const size_t sourceId = files.find(fileName)->second; // check
 
 			for (const auto & line : lines)
 			{
-				unsigned lineNumber = line.first;
-				bool covered = line.second;
+				const unsigned lineNumber = line.first;
+				const bool covered = line.second;
 
 				p.OpenElement("range");
-				p.PushAttribute("source_id", files[fileName]);
+				
+				p.PushAttribute("source_id", sourceId);
 				p.PushAttribute("covered", covered ? "yes" : "no");
 				p.PushAttribute("start_line", lineNumber);
 				// todo? p.PushAttribute("start_column", "0");
@@ -295,6 +321,66 @@ std::string Coverage::CreateReport(unsigned int processId)
 	p.CloseElement(); // modules
 	p.CloseElement(); // results
 
+	return p.Xml();
+}
+
+std::string Coverage::CreateGCovReport(const std::map<ULONG, Function> & indexToFunction) const
+{
+	/*
+	 * need to build a map for fileName -> functions, is it just invering function fileLines?
+	 */
+	struct Data{};
+	CaseInsensitiveMap<wchar_t, Data> fileData;
+	// per file need count of functions found, covered functions, first line
+	for (const auto & item : indexToFunction)
+	{
+		for (const std::pair<const std::wstring, Lines> & fileLines : item.second.FileLines())
+		{
+			const auto & fileName = fileLines.first;
+			for (const std::pair<const unsigned, bool> & lineCoverage : fileLines.second)
+			{
+				unsigned line = lineCoverage.first;
+				unsigned covered = lineCoverage.second;
+
+				//fileData[fileName].Line(line, covered);
+				(void)fileName;
+				(void)line;
+				(void)covered;
+			}
+		}
+	}
+
+	// have list of addresses -> file lines
+	// need fileNames -> functionName+ hit count
+
+	std::ostringstream s;
+	const char * TestName = "TN";
+	const char * SourceFile = "SF";
+	//const char * FunctionName = "FN";
+	//const char * FunctionData= "FNDA";
+	// FNF functionFound, ?
+	// FNH functions executed?, ? 
+	// DA Executions for some Line?, line number, executionCount
+	// LF lines found
+	// LH lines hit
+	// end_of_record end of file
+
+	s << TestName << std::endl; // Test Name empty
+	for (const auto & fd : fileData)
+	{
+		s << SourceFile << GLib::Cvt::w2a(fd.first) << std::endl;
+	
+		//enum fns, need file to function map? 1->1 or many->1
+		// << FN << startLine << name(manged)
+		// << FNDA << executionCount << name(manged)
+		
+	}
+
+	return s.str();
+}
+
+std::string Coverage::CreateCoberturaReport(const std::map<ULONG, Function> &) const
+{
 	/* Try Cobertura version?
 	p.OpenElement("coverage");
 	p.PushAttribute("version", "1.9");
@@ -324,5 +410,5 @@ std::string Coverage::CreateReport(unsigned int processId)
 	p.CloseElement(); // coverage
 	*/
 
-	return p.Xml();
+	throw std::runtime_error("Notimpl");
 }

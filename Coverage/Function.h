@@ -47,8 +47,8 @@ public:
 				{
 					functionName.erase(0, className.size() + 2);
 				}
-				RemoveTemplateDefinition(className);
-				RemoveTemplateDefinition(functionName);
+				//RemoveTemplateDefinition(className);
+				//RemoveTemplateDefinition(functionName);
 			}
 		}
 		else
@@ -62,7 +62,7 @@ public:
 					nameSpace = functionName.substr(0, len - 2);
 					functionName.erase(0, len);
 				}
-				RemoveTemplateDefinition(functionName);
+				//RemoveTemplateDefinition(functionName);
 				className = "<Functions>"; // avoid blank line in ReportGenerator
 			}
 		}
@@ -78,6 +78,8 @@ public:
 	}
 
 	// called when another address seen for the same function symbolId
+	// 1. lines in same function
+	// 2. lines merged into constructor from in class assignments, can cause multiple file names per accumulated address
 	void Accumulate(const Address & address) const
 	{
 		bool const visited = address.Visited();
@@ -93,7 +95,8 @@ public:
 		}
 	}
 
-	// called for e.g. class templates, merge with above
+	// called for e.g. class templates, merge with above? or just have the report generator do it?
+	// 1. Template expansions different T's
 	void Merge(const Function & other) const
 	{
 		for (const auto & fileLineIt : other.FileLines())

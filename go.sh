@@ -26,6 +26,22 @@ Clean() {
 	rm -f -r -v "${RootDir}/out" || error_exit "rm ${RootDir}/out failed"
 }
 
+Coverage() {
+		Configuration=Debug
+		Build
+
+		Name="${CMakeBuildDir}/TestsCoverage"
+
+		lcov -directory "${CMakeBuildDir}" --zerocounters || error_exit "lcov init"
+		lcov -c -i -d "${CMakeBuildDir}" -o "${Name}.Base" || error_exit "lcov base"
+		RunTests
+		lcov -directory "${CMakeBuildDir}" --capture --output-file "${Name}.Info" || error_exit "lcov info"
+		lcov -a "${Name}.Base" -a "${Name}.Info" --output-file "${Name}.Total" || error_exit "lcov total"
+		lcov --remove "${Name}.Total" '/usr/include/*' '*/boost/*' '*/Tests/*' --output-file "${Name}.info.cleaned" || error_exit "lcov remove"
+		genhtml -o "${Name}" "${Name}.info.cleaned" || error_exit "genhtml"
+		echo "html coverage generated at: ${CMakeBuildDir}/TestsCoverage/index.html"
+}
+
 RootDir=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 Configuration=Release
 
@@ -41,19 +57,7 @@ case "$1" in
 		Install
 		;;
 	coverage)
-		Configuration=Debug
-		Build		
-		
-		Name="${CMakeBuildDir}/TestsCoverage"
-		
-		lcov -directory "${CMakeBuildDir}" --zerocounters || error_exit "lcov init"
-		lcov -c -i -d "${CMakeBuildDir}" -o "${Name}.Base" || error_exit "lcov base"
-		RunTests
-		lcov -directory "${CMakeBuildDir}" --capture --output-file "${Name}.Info" || error_exit "lcov info"
-		lcov -a "${Name}.Base" -a "${Name}.Info" --output-file "${Name}.Total" || error_exit "lcov total"
-		lcov --remove "${Name}.Total" '/usr/include/*' '*/boost/*' '*/Tests/*' --output-file "${Name}.info.cleaned" || error_exit "lcov remove"
-		genhtml -o "${Name}" "${Name}.info.cleaned" || error_exit "genhtml"
-		echo "html coverage generated at: ${CMakeBuildDir}/TestsCoverage/index.html"
+		Coverage
 		;;
 	clean)
 		Clean

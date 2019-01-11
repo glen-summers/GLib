@@ -4,6 +4,8 @@
 
 #include <GLib/Win/Debugger.h>
 
+class Function;
+
 class Coverage : public GLib::Win::Debugger
 {
 	static constexpr unsigned char debugBreakByte = 0xCC;
@@ -32,6 +34,9 @@ public:
 private:
 	static WideStrings a2w(const Strings& strings);
 	void AddLine(const std::wstring & fileName, unsigned lineNumber, const GLib::Win::Symbols::SymProcess & process, DWORD64 address);
+	std::string CreateMsVcReport(const std::map<ULONG, Function> & indexToFunction) const;
+	std::string CreateGCovReport(const std::map<ULONG, Function> & indexToFunction) const;
+	std::string CreateCoberturaReport(const std::map<ULONG, Function> & indexToFunction) const;
 
 	void OnCreateProcess(DWORD processId, DWORD threadId, const CREATE_PROCESS_DEBUG_INFO & info) override;
 	void OnExitProcess(DWORD processId, DWORD threadId, const EXIT_PROCESS_DEBUG_INFO& info) override;
