@@ -142,13 +142,13 @@
 
 	<Target Name="Coverage" DependsOnTargets="Compile;DownloadTools">
 		<MSBuild Projects="$(MSBuildProjectFile)" Targets="CompileTests" Properties="Configuration=Debug"/>
-		<Exec Command="$(CoverageExecutable) $(DebugTestExecutable) $(Out)\coverage.xml -i $(CoverageInclude) -x $(CoverageExclude)"/>
+		<Exec Command="$(CoverageExecutable) $(DebugTestExecutable) $(Out) -i $(CoverageInclude) -x $(CoverageExclude)"/>
 		<Exec Command="$(ReportGenerator) -reports:$(Out)\coverage.xml -targetdir:$(Out)\CoverageReport -verbosity:Error -Reporttypes:HTML"/>
 		<Exec Command="start $(Out)\CoverageReport\index.htm"/>
 	</Target>
 
 	<Target Name="CoverageRelease" DependsOnTargets="Compile;DownloadTools">
-		<Exec Command="$(CoverageExecutable) $(TestExecutable) $(Out)\coverage.xml -i $(CoverageInclude) -x $(CoverageExclude)"/>
+		<Exec Command="$(CoverageExecutable) $(TestExecutable) $(Out) -i $(CoverageInclude) -x $(CoverageExclude)"/>
 		<Exec Command="$(ReportGenerator) -reports:$(Out)\coverage.xml -targetdir:$(Out)\CoverageReport -verbosity:Error -Reporttypes:HTML"/>
 		<Exec Command="start $(Out)\CoverageReport\index.htm"/>
 	</Target>

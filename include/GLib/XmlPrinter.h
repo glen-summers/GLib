@@ -7,46 +7,23 @@ class XmlPrinter
 {
 	static constexpr int TextDepthNotSet = -1;
 
-	bool elementOpen = false;
-	bool isFirstElement = true;
-	int depth = 0;
-	int textDepth = -1;
+	bool const format;
+	bool elementOpen;
+	bool isFirstElement;
+	int depth;
+	int textDepth;
 	std::ostringstream s;
 	std::stack<std::string> stack;
-	
-	struct Entity
-	{
-		const char * escaped;
-		char c;
-	};
-
-	inline static const Entity entities[]
-	{
-		{ "&quot;", '\"' },
-		{ "&amp;" , '&'  },
-		{ "&apos;", '\'' },
-		{ "&lt;"  , '<'  },
-		{ "&gt;"  , '>'  }
-	};
-
-	void Text(std::string && value)
-	{
-		for (const auto & e : entities)
-		{
-			ReplaceAll(value, e.c, e.escaped);
-		}
-		s << value;
-	}
-
-	static void ReplaceAll(std::string & value, char c, const char * replacement)
-	{
-		for (size_t start_pos = value.find(c); start_pos != std::string::npos; start_pos = value.find(c, start_pos + ::strlen(replacement)))
-		{
-			value.replace(start_pos, 1, replacement);
-		}
-	}
 
 public:
+	XmlPrinter(bool format = true)
+		: format(format)
+		, elementOpen()
+		, isFirstElement(true)
+		, depth()
+		, textDepth(TextDepthNotSet)
+	{}
+
 	void PushDeclaration()
 	{
 		s << R"(<?xml version="1.0" encoding="UTF-8" ?>)" << std::endl;
@@ -54,13 +31,22 @@ public:
 
 	void OpenElement(const char * name)
 	{
+		OpenElement(name, format);
+	}
+
+	void OpenElement(const char * name, bool elementFormat)
+	{
 		CloseJustOpenedElement();
 		stack.push(name);
-		if (textDepth == TextDepthNotSet && !isFirstElement)
+		if (textDepth == TextDepthNotSet && !isFirstElement && elementFormat)
 		{
 			s << std::endl;
 		}
-		s << std::string(depth, ' ') << '<' << name;
+		if (elementFormat)
+		{
+			s << std::string(depth, ' ');
+		}
+		s << '<' << name;
 		elementOpen = true;
 		isFirstElement = false;
 		++depth;
@@ -94,7 +80,22 @@ public:
 		Text(text);
 	}
 
+	void PushText(const std::string & text)
+	{
+		PushText(text.c_str());
+	}
+
+	void PushDocType(const char * docType)
+	{
+		s << "<!DOCTYPE " << docType << '>' << std::endl;
+	}
+
 	void CloseElement()
+	{
+		CloseElement(format);
+	}
+
+	void CloseElement(bool elementFormat)
 	{
 		--depth;
 		const auto name = stack.top();
@@ -105,11 +106,9 @@ public:
 		}
 		else
 		{
-			if (textDepth == TextDepthNotSet)
+			if (textDepth == TextDepthNotSet && elementFormat)
 			{
-				s
-					<< std::endl
-					<< std::string(depth, ' ');
+				s << std::endl << std::string(depth, ' ');
 			}
 			s << "</" << name << '>';
 		}
@@ -119,7 +118,7 @@ public:
 			textDepth = TextDepthNotSet;
 		}
 
-		if (depth == 0)
+		if (depth == 0 && elementFormat)
 		{
 			s << std::endl;
 		}
@@ -127,18 +126,76 @@ public:
 		elementOpen = false;
 	}
 
+	void Close()
+	{
+		while (!stack.empty())
+		{
+			CloseElement();
+		}
+	}
+
 	std::string Xml() const
 	{
+		if (depth != 0)
+		{
+			throw std::runtime_error("Element is not closed: " + stack.top());
+		}
 		return s.str();
 	}
 
 private:
+	struct Entity
+	{
+		const char * escaped;
+		char c;
+	};
+
+	inline static const Entity entities[]
+	{
+		{ "&quot;", '\"' },
+		{ "&amp;" , '&'  },
+		{ "&apos;", '\'' },
+		{ "&lt;"  , '<'  },
+		{ "&gt;"  , '>'  }
+	};
+
 	void CloseJustOpenedElement()
 	{
 		if (elementOpen)
 		{
 			s << '>';
 			elementOpen = false;
+		}
+	}
+
+	void Text(std::string && value)
+	{
+		Escape(value);
+		s << value;
+	}
+
+	static void Escape(std::string & value)
+	{
+		// better to stream to new string, if no change move?
+		for (size_t startPos = 0;;)
+		{
+			const char * replacement = {};
+			size_t pos = std::string::npos;
+			for (const auto & e : entities)
+			{
+				size_t const find = value.find(e.c, startPos);
+				if (find != std::string::npos && find < pos)
+				{
+					pos = find;
+					replacement = e.escaped;
+				}
+			}
+			if (pos == std::string::npos)
+			{
+				return;
+			}
+			value.replace(pos, 1, replacement);
+			startPos = pos + ::strlen(replacement);
 		}
 	}
 

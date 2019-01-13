@@ -146,7 +146,9 @@
     <ClInclude Include="Address.h" />
     <ClInclude Include="Coverage.h" />
     <ClInclude Include="Function.h" />
+    <ClInclude Include="HtmlPrinter.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="RootDirs.h" />
     <ClInclude Include="Types.h" />
   </ItemGroup>
   <ItemGroup>

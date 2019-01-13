@@ -28,5 +28,3 @@ std::string LogManager::GetLogPath()
 {
 	return FileLogger::Instance().streamInfo.FileName();
 }
-
-

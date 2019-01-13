@@ -2,12 +2,12 @@
 
 #include "Coverage.h"
 #include "Function.h"
+#include "RootDirs.h"
+#include "HtmlPrinter.h"
 
 #include <GLib/XmlPrinter.h>
 
 #include <fstream>
-
-enum class ReportType { Msvc, GCov, Cobertura };
 
 WideStrings Coverage::a2w(const Strings& strings)
 {
@@ -89,12 +89,8 @@ void Coverage::OnCreateProcess(DWORD processId, DWORD threadId, const CREATE_PRO
 
 void Coverage::OnExitProcess(DWORD processId, DWORD threadId, const EXIT_PROCESS_DEBUG_INFO& info)
 {
-	std::string const coverageReport = CreateReport(processId); // todo just cache data to memory, and do report at exit
-	std::filesystem::path path(GLib::Cvt::a2w(reportPath));
-	create_directory(path.parent_path());
-	std::ofstream fs(path);
-	fs << coverageReport;
-
+	CreateReport(processId); // todo just cache data to memory, and do report at exit
+	
 	Debugger::OnExitProcess(processId, threadId, info);
 }
 
@@ -153,7 +149,7 @@ DWORD Coverage::OnException(DWORD processId, DWORD threadId, const EXCEPTION_DEB
 	return DBG_EXCEPTION_NOT_HANDLED;
 }
 
-std::string Coverage::CreateReport(unsigned int processId)
+void Coverage::CreateReport(unsigned int processId)
 {
 	const GLib::Win::Symbols::SymProcess & process = Symbols().GetProcess(processId);
 
@@ -179,27 +175,12 @@ std::string Coverage::CreateReport(unsigned int processId)
 		it->second.Accumulate(address);
 	}
 
-	ReportType reportType = ReportType::Msvc; // from parameter
-	switch (reportType)
-	{
-		case ReportType::Msvc:
-		{
-			return CreateMsVcReport(indexToFunction);
-		}
-		case ReportType::GCov:
-		{
-			return CreateGCovReport(indexToFunction);
-		}
-		case ReportType::Cobertura:
-		{
-			return CreateCoberturaReport(indexToFunction);
-		}
-	}
-
-	return {};
+	// just do both for now
+	CreateXmlReport(indexToFunction);
+	CreateHtmlReport(indexToFunction, executable);
 }
 
-std::string Coverage::CreateMsVcReport(const std::map<ULONG, Function> & indexToFunction) const
+void Coverage::CreateXmlReport(const std::map<ULONG, Function> & indexToFunction) const
 {
 	// merge templates here?
 	// std::set<Function> nameToFunction;
@@ -316,99 +297,218 @@ std::string Coverage::CreateMsVcReport(const std::map<ULONG, Function> & indexTo
 		//p.PushAttribute("checksum", "blah");
 		p.CloseElement(); // source_file
 	}
-	p.CloseElement(); // source_files
-	p.CloseElement(); // module
-	p.CloseElement(); // modules
-	p.CloseElement(); // results
+	p.Close();
 
-	return p.Xml();
+	std::filesystem::path path(GLib::Cvt::a2w(reportPath)); // moveup
+	create_directories(path);
+	std::ofstream fs(path / "Coverage.xml");
+	fs << p.Xml();
 }
 
-std::string Coverage::CreateGCovReport(const std::map<ULONG, Function> & indexToFunction) const
+void Coverage::CreateHtmlReport(const std::map<ULONG, Function> & indexToFunctionMap, const std::string & title) const
 {
-	/*
-	 * need to build a map for fileName -> functions, is it just invering function fileLines?
-	 */
-	struct Data{};
-	CaseInsensitiveMap<wchar_t, Data> fileData;
-	// per file need count of functions found, covered functions, first line
-	for (const auto & item : indexToFunction)
-	{
-		for (const std::pair<const std::wstring, Lines> & fileLines : item.second.FileLines())
-		{
-			const auto & fileName = fileLines.first;
-			for (const std::pair<const unsigned, bool> & lineCoverage : fileLines.second)
-			{
-				unsigned line = lineCoverage.first;
-				unsigned covered = lineCoverage.second;
+	std::filesystem::path htmlPath(GLib::Cvt::a2w(reportPath)); // moveup
+	htmlPath /= "HtmlReport";
+	remove_all(htmlPath);
+	create_directories(htmlPath);
 
-				//fileData[fileName].Line(line, covered);
-				(void)fileName;
-				(void)line;
-				(void)covered;
-			}
+	// just store in filesystem
+	auto cssPath = htmlPath / "coverage.css";
+	std::ofstream css(cssPath);
+	css << R"(body
+{
+  color: #000000;
+  background-color: #FFFFFF;
+}
+td.title
+{
+  text-align: center;
+  font-size: 18pt;
+}
+span.line
+{
+  color: blue;
+}
+tr.covered
+{
+	background-color: #dcf4dc;
+}
+tr.notCovered
+{
+	background-color: #f7dede;
+})";
+	css.close();
+
+	CaseInsensitiveMap<wchar_t, std::multimap<unsigned int, Function>> fileNameToFunctionMap; // use map<path..>?
+
+	// rootDirs assumes files are canonical and ignores case
+	std::set<std::filesystem::path> rootPaths;
+
+	for (const auto & it : indexToFunctionMap)
+	{
+		const Function & function = it.second;
+		for (const auto & fileLineIt : function.FileLines())
+		{
+			const std::wstring & fileName = fileLineIt.first;
+			const std::map<unsigned, bool> & lineCoverage = fileLineIt.second;
+
+			rootPaths.insert(std::filesystem::path(fileName).parent_path());
+			unsigned int startLine = lineCoverage.begin()->first;
+			fileNameToFunctionMap[fileName].insert({ startLine, function });
 		}
 	}
 
-	// have list of addresses -> file lines
-	// need fileNames -> functionName+ hit count
+	RootDirectories(rootPaths);
 
-	std::ostringstream s;
-	const char * TestName = "TN";
-	const char * SourceFile = "SF";
-	//const char * FunctionName = "FN";
-	//const char * FunctionData= "FNDA";
-	// FNF functionFound, ?
-	// FNH functions executed?, ? 
-	// DA Executions for some Line?, line number, executionCount
-	// LF lines found
-	// LH lines hit
-	// end_of_record end of file
+	std::map<std::filesystem::path, std::set<std::filesystem::path>> index;
 
-	s << TestName << std::endl; // Test Name empty
-	for (const auto & fd : fileData)
+	for (const auto & fd : fileNameToFunctionMap)
 	{
-		s << SourceFile << GLib::Cvt::w2a(fd.first) << std::endl;
-	
-		//enum fns, need file to function map? 1->1 or many->1
-		// << FN << startLine << name(manged)
-		// << FNDA << executionCount << name(manged)
-		
+		std::filesystem::path fileName = fd.first;
+		const std::multimap<unsigned, Function> & startLineToFunctionMap = fd.second;
+
+		std::map<unsigned int, size_t> lines;
+
+		for (const auto & it : startLineToFunctionMap)
+		{
+			const Function & function = it.second;
+			const FileLines & fileLines = function.FileLines();
+
+			auto justFileNameIt = fileLines.find(fileName.wstring());
+			if (justFileNameIt == fileLines.end())
+			{
+				continue;
+			}
+
+			for (const auto & lineHitPair : justFileNameIt->second)
+			{
+				lines[lineHitPair.first] += lineHitPair.second ? 1 : 0;
+			}
+		}
+
+		std::filesystem::path subPath = Reduce(fileName, rootPaths);
+		std::filesystem::path filePath = htmlPath / subPath;
+		filePath.replace_filename(filePath.filename().wstring() + L".html");
+		create_directories(filePath.parent_path());
+		GenerateHtmlFile(fileName, filePath, lines, cssPath, "Coverage - " + subPath.u8string());
+		index[subPath.parent_path()].insert(filePath.filename());
 	}
 
-	return s.str();
+	HtmlPrinter printer("Coverage - " + title);
+	printer.OpenTable();
+
+	for (const auto & pathChildrenPair : index)
+	{
+		const auto & relativePath = pathChildrenPair.first;
+		const auto & children = pathChildrenPair.second;
+
+		printer.OpenElement("tr");
+		printer.OpenElement("td");
+		auto relativePathIndex = relativePath / "index.html";
+		printer.Anchor(relativePathIndex, relativePath.u8string());
+		printer.CloseElement(false); // td
+		printer.CloseElement(); // tr
+
+		HtmlPrinter printer2("Coverage - " + title);
+		printer2.OpenTable();
+		for (const auto & child : children)
+		{
+			printer2.OpenElement("tr");
+			printer2.OpenElement("td");
+			printer2.Anchor(child, child.u8string());
+			printer2.CloseElement(false); // td
+			printer2.CloseElement(); // tr
+		}
+		printer2.Close();
+		auto pathIndex = htmlPath / relativePathIndex;
+		std::ofstream out(pathIndex);
+		if (out.fail())
+		{
+			throw std::runtime_error("Unable to create output file : " + pathIndex.u8string());
+		}
+		out << printer2.Xml();
+	}
+	printer.Close();
+
+	auto indexFile = htmlPath / "index.html";
+	std::ofstream out(indexFile);
+	if (out.fail())
+	{
+		throw std::runtime_error("Unable to create output file : " + indexFile.u8string());
+	}
+	out << printer.Xml();
 }
 
-std::string Coverage::CreateCoberturaReport(const std::map<ULONG, Function> &) const
+void Coverage::GenerateHtmlFile(const std::filesystem::path & sourceFile, const std::filesystem::path & destFile, const std::map<unsigned int, size_t> & lines,
+	const std::filesystem::path & css, const std::string & title) const
 {
-	/* Try Cobertura version?
-	p.OpenElement("coverage");
-	p.PushAttribute("version", "1.9");
-	p.PushAttribute("timestamp", std::time(nullptr));
-	p.OpenElement("sources");
-	p.OpenElement("source");
-	p.PushText("srcFile");
-	p.CloseElement(); // source
-	p.CloseElement(); // sources
+	// use template engine for boilerplate?
+	std::ifstream in(sourceFile);
+	if (in.fail())
+	{
+		throw std::runtime_error("Unable to open input file : " + sourceFile.u8string());
+	}
+	in.exceptions(std::ifstream::badbit);
+	std::vector<std::string> fileLines;
+	while (!in.eof())
+	{
+		std::string s;
+		std::getline(in, s);
+		fileLines.push_back(s);
+	}
 
-	p.OpenElement("packages");
-	p.OpenElement("package");
-	p.OpenElement("classes");
-	p.OpenElement("class");
-	p.OpenElement("methods");
-	p.OpenElement("method");
-	p.OpenElement("lines");
-	p.OpenElement("line");
-	p.CloseElement(); // line
-	p.CloseElement(); // lines
-	p.CloseElement(); // method
-	p.CloseElement(); // methods
-	p.CloseElement(); // class
-	p.CloseElement(); // classes
-	p.CloseElement(); // package
-	p.CloseElement(); // packages
-	p.CloseElement(); // coverage
-	*/
+	HtmlPrinter printer(title, css);
 
-	throw std::runtime_error("Notimpl");
+	printer.OpenTable();
+	printer.PushAttribute("width", "100%");
+
+	printer.OpenElement("tr");
+	printer.OpenElement("td");
+	printer.PushAttribute("class", "title");
+	printer.PushText("Coverage report");
+	printer.CloseElement(); // td
+	printer.CloseElement(); // tr
+	printer.CloseElement(); // table
+
+	printer.OpenElement("pre");
+	printer.OpenTable();
+
+	for (size_t fileLine = 1; fileLine <= fileLines.size(); ++fileLine)
+	{
+		auto it = lines.find(static_cast<unsigned int>(fileLine));
+		const char* style = nullptr;
+		if (it != lines.end())
+		{
+			style = it->second != 0 ? "covered" : "notCovered";
+		}
+		std::string text = fileLines[fileLine - 1];
+		size_t start = 0;
+		while ((start = text.find('\t', start)) != std::string::npos)
+		{
+			text.replace(start, 1, "    ");
+			start += 4;
+		}
+
+		printer.OpenElement("tr");
+		if (style)
+		{
+			printer.PushAttribute("class", style);
+		}
+		printer.OpenElement("td", false);
+		std::ostringstream l;
+		l << std::setw(8) << fileLine << " : ";
+		printer.Span(l.str(), "line");
+		printer.PushText(text);
+		//printer.PushText("\n"); // manual newline
+		printer.CloseElement(false); // td
+		printer.CloseElement(false); // tr
+	}
+	printer.Close(); 
+
+	std::ofstream out(destFile);
+	out << printer.Xml();
+	if (out.fail())
+	{
+		throw std::runtime_error("Unable to create output file : " + destFile.u8string());
+	}
 }

@@ -29,14 +29,16 @@ public:
 		, excludes(a2w(excludes))
 	{}
 
-	std::string CreateReport(unsigned int processId);
+	void CreateReport(unsigned int processId);
 
 private:
 	static WideStrings a2w(const Strings& strings);
 	void AddLine(const std::wstring & fileName, unsigned lineNumber, const GLib::Win::Symbols::SymProcess & process, DWORD64 address);
-	std::string CreateMsVcReport(const std::map<ULONG, Function> & indexToFunction) const;
-	std::string CreateGCovReport(const std::map<ULONG, Function> & indexToFunction) const;
-	std::string CreateCoberturaReport(const std::map<ULONG, Function> & indexToFunction) const;
+	void CreateXmlReport(const std::map<ULONG, Function> & indexToFunction) const;
+	void CreateHtmlReport(const std::map<ULONG, Function> & indexToFunctionMap, const std::string & title) const;
+
+	void GenerateHtmlFile(const std::filesystem::path & sourceFile, const std::filesystem::path & destFile, const std::map<unsigned int, size_t> & lines,
+		const std::filesystem::path & css, const std::string & title) const;
 
 	void OnCreateProcess(DWORD processId, DWORD threadId, const CREATE_PROCESS_DEBUG_INFO & info) override;
 	void OnExitProcess(DWORD processId, DWORD threadId, const EXIT_PROCESS_DEBUG_INFO& info) override;

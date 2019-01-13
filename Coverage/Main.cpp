@@ -4,9 +4,11 @@
 
 #include <iostream>
 
+using namespace std::string_literals;
+
 int main(int argc, char *argv[])
 {
-	using namespace std::string_literals;
+	int errorCode = 0;
 
 	try
 	{
@@ -47,9 +49,12 @@ int main(int argc, char *argv[])
 		for(;dbg.ProcessEvents(1000);) // just use INFINITE?
 		{}
 		std::cout << "Exited: Process exited with code: " << dbg.ExitCode() << std::endl;
+
 	}
 	catch (const std::exception & e)
 	{
  		std::cout << e.what() << std::endl;
+		errorCode = 1;
 	}
+	return errorCode;
 }
