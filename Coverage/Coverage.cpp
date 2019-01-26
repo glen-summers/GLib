@@ -315,28 +315,36 @@ void Coverage::CreateHtmlReport(const std::map<ULONG, Function> & indexToFunctio
 	// just store in filesystem
 	auto cssPath = htmlPath / "coverage.css";
 	std::ofstream css(cssPath);
-	css << R"(body
-{
+	css << R"(body {
   color: #000000;
   background-color: #FFFFFF;
 }
-td.title
-{
+td.title {
   text-align: center;
   font-size: 18pt;
 }
-span.line
-{
+span.line {
   color: blue;
 }
-tr.covered
-{
-	background-color: #dcf4dc;
+tr.covered {
+	background-color: #DCF4DC;
 }
-tr.notCovered
-{
-	background-color: #f7dede;
-})";
+tr.notCovered {
+	background-color: #F7DEDE;
+}
+div.box {
+	width:100px; height:10px; border:1px solid #000
+}
+div.red {
+	height:100%; background-color: #CE1620
+}
+div.amber {
+	height:100%; background-color: #FF7518
+}
+div.green {
+	height:100%; background-color: #03C03C
+}
+	)";
 	css.close();
 
 	CaseInsensitiveMap<wchar_t, std::multimap<unsigned int, Function>> fileNameToFunctionMap; // use map<path..>?
@@ -360,14 +368,15 @@ tr.notCovered
 
 	RootDirectories(rootPaths);
 
-	std::map<std::filesystem::path, std::set<std::filesystem::path>> index;
+	std::map<std::filesystem::path, std::map<std::filesystem::path, unsigned int>> index;
 
 	for (const auto & fd : fileNameToFunctionMap)
 	{
 		std::filesystem::path fileName = fd.first;
 		const std::multimap<unsigned, Function> & startLineToFunctionMap = fd.second;
 
-		std::map<unsigned int, size_t> lines;
+		size_t coveredLines{};
+		std::map<unsigned int, size_t> lineCoverage;
 
 		for (const auto & it : startLineToFunctionMap)
 		{
@@ -380,9 +389,14 @@ tr.notCovered
 				continue;
 			}
 
-			for (const auto & lineHitPair : justFileNameIt->second)
+			for (const auto& lineHitPair : justFileNameIt->second)
 			{
-				lines[lineHitPair.first] += lineHitPair.second ? 1 : 0;
+				bool covered = lineHitPair.second;
+				size_t hitCount = lineCoverage[lineHitPair.first] += covered ? 1 : 0;
+				if (covered && hitCount == 1)
+				{
+					++coveredLines;
+				}
 			}
 		}
 
@@ -390,45 +404,56 @@ tr.notCovered
 		std::filesystem::path filePath = htmlPath / subPath;
 		filePath.replace_filename(filePath.filename().wstring() + L".html");
 		create_directories(filePath.parent_path());
-		GenerateHtmlFile(fileName, filePath, lines, cssPath, "Coverage - " + subPath.u8string());
-		index[subPath.parent_path()].insert(filePath.filename());
+
+		auto coveragePercent = static_cast<unsigned int>(100 * coveredLines / lineCoverage.size());
+
+		GenerateHtmlFile(fileName, filePath, lineCoverage, cssPath, "Coverage - " + subPath.u8string(), coveragePercent);
+
+		index[subPath.parent_path()].insert({ filePath.filename(), coveragePercent });
 	}
 
-	HtmlPrinter printer("Coverage - " + title);
-	printer.OpenTable();
+	HtmlPrinter rootIndex("Coverage - " + title);
+	rootIndex.OpenTable();
 
 	for (const auto & pathChildrenPair : index)
 	{
 		const auto & relativePath = pathChildrenPair.first;
 		const auto & children = pathChildrenPair.second;
 
-		printer.OpenElement("tr");
-		printer.OpenElement("td");
+		rootIndex.OpenElement("tr");
+		rootIndex.OpenElement("td");
 		auto relativePathIndex = relativePath / "index.html";
-		printer.Anchor(relativePathIndex, relativePath.u8string());
-		printer.CloseElement(false); // td
-		printer.CloseElement(); // tr
+		rootIndex.Anchor(relativePathIndex, relativePath.u8string());
+		rootIndex.CloseElement(false); // td
+		rootIndex.CloseElement(); // tr
 
-		HtmlPrinter printer2("Coverage - " + title);
-		printer2.OpenTable();
+		HtmlPrinter childList("Coverage - " + title, cssPath);
+		childList.OpenTable();
+
 		for (const auto & child : children)
 		{
-			printer2.OpenElement("tr");
-			printer2.OpenElement("td");
-			printer2.Anchor(child, child.u8string());
-			printer2.CloseElement(false); // td
-			printer2.CloseElement(); // tr
+			const auto & fileName = child.first;
+			unsigned int coveragePercent = child.second;
+
+			childList.OpenElement("tr");
+			childList.OpenElement("td");
+			childList.Anchor(fileName, fileName.u8string());
+			childList.CloseElement(false); // td
+			childList.OpenElement("td", false);
+			AddHtmlCoverageBar(childList, coveragePercent);
+			childList.CloseElement(false); // td
+			childList.CloseElement(); // tr
 		}
-		printer2.Close();
+		childList.Close();
 		auto pathIndex = htmlPath / relativePathIndex;
 		std::ofstream out(pathIndex);
 		if (out.fail())
 		{
 			throw std::runtime_error("Unable to create output file : " + pathIndex.u8string());
 		}
-		out << printer2.Xml();
+		out << childList.Xml();
 	}
-	printer.Close();
+	rootIndex.Close();
 
 	auto indexFile = htmlPath / "index.html";
 	std::ofstream out(indexFile);
@@ -436,11 +461,11 @@ tr.notCovered
 	{
 		throw std::runtime_error("Unable to create output file : " + indexFile.u8string());
 	}
-	out << printer.Xml();
+	out << rootIndex.Xml();
 }
 
 void Coverage::GenerateHtmlFile(const std::filesystem::path & sourceFile, const std::filesystem::path & destFile, const std::map<unsigned int, size_t> & lines,
-	const std::filesystem::path & css, const std::string & title) const
+	const std::filesystem::path & css, const std::string & title, unsigned int coveragePercent) const
 {
 	// use template engine for boilerplate?
 	std::ifstream in(sourceFile);
@@ -468,6 +493,13 @@ void Coverage::GenerateHtmlFile(const std::filesystem::path & sourceFile, const 
 	printer.PushText("Coverage report");
 	printer.CloseElement(); // td
 	printer.CloseElement(); // tr
+
+	printer.OpenElement("tr");
+	printer.OpenElement("td");
+	AddHtmlCoverageBar(printer, coveragePercent);
+	printer.CloseElement(); // td
+	printer.CloseElement(); // tr
+
 	printer.CloseElement(); // table
 
 	printer.OpenElement("pre");
@@ -511,4 +543,30 @@ void Coverage::GenerateHtmlFile(const std::filesystem::path & sourceFile, const 
 	{
 		throw std::runtime_error("Unable to create output file : " + destFile.u8string());
 	}
+}
+
+void Coverage::AddHtmlCoverageBar(HtmlPrinter& printer, unsigned int percent)
+{
+	// move
+	const int lowValue = 70;
+	const int highValue = 90;
+	const char* badStyle = "red";
+	const char* warnStyle = "amber";
+	const char* goodSttle = "green";
+
+	std::ostringstream divWidth;
+	divWidth << "width:" << percent << "px;";
+	const char* divClass = percent < lowValue
+		? badStyle
+			: percent < highValue
+			? warnStyle
+				: goodSttle;
+
+	printer.OpenElement("div");
+	printer.PushAttribute("class", "box");
+	printer.OpenElement("div");
+	printer.PushAttribute("class", divClass);
+	printer.PushAttribute("style", divWidth.str());
+	printer.CloseElement(); // div
+	printer.CloseElement(); // div
 }

@@ -1,6 +1,5 @@
 #include "pch.h"
 
-
 #include "GLib/flogging.h"
 #include "GLib/compat.h"
 
