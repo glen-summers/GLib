@@ -4,6 +4,7 @@
 
 #include <filesystem>
 
+// strict XHTML?
 class HtmlPrinter : public XmlPrinter
 {
 public:
@@ -49,12 +50,18 @@ public:
 		CloseElement(false);
 	}
 
-	void OpenTable()
+	void OpenTable() // parms
 	{
 		OpenElement("table");
 		PushAttribute("cellpadding", "0");
 		PushAttribute("cellspacing", "0");
 		PushAttribute("border", "0");
+	}
+
+	void LineBreak(const char * element = "hr")
+	{
+		OpenElement(element);
+		CloseElement(element);
 	}
 
 private:

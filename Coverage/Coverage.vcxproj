@@ -145,14 +145,17 @@
   <ItemGroup>
     <ClInclude Include="Address.h" />
     <ClInclude Include="Coverage.h" />
+    <ClInclude Include="FileCoverageData.h" />
     <ClInclude Include="Function.h" />
     <ClInclude Include="HtmlPrinter.h" />
+    <ClInclude Include="HtmlReport.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="RootDirs.h" />
     <ClInclude Include="Types.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Coverage.cpp" />
+    <ClCompile Include="HtmlReport.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>

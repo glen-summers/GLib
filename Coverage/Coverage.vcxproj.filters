@@ -36,6 +36,12 @@
     <ClInclude Include="HtmlPrinter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="HtmlReport.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FileCoverageData.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -45,6 +51,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="HtmlReport.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
