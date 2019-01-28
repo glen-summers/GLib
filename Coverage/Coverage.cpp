@@ -42,6 +42,7 @@ void Coverage::AddLine(const std::wstring & fileName, unsigned lineNumber, const
 			return;
 		}
 
+		// functional change to symbol api or compiler change? file names as of 28jan 2019 are all lower case
 		wideFiles.insert(fileName);
 	}
 
@@ -333,17 +334,23 @@ std::map<std::filesystem::path, FileCoverageData> Coverage::ConvertFunctionDataT
 
 	for (const auto & fd : fileNameToFunctionMap)
 	{
-		std::filesystem::path fileName = fd.first;
+		std::filesystem::path filePath = fd.first;
 		const std::multimap<unsigned, Function> & startLineToFunctionMap = fd.second;
 
-		auto & coverageData = fileCoverageData[fileName.wstring()];
+		auto fileIt = fileCoverageData.find(filePath);
+		if (fileIt == fileCoverageData.end())
+		{
+			fileIt = fileCoverageData.insert({ filePath, {filePath} }).first;
+		}
+
+		FileCoverageData & coverageData = fileIt->second;
 
 		for (const auto & it : startLineToFunctionMap)
 		{
 			const Function & function = it.second;
 			const FileLines & fileLines = function.FileLines();
 
-			auto justFileNameIt = fileLines.find(fileName.wstring());
+			auto justFileNameIt = fileLines.find(filePath.wstring());
 			if (justFileNameIt == fileLines.end())
 			{
 				continue;
@@ -351,12 +358,7 @@ std::map<std::filesystem::path, FileCoverageData> Coverage::ConvertFunctionDataT
 
 			for (const auto & lineHitPair : justFileNameIt->second)
 			{
-				bool covered = lineHitPair.second;
-				size_t hitCount = coverageData.lineCoverage[lineHitPair.first] += covered ? 1 : 0;
-				if (covered && hitCount == 1)
-				{
-					++coverageData.coveredLines;
-				}
+				coverageData.AddLine(lineHitPair.first, lineHitPair.second);
 			}
 		}
 	}

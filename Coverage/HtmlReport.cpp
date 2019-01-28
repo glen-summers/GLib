@@ -16,7 +16,6 @@ namespace
 	{
 		return p.replace_filename(p.filename().wstring() + appendage);
 	}
-	wchar_t HtmlExtension[] = L".html";
 }
 
 HtmlReport::HtmlReport(const std::string & title, const std::filesystem::path & htmlPath,
@@ -27,21 +26,19 @@ HtmlReport::HtmlReport(const std::string & title, const std::filesystem::path & 
 {
 	for (const auto & fileDataPair : fileCoverageData)
 	{
-		const std::filesystem::path & fileName = fileDataPair.first;
+		const std::filesystem::path & sourceFile = fileDataPair.first;
 		const FileCoverageData & data = fileDataPair.second;
-		Create(fileName, data);
+
+		std::filesystem::path subPath = Reduce(sourceFile, rootPaths);
+		std::filesystem::path targetPath = (htmlPath / subPath).concat(L".html");
+		auto coveragePercent = static_cast<unsigned int>(100 * data.CoveredLines() / data.LineCoverage().size());
+		GenerateSourceFile(sourceFile, targetPath, data.LineCoverage(), "Coverage - " + subPath.u8string(), coveragePercent);
+
+		// get line totals for summary
+
+		index[subPath.parent_path()].push_back(data);
 	}
 	GenerateIndices(title);
-}
-
-void HtmlReport::Create(const std::filesystem::path & sourcePath, const FileCoverageData & data)
-{
-	std::filesystem::path subPath = Reduce(sourcePath, rootPaths);
-	std::filesystem::path filePath = htmlPath / subPath;
-	create_directories(filePath.parent_path());
-	auto coveragePercent = static_cast<unsigned int>(100 * data.coveredLines / data.lineCoverage.size());
-	GenerateSourceFile(sourcePath, Append(filePath, HtmlExtension), data.lineCoverage, "Coverage - " + subPath.u8string(), coveragePercent);
-	index[subPath.parent_path()].insert({ filePath.filename(), coveragePercent });
 }
 
 std::filesystem::path HtmlReport::Initialise(const std::filesystem::path & path)
@@ -123,7 +120,7 @@ std::set<std::filesystem::path> HtmlReport::RootPaths(const std::map<std::filesy
 	return rootPaths;
 }
 
-void HtmlReport::GenerateSourceFile(const std::filesystem::path & sourceFile, const std::filesystem::path & destFile, const std::map<unsigned int, size_t> & lines,
+void HtmlReport::GenerateSourceFile(const std::filesystem::path & sourceFile, const std::filesystem::path & destFile, const std::map<unsigned int, unsigned int> & lines,
 	const std::string & title, unsigned int coveragePercent) const
 {
 	// use template engine for boilerplate?
@@ -200,6 +197,7 @@ void HtmlReport::GenerateSourceFile(const std::filesystem::path & sourceFile, co
 	printer.LineBreak();
 	printer.Close();
 
+	create_directories(destFile.parent_path());
 	std::ofstream out(destFile);
 	out << printer.Xml();
 	if (out.fail())
@@ -232,15 +230,16 @@ void HtmlReport::GenerateIndices(const std::string & title) const
 		childList.OpenTable();
 		childList.PushAttribute("class", "centre");
 
-		for (const auto& child : children)
+		for (const FileCoverageData & data : children)
 		{
-			auto fileName = child.first;
-			
-			unsigned int coveragePercent = child.second;
+			std::filesystem::path fileName = data.Path().filename();
+			auto text = fileName.u8string();
+			fileName += L".html";
+			auto coveragePercent = 100 * data.CoveredLines() / data.CoverableLines();
 
 			childList.OpenElement("tr");
 			childList.OpenElement("td");
-			childList.Anchor(Append(fileName, HtmlExtension), fileName.u8string());
+			childList.Anchor(fileName, text);
 			childList.CloseElement(false); // td
 			childList.OpenElement("td", false);
 			AddHtmlCoverageBar(childList, coveragePercent);

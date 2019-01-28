@@ -8,7 +8,7 @@
 class HtmlPrinter : public XmlPrinter
 {
 public:
-	HtmlPrinter(const std::string& title, const std::filesystem::path& css = {})
+	HtmlPrinter(const std::string & title, const std::filesystem::path & css = {})
 		: XmlPrinter(true)
 	{
 		PushDocType("html");
@@ -27,22 +27,22 @@ public:
 			OpenElement("link");
 			PushAttribute("rel", "stylesheet");
 			PushAttribute("type", "text/css");
-			PushAttribute("href", Convert(css));
+			PushAttribute("href", css.generic_u8string());
 			CloseElement(); // link
 		}
 		CloseElement(); // head
 		OpenElement("body");
 	}
 
-	void Anchor(const std::filesystem::path& path, const std::string& text)
+	void Anchor(const std::filesystem::path & path, const std::string & text)
 	{
 		OpenElement("a", false);
-		PushAttribute("href", Convert(path.u8string()));
+		PushAttribute("href", path.generic_u8string());
 		PushText(text);
 		CloseElement(false);
 	}
 
-	void Span(const std::string& text, const std::string& cls)
+	void Span(const std::string & text, const std::string & cls)
 	{
 		OpenElement("span", false);
 		PushAttribute("class", cls);
@@ -63,13 +63,4 @@ public:
 		OpenElement(element);
 		CloseElement(element);
 	}
-
-private:
-	static std::string Convert(const std::filesystem::path& path)
-	{
-		auto s = path.u8string();
-		std::replace(s.begin(), s.end(), '\\', '/');
-		return s;
-	}
 };
-
