@@ -29,8 +29,7 @@ public:
 		const std::map<std::filesystem::path, FileCoverageData> & fileCoverageData);
 
 private:
-	void GenerateSourceFile(const std::filesystem::path & sourceFile, const std::filesystem::path & destFile, const std::map<unsigned int, unsigned int> & lines,
-		const std::string & title, unsigned int coveragePercent) const;
+	void GenerateSourceFile(const std::filesystem::path & destFile, const std::string & title, const FileCoverageData & data) const;
 
 	void GenerateIndices(const std::string & title) const;
 

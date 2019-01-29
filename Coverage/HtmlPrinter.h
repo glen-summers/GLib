@@ -50,12 +50,12 @@ public:
 		CloseElement(false);
 	}
 
-	void OpenTable() // parms
+	void OpenTable(int padding=0, int spacing=0, int border=0)
 	{
 		OpenElement("table");
-		PushAttribute("cellpadding", "0");
-		PushAttribute("cellspacing", "0");
-		PushAttribute("border", "0");
+		PushAttribute("cellpadding", std::to_string(padding));
+		PushAttribute("cellspacing", std::to_string(spacing));
+		PushAttribute("border", std::to_string(border));
 	}
 
 	void LineBreak(const char * element = "hr")

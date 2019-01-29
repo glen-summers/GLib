@@ -6,6 +6,8 @@
 #include "RootDirs.h"
 #include "HtmlPrinter.h"
 
+#include "GLib/formatter.h"
+
 #include <fstream>
 #include <filesystem>
 #include <set>
@@ -26,15 +28,11 @@ HtmlReport::HtmlReport(const std::string & title, const std::filesystem::path & 
 {
 	for (const auto & fileDataPair : fileCoverageData)
 	{
-		const std::filesystem::path & sourceFile = fileDataPair.first;
 		const FileCoverageData & data = fileDataPair.second;
 
-		std::filesystem::path subPath = Reduce(sourceFile, rootPaths);
+		std::filesystem::path subPath = Reduce(data.Path(), rootPaths);
 		std::filesystem::path targetPath = (htmlPath / subPath).concat(L".html");
-		auto coveragePercent = static_cast<unsigned int>(100 * data.CoveredLines() / data.LineCoverage().size());
-		GenerateSourceFile(sourceFile, targetPath, data.LineCoverage(), "Coverage - " + subPath.u8string(), coveragePercent);
-
-		// get line totals for summary
+		GenerateSourceFile(targetPath, "Coverage - " + subPath.u8string(), data);
 
 		index[subPath.parent_path()].push_back(data);
 	}
@@ -75,6 +73,10 @@ table.centre {
 td.title {
   text-align: center;
   font-size: 18pt;
+}
+
+td.coverageNumber {
+	text-align: right;
 }
 
 span.line {
@@ -120,9 +122,13 @@ std::set<std::filesystem::path> HtmlReport::RootPaths(const std::map<std::filesy
 	return rootPaths;
 }
 
-void HtmlReport::GenerateSourceFile(const std::filesystem::path & sourceFile, const std::filesystem::path & destFile, const std::map<unsigned int, unsigned int> & lines,
-	const std::string & title, unsigned int coveragePercent) const
+void HtmlReport::GenerateSourceFile(const std::filesystem::path & destFile, const std::string & title,
+	const FileCoverageData & data) const
 {
+	const std::filesystem::path & sourceFile = data.Path();
+	const auto & lineCoverage = data.LineCoverage();
+	auto coveragePercent = static_cast<unsigned int>(100 * data.CoveredLines() / lineCoverage.size());
+
 	// use template engine for boilerplate?
 	std::ifstream in(sourceFile);
 	if (in.fail())
@@ -151,9 +157,30 @@ void HtmlReport::GenerateSourceFile(const std::filesystem::path & sourceFile, co
 	printer.CloseElement(); // td
 	printer.CloseElement(); // tr
 
+	printer.OpenTable(1, 1, 0);
+	printer.PushAttribute("class", "centre");
+	printer.OpenElement("tr");
+	printer.OpenElement("td");
+	printer.PushText("Coverage");
+	printer.CloseElement(); // td
+	printer.OpenElement("td");
+	printer.PushText("%");
+	printer.CloseElement(); // td
+	printer.OpenElement("td");
+	printer.PushText("Covered lines");
+	printer.CloseElement(); // td
+	printer.CloseElement(); // tr
+
 	printer.OpenElement("tr");
 	printer.OpenElement("td");
 	AddHtmlCoverageBar(printer, coveragePercent);
+	printer.CloseElement(); // td
+	printer.OpenElement("td");
+	printer.PushText(GLib::Formatter::Format("{0} %", coveragePercent));
+	printer.CloseElement(); // td
+	printer.OpenElement("td");
+	printer.PushAttribute("class", "coverageNumber");
+	printer.PushText(GLib::Formatter::Format("{0} / {1}", data.CoveredLines(), data.CoverableLines()));
 	printer.CloseElement(); // td
 	printer.CloseElement(); // tr
 
@@ -165,9 +192,9 @@ void HtmlReport::GenerateSourceFile(const std::filesystem::path & sourceFile, co
 
 	for (size_t fileLine = 1; fileLine <= fileLines.size(); ++fileLine)
 	{
-		auto it = lines.find(static_cast<unsigned int>(fileLine));
+		auto it = lineCoverage.find(static_cast<unsigned int>(fileLine));
 		const char* style = nullptr;
-		if (it != lines.end())
+		if (it != lineCoverage.end())
 		{
 			style = it->second != 0 ? "covered" : "notCovered";
 		}
@@ -211,24 +238,73 @@ void HtmlReport::GenerateIndices(const std::string & title) const
 	HtmlPrinter rootIndex("Coverage - " + title, cssPath);
 	rootIndex.LineBreak();
 
-	rootIndex.OpenTable();
+	rootIndex.OpenTable(1, 1, 0);
 	rootIndex.PushAttribute("class", "centre");
+	rootIndex.OpenElement("tr");
+	rootIndex.OpenElement("td");
+	rootIndex.PushText("Directory");
+	rootIndex.CloseElement(); // td
+	rootIndex.OpenElement("td");
+	rootIndex.PushText("Coverage");
+	rootIndex.CloseElement(); // td
+	rootIndex.OpenElement("td");
+	rootIndex.PushText("%");
+	rootIndex.CloseElement(); // td
+	rootIndex.OpenElement("td");
+	rootIndex.PushText("Covered lines");
+	rootIndex.CloseElement(); // td
+	rootIndex.CloseElement(); // tr
+
 	for (const auto & pathChildrenPair : index)
 	{
 		const auto& relativePath = pathChildrenPair.first;
 		const auto& children = pathChildrenPair.second;
 
+		unsigned int totalCoveredLines{}, totalCoverableLines{};
+		for (const FileCoverageData & data : children)
+		{
+			totalCoveredLines += data.CoveredLines();
+			totalCoverableLines += data.CoverableLines();
+		}
+		auto totalCoveragePercent = 100 * totalCoveredLines / totalCoverableLines;
+
 		rootIndex.OpenElement("tr");
 		rootIndex.OpenElement("td");
 		auto relativePathIndex = relativePath / "index.html";
 		rootIndex.Anchor(relativePathIndex, relativePath.u8string());
-		rootIndex.CloseElement(false); // td
+		rootIndex.CloseElement(); // td
+		rootIndex.OpenElement("td");
+		AddHtmlCoverageBar(rootIndex, totalCoveragePercent);
+		rootIndex.CloseElement(); // td
+		rootIndex.OpenElement("td");
+		rootIndex.PushText(GLib::Formatter::Format("{0} %", totalCoveragePercent));
+		rootIndex.CloseElement(); // td
+		rootIndex.OpenElement("td");
+		rootIndex.PushAttribute("class", "coverageNumber");
+		rootIndex.PushText(GLib::Formatter::Format("{0} / {1}", totalCoveredLines, totalCoverableLines));
+		rootIndex.CloseElement(); // td
 		rootIndex.CloseElement(); // tr
 
 		HtmlPrinter childList("Coverage - " + title + " - " + relativePath.u8string(), cssPath);
 		childList.LineBreak();
 		childList.OpenTable();
 		childList.PushAttribute("class", "centre");
+		childList.OpenTable(1, 1, 0);
+		childList.PushAttribute("class", "centre");
+		childList.OpenElement("tr");
+		childList.OpenElement("td");
+		childList.PushText("SourceFile");
+		childList.CloseElement(); // td
+		childList.OpenElement("td");
+		childList.PushText("Coverage");
+		childList.CloseElement(); // td
+		childList.OpenElement("td");
+		childList.PushText("%");
+		childList.CloseElement(); // td
+		childList.OpenElement("td");
+		childList.PushText("Covered lines");
+		childList.CloseElement(); // td
+		childList.CloseElement(); // tr
 
 		for (const FileCoverageData & data : children)
 		{
@@ -240,10 +316,17 @@ void HtmlReport::GenerateIndices(const std::string & title) const
 			childList.OpenElement("tr");
 			childList.OpenElement("td");
 			childList.Anchor(fileName, text);
-			childList.CloseElement(false); // td
-			childList.OpenElement("td", false);
+			childList.CloseElement(); // td
+			childList.OpenElement("td");
 			AddHtmlCoverageBar(childList, coveragePercent);
-			childList.CloseElement(false); // td
+			childList.CloseElement(); // td
+			childList.OpenElement("td");
+			childList.PushText(GLib::Formatter::Format("{0} %", coveragePercent));
+			childList.CloseElement(); // td
+			childList.OpenElement("td");
+			childList.PushAttribute("class", "coverageNumber");
+			childList.PushText(GLib::Formatter::Format("{0} / {1}", data.CoveredLines(), data.CoverableLines()));
+			childList.CloseElement(); // td
 			childList.CloseElement(); // tr
 		}
 		childList.CloseElement(); // table

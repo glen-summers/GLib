@@ -334,7 +334,7 @@ std::map<std::filesystem::path, FileCoverageData> Coverage::ConvertFunctionDataT
 
 	for (const auto & fd : fileNameToFunctionMap)
 	{
-		std::filesystem::path filePath = fd.first;
+		const std::filesystem::path & filePath = fd.first;
 		const std::multimap<unsigned, Function> & startLineToFunctionMap = fd.second;
 
 		auto fileIt = fileCoverageData.find(filePath);
