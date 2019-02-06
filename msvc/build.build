@@ -155,7 +155,7 @@
 
 	<Target Name="Format">
 		<PropertyGroup>
-			<ClangFormat>"$(vsInstallationPath)\Common7\IDE\VC\vcpackages\clang-format.exe"</ClangFormat>
+			<ClangFormat>"$(ProgramFiles)\LLVM\bin\clang-format.exe"</ClangFormat>
 		</PropertyGroup>
 		<ItemGroup>
 			<FileToFormat Include="$(Source)/include/**/*.cpp"/>

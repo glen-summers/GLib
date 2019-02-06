@@ -11,7 +11,7 @@ for /F "tokens=* usebackq" %%i in (`%vswherecmd%`) do set vsInstallationPath=%%i
 if "%vsInstallationPath%" equ "" echo Visual studio not found & exit /b 1
 echo VisualStudio=%vsInstallationPath%
 
-set msb="%vsInstallationPath%\MSBuild\%msbuildVersion%\Bin\MSBuild.exe"
+set msb="%vsInstallationPath%\MSBuild\%msbuildVersion%\Bin\amd64\MSBuild.exe"
 if not exist %msb% echo MSBuild not found at %msb% & exit /b 1
 echo MsBuild=%msb%
 
