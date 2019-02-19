@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.10.2)
 include(../cmake/common.cmake)
 
 #todo pch
-set(SOURCES Main.cpp Coverage.cpp)
+set(SOURCES Main.cpp Coverage.cpp HtmlReport.cpp)
 
 include_directories(../include)
 
