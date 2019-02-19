@@ -4,14 +4,14 @@
 #include "GLib/scope.h"
 
 #include <iomanip>
+#include <utility>
 
-// workaround wstring generates empty test errors: 
-// convertertests.cpp(40): error: in "ConverterTests/Test1": check result == expected has failed [ != ]
+// workaround for strings generating empty test errors with invalid encoding : check result == expected has failed [ != ]
 template<typename T> struct StringHolder
 {
 	typedef std::basic_string<T> StringType;
 	StringType value;
-	StringHolder(const StringType & value) : value(value) {}
+	StringHolder(StringType value) : value(std::move(value)) {}
 	bool operator==(const StringHolder<T> & right) const
 	{
 		return right.value == value;
@@ -36,6 +36,6 @@ std::ostream & operator << (std::ostream & stm, const StringHolder<T> & holder)
 			<< "<" << std::left << std::setw(sizeof(c) * 2)
 			<< static_cast<uint16_t>(static_cast<UT>(c)) << ">";
 	}
-	stm.copyfmt(state);
+
 	return stm;
 }

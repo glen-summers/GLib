@@ -11,7 +11,7 @@ BOOST_AUTO_TEST_SUITE(ConverterTests)
 		std::wstring utf16Value = L"\u20AC";
 
 		BOOST_TEST(Hold(utf16Value) == Hold(GLib::Cvt::a2w(utf8Value)));
-		BOOST_TEST(utf8Value == GLib::Cvt::w2a(utf16Value));
+		BOOST_TEST(Hold(utf8Value) == Hold(GLib::Cvt::w2a(utf16Value)));
 	}
 
 	BOOST_AUTO_TEST_CASE(DeseretSmallLetterYee)
@@ -20,7 +20,7 @@ BOOST_AUTO_TEST_SUITE(ConverterTests)
 		std::wstring expectedWideValue = L"\U00010437";
 
 		BOOST_TEST(Hold(expectedWideValue) == Hold(GLib::Cvt::a2w(utf8Value)));
-		BOOST_TEST(utf8Value == GLib::Cvt::w2a(expectedWideValue));
+		BOOST_TEST(Hold(utf8Value) == Hold(GLib::Cvt::w2a(expectedWideValue)));
 	}
 
 	BOOST_AUTO_TEST_CASE(CjkUnifiedIdeograph24B62)
@@ -29,7 +29,7 @@ BOOST_AUTO_TEST_SUITE(ConverterTests)
 		std::wstring utf16Value = L"\U00024B62";
 
 		BOOST_TEST(Hold(utf16Value) == Hold(GLib::Cvt::a2w(utf8Value)));
-		BOOST_TEST(utf8Value == GLib::Cvt::w2a(utf16Value));
+		BOOST_TEST(Hold(utf8Value) == Hold(GLib::Cvt::w2a(utf16Value)));
 	}
 
 	BOOST_AUTO_TEST_CASE(SharpS)
@@ -37,7 +37,7 @@ BOOST_AUTO_TEST_SUITE(ConverterTests)
 		std::string utf8Value = "\xC3\x9F";
 		std::wstring utf16Value = L"\u00DF";
 		BOOST_TEST(Hold(utf16Value) == Hold(GLib::Cvt::a2w(utf8Value)));
-		BOOST_TEST(utf8Value == GLib::Cvt::w2a(utf16Value));
+		BOOST_TEST(Hold(utf8Value) == Hold(GLib::Cvt::w2a(utf16Value)));
 	}
 
 BOOST_AUTO_TEST_SUITE_END()
