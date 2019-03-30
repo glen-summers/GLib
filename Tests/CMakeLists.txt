@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.10.2)
 
-set(BOOST_VER 1_68_0)
+set(BOOST_VER boost_1_68_0_TEST)
+set(BOOST_SIG ExternalDependencies/${BOOST_VER})
+set(BOOST_ITEM boost/test/unit_test.hpp)
+
 include(../cmake/common.cmake)
 
 # not working...
@@ -17,8 +20,8 @@ if(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
 	link_libraries(gcov)
 	message("Set config for coverage")
 endif()
-	
-R_SEARCH_ABOVE(${CMAKE_CURRENT_SOURCE_DIR} ExternalDependencies/boost_${BOOST_VER} Jamroot BOOST_DIR)
+
+R_SEARCH_ABOVE(${CMAKE_CURRENT_SOURCE_DIR} ${BOOST_SIG} ${BOOST_ITEM} BOOST_DIR)
 if(NOT BOOST_DIR)
 	message(FATAL_ERROR "Could not find ExternalDependencies")
 endif()
@@ -40,6 +43,7 @@ set(SOURCES Main.cpp
 )
 
 if(WIN32)
+	add_compile_definitions(BOOST_ALL_NO_LIB)
 	set(SOURCES ${SOURCES} WinTests.cpp)
 	set(SOURCES ${SOURCES} ComPtrTests.cpp)
 endif(WIN32)

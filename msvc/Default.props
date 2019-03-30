@@ -3,8 +3,11 @@
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
-    <BoostVer>boost_1_68_0</BoostVer>
-    <Boost>$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), ExternalDependencies\$(BoostVer)\Jamroot))\ExternalDependencies\$(BoostVer)</Boost>
+    <BoostVer>boost_1_68_0_TEST</BoostVer>
+    <BoostSig>ExternalDependencies\$(BoostVer)</BoostSig>
+		<BoostItem>boost\test\unit_test.hpp</BoostItem>
+    <ExtDeps>$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), "$(BoostSig)/$(BoostItem)"))</ExtDeps>
+		<Boost>$(ExtDeps)\ExternalDependencies\$(BoostVer)</Boost>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
@@ -12,7 +15,7 @@
         $(Boost);
         $([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)\..\include'));
       </AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions);NOMINMAX;WIN32_LEAN_AND_MEAN</PreprocessorDefinitions>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);NOMINMAX;WIN32_LEAN_AND_MEAN;BOOST_ALL_NO_LIB</PreprocessorDefinitions>
       <TreatWarningAsError Condition="'$(Configuration)'=='Debug'">false</TreatWarningAsError>
       <TreatWarningAsError Condition="'$(Configuration)'!='Debug'">true</TreatWarningAsError>
       <WarningLevel>Level4</WarningLevel>
