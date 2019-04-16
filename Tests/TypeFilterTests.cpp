@@ -3,7 +3,7 @@
 #include <GLib/TypeFilter.h>
 #include <GLib/compat.h>
 
-#include <type_traits>
+#include <typeindex>
 
 namespace Interfaces
 {

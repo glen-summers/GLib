@@ -2,23 +2,27 @@
 cls
 setlocal EnableDelayedExpansion
 
+set version="[15,16.1)"
+
 set buildFile=%~dp0msvc\build.build
-set msbuildVersion=15.0
 set requires=Microsoft.Component.MSBuild Microsoft.VisualStudio.Component.VC.Tools.x86.x64
+set msbuild=MSBuild\**\Bin\amd64\MSBuild.exe
 
-set vswherecmd="%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe" -latest -requires %requires% -property installationPath
-for /F "tokens=* usebackq" %%i in (`%vswherecmd%`) do set vsInstallationPath=%%i
-if "%vsInstallationPath%" equ "" echo Visual studio not found & exit /b 1
-echo VisualStudio=%vsInstallationPath%
+set vsWhereBaseCmd=.\vswhere.exe -latest -requires %requires% -version %version%
 
-set msb="%vsInstallationPath%\MSBuild\%msbuildVersion%\Bin\amd64\MSBuild.exe"
-if not exist %msb% echo MSBuild not found at %msb% & exit /b 1
-echo MsBuild=%msb%
+pushd "%ProgramFiles(x86)%\Microsoft Visual Studio\Installer"
+
+for /F "tokens=* usebackq delims=" %%i in (`%vsWhereBaseCmd% -find %msbuild%`) do set msbuild=%%i
+if "%msbuild%" equ "" echo msbuild not found & exit /b 1
+echo msbuild=%msbuild%
+
+for /F "tokens=* usebackq delims=" %%i in (`%vsWhereBaseCmd% -property installationPath`) do set vsInstallationPath=%%i
+if "%vsInstallationPath%" equ "" echo visual studio not found & exit /b 1
+echo vsInstallationPath=%vsInstallationPath%
 
 set args=%*
 if "%1" NEQ "" set args=/t:%*
 
-call "%vsInstallationPath%\VC\Auxiliary\Build\vcvars64.bat"
-%msb% /p:vsInstallationPath="%vsInstallationPath%" %buildFile% %args%
+"%msbuild%" /p:vsInstallationPath="%vsInstallationPath%" %buildFile% %args%
 
 exit /b 0
