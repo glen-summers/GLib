@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10.2)
 
-set(BOOST_VER boost_1_68_0_TEST)
+set(BOOST_VER boost_1_69_0_TEST)
 set(BOOST_SIG ExternalDependencies/${BOOST_VER})
 set(BOOST_ITEM boost/test/unit_test.hpp)
 
@@ -15,7 +15,7 @@ include(../cmake/common.cmake)
 #endif(ICU_FOUND)
 #endif()
 
-if(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+if(UNIX AND ${CMAKE_BUILD_TYPE} STREQUAL "Debug")
 	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g -O0 --coverage -fprofile-arcs -ftest-coverage")
 	link_libraries(gcov)
 	message("Set config for coverage")

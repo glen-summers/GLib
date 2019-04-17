@@ -16,7 +16,6 @@ namespace GLib
 
 		public:
 			using typename Base::int_type;
-			using typename Base::traits_type;
 
 			VectorStreamBuffer()
 			{
@@ -43,11 +42,11 @@ namespace GLib
 		protected:
 			int_type overflow(int_type c) override
 			{
-				if (traits_type::eq_int_type(c, traits_type::eof()))
+				if (Base::traits_type::eq_int_type(c, Base::traits_type::eof()))
 				{
-					return traits_type::not_eof(c);
+					return Base::traits_type::not_eof(c);
 				}
-				buffer.push_back(traits_type::to_char_type(c));
+				buffer.push_back(Base::traits_type::to_char_type(c));
 				return c;
 			}
 		};
