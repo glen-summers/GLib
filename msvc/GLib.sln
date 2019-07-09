@@ -1,13 +1,14 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28010.2026
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29025.244
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Tests", "..\Tests\Tests.vcxproj", "{4FA66CBF-F1FA-417B-96A7-09B2D78B201A}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SolutionItems", "SolutionItems", "{E4242C09-3560-4051-A84A-5D38CA1712AA}"
 	ProjectSection(SolutionItems) = preProject
 		..\.clang-format = ..\.clang-format
+		..\.editorconfig = ..\.editorconfig
 		build.build = build.build
 		Default.props = Default.props
 		..\go.cmd = ..\go.cmd

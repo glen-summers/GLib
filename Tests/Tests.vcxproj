@@ -167,6 +167,7 @@
     <ClCompile Include="SplitTests.cpp" />
     <ClCompile Include="TypeFilterTests.cpp" />
     <ClCompile Include="WinTests.cpp" />
+    <ClCompile Include="XmlIteratorTests.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\GLib\GLib.vcxproj">
@@ -177,6 +178,7 @@
     <ClInclude Include="TestInterfaces.h" />
     <ClInclude Include="TestUtils.h" />
     <ClInclude Include="wstringfix.h" />
+    <ClInclude Include="XmlTestUtils.h" />
     <ClInclude Include="Xyzzy.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

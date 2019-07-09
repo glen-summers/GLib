@@ -12,7 +12,10 @@
     <Filter Include="Include Files">
       <UniqueIdentifier>{20c6bdf0-4b2d-4ad4-abc7-faed1b479ca5}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Include Files\win">
+    <Filter Include="Include Files\Xml">
+      <UniqueIdentifier>{4619e0e9-8444-4c06-9f1c-0be28b988d45}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Include Files\Win">
       <UniqueIdentifier>{5c6b3d04-4677-4e43-b624-2ac01ba801fe}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -39,16 +42,16 @@
       <Filter>Include Files</Filter>
     </ClInclude>
     <ClInclude Include="..\include\GLib\win\Process.h">
-      <Filter>Include Files\win</Filter>
+      <Filter>Include Files\Win</Filter>
     </ClInclude>
     <ClInclude Include="..\include\GLib\win\WinException.h">
-      <Filter>Include Files\win</Filter>
+      <Filter>Include Files\Win</Filter>
     </ClInclude>
     <ClInclude Include="..\include\GLib\win\FormatErrorMessage.h">
-      <Filter>Include Files\win</Filter>
+      <Filter>Include Files\Win</Filter>
     </ClInclude>
     <ClInclude Include="..\include\GLib\Win\ErrorCheck.h">
-      <Filter>Include Files\win</Filter>
+      <Filter>Include Files\Win</Filter>
     </ClInclude>
     <ClInclude Include="streaminfo.h">
       <Filter>Header Files</Filter>
@@ -75,13 +78,13 @@
       <Filter>Include Files</Filter>
     </ClInclude>
     <ClInclude Include="..\include\GLib\Win\FileSystem.h">
-      <Filter>Include Files\win</Filter>
+      <Filter>Include Files\Win</Filter>
     </ClInclude>
     <ClInclude Include="..\include\GLib\Win\Handle.h">
-      <Filter>Include Files\win</Filter>
+      <Filter>Include Files\Win</Filter>
     </ClInclude>
     <ClInclude Include="..\include\GLib\Win\DebugStream.h">
-      <Filter>Include Files\win</Filter>
+      <Filter>Include Files\Win</Filter>
     </ClInclude>
     <ClInclude Include="..\include\GLib\genericoutstream.h">
       <Filter>Include Files</Filter>
@@ -93,37 +96,37 @@
       <Filter>Include Files</Filter>
     </ClInclude>
     <ClInclude Include="..\include\GLib\Win\Symbols.h">
-      <Filter>Include Files\win</Filter>
+      <Filter>Include Files\Win</Filter>
     </ClInclude>
     <ClInclude Include="..\include\GLib\Win\DebugWrite.h">
-      <Filter>Include Files\win</Filter>
+      <Filter>Include Files\Win</Filter>
     </ClInclude>
     <ClInclude Include="..\include\GLib\Win\Uuid.h">
-      <Filter>Include Files\win</Filter>
+      <Filter>Include Files\Win</Filter>
     </ClInclude>
     <ClInclude Include="..\include\GLib\Win\ComErrorCheck.h">
-      <Filter>Include Files\win</Filter>
+      <Filter>Include Files\Win</Filter>
     </ClInclude>
     <ClInclude Include="..\include\GLib\Win\ComException.h">
-      <Filter>Include Files\win</Filter>
+      <Filter>Include Files\Win</Filter>
     </ClInclude>
     <ClInclude Include="..\include\GLib\Win\ComPtr.h">
-      <Filter>Include Files\win</Filter>
+      <Filter>Include Files\Win</Filter>
     </ClInclude>
     <ClInclude Include="..\include\GLib\Win\ComUtil.h">
-      <Filter>Include Files\win</Filter>
+      <Filter>Include Files\Win</Filter>
     </ClInclude>
     <ClInclude Include="scope.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\include\GLib\Win\SimpleCom.h">
-      <Filter>Include Files\win</Filter>
+      <Filter>Include Files\Win</Filter>
     </ClInclude>
     <ClInclude Include="..\include\GLib\TypeFilter.h">
       <Filter>Include Files</Filter>
     </ClInclude>
     <ClInclude Include="..\include\GLib\Win\Debugger.h">
-      <Filter>Include Files\win</Filter>
+      <Filter>Include Files\Win</Filter>
     </ClInclude>
     <ClInclude Include="..\include\GLib\XmlPrinter.h">
       <Filter>Include Files</Filter>
@@ -133,6 +136,12 @@
     </ClInclude>
     <ClInclude Include="..\include\GLib\IcuUtils.h">
       <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\GLib\Xml\StateEngine.h">
+      <Filter>Include Files\Xml</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\GLib\Xml\Iterator.h">
+      <Filter>Include Files\Xml</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
