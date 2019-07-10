@@ -1,7 +1,7 @@
 #ifndef FORMATTER_H
 #define FORMATTER_H
 
-#include "printfformatpolicy.h"
+#include "GLib/printfformatpolicy.h"
 
 #include <sstream>
 #include <functional>

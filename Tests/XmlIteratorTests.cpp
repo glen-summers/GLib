@@ -74,8 +74,8 @@ BOOST_AUTO_TEST_CASE(Attributes)
 
 	std::vector<Xml::Element> expected
 	{
-		{"root", Xml::ElementType::Open, { {"a","1"}, {"b","2"}}},
-		{"sub", Xml::ElementType::Empty, {{"c", "3"}, {"d", "4"}}},
+		{"root", Xml::ElementType::Open, { {"a","1",{}}, {"b","2",{}}}},
+		{"sub", Xml::ElementType::Empty, {{"c","3",{}}, {"d","4",{}}}},
 		{"root", Xml::ElementType::Close, {}},
 	};
 	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), xml.begin(), xml.end());
@@ -87,7 +87,7 @@ BOOST_AUTO_TEST_CASE(AttributeSpace)
 
 	std::vector<Xml::Element> expected
 	{
-		{"root", Xml::ElementType::Empty, { {"a","1"}, {"b","2"} }},
+		{"root", Xml::ElementType::Empty, { {"a","1",{}}, {"b","2",{}} }},
 	};
 	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), xml.begin(), xml.end());
 }
@@ -386,11 +386,11 @@ BOOST_AUTO_TEST_CASE(AttributeValueError)
 BOOST_AUTO_TEST_CASE(ErrorMeansError)
 {
 	Xml::StateEngine engine;
-	BOOST_CHECK(engine.State() == Xml::State::Start);
+	BOOST_CHECK(engine.GetState() == Xml::State::Start);
 	engine.Push('!');
-	BOOST_CHECK(engine.State() == Xml::State::Error);
+	BOOST_CHECK(engine.GetState() == Xml::State::Error);
 	engine.Push('!');
-	BOOST_CHECK(engine.State() == Xml::State::Error);
+	BOOST_CHECK(engine.GetState() == Xml::State::Error);
 }
 
 BOOST_AUTO_TEST_CASE(EndOfTheWorld)

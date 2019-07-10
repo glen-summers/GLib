@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10.2)
+cmake_minimum_required(VERSION 3.14)
 
 set(BOOST_VER boost_1_69_0_TEST)
 set(BOOST_SIG ExternalDependencies/${BOOST_VER})
@@ -33,6 +33,7 @@ link_directories(${BOOST_DIR}/stage/lib)
 set(SOURCES Main.cpp
 	CheckedCastTests.cpp
 	ConverterTests.cpp
+	EvaluatorTests.cpp
 	FlogTests.cpp
 	FormatterTests.cpp
 	IcuUtilsTests.cpp
@@ -40,6 +41,7 @@ set(SOURCES Main.cpp
 	ScopeTests.cpp
 	SplitTests.cpp
 	TypeFilterTests.cpp
+	XmlIteratorTests.cpp
 )
 
 if(WIN32)

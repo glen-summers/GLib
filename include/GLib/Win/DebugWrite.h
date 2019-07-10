@@ -1,6 +1,6 @@
 #pragma once
 
-#include "DebugStream.h"
+#include "GLib/Win/DebugStream.h"
 #include "GLib/formatter.h"
 
 namespace GLib

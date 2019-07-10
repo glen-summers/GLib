@@ -1,6 +1,6 @@
 #pragma once
 
-#include "StateEngine.h"
+#include "GLib/Xml/StateEngine.h"
 
 #include <iterator>
 #include <string_view>
@@ -185,7 +185,7 @@ namespace GLib::Xml
 						throw std::runtime_error("No root element");
 					}
 
-					if (engine.State() != Xml::State::Start || !elementStack.empty())
+					if (engine.GetState() != Xml::State::Start || !elementStack.empty())
 					{
 						throw std::runtime_error("Xml not closed");
 					}
@@ -193,7 +193,7 @@ namespace GLib::Xml
 				}
 
 				const auto oldPtr = ptr;
-				const auto oldState = engine.State();
+				const auto oldState = engine.GetState();
 				const auto newState = engine.Push(*ptr);
 				if (newState == Xml::State::Error)
 				{

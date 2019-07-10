@@ -77,7 +77,7 @@ namespace GLib::Xml
 		  , stateFunction(stateFunctions[static_cast<int>(state)])
 		{}
 
-		State State() const
+		State GetState() const
 		{
 			return state;
 		}
@@ -87,7 +87,7 @@ namespace GLib::Xml
 			return !isProlog;
 		}
 
-		Xml::State Push(char value)
+		State Push(char value)
 		{
 			SetState((this->*stateFunction)(value));
 			return state;

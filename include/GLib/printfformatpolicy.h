@@ -1,9 +1,9 @@
 #ifndef PRINTF_FORMAT_POLICY_H
 #define PRINTF_FORMAT_POLICY_H
 
-#include "stackorheap.h"
-#include "compat.h"
-#include "cvt.h"
+#include "GLib/stackorheap.h"
+#include "GLib/compat.h"
+#include "GLib/cvt.h"
 
 #include <ostream>
 #include <iomanip>

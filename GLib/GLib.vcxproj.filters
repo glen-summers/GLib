@@ -18,6 +18,15 @@
     <Filter Include="Include Files\Win">
       <UniqueIdentifier>{5c6b3d04-4677-4e43-b624-2ac01ba801fe}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Include Files\Eval">
+      <UniqueIdentifier>{aa7e1b82-92ad-4b54-a064-8fb353ccd19f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Include Files\Util">
+      <UniqueIdentifier>{985e6ed5-48b7-468b-87aa-aa09c433d312}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Include Files\Formatter">
+      <UniqueIdentifier>{9ab6929a-e791-49f6-9aea-00adbdebfcf9}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="targetver.h">
@@ -27,15 +36,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\include\GLib\flogging.h">
-      <Filter>Include Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\GLib\formatter.h">
-      <Filter>Include Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\GLib\printfformatpolicy.h">
-      <Filter>Include Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\GLib\stackorheap.h">
       <Filter>Include Files</Filter>
     </ClInclude>
     <ClInclude Include="..\include\GLib\cvt.h">
@@ -74,9 +74,6 @@
     <ClInclude Include="..\include\GLib\scope.h">
       <Filter>Include Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\GLib\checked_cast.h">
-      <Filter>Include Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\include\GLib\Win\FileSystem.h">
       <Filter>Include Files\Win</Filter>
     </ClInclude>
@@ -85,15 +82,6 @@
     </ClInclude>
     <ClInclude Include="..\include\GLib\Win\DebugStream.h">
       <Filter>Include Files\Win</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\GLib\genericoutstream.h">
-      <Filter>Include Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\GLib\vectorstreambuffer.h">
-      <Filter>Include Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\GLib\split.h">
-      <Filter>Include Files</Filter>
     </ClInclude>
     <ClInclude Include="..\include\GLib\Win\Symbols.h">
       <Filter>Include Files\Win</Filter>
@@ -122,14 +110,8 @@
     <ClInclude Include="..\include\GLib\Win\SimpleCom.h">
       <Filter>Include Files\Win</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\GLib\TypeFilter.h">
-      <Filter>Include Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\include\GLib\Win\Debugger.h">
       <Filter>Include Files\Win</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\GLib\XmlPrinter.h">
-      <Filter>Include Files</Filter>
     </ClInclude>
     <ClInclude Include="..\include\GLib\NoCase.h">
       <Filter>Include Files</Filter>
@@ -142,6 +124,45 @@
     </ClInclude>
     <ClInclude Include="..\include\GLib\Xml\Iterator.h">
       <Filter>Include Files\Xml</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\GLib\XmlPrinter.h">
+      <Filter>Include Files\Xml</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\GLib\checked_cast.h">
+      <Filter>Include Files\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\GLib\genericoutstream.h">
+      <Filter>Include Files\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\GLib\split.h">
+      <Filter>Include Files\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\GLib\stackorheap.h">
+      <Filter>Include Files\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\GLib\TypeFilter.h">
+      <Filter>Include Files\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\GLib\vectorstreambuffer.h">
+      <Filter>Include Files\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\GLib\formatter.h">
+      <Filter>Include Files\Formatter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\GLib\printfformatpolicy.h">
+      <Filter>Include Files\Formatter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\GLib\Eval\Collection.h">
+      <Filter>Include Files\Eval</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\GLib\Eval\Evaluator.h">
+      <Filter>Include Files\Eval</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\GLib\Eval\Utils.h">
+      <Filter>Include Files\Eval</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\GLib\Eval\Value.h">
+      <Filter>Include Files\Eval</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
