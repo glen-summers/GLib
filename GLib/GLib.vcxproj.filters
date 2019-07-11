@@ -164,6 +164,9 @@
     <ClInclude Include="..\include\GLib\Eval\Value.h">
       <Filter>Include Files\Eval</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\GLib\Eval\TemplateEngine.h">
+      <Filter>Include Files\Eval</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="filelogger.cpp">

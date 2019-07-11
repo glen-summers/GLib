@@ -148,6 +148,7 @@
     <ClInclude Include="..\include\GLib\cvt.h" />
     <ClInclude Include="..\include\GLib\Eval\Collection.h" />
     <ClInclude Include="..\include\GLib\Eval\Evaluator.h" />
+    <ClInclude Include="..\include\GLib\Eval\TemplateEngine.h" />
     <ClInclude Include="..\include\GLib\Eval\Utils.h" />
     <ClInclude Include="..\include\GLib\Eval\Value.h" />
     <ClInclude Include="..\include\GLib\flogging.h" />

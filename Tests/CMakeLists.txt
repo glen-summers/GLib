@@ -40,6 +40,7 @@ set(SOURCES Main.cpp
 	NoCaseTests.cpp
 	ScopeTests.cpp
 	SplitTests.cpp
+	TemplateEngineTests.cpp
 	TypeFilterTests.cpp
 	XmlIteratorTests.cpp
 )
