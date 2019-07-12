@@ -40,21 +40,17 @@ namespace GLib::Eval::TemplateEngine
 			Nodes(const std::string_view & xml) : current(&root)
 			{
 				Xml::Holder h{xml};
-				auto contentStart = xml.data();
-				auto contentEnd = contentStart + xml.size();
 		
 				auto it = h.begin();
 				auto end = h.end();
 
 				// avoid, need to suppress ns, need to change xml test scan to find glib ns and remove
-				it.AddNameSpace("gl", "glib"); 
+				it.AddNameSpace("gl", "glib");
 
 				for (; it != end; ++it)
 				{
 					if (it->nameSpace=="glib" && it->name=="block")
 					{
-						auto elementStart = it->outerXml.data();
-
 						switch (it->type)
 						{
 							case Xml::ElementType::Open:
@@ -71,13 +67,11 @@ namespace GLib::Eval::TemplateEngine
 									throw std::runtime_error("Error in var : " + var);
 								}
 
-								AddXmlFragment(contentStart, elementStart);
 								current->AddChild();
 								current = &current->children.back();
 
 								current->variable = m[1];
 								current->enumeration = m[2];
-								contentStart = elementStart + it->outerXml.size();
 								break;
 							}
 
@@ -88,13 +82,11 @@ namespace GLib::Eval::TemplateEngine
 
 							case Xml::ElementType::Close:
 							{
-								AddXmlFragment(contentStart, elementStart);
 								if (!current)
 								{
 									throw std::logic_error("No parent node");
 								}
 								current = current->parent;
-								contentStart = elementStart + it->outerXml.size();
 								break;
 							}
 
@@ -104,22 +96,16 @@ namespace GLib::Eval::TemplateEngine
 							}
 						}
 					}
+					else
+					{
+						current->AddChild(it->outerXml);
+					}
 				}
-				current->AddChild({ contentStart, static_cast<size_t>(contentEnd - contentStart) });
 			}
 
 			const Node & GetRoot() const
 			{
 				return root;
-			}
-
-			void AddXmlFragment(const char * contentStart, const char * elementStart) const
-			{
-				const auto size = static_cast<size_t>(elementStart-contentStart);
-				if (size!=0)
-				{
-					current->AddChild({ contentStart, size });
-				}
 			}
 		};
 

@@ -7,7 +7,6 @@
 #include <sstream>
 #include <unordered_map>
 #include <stack>
-#include <vector>
 
 /*
 Design assumptions:
@@ -46,7 +45,7 @@ namespace GLib::Xml
 		std::string_view nameSpace;
 		std::string_view outerXml;
 		ElementType type;
-		std::vector<Attribute> attributes;
+		std::vector<Attribute> attributes; // expose iterator
 		size_t depth; // move/remove?
 
 		Element(std::string_view qName, std::string_view name, std::string_view nameSpace, ElementType type, std::vector<Attribute> attributes)
@@ -129,6 +128,14 @@ namespace GLib::Xml
 		// hack to allow template engine to not specify nameSpace, but means input not valid xhtml
 		void AddNameSpace(std::string_view name, std::string_view nameSpace)
 		{
+			auto nit = nameSpaces.find(name);
+			if (nit!=nameSpaces.end())
+			{
+				if (nit->second != nameSpace)
+				{
+					throw std::runtime_error("namespace redefine");
+				}
+			}
 			nameSpaces.emplace(name, nameSpace);
 		}
 

@@ -127,7 +127,7 @@ void HtmlReport::GenerateSourceFile(const std::filesystem::path & destFile, cons
 {
 	const std::filesystem::path & sourceFile = data.Path();
 	const auto & lineCoverage = data.LineCoverage();
-	auto coveragePercent = static_cast<unsigned int>(100 * data.CoveredLines() / lineCoverage.size());
+	auto coveragePercent = static_cast<unsigned int>(data.CoveredLines()*100 / lineCoverage.size());
 
 	// use template engine for boilerplate?
 	std::ifstream in(sourceFile);
