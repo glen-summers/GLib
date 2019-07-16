@@ -49,17 +49,21 @@ namespace GLib::Eval::TemplateEngine
 
 				for (; it != end; ++it)
 				{
-					if (it->nameSpace=="glib" && it->name=="block")
+					const Xml::Element & e = *it;
+					if (e.nameSpace=="glib" && e.name=="block")
 					{
-						switch (it->type)
+						const auto & attrs = e.attributes;
+						switch (e.type)
 						{
 							case Xml::ElementType::Open:
 							{
-								if (it->attributes.size()!=1 && it->attributes[0].name != "each")
+								auto eachIt = attrs.begin();
+								if (eachIt == attrs.end() || (*eachIt).name != "each")
 								{
 									throw std::runtime_error("No each attribute");
 								}
-								auto var = static_cast<std::string>(it->attributes[0].value); // avoid copy to string
+
+								auto var = std::string{(*eachIt).value}; // avoid copy to string?
 								std::smatch m;
 								std::regex_search(var, m, varRegex);
 								if (m.empty())

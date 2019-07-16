@@ -13,7 +13,7 @@ BOOST_AUTO_TEST_CASE(EmptyElement)
 
 	std::vector<Xml::Element> expected
 	{
-		{"xml", Xml::ElementType::Empty, {}},
+		{"xml", Xml::ElementType::Empty},
 	};
 	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), xml.begin(), xml.end());
 }
@@ -74,11 +74,42 @@ BOOST_AUTO_TEST_CASE(Attributes)
 
 	std::vector<Xml::Element> expected
 	{
-		{"root", Xml::ElementType::Open, { {"a","1",{}}, {"b","2",{}}}},
-		{"sub", Xml::ElementType::Empty, {{"c","3",{}}, {"d","4",{}}}},
+		{"root", Xml::ElementType::Open, {"a='1' b='2'" }},
+		{"sub", Xml::ElementType::Empty, {"c='3' d=\"4\""}},
 		{"root", Xml::ElementType::Close, {}},
 	};
 	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), xml.begin(), xml.end());
+}
+
+BOOST_AUTO_TEST_CASE(IterateAttributes)
+{
+	Xml::Holder xml { R"(<root a='1' b='2' >
+	<sub c='3' d="4"/>
+</root>)" };
+
+	std::vector<Xml::Element> expected
+	{
+		{"root", Xml::ElementType::Open, {"a='1' b='2'" }},
+		{"sub", Xml::ElementType::Empty, {"c='3' d=\"4\""}},
+		{"root", Xml::ElementType::Close, {}},
+	};
+
+	// std::vector<Xml::Element> actual {xml.begin(), xml.end()}; error
+	std::vector<Xml::Element> actual;
+	for (const auto & e : xml)
+	{
+		actual.push_back(e);
+	}
+
+	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), actual.begin(), actual.end());
+
+	std::vector<Xml::Attribute> expectedAttr0 = { {"a", "1", ""}, {"b", "2", ""} };
+	BOOST_CHECK_EQUAL_COLLECTIONS(expectedAttr0.begin(), expectedAttr0.end(),
+		actual[0].attributes.begin(), actual[0].attributes.end());
+
+	std::vector<Xml::Attribute> expectedAttr1 = { {"c", "3", ""}, {"d", "4", ""} };
+	BOOST_CHECK_EQUAL_COLLECTIONS(expectedAttr1.begin(), expectedAttr1.end(),
+		actual[1].attributes.begin(), actual[1].attributes.end());
 }
 
 BOOST_AUTO_TEST_CASE(AttributeSpace)
@@ -87,7 +118,7 @@ BOOST_AUTO_TEST_CASE(AttributeSpace)
 
 	std::vector<Xml::Element> expected
 	{
-		{"root", Xml::ElementType::Empty, { {"a","1",{}}, {"b","2",{}} }},
+		{"root", Xml::ElementType::Empty, { "a = '1' b  =  '2'" }},
 	};
 	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), xml.begin(), xml.end());
 }
@@ -138,9 +169,11 @@ BOOST_AUTO_TEST_CASE(NameSpace)
 
 	std::vector<Xml::Element> expected
 	{
-		{"foo:x", "x", "foo-ns", Xml::ElementType::Empty, {{ "bar","baz","foo-ns" }}},
+		{"foo:x", "x", "foo-ns", Xml::ElementType::Empty, {"foo:bar='baz'"}},
 	};
 	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), xml.begin(), xml.end());
+
+	//BOOST_TEST( (*(expected.begin()->attributes.begin()) == Xml::Attribute{"bar","baz","foo"}));
 }
 
 BOOST_AUTO_TEST_CASE(NameSpace2)
@@ -153,7 +186,7 @@ BOOST_AUTO_TEST_CASE(NameSpace2)
 	std::vector<Xml::Element> expected
 	{
 		{"foo:x", "x", "foo-ns", Xml::ElementType::Open, {}},
-		{"bar:y", "y", "bar-ns", Xml::ElementType::Empty, {{ "at","f","foo-ns" },{ "at","b","bar-ns" }}},
+		{"bar:y", "y", "bar-ns", Xml::ElementType::Empty, { "xmlns:bar='bar-ns' foo:at='f' bar:at='b'" }},
 		{"foo:x", "x", "foo-ns", Xml::ElementType::Close, {}},
 	};
 	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), xml.begin(), xml.end());
@@ -400,9 +433,13 @@ BOOST_AUTO_TEST_CASE(EndOfTheWorld)
 	GLIB_CHECK_RUNTIME_EXCEPTION( { ++end; }, "++end");
 }
 
-BOOST_AUTO_TEST_CASE(NamespaceNotFound)
+BOOST_AUTO_TEST_CASE(ElementNamespaceNotFound)
 {
 	GLIB_CHECK_RUNTIME_EXCEPTION( { Xml::Parse("<foo:xml bar='fubard'/>"); }, "NameSpace foo not found");
+}
+
+BOOST_AUTO_TEST_CASE(AttrNamespaceNotFound)
+{
 	GLIB_CHECK_RUNTIME_EXCEPTION( { Xml::Parse("<xml bar:baz='barbazd'/>"); }, "NameSpace bar not found");
 }
 

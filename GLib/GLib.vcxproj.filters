@@ -167,6 +167,21 @@
     <ClInclude Include="..\include\GLib\Eval\TemplateEngine.h">
       <Filter>Include Files\Eval</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\GLib\Xml\AttributeIterator.h">
+      <Filter>Include Files\Xml</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\GLib\Xml\Attributes.h">
+      <Filter>Include Files\Xml</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\GLib\Xml\Utils.h">
+      <Filter>Include Files\Xml</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\GLib\Xml\NameSpaceManager.h">
+      <Filter>Include Files\Xml</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\GLib\Xml\Element.h">
+      <Filter>Include Files\Xml</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="filelogger.cpp">

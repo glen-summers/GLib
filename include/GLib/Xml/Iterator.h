@@ -1,21 +1,19 @@
 #pragma once
 
 #include "GLib/Xml/StateEngine.h"
+#include "GLib/Xml/NameSpacemanager.h"
+#include "GLib/Xml/Element.h"
 
 #include <iterator>
-#include <string_view>
 #include <sstream>
-#include <unordered_map>
-#include <stack>
 
 /*
-Design assumptions:
+Design:
 xml input is a contiguous sequence of utf8 characters
 string_view's are used to hold pieces of the xml input to avoid copying
+seperatet attribute iterator exposed, enumerated first for namespaces then for values
 
-attributes are currently collated into a vector
-todo: 
-just store a string_view and add an attribute iterator that doesnt copy\allocate
+todo:
 improve error msgs to include error detail line\column numbers
 default namespace
 standard entities
@@ -23,72 +21,30 @@ standard entities
 
 namespace GLib::Xml
 {
-	namespace Detail
-	{
-		inline std::string_view ToStringView(const char * start, const char * end)
-		{
-			return {start, static_cast<size_t>(end - start) };
-		}
-	}
-
-	struct Attribute;
-
-	enum class ElementType : int
-	{
-		Open, Empty, Close
-	};
-
-	struct Element // class
-	{
-		std::string_view qName;
-		std::string_view name;
-		std::string_view nameSpace;
-		std::string_view outerXml;
-		ElementType type;
-		std::vector<Attribute> attributes; // expose iterator
-		size_t depth; // move/remove?
-
-		Element(std::string_view qName, std::string_view name, std::string_view nameSpace, ElementType type, std::vector<Attribute> attributes)
-			: qName(qName), name(name), nameSpace(nameSpace), type(type), attributes(attributes), depth()
-		{}
-
-		Element(std::string_view name, ElementType type, std::vector<Attribute> attributes)
-			: qName(name), name(name), type(type), attributes(attributes), depth()
-		{}
-
-		Element() : type(), depth() {}
-	};
-
-	struct Attribute
-	{
-		std::string_view name;
-		std::string_view value;
-		std::string_view nameSpace;
-	};
-
 	class Iterator
 	{
-		inline static constexpr std::string_view NameSpaceAttribute = "xmlns";
+		friend class AttributeIterator;
 
 		Xml::StateEngine engine;
+		NameSpaceManager manager;
 
 		const char * ptr;
 		const char * end;
 		const char * currentPtr;
 
-		/////////// element working data
+		/////////// element working data, could just use element storage
 		const char * start;
 		const char * elementNameStart;
 		const char * elementNameEnd;
-		const char * attributeNameStart; // use pair?
+		const char * attributesStart; // use pair?
+		const char * attributesEnd; // could remove, use state change
+
+		const char * attributeNameStart;
 		const char * attributeNameEnd;
-		const char * attributeValueStart; // use pair?
+		const char * attributeValueStart;
 		///////////
 
 		Element element;
-
-		std::unordered_map<std::string_view, std::string_view> nameSpaces;
-		std::stack<std::pair<size_t, std::pair<std::string_view,std::string_view>>> nameSpaceStack;
 		std::stack<std::string_view> elementStack;
 
 	public:
@@ -105,6 +61,8 @@ namespace GLib::Xml
 			, start(begin)
 			, elementNameStart()
 			, elementNameEnd()
+			, attributesStart()
+			, attributesEnd()
 			, attributeNameStart()
 			, attributeNameEnd()
 			, attributeValueStart()
@@ -119,6 +77,8 @@ namespace GLib::Xml
 			, start()
 			, elementNameStart()
 			, elementNameEnd()
+			, attributesStart()
+			, attributesEnd()
 			, attributeNameStart()
 			, attributeNameEnd()
 			, attributeValueStart()
@@ -128,15 +88,7 @@ namespace GLib::Xml
 		// hack to allow template engine to not specify nameSpace, but means input not valid xhtml
 		void AddNameSpace(std::string_view name, std::string_view nameSpace)
 		{
-			auto nit = nameSpaces.find(name);
-			if (nit!=nameSpaces.end())
-			{
-				if (nit->second != nameSpace)
-				{
-					throw std::runtime_error("namespace redefine");
-				}
-			}
-			nameSpaces.emplace(name, nameSpace);
+			manager.Add(name, nameSpace);
 		}
 
 		bool operator==(const Iterator & other) const
@@ -207,6 +159,8 @@ namespace GLib::Xml
 					IllegalCharacter(*ptr);
 				}
 				++ptr;
+				// should not use ptr below here as could now be end!
+				// would only happen with truncated xml but still fix
 
 				if (newState != oldState)
 				{
@@ -222,6 +176,11 @@ namespace GLib::Xml
 						{
 							elementNameEnd = oldPtr;
 							element.type = ElementType::Open;
+							if (newState == State::ElementAttributeSpace)
+							{
+								attributesStart = ptr;
+								attributesEnd = nullptr;
+							}
 							break;
 						}
 						
@@ -241,13 +200,12 @@ namespace GLib::Xml
 						case Xml::State::ElementAttributeValueQuote:
 						case Xml::State::ElementAttributeValueSingleQuote:
 						{
-							const char * attributeValueEnd = oldPtr;
-							element.attributes.emplace_back(Attribute
-							{
-								{attributeNameStart, static_cast<size_t>(attributeNameEnd - attributeNameStart)},
-								{attributeValueStart+1, static_cast<size_t>(attributeValueEnd - attributeValueStart-1)},
-								{}
-							});
+							manager.Check(Utils::ToStringView(attributeNameStart, attributeNameEnd),
+								Utils::ToStringView(attributeValueStart+1, oldPtr), elementStack.size());
+
+							// better test? currently writes ones per attr
+							attributesEnd = ptr;
+							break;
 						}
 
 						default:;
@@ -302,6 +260,7 @@ namespace GLib::Xml
 								start = ptr;
 								return;
 							}
+							break;
 						}
 
 						default:;
@@ -310,78 +269,31 @@ namespace GLib::Xml
 			}
 		}
 
-		static void ValidateName(size_t colon, const std::string_view & value)
+		void ProcessNameSpaces(const std::string_view & attributes) const
 		{
-			if (colon == 0 || value.find(':', colon+1) != std::string_view::npos)
+			for (auto at : Attributes{attributes, &manager})
 			{
-				throw std::runtime_error(std::string("Illegal name : '") + std::string(value) + '\'');
+				(void)at;
 			}
 		}
 
 		void ProcessElement(const char * outerXmlEnd)
 		{
-			for (auto it = element.attributes.begin(); it!=element.attributes.end();)
+			std::string_view attributes;
+			if (attributesStart && attributesEnd && element.type != ElementType::Close)
 			{
-				if (it->name.compare(0, NameSpaceAttribute.size(), NameSpaceAttribute) == 0)
-				{
-					std::string_view nameSpace = it->value;
-					std::string_view name = it->name.substr(NameSpaceAttribute.size()+1);
-
-					auto nit = nameSpaces.find(name);
-					if (nit!=nameSpaces.end())
-					{
-						nameSpaceStack.push({elementStack.size(), {name, nit->second}});
-						nit->second = nameSpace;
-					}
-					else
-					{
-						nameSpaces.emplace(name, nameSpace);
-					}
-					it = element.attributes.erase(it);
-				}
-				else
-				{
-					++it;
-				}
+				attributes = Utils::ToStringView(attributesStart, attributesEnd);
 			}
+			ProcessNameSpaces(attributes);
 
-			const std::string_view qName = Detail::ToStringView(elementNameStart, elementNameEnd);
-			std::string_view name = qName, nameSpace;
-			const size_t colon = qName.find(':');
-			if (colon != std::string_view::npos)
-			{
-				ValidateName(colon, qName);
-				nameSpace = qName.substr(0, colon);
-				const auto it = nameSpaces.find(nameSpace);
-				if (it == nameSpaces.end())
-				{
-					throw std::runtime_error(std::string("NameSpace ") + std::string(nameSpace) + " not found");
-				}
-				name = qName.substr(colon+1);
-				nameSpace = it->second;
-			}
+			auto qName = Utils::ToStringView(elementNameStart, elementNameEnd);
+			auto [name, nameSpace] = manager.Normalise(qName);
 
 			element.qName = qName;
 			element.name = name;
 			element.nameSpace = nameSpace;
-			element.outerXml = Detail::ToStringView(start, outerXmlEnd);
-
-			for (auto & at : element.attributes)
-			{
-				const size_t atColon = at.name.find(':');
-				if (atColon != std::string_view::npos)
-				{
-					ValidateName(atColon, at.name);
-					auto atNameSpace = at.name.substr(0, atColon);
-					auto it = nameSpaces.find(atNameSpace);
-					if (it == nameSpaces.end())
-					{
-						throw std::runtime_error(std::string("NameSpace ") + std::string(atNameSpace) + " not found");
-					}
-					at.name = at.name.substr(atColon+1);
-					at.nameSpace = it->second;
-				}
-			}
+			element.outerXml = Utils::ToStringView(start, outerXmlEnd);
+			element.attributes = attributes;
 
 			switch (element.type)
 			{
@@ -422,16 +334,7 @@ namespace GLib::Xml
 				}
 			}
 
-			while (!nameSpaceStack.empty() && elementStack.size() == nameSpaceStack.top().first)
-			{
-				auto nit = nameSpaces.find(nameSpaceStack.top().second.first);
-				if (nit==nameSpaces.end())
-				{
-					throw std::logic_error("!");
-				}
-				nit->second = nameSpaceStack.top().second.second;
-				nameSpaceStack.pop();
-			}
+			manager.Pop(elementStack.size());
 		}
 	};
 

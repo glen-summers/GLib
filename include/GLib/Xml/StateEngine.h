@@ -69,8 +69,8 @@ namespace GLib::Xml
 		StateFunction stateFunction;
 
 	public:
-		StateEngine()
-		  : state(State::Start)
+		StateEngine(State state = State::Start)
+		  : state(state)
 		  , isProlog(true)
 		  , hasDocTypeDecl()
 		  , hasContent()
