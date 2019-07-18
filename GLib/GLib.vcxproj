@@ -156,6 +156,7 @@
     <ClInclude Include="..\include\GLib\genericoutstream.h" />
     <ClInclude Include="..\include\GLib\IcuUtils.h" />
     <ClInclude Include="..\include\GLib\NoCase.h" />
+    <ClInclude Include="..\include\GLib\PairHash.h" />
     <ClInclude Include="..\include\GLib\printfformatpolicy.h" />
     <ClInclude Include="..\include\GLib\scope.h" />
     <ClInclude Include="..\include\GLib\split.h" />

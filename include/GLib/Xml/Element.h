@@ -27,7 +27,7 @@ namespace GLib::Xml
 			: qName(name), name(name), type(type), attributes(attributes), depth()
 		{}
 
-		Element() : type(), depth(), attributes()
+		Element() : type(), attributes(), depth()
 		{}
 	};
 }

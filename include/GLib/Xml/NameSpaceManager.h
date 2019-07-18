@@ -6,51 +6,56 @@
 
 namespace GLib::Xml
 {
-	class NameSpaceManager // name?
+	class NameSpaceManager
 	{
-		inline static constexpr std::string_view NameSpaceAttribute = "xmlns";
+		inline static constexpr std::string_view Attribute = "xmlns:";
 
 		std::unordered_map<std::string_view, std::string_view> nameSpaces;
 		std::stack<std::pair<size_t, std::pair<std::string_view,std::string_view>>> nameSpaceStack;
 
 	public:
-		static bool IsNameSpace(const std::string_view & name)
+		static bool IsDeclaration(const std::string_view & value)
 		{
-			return (name.compare(0, NameSpaceAttribute.size(), NameSpaceAttribute) == 0);
+			return value.compare(0, Attribute.size(), Attribute) == 0;
 		}
 
-		void Add(const std::string_view & name, const std::string_view & nameSpace) // hack, remove
+		static bool CheckForDeclaration(const std::string_view & value, std::string_view & prefix)
 		{
-			auto nit = nameSpaces.find(name);
-			if (nit!=nameSpaces.end())
+			bool check = IsDeclaration(value);
+			if (check)
 			{
-				if (nit->second != nameSpace)
-				{
-					throw std::runtime_error("namespace redefine");
-				}
+				prefix = value.substr(Attribute.size());
 			}
-			nameSpaces.emplace(name, nameSpace);
+			return check;
 		}
 
-		void Check(const std::string_view & qualifiedName, const std::string_view & value, size_t depth)
+		std::string_view Get(const std::string_view & prefix) const
 		{
-			if (!IsNameSpace(qualifiedName))
+			auto nit = nameSpaces.find(prefix);
+			if (nit==nameSpaces.end())
+			{
+				throw std::runtime_error("Namespace not found"); // +detail
+			}
+			return nit->second;
+		}
+
+		void Push(const std::string_view & qualifiedName, const std::string_view & value, size_t depth)
+		{
+			std::string_view prefix;
+			if (!CheckForDeclaration(qualifiedName, prefix))
 			{
 				return;
 			}
 
-			std::string_view nameSpace = value;
-			std::string_view name = qualifiedName.substr(NameSpaceAttribute.size()+1);
-
-			auto nit = nameSpaces.find(name);
+			auto nit = nameSpaces.find(prefix);
 			if (nit!=nameSpaces.end())
 			{
-				nameSpaceStack.push({depth, {name, nit->second}});
-				nit->second = nameSpace;
+				nameSpaceStack.push({depth, {prefix, nit->second}});
+				nit->second = value;
 			}
 			else
 			{
-				nameSpaces.emplace(name, nameSpace);
+				nameSpaces.emplace(prefix, value);
 			}
 		}
 
@@ -82,11 +87,11 @@ namespace GLib::Xml
 			if (colon != std::string_view::npos)
 			{
 				ValidateName(colon, name);
-				auto nameSpacePrefix = name.substr(0, colon);
-				auto it = nameSpaces.find(nameSpacePrefix);
+				auto prefix = name.substr(0, colon);
+				auto it = nameSpaces.find(prefix);
 				if (it == nameSpaces.end())
 				{
-					throw std::runtime_error(std::string("NameSpace ") + std::string(nameSpacePrefix) + " not found");
+					throw std::runtime_error(std::string("NameSpace ") + std::string(prefix) + " not found");
 				}
 				return { name.substr(colon+1), it->second };
 			}

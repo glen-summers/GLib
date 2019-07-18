@@ -34,14 +34,11 @@ namespace GLib::Xml
 
 		/////////// element working data, could just use element storage
 		const char * start;
-		const char * elementNameStart;
-		const char * elementNameEnd;
-		const char * attributesStart; // use pair?
-		const char * attributesEnd; // could remove, use state change
-
-		const char * attributeNameStart;
-		const char * attributeNameEnd;
+		Utils::PtrPair elementName;
+		Utils::PtrPair attributes;
+		Utils::PtrPair attributeName;
 		const char * attributeValueStart;
+		const char * attributesEnd; // could remove, use state change
 		///////////
 
 		Element element;
@@ -59,13 +56,8 @@ namespace GLib::Xml
 			, end(end)
 			, currentPtr()
 			, start(begin)
-			, elementNameStart()
-			, elementNameEnd()
-			, attributesStart()
-			, attributesEnd()
-			, attributeNameStart()
-			, attributeNameEnd()
 			, attributeValueStart()
+			, attributesEnd()
 		{
 			Advance();
 		}
@@ -75,20 +67,13 @@ namespace GLib::Xml
 			, end()
 			, currentPtr()
 			, start()
-			, elementNameStart()
-			, elementNameEnd()
-			, attributesStart()
-			, attributesEnd()
-			, attributeNameStart()
-			, attributeNameEnd()
 			, attributeValueStart()
+			, attributesEnd()
 		{}
 
-		// remove
-		// hack to allow template engine to not specify nameSpace, but means input not valid xhtml
-		void AddNameSpace(std::string_view name, std::string_view nameSpace)
+		const NameSpaceManager & Manager() const
 		{
-			manager.Add(name, nameSpace);
+			return manager;
 		}
 
 		bool operator==(const Iterator & other) const
@@ -174,37 +159,37 @@ namespace GLib::Xml
 
 						case Xml::State::ElementName:
 						{
-							elementNameEnd = oldPtr;
+							elementName.second = oldPtr;
 							element.type = ElementType::Open;
 							if (newState == State::ElementAttributeSpace)
 							{
-								attributesStart = ptr;
-								attributesEnd = nullptr;
+								attributes.first = ptr;
+								attributes.second = nullptr;
 							}
 							break;
 						}
 						
 						case Xml::State::ElementEndName:
 						{
-							elementNameEnd = oldPtr;
+							elementName.second = oldPtr;
 							element.type = ElementType::Close;
 							break;
 						}
 
 						case Xml::State::ElementAttributeName:
 						{
-							attributeNameEnd = oldPtr;
+							attributeName.second = oldPtr;
 							break;
 						}
 
 						case Xml::State::ElementAttributeValueQuote:
 						case Xml::State::ElementAttributeValueSingleQuote:
 						{
-							manager.Check(Utils::ToStringView(attributeNameStart, attributeNameEnd),
+							manager.Push(Utils::ToStringView(attributeName),
 								Utils::ToStringView(attributeValueStart+1, oldPtr), elementStack.size());
 
 							// better test? currently writes ones per attr
-							attributesEnd = ptr;
+							attributes.second = ptr;
 							break;
 						}
 
@@ -214,19 +199,15 @@ namespace GLib::Xml
 					switch (newState)
 					{
 						case Xml::State::ElementName:
+						case Xml::State::ElementEndName:
 						{
-							// now could be comment
-							elementNameStart = oldPtr;
+							elementName.first = oldPtr;
 							break;
 						}
 
 						case Xml::State::Bang:
-							elementNameStart = nullptr;
-							break;
-
-						case Xml::State::ElementEndName:
 						{
-							elementNameStart = oldPtr;
+							elementName.first = nullptr;
 							break;
 						}
 
@@ -238,7 +219,7 @@ namespace GLib::Xml
 
 						case Xml::State::ElementAttributeName:
 						{
-							attributeNameStart = oldPtr;
+							attributeName.first = oldPtr;
 							break;
 						}
 
@@ -254,7 +235,7 @@ namespace GLib::Xml
 							// bug: white space at end is not in outerXml...
 							// don't yield for !doctype atm
 							// just set a member value for now?
-							if (elementNameStart)
+							if (elementName.first)
 							{
 								ProcessElement(ptr);
 								start = ptr;
@@ -269,31 +250,24 @@ namespace GLib::Xml
 			}
 		}
 
-		void ProcessNameSpaces(const std::string_view & attributes) const
-		{
-			for (auto at : Attributes{attributes, &manager})
-			{
-				(void)at;
-			}
-		}
-
 		void ProcessElement(const char * outerXmlEnd)
 		{
-			std::string_view attributes;
-			if (attributesStart && attributesEnd && element.type != ElementType::Close)
-			{
-				attributes = Utils::ToStringView(attributesStart, attributesEnd);
-			}
-			ProcessNameSpaces(attributes);
-
-			auto qName = Utils::ToStringView(elementNameStart, elementNameEnd);
+			auto qName = Utils::ToStringView(elementName);
 			auto [name, nameSpace] = manager.Normalise(qName);
 
 			element.qName = qName;
 			element.name = name;
 			element.nameSpace = nameSpace;
 			element.outerXml = Utils::ToStringView(start, outerXmlEnd);
-			element.attributes = attributes;
+
+			if (attributes.first && attributes.second && element.type != ElementType::Close)
+			{
+				element.attributes = {Utils::ToStringView(attributes), &manager};
+			}
+			else
+			{
+				element.attributes = {};
+			}
 
 			switch (element.type)
 			{
@@ -352,7 +326,7 @@ namespace GLib::Xml
 			return Iterator{value.data(), value.size() + value.data()};
 		}
 
-		Iterator end()
+		Iterator end() const
 		{
 			(void)this;
 			return Iterator{};

@@ -163,6 +163,18 @@ BOOST_AUTO_TEST_CASE(XmlDeclMustBeFirst)
 	GLIB_CHECK_RUNTIME_EXCEPTION({ Xml::Parse(xml); }, "Illegal character: '?' (0x3f)");
 }
 
+BOOST_AUTO_TEST_CASE(DefaultNameSpaceToDo)
+{
+	Xml::Holder xml{ R"(<xml xmlns='foo'/>)"};
+
+	std::vector<Xml::Element> expected
+	{
+		// Xml::Element{"xml", "xml", "foo", Xml::ElementType::Empty, {}},
+		Xml::Element{"xml", "xml", "", Xml::ElementType::Empty, {}},
+	};
+	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), xml.begin(), xml.end());
+}
+
 BOOST_AUTO_TEST_CASE(NameSpace)
 {
 	Xml::Holder xml{ R"(<foo:x foo:bar='baz' xmlns:foo='foo-ns'/>)"};
@@ -457,6 +469,35 @@ BOOST_AUTO_TEST_CASE(EntitiesToDo)
 	GLIB_CHECK_RUNTIME_EXCEPTION({ Xml::Parse("<xml>&#x20ac;</xml>"); }, "Illegal character: '&' (0x26)");
 	GLIB_CHECK_RUNTIME_EXCEPTION({ Xml::Parse("<xml>&#8364;</xml>"); }, "Illegal character: '&' (0x26)");
 	GLIB_CHECK_RUNTIME_EXCEPTION({ Xml::Parse("<xml>&amp; &lt; &gt; &apos; &quot;</xml>"); }, "Illegal character: '&' (0x26)");
+}
+
+// move to another file
+BOOST_AUTO_TEST_CASE(AttributeIteratorAll)
+{
+	Xml::Attributes attr { "a='1' b='2' xmlns:foo='bar'" };
+
+	std::vector<Xml::Attribute> expected
+	{
+		{"a", "1", {}},
+		{"b", "2", {}},
+		{"xmlns:foo", "bar", {}},
+	};
+
+	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), attr.begin(), attr.end());
+}
+
+BOOST_AUTO_TEST_CASE(AttributeIteratorEnum)
+{
+	Xml::NameSpaceManager man;
+	Xml::Attributes attr { "a='1' b='2' xmlns:foo='bar'", &man };
+
+	std::vector<Xml::Attribute> expected
+	{
+		{"a", "1", {}},
+		{"b", "2", {}},
+	};
+
+	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), attr.begin(), attr.end());
 }
 
 BOOST_AUTO_TEST_SUITE_END()

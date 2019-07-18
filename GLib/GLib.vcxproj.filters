@@ -182,6 +182,9 @@
     <ClInclude Include="..\include\GLib\Xml\Element.h">
       <Filter>Include Files\Xml</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\GLib\PairHash.h">
+      <Filter>Include Files\Util</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="filelogger.cpp">

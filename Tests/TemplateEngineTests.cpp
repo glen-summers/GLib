@@ -21,6 +21,22 @@ BOOST_AUTO_TEST_CASE(SimpleProperty)
 	BOOST_TEST(stm.str() == "<xml attr='fred' />");
 }
 
+	BOOST_AUTO_TEST_CASE(Nop)
+	{
+		Evaluator evaluator;
+		std::ostringstream stm;
+		TemplateEngine::Generate(evaluator, "<xml xmlns:gl='glib'/>", stm);
+		BOOST_TEST(stm.str() == "<xml/>");
+	}
+
+	BOOST_AUTO_TEST_CASE(Nop2)
+	{
+		Evaluator evaluator;
+		std::ostringstream stm;
+		TemplateEngine::Generate(evaluator, "<xml xmlns:gl1='glib' xmlns:gl2='glib'/>", stm);
+		BOOST_TEST(stm.str() == "<xml/>");
+	}
+
 	BOOST_AUTO_TEST_CASE(ForEach)
 	{
 		const std::vector<User> users
@@ -30,7 +46,7 @@ BOOST_AUTO_TEST_CASE(SimpleProperty)
 		Evaluator evaluator;
 		evaluator.AddCollection("users", users);
 
-		auto xml = R"(<xml>
+		auto xml = R"(<xml xmlns:gl='glib'>
 <gl:block each="user : ${users}">
 	<User name='${user.name}' />
 </gl:block>
@@ -60,7 +76,7 @@ BOOST_AUTO_TEST_CASE(SimpleProperty)
 		Evaluator evaluator;
 		evaluator.AddCollection("users", users);
 
-		auto xml = R"(<xml>
+		auto xml = R"(<xml xmlns:gl='glib'>
 <gl:block each="user : ${users}">
 	<User name='${user.name}'>
 <gl:block each="hobby : ${user.hobbies}">
@@ -84,6 +100,32 @@ BOOST_AUTO_TEST_CASE(SimpleProperty)
 		<Hobby value='FE00'/>
 	</User>
 </xml>)";
+
+		BOOST_TEST(stm.str() == expected);
+	}
+
+	BOOST_AUTO_TEST_CASE(ReplaceAttribute)
+	{
+		Evaluator evaluator;
+
+		auto xml = "<xml xmlns:gl='glib' attr='value' gl:attr='replacedValue'/>";
+		auto expected = "<xml attr='replacedValue' />";
+
+		std::ostringstream stm;
+		TemplateEngine::Generate(evaluator, xml, stm);
+
+		BOOST_TEST(stm.str() == expected);
+	}
+
+	BOOST_AUTO_TEST_CASE(ReplaceAttributeKeepsOtherXmlNs)
+	{
+		Evaluator evaluator;
+
+		auto xml = "<xml xmlns:gl='glib' xmlns:foo='bar' attr='value' gl:attr='replacedValue'/>";
+		auto expected = "<xml xmlns:foo='bar' attr='replacedValue' />";
+
+		std::ostringstream stm;
+		TemplateEngine::Generate(evaluator, xml, stm);
 
 		BOOST_TEST(stm.str() == expected);
 	}

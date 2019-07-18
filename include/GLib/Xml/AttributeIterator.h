@@ -13,22 +13,20 @@ namespace GLib::Xml
 	{
 		std::string_view name;
 		std::string_view value;
-		std::string_view nameSpace; // order?
+		std::string_view nameSpace;
 	};
 
 	class AttributeIterator
 	{
 		Xml::StateEngine engine;
-		const NameSpaceManager * const manager;
+		const NameSpaceManager * manager;
 		const char * ptr;
 		const char * end;
 		const char * currentPtr;
 
 		/////////// working data
-		const char * attributeNameStart; // use pair?
-		const char * attributeNameEnd;
-		const char * attributeValueStart; // use pair?
-		const char * attributeValueEnd;
+		Utils::PtrPair attributeName;
+		Utils::PtrPair attributeValue;
 		///////////
 
 	public:
@@ -71,17 +69,17 @@ namespace GLib::Xml
 
 		Attribute operator*() const
 		{
-			auto qName = Utils::ToStringView(attributeNameStart, attributeNameEnd);
-			auto value = Utils::ToStringView(attributeValueStart, attributeValueEnd);
+			auto qName = Utils::ToStringView(attributeName);
+			auto value = Utils::ToStringView(attributeValue);
 
-			if (!manager)
-			{
-				return { qName, value };
-			}
-			else
+			if (manager)
 			{
 				auto [name, nameSpace] = manager->Normalise(qName);
 				return { name, value, nameSpace};
+			}
+			else
+			{
+				return { qName, value, {} };
 			}
 		}
 
@@ -95,10 +93,9 @@ namespace GLib::Xml
 
 		void Advance()
 		{
-			attributeNameStart = attributeNameEnd = attributeValueStart = attributeValueEnd = nullptr;
-
+			attributeName = attributeValue = {};
 			currentPtr = ptr;
-			
+
 			if (!currentPtr)
 			{
 				throw std::runtime_error("++end");
@@ -128,19 +125,18 @@ namespace GLib::Xml
 					{
 						case Xml::State::ElementAttributeName:
 						{
-							attributeNameEnd = oldPtr;
+							attributeName.second = oldPtr;
 							break;
 						}
 
 						case Xml::State::ElementAttributeValueQuote:
 						case Xml::State::ElementAttributeValueSingleQuote:
 						{
-							attributeValueEnd = oldPtr;
-							if (!manager || !manager->IsNameSpace(Utils::ToStringView(attributeNameStart, attributeNameEnd)))
+							attributeValue.second = oldPtr;
+							if (!manager || !Xml::NameSpaceManager::IsDeclaration(Utils::ToStringView(attributeName)))
 							{
 								return;
 							}
-							break;
 						}
 
 						default:;
@@ -150,14 +146,14 @@ namespace GLib::Xml
 					{
 						case Xml::State::ElementAttributeName:
 						{
-							attributeNameStart = oldPtr;
+							attributeName.first = oldPtr;
 							break;
 						}
 
 						case Xml::State::ElementAttributeValueQuote:
 						case Xml::State::ElementAttributeValueSingleQuote:
 						{
-							attributeValueStart = ptr;
+							attributeValue.first = ptr;
 							break;
 						}
 

@@ -1,9 +1,9 @@
 #pragma once
 
 #include "GLib/Eval/Evaluator.h"
-
 #include "GLib/Xml/Iterator.h"
 #include "GLib/scope.h"
+#include "GLib/PairHash.h"
 
 #include <regex>
 
@@ -13,6 +13,11 @@ namespace GLib::Eval::TemplateEngine
 	{
 		inline static std::regex const varRegex { R"(^(\w+)\s:\s\$\{([\w\.]+)\}$)" };
 		inline static std::regex const propRegex{R"(\$\{([\w\.]+)\})"};
+		inline static constexpr const char NameSpace[] = "glib";
+		inline static constexpr const char Block[] = "block";
+		inline static constexpr const char Each[] = "each";
+
+		typedef std::unordered_map<std::pair<std::string_view, std::string_view>, Xml::Attribute, Util::PairHash> AttributeMap;
 
 		struct Node
 		{
@@ -25,6 +30,7 @@ namespace GLib::Eval::TemplateEngine
 			Node(Node * parent={}, std::string_view value={}) : parent(parent), value(value)
 			{}
 
+			// change this to an ostream model to help with small additions via attr replace 
 			void AddChild(std::string_view v={})
 			{
 				children.push_back({this, v});
@@ -37,28 +43,19 @@ namespace GLib::Eval::TemplateEngine
 			Node * current;
 
 		public:
-			Nodes(const std::string_view & xml) : current(&root)
+			Nodes(const Xml::Holder & holder) : current(&root)
 			{
-				Xml::Holder h{xml};
-		
-				auto it = h.begin();
-				auto end = h.end();
-
-				// avoid, need to suppress ns, need to change xml test scan to find glib ns and remove
-				it.AddNameSpace("gl", "glib");
-
-				for (; it != end; ++it)
+				for (auto it = holder.begin(), end = holder.end(); it != end; ++it)
 				{
 					const Xml::Element & e = *it;
-					if (e.nameSpace=="glib" && e.name=="block")
+					if (e.nameSpace == NameSpace && e.name == Block)
 					{
-						const auto & attrs = e.attributes;
 						switch (e.type)
 						{
 							case Xml::ElementType::Open:
 							{
-								auto eachIt = attrs.begin();
-								if (eachIt == attrs.end() || (*eachIt).name != "each")
+								auto eachIt = e.attributes.begin();
+								if (eachIt == e.attributes.end() || (*eachIt).name != Each)
 								{
 									throw std::runtime_error("No each attribute");
 								}
@@ -102,7 +99,84 @@ namespace GLib::Eval::TemplateEngine
 					}
 					else
 					{
-						current->AddChild(it->outerXml);
+						AttributeMap atMap;
+						bool replaced = false;
+						const auto & manager = it.Manager();
+
+						Xml::Attributes attributes { e.attributes.Value(), nullptr };
+						for (auto a : attributes)
+						{
+							if (!Xml::NameSpaceManager::IsDeclaration(a.name))
+							{
+								auto [name, nameSpace] = manager.Normalise(a.name);
+								if (nameSpace.empty())
+								{
+									atMap.emplace(std::make_pair(nameSpace, name), a);
+								}
+								else if (nameSpace == NameSpace)
+								{
+									auto existingIt = atMap.find(std::make_pair("",name));
+									if (existingIt == atMap.end())
+									{
+										// Throw() << "Attr not found : '" << name << '\''; ?
+										throw std::runtime_error(std::string("Attr not found : '") + std::string(name) + "'");
+									}
+									existingIt->second.value = a.value;
+									replaced = true;
+								}
+							}
+						}
+
+						if (replaced)
+						{
+							current->AddChild(Xml::Utils::ToStringView(e.outerXml.data(), e.attributes.Value().data()));
+
+							for (const auto & a : attributes)
+							{
+								std::string_view nameSpacePrefix;
+								if (Xml::NameSpaceManager::CheckForDeclaration(a.name, nameSpacePrefix))
+								{
+									auto ns = manager.Get(nameSpacePrefix);
+									if (ns == NameSpace)
+									{
+										continue;
+									}
+									current->AddChild(a.name);
+									current->AddChild("='");
+									current->AddChild(a.value);
+									current->AddChild("' ");
+								}
+								else
+								{
+									auto [name, nameSpace] = manager.Normalise(a.name);
+									if (nameSpace.empty())
+									{
+										current->AddChild(name);
+										current->AddChild("='");
+										current->AddChild(atMap[std::make_pair(nameSpace, name)].value);
+										current->AddChild("' ");
+									}
+								}
+							}
+							current->AddChild(Xml::Utils::ToStringView(e.attributes.Value().data()+e.attributes.Value().size(), e.outerXml.data()+e.outerXml.size()));
+						}
+						else
+						{
+							auto p = e.outerXml.data();
+							for (const Xml::Attribute & a : attributes)
+							{
+								std::string_view prefix;
+								if (Xml::NameSpaceManager::CheckForDeclaration(a.name, prefix))
+								{
+									if (manager.Get(prefix) == NameSpace)
+									{
+										current->AddChild(Xml::Utils::ToStringView(p, a.name.data()-1)); // -1 minus space prefix
+										p = a.value.data() + a.value.size() + 1; // +1 trailing quote
+									}
+								}
+							}
+							current->AddChild(Xml::Utils::ToStringView(p, e.outerXml.data()+e.outerXml.size()));
+						}
 					}
 				}
 			}

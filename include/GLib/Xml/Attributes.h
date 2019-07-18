@@ -7,11 +7,11 @@ namespace GLib::Xml
 {
 	class Attributes
 	{
-		const NameSpaceManager * manager;
 		std::string_view data;
+		const NameSpaceManager * manager;
 
 	public:
-		Attributes(std::string_view data={}, const NameSpaceManager * manager=nullptr)
+		Attributes(std::string_view data={}, const NameSpaceManager * manager={})
 			: data(data)
 			, manager(manager)
 		{}
@@ -30,5 +30,7 @@ namespace GLib::Xml
 		{
 			return data.empty();
 		}
+
+		const std::string_view & Value() const { return data; }
 	};
 }
