@@ -6,6 +6,29 @@
 #include "TestStructs.h"
 #include "TestUtils.h"
 
+struct Directory
+{
+	std::string name;
+	std::string trafficLight;
+	unsigned int percent;
+	unsigned int lines;
+	unsigned int coveredLines;
+};
+
+template <>
+struct GLib::Eval::Visitor<Directory>
+{
+	static void Visit(const Directory & dir, const std::string & propertyName, const ValueVisitor & f)
+	{
+		if (propertyName == "name") return f(Value(dir.name));
+		if (propertyName == "trafficLight") return f(Value(dir.trafficLight));
+		if (propertyName == "percent") return f(Value(dir.percent));
+		if (propertyName == "lines") return f(Value(dir.lines));
+		if (propertyName == "coveredLines") return f(Value(dir.coveredLines));
+		throw std::runtime_error(std::string("Unknown property : '") + propertyName + '\''); // bool return?
+	}
+};
+
 using namespace GLib::Eval;
 
 BOOST_AUTO_TEST_SUITE(TemplateEngineTests)
@@ -109,7 +132,7 @@ BOOST_AUTO_TEST_CASE(SimpleProperty)
 		Evaluator evaluator;
 
 		auto xml = "<xml xmlns:gl='glib' attr='value' gl:attr='replacedValue'/>";
-		auto expected = "<xml attr='replacedValue' />";
+		auto expected = R"(<xml attr="replacedValue" />)";
 
 		std::ostringstream stm;
 		TemplateEngine::Generate(evaluator, xml, stm);
@@ -122,12 +145,105 @@ BOOST_AUTO_TEST_CASE(SimpleProperty)
 		Evaluator evaluator;
 
 		auto xml = "<xml xmlns:gl='glib' xmlns:foo='bar' attr='value' gl:attr='replacedValue'/>";
-		auto expected = "<xml xmlns:foo='bar' attr='replacedValue' />";
+		auto expected = R"(<xml xmlns:foo="bar" attr="replacedValue" />)";
 
 		std::ostringstream stm;
 		TemplateEngine::Generate(evaluator, xml, stm);
 
 		BOOST_TEST(stm.str() == expected);
+	}
+
+	BOOST_AUTO_TEST_CASE(Diff)
+	{
+		Diff2("1234", "1234", 30);
+		GLIB_CHECK_RUNTIME_EXCEPTION({ Diff2("1234", "12345", 30); }, "Expected data at end missing: [5]");
+		GLIB_CHECK_RUNTIME_EXCEPTION({ Diff2("12345", "1234", 30); }, "Difference at position: 4 [5]");
+		GLIB_CHECK_RUNTIME_EXCEPTION({ Diff2("\t\n ", "123", 30); }, "Difference at position: 0 [\\t\\n\\s]");
+	}
+
+	BOOST_AUTO_TEST_CASE(Cov1)
+	{
+		Evaluator evaluator;
+		evaluator.Add("title", "Tests.exe");
+		evaluator.Add("styleSheet", "coverage.css");
+
+		std::vector<Directory> directories =
+		{ { "dir1","amber", 78, 278, 219 } };
+		evaluator.Add("directories", directories);
+
+		auto xml = R"(<!DOCTYPE html>
+<html xmlns:gl='glib'>
+ <head>
+  <meta charset="UTF-8"/>
+  <title>Coverage - ${title}</title>
+  <link rel="stylesheet" type="text/css" href="./coverage.css" gl:href="${styleSheet}"/>
+ </head>
+ <body>
+  <hr/>
+  <table cellpadding="1" cellspacing="1" border="0" class="centre">
+   <tr>
+    <td>Directory</td>
+    <td>Coverage</td>
+    <td>%</td>
+    <td>Covered lines</td>
+   </tr>
+<gl:block each="directory : ${directories}">
+   <tr>
+    <td>
+     <a href="${directory.name}/index.html">${directory.name}</a>
+    </td>
+    <td>
+     <div class="box">
+      <div class="${directory.trafficLight}" style="width:${directory.percent}px;"/>
+     </div>
+    </td>
+    <td>${directory.percent} %</td>
+    <td class="coverageNumber">${directory.coveredLines} / ${directory.lines}</td>
+   </tr>
+</gl:block>
+  </table>
+  <hr/>
+ </body>
+</html>
+)";
+
+		auto expected = R"(<!DOCTYPE html>
+<html>
+ <head>
+  <meta charset="UTF-8"/>
+  <title>Coverage - Tests.exe</title>
+  <link rel="stylesheet" type="text/css" href="coverage.css" />
+ </head>
+ <body>
+  <hr/>
+  <table cellpadding="1" cellspacing="1" border="0" class="centre">
+   <tr>
+    <td>Directory</td>
+    <td>Coverage</td>
+    <td>%</td>
+    <td>Covered lines</td>
+   </tr>
+   <tr>
+    <td>
+     <a href="dir1/index.html">dir1</a>
+    </td>
+    <td>
+     <div class="box">
+      <div class="amber" style="width:78px;"/>
+     </div>
+    </td>
+    <td>78 %</td>
+    <td class="coverageNumber">219 / 278</td>
+   </tr>
+  </table>
+  <hr/>
+ </body>
+</html>)";
+
+		std::ostringstream stm;
+		TemplateEngine::Generate(evaluator, xml, stm);
+
+		Diff2(stm.str(), expected, 30);
 	}
 
 BOOST_AUTO_TEST_SUITE_END()

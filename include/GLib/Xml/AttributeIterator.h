@@ -75,7 +75,7 @@ namespace GLib::Xml
 			if (manager)
 			{
 				auto [name, nameSpace] = manager->Normalise(qName);
-				return { name, value, nameSpace};
+				return { name, value, nameSpace };
 			}
 			else
 			{

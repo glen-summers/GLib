@@ -39,6 +39,7 @@ namespace GLib::Xml
 		Utils::PtrPair attributeName;
 		const char * attributeValueStart;
 		const char * attributesEnd; // could remove, use state change
+		bool contentClosed;
 		///////////
 
 		Element element;
@@ -58,6 +59,7 @@ namespace GLib::Xml
 			, start(begin)
 			, attributeValueStart()
 			, attributesEnd()
+			, contentClosed()
 		{
 			Advance();
 		}
@@ -69,6 +71,7 @@ namespace GLib::Xml
 			, start()
 			, attributeValueStart()
 			, attributesEnd()
+			, contentClosed()
 		{}
 
 		const NameSpaceManager & Manager() const
@@ -163,8 +166,7 @@ namespace GLib::Xml
 							element.type = ElementType::Open;
 							if (newState == State::ElementAttributeSpace)
 							{
-								attributes.first = ptr;
-								attributes.second = nullptr;
+								attributes = {ptr, nullptr};
 							}
 							break;
 						}
@@ -252,6 +254,11 @@ namespace GLib::Xml
 
 		void ProcessElement(const char * outerXmlEnd)
 		{
+			if (contentClosed)
+			{
+				throw std::runtime_error("Extra content at document end");
+			}
+
 			auto qName = Utils::ToStringView(elementName);
 			auto [name, nameSpace] = manager.Normalise(qName);
 
@@ -268,6 +275,7 @@ namespace GLib::Xml
 			{
 				element.attributes = {};
 			}
+			attributes = {};
 
 			switch (element.type)
 			{
@@ -281,16 +289,17 @@ namespace GLib::Xml
 				case ElementType::Empty:
 				{
 					element.depth = elementStack.size() + 1;
+					manager.Pop(elementStack.size());
+					if (element.depth == 1)
+					{
+						contentClosed = true;
+					}
 					break;
 				}
 
 				case ElementType::Close:
 				{
 					element.depth = elementStack.size();
-					if (element.depth == 0)
-					{
-						throw std::runtime_error("Extra content at document end");
-					}
 					const auto & top = elementStack.top();
 					if (element.qName != top)
 					{
@@ -298,7 +307,12 @@ namespace GLib::Xml
 						s << "Element mismatch: "  << element.qName << " != " << top;
 						throw std::runtime_error(s.str());
 					}
+					if (element.depth == 1)
+					{
+						contentClosed = true;
+					}
 					elementStack.pop();
+					manager.Pop(elementStack.size());
 					break;
 				}
 
@@ -307,8 +321,6 @@ namespace GLib::Xml
 					throw std::logic_error("Unexpected enumeration value");
 				}
 			}
-
-			manager.Pop(elementStack.size());
 		}
 	};
 

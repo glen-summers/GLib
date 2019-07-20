@@ -66,7 +66,7 @@ namespace GLib::Xml
 				auto nit = nameSpaces.find(nameSpaceStack.top().second.first);
 				if (nit==nameSpaces.end())
 				{
-					throw std::logic_error("!");
+					throw std::logic_error("Inconsistent namespace stack");
 				}
 				nit->second = nameSpaceStack.top().second.second;
 				nameSpaceStack.pop();

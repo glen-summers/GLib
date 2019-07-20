@@ -184,8 +184,6 @@ BOOST_AUTO_TEST_CASE(NameSpace)
 		{"foo:x", "x", "foo-ns", Xml::ElementType::Empty, {"foo:bar='baz'"}},
 	};
 	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), xml.begin(), xml.end());
-
-	//BOOST_TEST( (*(expected.begin()->attributes.begin()) == Xml::Attribute{"bar","baz","foo"}));
 }
 
 BOOST_AUTO_TEST_CASE(NameSpace2)
@@ -350,6 +348,11 @@ BOOST_AUTO_TEST_CASE(CDataOkWithRightSquareBrackets)
 
 BOOST_AUTO_TEST_CASE(ExtraContentAtEndThrows)
 {
+	GLIB_CHECK_RUNTIME_EXCEPTION({ Xml::Parse("<xml/><extra>"); }, "Extra content at document end");
+	GLIB_CHECK_RUNTIME_EXCEPTION({ Xml::Parse("<xml/>    <extra>"); }, "Extra content at document end");
+	GLIB_CHECK_RUNTIME_EXCEPTION({ Xml::Parse("<xml/>  <!-- comment -->  <extra>"); }, "Extra content at document end");
+
+	GLIB_CHECK_RUNTIME_EXCEPTION({ Xml::Parse("<xml/><extra/>"); }, "Extra content at document end");
 	GLIB_CHECK_RUNTIME_EXCEPTION({ Xml::Parse("<xml/></extra>"); }, "Extra content at document end");
 }
 

@@ -30,7 +30,6 @@ namespace GLib::Eval::TemplateEngine
 			Node(Node * parent={}, std::string_view value={}) : parent(parent), value(value)
 			{}
 
-			// change this to an ostream model to help with small additions via attr replace 
 			void AddChild(std::string_view v={})
 			{
 				children.push_back({this, v});
@@ -141,20 +140,22 @@ namespace GLib::Eval::TemplateEngine
 									{
 										continue;
 									}
+									// preserve quote type?
 									current->AddChild(a.name);
-									current->AddChild("='");
+									current->AddChild("=\"");
 									current->AddChild(a.value);
-									current->AddChild("' ");
+									current->AddChild("\" ");
 								}
 								else
 								{
 									auto [name, nameSpace] = manager.Normalise(a.name);
 									if (nameSpace.empty())
 									{
+										// preserve quote type?
 										current->AddChild(name);
-										current->AddChild("='");
+										current->AddChild("=\"");
 										current->AddChild(atMap[std::make_pair(nameSpace, name)].value);
-										current->AddChild("' ");
+										current->AddChild("\" ");
 									}
 								}
 							}
