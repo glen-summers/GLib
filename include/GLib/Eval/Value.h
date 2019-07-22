@@ -82,9 +82,10 @@ namespace GLib::Eval
 		static std::string Visit(const Value & value, const std::string & propertyName, const ValueVisitor & visitor)
 		{
 			(void)value;
-			(void)propertyName;
 			(void)visitor;
-			throw std::runtime_error(std::string("No accessor defined for : ") + Compat::Unmangle(typeid(Value).name()));
+
+			throw std::runtime_error(std::string("No accessor defined for property: '")
+				+ propertyName + "', type:'" + Compat::Unmangle(typeid(Value).name()) + '\'');
 		}
 	};
 }

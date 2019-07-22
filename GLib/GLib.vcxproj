@@ -175,6 +175,7 @@
     <ClInclude Include="..\include\GLib\win\FormatErrorMessage.h" />
     <ClInclude Include="..\include\GLib\Win\Handle.h" />
     <ClInclude Include="..\include\GLib\win\Process.h" />
+    <ClInclude Include="..\include\GLib\Win\Resources.h" />
     <ClInclude Include="..\include\GLib\Win\SimpleCom.h" />
     <ClInclude Include="..\include\GLib\Win\Symbols.h" />
     <ClInclude Include="..\include\GLib\Win\Uuid.h" />

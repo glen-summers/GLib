@@ -10,7 +10,7 @@ struct Directory
 {
 	std::string name;
 	std::string trafficLight;
-	unsigned int percent;
+	unsigned int coveragePercent;
 	unsigned int lines;
 	unsigned int coveredLines;
 };
@@ -22,7 +22,7 @@ struct GLib::Eval::Visitor<Directory>
 	{
 		if (propertyName == "name") return f(Value(dir.name));
 		if (propertyName == "trafficLight") return f(Value(dir.trafficLight));
-		if (propertyName == "percent") return f(Value(dir.percent));
+		if (propertyName == "coveragePercent") return f(Value(dir.coveragePercent));
 		if (propertyName == "lines") return f(Value(dir.lines));
 		if (propertyName == "coveredLines") return f(Value(dir.coveredLines));
 		throw std::runtime_error(std::string("Unknown property : '") + propertyName + '\''); // bool return?
@@ -194,10 +194,10 @@ BOOST_AUTO_TEST_CASE(SimpleProperty)
     </td>
     <td>
      <div class="box">
-      <div class="${directory.trafficLight}" style="width:${directory.percent}px;"/>
+      <div class="${directory.trafficLight}" style="width:${directory.coveragePercent}px;"/>
      </div>
     </td>
-    <td>${directory.percent} %</td>
+    <td>${directory.coveragePercent} %</td>
     <td class="coverageNumber">${directory.coveredLines} / ${directory.lines}</td>
    </tr>
 </gl:block>

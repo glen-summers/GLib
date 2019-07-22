@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:gl="glib">
+<head>
+	<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+	<title>Coverage - ${title}</title>
+	<link rel="stylesheet" type="text/css" href="./coverage.css" gl:href="${styleSheet}" />
+</head>
+<body>
+	<hr />
+	<table cellpadding="0" cellspacing="0" border="0" width="100%" class="centre">
+		<tr>
+			<td class="title">Coverage report</td>
+		</tr>
+		<tr>
+			<td>
+				<table cellpadding="1" cellspacing="1" border="0" class="centre">
+					<tr>
+						<td>Coverage</td>
+						<td>%</td>
+						<td>Covered lines</td>
+					</tr>
+					<tr>
+						<td>
+							<div class="box">
+								<div class="green" style="width:75%" gl:class="${coverageStyle}" gl:style="width:${coveragePercent}px;"/>
+							</div>
+						</td>
+						<td>${coveragePercent} %</td>
+						<td class="coverageNumber">${coveredLines} / ${coverableLines}</td>
+					</tr>
+				</table>
+				<hr />
+				<table cellpadding="0" cellspacing="0" border="0" width="100%">
+<tr><td><pre>
+<gl:block each="line : ${lines}">
+<span class="${line.style}"><span class="line">${line.number} : </span>${line.text}</span>
+</gl:block>
+</pre></td></tr>
+				</table>
+				<hr />
+			</td>
+		</tr>
+	</table>
+</body>
+</html>

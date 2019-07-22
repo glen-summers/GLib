@@ -145,11 +145,13 @@
   <ItemGroup>
     <ClInclude Include="Address.h" />
     <ClInclude Include="Coverage.h" />
+    <ClInclude Include="Directory.h" />
     <ClInclude Include="FileCoverageData.h" />
     <ClInclude Include="Function.h" />
     <ClInclude Include="HtmlPrinter.h" />
     <ClInclude Include="HtmlReport.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="RootDirs.h" />
     <ClInclude Include="Types.h" />
   </ItemGroup>
@@ -163,6 +165,14 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Coverage.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Template\coverage.css" />
+    <None Include="Template\directory.html" />
+    <None Include="Template\file.html" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

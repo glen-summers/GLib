@@ -305,6 +305,10 @@ void Coverage::CreateXmlReport(const std::map<ULONG, Function> & indexToFunction
 
 	create_directories(reportPath);
 	std::ofstream fs(reportPath / "Coverage.xml");
+	if(!fs)
+	{
+		throw std::runtime_error("Unable to create file");
+	}
 	fs << p.Xml();
 }
 

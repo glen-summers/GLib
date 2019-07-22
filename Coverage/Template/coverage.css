@@ -1,0 +1,66 @@
+body {
+	color: #000000;
+	background-color: #FFFFFF;
+}
+
+hr {
+	display: block;
+	height: 2px;
+	border: 0;
+	border-top: 1px solid blue;
+	margin: 1em 0;
+	padding: 0;
+}
+
+table.centre {
+	margin: auto;
+}
+
+td.title {
+	text-align: center;
+	font-size: 18pt;
+}
+
+table {
+	border: none;
+	border-collapse: collapse;
+	margin: 0;
+	padding: 0;
+}
+
+td.coverageNumber {
+	text-align: right;
+}
+
+span.line {
+	color: blue;
+}
+
+span.cov {
+	background-color: #DCF4DC;
+	margin: 0;
+	padding: 0;
+}
+
+span.ncov {
+	background-color: #F7DEDE;
+	margin: 0;
+	padding: 0;
+}
+
+div.box {
+	width:100px; height:10px; border:1px solid #000;
+	margin: auto;
+}
+
+div.red {
+	height:100%; background-color: #CE1620;
+}
+
+div.amber {
+	height:100%; background-color: #FF7518;
+}
+
+div.green {
+	height:100%; background-color: #03C03C;
+}

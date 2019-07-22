@@ -171,7 +171,7 @@ BOOST_AUTO_TEST_SUITE(EvaluatorTests)
 		GLib::Eval::Evaluator evaluator;
 		evaluator.Add("HasNoVisitor", HasNoVisitor{});
 		GLIB_CHECK_RUNTIME_EXCEPTION({ (void)evaluator.Evaluate("HasNoVisitor.FuBar"); },
-			"No accessor defined for : HasNoVisitor");
+			"No accessor defined for property: 'FuBar', type:'HasNoVisitor'");
 		;
 	}
 

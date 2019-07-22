@@ -10,41 +10,39 @@ class FileCoverageData
 	unsigned int coveredLines;
 	std::map<unsigned int, unsigned int> lineCoverage;
 
-	public:
-		FileCoverageData(std::filesystem::path path)
-			: path(std::move(path))
-			, coveredLines()
-		{}
+public:
+	FileCoverageData(std::filesystem::path path)
+		: path(std::move(path))
+		, coveredLines()
+	{}
 
-		void AddLine(unsigned int line, bool covered)
+	void AddLine(unsigned int line, bool covered)
+	{
+		unsigned int & hitCount = lineCoverage[line];
+		if (covered && ++hitCount == 1)
 		{
-			size_t const hitCount = lineCoverage[line] += covered ? 1 : 0;
-			if (covered && hitCount == 1)
-			{
-				++coveredLines;
-			}
+			++coveredLines;
 		}
+	}
 
-		const std::filesystem::path & Path() const
-		{
-			return path;
-		}
+	const std::filesystem::path & Path() const
+	{
+		return path;
+	}
 
-		unsigned int CoveredLines() const
-		{
-			return coveredLines;
-		}
+	unsigned int CoveredLines() const
+	{
+		return coveredLines;
+	}
 
-		unsigned int CoverableLines() const
-		{
-			return static_cast<unsigned int>(lineCoverage.size());
-		}
+	unsigned int CoverableLines() const
+	{
+		return static_cast<unsigned int>(lineCoverage.size());
+	}
 
-		const std::map<unsigned int, unsigned int> & LineCoverage() const
-		{
-			return lineCoverage;
-		}
-
-	
+	const std::map<unsigned int, unsigned int> & LineCoverage() const
+	{
+		return lineCoverage;
+	}
 };
 

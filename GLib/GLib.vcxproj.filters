@@ -185,6 +185,9 @@
     <ClInclude Include="..\include\GLib\PairHash.h">
       <Filter>Include Files\Util</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\GLib\Win\Resources.h">
+      <Filter>Include Files\Win</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="filelogger.cpp">

@@ -19,20 +19,60 @@ namespace GLib::Eval::TemplateEngine
 
 		typedef std::unordered_map<std::pair<std::string_view, std::string_view>, Xml::Attribute, Util::PairHash> AttributeMap;
 
-		struct Node
+		class Node
 		{
 			Node * const parent;
 			std::string_view value;
 			std::list<Node> children;
 			std::string variable;
-			std::string  enumeration;
+			std::string enumeration;
 
-			Node(Node * parent={}, std::string_view value={}) : parent(parent), value(value)
+		public:
+			Node() : parent{}
 			{}
 
-			void AddChild(std::string_view v={})
+			Node(Node * parent, std::string_view value) : parent(parent), value(value)
+			{}
+
+			Node(Node * parent, std::string variable, std::string enumeration)
+				: parent(parent), variable(variable), enumeration(enumeration)
+			{}
+
+			Node * Parent() const
 			{
-				children.push_back({this, v});
+				return parent;
+			}
+
+			const std::string_view & Value() const
+			{
+				return value;
+			}
+
+			const std::string & Variable() const
+			{
+				return variable;
+			}
+
+			const std::string & Enumeration() const
+			{
+				return enumeration;
+			}
+
+			const std::list<Node> & Children() const
+			{
+				return children;
+			}
+
+			Node * AddFragment(const std::string_view & fragment={})
+			{
+				children.push_back({this, fragment});
+				return &children.back();
+			}
+
+			Node * AddEnum(const std::string & var, const std::string & e)
+			{
+				children.push_back({this, var, e});
+				return &children.back();
 			}
 		};
 
@@ -67,11 +107,7 @@ namespace GLib::Eval::TemplateEngine
 									throw std::runtime_error("Error in var : " + var);
 								}
 
-								current->AddChild();
-								current = &current->children.back();
-
-								current->variable = m[1];
-								current->enumeration = m[2];
+								current = current->AddEnum(m[1], m[2]);
 								break;
 							}
 
@@ -86,7 +122,7 @@ namespace GLib::Eval::TemplateEngine
 								{
 									throw std::logic_error("No parent node");
 								}
-								current = current->parent;
+								current = current->Parent();
 								break;
 							}
 
@@ -128,7 +164,7 @@ namespace GLib::Eval::TemplateEngine
 
 						if (replaced)
 						{
-							current->AddChild(Xml::Utils::ToStringView(e.outerXml.data(), e.attributes.Value().data()));
+							current->AddFragment(Xml::Utils::ToStringView(e.outerXml.data(), e.attributes.Value().data()));
 
 							for (const auto & a : attributes)
 							{
@@ -141,10 +177,10 @@ namespace GLib::Eval::TemplateEngine
 										continue;
 									}
 									// preserve quote type?
-									current->AddChild(a.name);
-									current->AddChild("=\"");
-									current->AddChild(a.value);
-									current->AddChild("\" ");
+									current->AddFragment(a.name);
+									current->AddFragment("=\"");
+									current->AddFragment(a.value);
+									current->AddFragment("\" ");
 								}
 								else
 								{
@@ -152,14 +188,14 @@ namespace GLib::Eval::TemplateEngine
 									if (nameSpace.empty())
 									{
 										// preserve quote type?
-										current->AddChild(name);
-										current->AddChild("=\"");
-										current->AddChild(atMap[std::make_pair(nameSpace, name)].value);
-										current->AddChild("\" ");
+										current->AddFragment(name);
+										current->AddFragment("=\"");
+										current->AddFragment(atMap[std::make_pair(nameSpace, name)].value);
+										current->AddFragment("\" ");
 									}
 								}
 							}
-							current->AddChild(Xml::Utils::ToStringView(e.attributes.Value().data()+e.attributes.Value().size(), e.outerXml.data()+e.outerXml.size()));
+							current->AddFragment(Xml::Utils::ToStringView(e.attributes.Value().data()+e.attributes.Value().size(), e.outerXml.data()+e.outerXml.size()));
 						}
 						else
 						{
@@ -171,12 +207,12 @@ namespace GLib::Eval::TemplateEngine
 								{
 									if (manager.Get(prefix) == NameSpace)
 									{
-										current->AddChild(Xml::Utils::ToStringView(p, a.name.data()-1)); // -1 minus space prefix
+										current->AddFragment(Xml::Utils::ToStringView(p, a.name.data()-1)); // -1 minus space prefix
 										p = a.value.data() + a.value.size() + 1; // +1 trailing quote
 									}
 								}
 							}
-							current->AddChild(Xml::Utils::ToStringView(p, e.outerXml.data()+e.outerXml.size()));
+							current->AddFragment(Xml::Utils::ToStringView(p, e.outerXml.data()+e.outerXml.size()));
 						}
 					}
 				}
@@ -190,14 +226,14 @@ namespace GLib::Eval::TemplateEngine
 
 		inline void Generate(Evaluator & evaluator, const Node & node, std::ostream & out)
 		{
-			if (!node.enumeration.empty())
+			if (!node.Enumeration().empty())
 			{
-				evaluator.ForEach(node.enumeration, [&](const ValueBase & value)
+				evaluator.ForEach(node.Enumeration(), [&](const ValueBase & value)
 				{
-					evaluator.Push(node.variable, value);
-					SCOPE(pop, [&](){evaluator.Pop(node.variable);});
+					evaluator.Push(node.Variable(), value);
+					SCOPE(pop, [&](){evaluator.Pop(node.Variable());});
 
-					for (const auto & child : node.children)
+					for (const auto & child : node.Children())
 					{
 						Generate(evaluator, child, out);
 					}
@@ -205,14 +241,14 @@ namespace GLib::Eval::TemplateEngine
 				return;
 			}
 
-			if (!node.value.empty())
+			if (!node.Value().empty())
 			{
 				std::regex r(propRegex);
-				std::cregex_iterator it(node.value.data(), node.value.data() + node.value.size(), r);
+				std::cregex_iterator it(node.Value().data(), node.Value().data() + node.Value().size(), r);
 				auto end = std::cregex_iterator{};
 				if (it==end)
 				{
-					out << node.value;
+					out << node.Value();
 				}
 				else
 				{
@@ -231,7 +267,7 @@ namespace GLib::Eval::TemplateEngine
 				}
 			}
 
-			for (const auto & child : node.children)
+			for (const auto & child : node.Children())
 			{
 				Generate(evaluator, child, out);
 			}
