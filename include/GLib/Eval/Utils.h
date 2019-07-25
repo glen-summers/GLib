@@ -34,7 +34,7 @@ namespace GLib::Eval::Utils
 			static const bool value = decltype(test<T>(0))::value;
 		};
 
-		// basic container test has const iterator, todo add cbegin\cend etc.
+		// basic container test has iterator, add begin\end.
 		template<typename T>
 		struct IsContainer
 		{
@@ -71,6 +71,6 @@ namespace GLib::Eval::Utils
 
 	inline std::string ToString(const std::string & value)
 	{
-	 	return value;
+		return value;
 	}
 }

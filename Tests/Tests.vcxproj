@@ -166,6 +166,7 @@
     <ClCompile Include="NoCaseTests.cpp" />
     <ClCompile Include="ScopeTests.cpp" />
     <ClCompile Include="SplitTests.cpp" />
+    <ClCompile Include="StackOrHeapTests.cpp" />
     <ClCompile Include="TemplateEngineTests.cpp" />
     <ClCompile Include="TypeFilterTests.cpp" />
     <ClCompile Include="WinTests.cpp" />

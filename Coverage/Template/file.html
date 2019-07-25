@@ -7,13 +7,13 @@
 </head>
 <body>
 	<hr />
-	<table cellpadding="0" cellspacing="0" border="0" width="100%" class="centre">
+	<table width="100%" class="centre">
 		<tr>
 			<td class="title">Coverage report</td>
 		</tr>
 		<tr>
 			<td>
-				<table cellpadding="1" cellspacing="1" border="0" class="centre">
+				<table class="centre">
 					<tr>
 						<td>Coverage</td>
 						<td>%</td>
@@ -22,7 +22,7 @@
 					<tr>
 						<td>
 							<div class="box">
-								<div class="green" style="width:75%" gl:class="${coverageStyle}" gl:style="width:${coveragePercent}px;"/>
+								<div class="green" style="width:75%" gl:class="${coverageStyle}" gl:style="width:${coveragePercent}px;"></div>
 							</div>
 						</td>
 						<td>${coveragePercent} %</td>
@@ -30,12 +30,16 @@
 					</tr>
 				</table>
 				<hr />
-				<table cellpadding="0" cellspacing="0" border="0" width="100%">
-<tr><td><pre>
+				<table width="100%">
+					<tr>
+						<td>
+<pre>
 <gl:block each="line : ${lines}">
-<span class="${line.style}"><span class="line">${line.number} : </span>${line.text}</span>
+<span class="cov" gl:class="${line.style}"><span class="line">${line.number} : </span>${line.text}</span>
 </gl:block>
-</pre></td></tr>
+</pre>
+						</td>
+					</tr>
 				</table>
 				<hr />
 			</td>

@@ -4,7 +4,7 @@
 
 namespace GLib::Eval
 {
-	// try with just value no collection, just use Utils::ForEach specialisation
+	// try with just value no collection, just use ForEach specialisation
 	struct CollectionBase : ValueBase
 	{
 		CollectionBase() = default;
@@ -12,7 +12,7 @@ namespace GLib::Eval
 		CollectionBase(CollectionBase &&) = delete;
 		CollectionBase & operator=(const CollectionBase &) = delete;
 		CollectionBase & operator=(CollectionBase &&) = delete;
-		virtual ~CollectionBase() = default;
+		~CollectionBase() override = default;
 	};
 
 	template<typename Container> class Collection : public CollectionBase

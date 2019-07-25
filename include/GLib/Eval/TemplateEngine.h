@@ -12,12 +12,12 @@ namespace GLib::Eval::TemplateEngine
 	namespace Detail
 	{
 		inline static std::regex const varRegex { R"(^(\w+)\s:\s\$\{([\w\.]+)\}$)" };
-		inline static std::regex const propRegex{R"(\$\{([\w\.]+)\})"};
-		inline static constexpr const char NameSpace[] = "glib";
-		inline static constexpr const char Block[] = "block";
-		inline static constexpr const char Each[] = "each";
+		inline static std::regex const propRegex { R"(\$\{([\w\.]+)\})" };
+		inline static constexpr char NameSpace[] = "glib";
+		inline static constexpr char Block[] = "block";
+		inline static constexpr char Each[] = "each";
 
-		typedef std::unordered_map<std::pair<std::string_view, std::string_view>, Xml::Attribute, Util::PairHash> AttributeMap;
+		using AttributeMap = std::unordered_map<std::pair<std::string_view, std::string_view>, Xml::Attribute, Util::PairHash>;
 
 		class Node
 		{
@@ -28,14 +28,15 @@ namespace GLib::Eval::TemplateEngine
 			std::string enumeration;
 
 		public:
-			Node() : parent{}
+			Node()
+				: parent {}
 			{}
 
 			Node(Node * parent, std::string_view value) : parent(parent), value(value)
 			{}
 
 			Node(Node * parent, std::string variable, std::string enumeration)
-				: parent(parent), variable(variable), enumeration(enumeration)
+				: parent(parent), variable(move(variable)), enumeration(move(enumeration))
 			{}
 
 			Node * Parent() const
@@ -65,13 +66,13 @@ namespace GLib::Eval::TemplateEngine
 
 			Node * AddFragment(const std::string_view & fragment={})
 			{
-				children.push_back({this, fragment});
+				children.emplace_back(this, fragment);
 				return &children.back();
 			}
 
-			Node * AddEnum(const std::string & var, const std::string & e)
+			Node * AddEnumeration(const std::string & var, const std::string & e)
 			{
-				children.push_back({this, var, e});
+				children.emplace_back(this, var, e);
 				return &children.back();
 			}
 		};
@@ -99,15 +100,15 @@ namespace GLib::Eval::TemplateEngine
 									throw std::runtime_error("No each attribute");
 								}
 
-								auto var = std::string{(*eachIt).value}; // avoid copy to string?
-								std::smatch m;
-								std::regex_search(var, m, varRegex);
+								const std::string_view & var = (*eachIt).value;
+								std::match_results<std::string_view::const_iterator> m;
+								std::regex_search(var.begin(), var.end(), m, varRegex);
 								if (m.empty())
 								{
-									throw std::runtime_error("Error in var : " + var);
+									throw std::runtime_error("Error in var : " + std::string(var));
 								}
 
-								current = current->AddEnum(m[1], m[2]);
+								current = current->AddEnumeration(m[1], m[2]);
 								break;
 							}
 
@@ -153,8 +154,7 @@ namespace GLib::Eval::TemplateEngine
 									auto existingIt = atMap.find(std::make_pair("",name));
 									if (existingIt == atMap.end())
 									{
-										// Throw() << "Attr not found : '" << name << '\''; ?
-										throw std::runtime_error(std::string("Attr not found : '") + std::string(name) + "'");
+										throw std::runtime_error(std::string("Attribute not found : '") + std::string(name) + "'");
 									}
 									existingIt->second.value = a.value;
 									replaced = true;

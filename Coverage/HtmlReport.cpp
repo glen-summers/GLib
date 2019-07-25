@@ -25,12 +25,7 @@ namespace
 		GLib::Win::LoadResourceFile(nullptr, id, RT_HTML, sz, p);
 		std::string s{reinterpret_cast<const char *>(p), sz};
 		s.erase(std::remove(s.begin(), s.end(), '\r'), s.end());
-		return move(s);
-	}
-
-	std::filesystem::path Append(std::filesystem::path p, const wchar_t * appendage)
-	{
-		return p.replace_filename(p.filename().wstring() + appendage);
+		return s;
 	}
 }
 
@@ -68,8 +63,6 @@ HtmlReport::HtmlReport(const std::string & title, const std::filesystem::path & 
 		std::filesystem::path subPath = Reduce(data.Path(), rootPaths);
 		std::filesystem::path targetPath = (htmlPath / subPath).concat(L".html");
 		GenerateSourceFile(targetPath, "Coverage - " + subPath.u8string(), data);
-
-		//create_directories(htmlPath / subPath); // until GenerateSourceFile impl
 
 		index[subPath.parent_path()].push_back(data);
 	}
@@ -209,7 +202,7 @@ void HtmlReport::GenerateSourceFile(std::filesystem::path & path, const std::str
 
 	GLib::Eval::Evaluator e;
 
-	auto css = (std::filesystem::relative(htmlPath, path.parent_path()) / "coverage.css").generic_u8string();
+	auto css = (relative(htmlPath, path.parent_path()) / "coverage.css").generic_u8string();
 	auto coveragePercent = static_cast<unsigned int>(data.CoveredLines()*100 / lc.size());
 
 	e.Add("styleSheet", css);
@@ -219,14 +212,6 @@ void HtmlReport::GenerateSourceFile(std::filesystem::path & path, const std::str
 	e.Add("coverableLines", lc.size());
 	e.Add("coveragePercent", coveragePercent);
 
-	/*for (unsigned int line = 0; line < lines.size(); ++line)
-	{
-		auto & l = lines[line];
-		l.number = line + 1;
-		std::getline(in, l.text);
-		l.style = lc.find(line) != lc.end() ? "covered" : "notCovered";
-	}*/
-
 	e.AddCollection("lines", lines);
 
 	create_directories(path.parent_path());
@@ -235,9 +220,6 @@ void HtmlReport::GenerateSourceFile(std::filesystem::path & path, const std::str
 	{
 		throw std::runtime_error("Unable to create file");
 	}
-
-	// convert FileCoverageData to something? get working
-	// then try using an adapter?
 
 	GLib::Eval::TemplateEngine::Generate(e, fileTemplate, out);
 }

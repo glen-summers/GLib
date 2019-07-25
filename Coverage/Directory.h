@@ -3,6 +3,7 @@
 #include "GLib/Eval/Value.h"
 
 #include <string>
+#include <utility>
 
 // move?
 inline const char * CoverageStyle(unsigned int coveragePercent)
@@ -26,8 +27,8 @@ class Directory
 
 public:
 	Directory(std::string name, std::string link, unsigned int coveredLines, unsigned int coverableLines)
-		: name(name)
-		, link(link)
+		: name(move(name))
+		, link(move(link))
 		, coveredLines(coveredLines)
 		, coverableLines(coverableLines)
 	{}

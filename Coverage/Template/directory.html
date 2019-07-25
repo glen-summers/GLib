@@ -1,35 +1,35 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:gl="glib">
- <head>
-  <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
-  <title>Coverage - ${title}</title>
-  <link rel="stylesheet" type="text/css" href="./coverage.css" gl:href="${styleSheet}"/>
- </head>
- <body>
-  <hr/>
-  <table cellpadding="1" cellspacing="1" class="centre">
-   <tr>
-    <td>Source</td>
-    <td>Coverage</td>
-    <td>%</td>
-    <td>Covered lines</td>
-   </tr>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+		<title>Coverage - ${title}</title>
+		<link rel="stylesheet" type="text/css" href="./coverage.css" gl:href="${styleSheet}"/>
+	</head>
+	<body>
+		<hr/>
+		<table class="centre">
+			<tr>
+				<td>Source</td>
+				<td>Coverage</td>
+				<td>%</td>
+				<td>Covered lines</td>
+			</tr>
 <gl:block each="directory : ${directories}">
-   <tr>
-    <td>
-     <a href="SubDir" gl:href="${directory.link}">${directory.name}</a>
-    </td>
-    <td>
-     <div class="box">
-      <div class="green" style="width:75%" gl:class="${directory.coverageStyle}" gl:style="width:${directory.coveragePercent}px;">
-      </div>
-     </div>
-    </td>
-    <td>${directory.coveragePercent} %</td>
-    <td class="coverageNumber">${directory.coveredLines} / ${directory.coverableLines}</td>
-   </tr>
+			<tr>
+				<td>
+					<a href="file.html" gl:href="${directory.link}">${directory.name}</a>
+				</td>
+				<td>
+					<div class="box">
+						<div class="green" style="width:75%" gl:class="${directory.coverageStyle}" gl:style="width:${directory.coveragePercent}px;">
+						</div>
+					</div>
+				</td>
+				<td>${directory.coveragePercent} %</td>
+				<td class="coverageNumber">${directory.coveredLines} / ${directory.coverableLines}</td>
+			</tr>
 </gl:block>
-  </table>
-  <hr/>
- </body>
+		</table>
+		<hr/>
+	</body>
 </html>

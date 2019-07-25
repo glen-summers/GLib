@@ -10,9 +10,9 @@
 namespace GLib::Eval
 {
 	struct ValueBase;
-	typedef std::unique_ptr<ValueBase> ValuePtr;
-	typedef std::function<void(const ValueBase &)> ValueVisitor;
-	template<typename ValueType> struct Value;
+	using ValuePtr = std::unique_ptr<ValueBase>;
+	using ValueVisitor = std::function<void (const ValueBase &)>;
+	template<typename ValueType> class Value;
 	template<typename Value> struct Visitor;
 
 	template <typename ValueType> ValuePtr MakeValue(ValueType value)
@@ -46,20 +46,20 @@ namespace GLib::Eval
 		ValueBase & operator=(ValueBase &&) = delete;
 		virtual ~ValueBase() = default;
 
-		virtual std::string ToString() const = 0; // +format, or ostream& ?
+		virtual std::string ToString() const = 0; // +format/stream?
 
 		virtual void VisitProperty(const std::string & propertyName, const ValueVisitor & f) const = 0;
 		virtual void ForEach(const ValueVisitor & f) const = 0;
 	};
 
-	template<typename ValueType> struct Value : ValueBase
+	template<typename ValueType> class Value : public ValueBase
 	{
 		ValueType value;
 
+	public:
 		Value(ValueType value)
 			: value(std::move(value))
-		{
-		}
+		{}
 
 		std::string ToString() const override
 		{
@@ -73,7 +73,7 @@ namespace GLib::Eval
 
 		void ForEach(const ValueVisitor & f) const override
 		{
-			return GLib::Eval::ForEach(value, f);
+			return Eval::ForEach(value, f);
 		}
 	};
 

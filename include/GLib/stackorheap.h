@@ -2,6 +2,8 @@
 #define STACK_OR_HEAP_H
 
 #include <memory>
+#include <variant>
+#include <array>
 
 namespace GLib
 {
@@ -13,23 +15,17 @@ namespace GLib
 		class StackOrHeap
 		{
 			size_t heapSize;
-			union
-			{
-				T stack[StackElementCount];
-				std::unique_ptr<T[]> heap;
-			};
+			std::variant<std::array<T, StackElementCount>, std::unique_ptr<T[]>> storage;
 
 		public:
-			StackOrHeap() : heapSize{} {}
+			StackOrHeap() : heapSize{}
+			{}
+
 			StackOrHeap(const StackOrHeap &) = delete;
 			StackOrHeap & operator=(const StackOrHeap &) = delete;
 			StackOrHeap(StackOrHeap &&) = delete;
 			StackOrHeap & operator=(StackOrHeap &&) = delete;
-
-			~StackOrHeap()
-			{
-				DeleteHeap();
-			}
+			~StackOrHeap() = default;
 
 			void EnsureSize(size_t newElementCount)
 			{
@@ -40,37 +36,35 @@ namespace GLib
 				// could go back to stack if (heapInUse && newElementCount <= StackElementCount)
 			}
 
-			const T* Get() const { return GetPtr(); }
-			T* Get() { return const_cast<T*>(GetPtr()); }
+			size_t size() const
+			{
+				return GetSize();
+			}
 
-			const T* operator->() const { return Get(); }
-			T* operator->() { return Get(); }
+			T* Get()
+			{
+				return HeapInUse() ? std::get<1>(storage).get() : std::get<0>(storage).data();
+			}
 
-			size_t size() const { return GetSize(); }
-
-			const T * begin() const { return Get(); }
-			T * begin() { return Get(); }
-
-			const T * end() const { return Get() + size(); }
-			T * end() { return Get() + size(); }
+			const T* Get() const
+			{
+				return HeapInUse() ? std::get<1>(storage).get() : std::get<0>(storage).data();
+			}
 
 		private:
-			bool HeapInUse() const { return heapSize != 0; }
-			size_t GetSize() const { return HeapInUse() ? heapSize : StackElementCount; }
-			const T* GetPtr() const { return HeapInUse() ? heap.get() : stack; }
-
-			void DeleteHeap()
+			bool HeapInUse() const
 			{
-				if (HeapInUse())
-				{
-					heap.std::template unique_ptr<T[]>::~unique_ptr();
-				}
+				return storage.index() != 0;
+			}
+
+			size_t GetSize() const
+			{
+				return HeapInUse() ? heapSize : StackElementCount;
 			}
 
 			void AllocateHeap(size_t size)
 			{
-				DeleteHeap();
-				new (&heap) std::unique_ptr<T[]>(std::make_unique<T[]>(size));
+				storage = std::make_unique<T[]>(size);
 				heapSize = size;
 			}
 		};
