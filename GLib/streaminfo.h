@@ -6,17 +6,16 @@ class StreamInfo
 {
 	std::ofstream mutable stream;
 	std::string fileName;
-	unsigned int date;
+	unsigned int date {};
 
 public:
-	StreamInfo() : date()
-	{}
-
 	StreamInfo(std::ofstream stream, std::string fileName, unsigned int date)
 		: stream(std::move(stream))
 		, fileName(std::move(fileName))
 		, date(date)
 	{}
+
+	StreamInfo() = default;
 
 	std::ofstream & Stream() const
 	{

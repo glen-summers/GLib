@@ -9,9 +9,9 @@ class XmlPrinter
 	static constexpr int TextDepthNotSet = -1;
 
 	bool const format;
-	bool elementOpen;
-	bool isFirstElement;
-	int depth;
+	bool elementOpen {};
+	bool isFirstElement {true};
+	int depth {};
 	int textDepth;
 	std::ostringstream s;
 	std::stack<std::string> stack;
@@ -19,9 +19,6 @@ class XmlPrinter
 public:
 	XmlPrinter(bool format = true)
 		: format(format)
-		, elementOpen()
-		, isFirstElement(true)
-		, depth()
 		, textDepth(TextDepthNotSet)
 	{}
 

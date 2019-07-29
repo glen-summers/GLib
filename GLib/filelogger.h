@@ -1,11 +1,9 @@
 #ifndef FILE_LOGGER_H
 #define FILE_LOGGER_H
 
-#include "filelogger.h"
 #include "streaminfo.h"
 #include "logstate.h"
 
-//#include "GLib/compat.h"
 #include "GLib/flogging.h"
 
 #include <mutex>

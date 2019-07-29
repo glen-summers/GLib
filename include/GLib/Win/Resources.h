@@ -6,22 +6,21 @@ namespace GLib
 {
 	namespace Win
 	{
-		inline std::string LoadResourceString(HINSTANCE instance, unsigned int id)
+		template <typename T>
+		inline std::tuple<const T *, size_t> LoadResource(HINSTANCE instance, unsigned int id, LPCWSTR resourceType)
 		{
-			LPWSTR p = nullptr;
-			int length = ::LoadStringW(instance, id, reinterpret_cast<LPWSTR>(&p), 0);
-			Util::AssertTrue(length != 0, "LoadString");
-			return Cvt::w2a(std::wstring(p, static_cast<size_t>(length)));
+			HRSRC resource = ::FindResourceW(instance, MAKEINTRESOURCEW(id), resourceType); // NOLINT(cppcoreguidelines-pro-type-cstyle-cast)
+			Util::AssertTrue(resource != nullptr, "FindResource failed");
+			HGLOBAL resourceData = ::LoadResource(instance, resource);
+			return { static_cast<const T*>(::LockResource(resourceData)), ::SizeofResource(instance, resource) };
 		}
 
-		inline void LoadResourceFile(HMODULE module, unsigned int id, LPCWSTR resourceType, size_t & size, const void *& data)
+		std::string LoadResourceString(HINSTANCE instance, unsigned int id, LPCWSTR resourceType)
 		{
-			HRSRC resource = ::FindResourceW(module, MAKEINTRESOURCEW(id), resourceType);
-			Util::AssertTrue(resource != nullptr, "FindResource failed");
-
-			HGLOBAL resourceData = ::LoadResource(module, resource);
-			size = ::SizeofResource(module, resource);
-			data = static_cast<const void*>(::LockResource(resourceData));
+			auto [p, size] = LoadResource<char>(instance, id, resourceType);
+			std::string s { p, size };
+			s.erase(std::remove(s.begin(), s.end(), '\r'), s.end());
+			return s;
 		}
 	}
 }

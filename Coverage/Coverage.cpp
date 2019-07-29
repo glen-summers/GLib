@@ -76,7 +76,7 @@ void Coverage::OnCreateProcess(DWORD processId, DWORD threadId, const CREATE_PRO
 		{
 			return;
 		}
-		AddLine(lineInfo->FileName, lineInfo->LineNumber, process, lineInfo->Address);
+		AddLine(static_cast<const wchar_t *>(lineInfo->FileName), lineInfo->LineNumber, process, lineInfo->Address);
 	}, process.Handle().get(), info.lpBaseOfImage);
 
 	// use flog...
@@ -120,7 +120,7 @@ DWORD Coverage::OnException(DWORD processId, DWORD threadId, const EXCEPTION_DEB
 
 	if (info.dwFirstChance!=0 && isBreakpoint)
 	{
-		const auto address = reinterpret_cast<uint64_t>(info.ExceptionRecord.ExceptionAddress);
+		const auto address = GLib::Win::Detail::ConvertAddress(info.ExceptionRecord.ExceptionAddress);
 		const auto it = addresses.find(address);
 		if (it != addresses.end())
 		{

@@ -39,7 +39,7 @@ BOOST_AUTO_TEST_SUITE(FormatterTests)
 
 BOOST_AUTO_TEST_CASE(BasicTest)
 {
-	std::string s = Formatter::Format("{0} {1} {2} {3}", 1, "2", std::string("3"), reinterpret_cast<void*>(4));
+	std::string s = Formatter::Format("{0} {1} {2} {3}", 1, "2", std::string("3"), reinterpret_cast<void*>(4)); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
 	if constexpr (sizeof(void*) == 8)
 	{
 		BOOST_TEST(s == "1 2 3 0000000000000004");
@@ -68,6 +68,11 @@ BOOST_AUTO_TEST_CASE(TestEscapes)
 	BOOST_TEST("a {1} c {4}:plover" == s);
 }
 
+BOOST_AUTO_TEST_CASE(NoArgumentsThrows)
+{
+	BOOST_CHECK_EXCEPTION(Formatter::Format("{0}"), std::logic_error, IsIndexOutOfRange);
+}
+
 BOOST_AUTO_TEST_CASE(TestInvalidEscapeThrows)
 {
 	BOOST_CHECK_EXCEPTION(Formatter::Format("{0}}", 0), std::logic_error, IsInvalidFormat);
@@ -75,12 +80,12 @@ BOOST_AUTO_TEST_CASE(TestInvalidEscapeThrows)
 
 BOOST_AUTO_TEST_CASE(TestInvalidEndBrace)
 {
-	BOOST_CHECK_EXCEPTION(Formatter::Format("xyz {"), std::logic_error, IsInvalidFormat);
+	BOOST_CHECK_EXCEPTION(Formatter::Format("xyz {", 0), std::logic_error, IsInvalidFormat);
 }
 
 BOOST_AUTO_TEST_CASE(TestInvalidIndexSpecifier)
 {
-	BOOST_CHECK_EXCEPTION(Formatter::Format("{x}"), std::logic_error, IsInvalidFormat);
+	BOOST_CHECK_EXCEPTION(Formatter::Format("{x}", 0), std::logic_error, IsInvalidFormat);
 	BOOST_CHECK_EXCEPTION(Formatter::Format("{0,x}", 0), std::logic_error, IsInvalidFormat);
 }
 
@@ -289,7 +294,7 @@ BOOST_AUTO_TEST_CASE(TestLongDoubleFormat)
 
 BOOST_AUTO_TEST_CASE(TestPointer)
 {
-	auto p = reinterpret_cast<void*>(0x12345);
+	auto p = reinterpret_cast<void*>(0x12345); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
 
 	std::string s = Formatter::Format("{0}", p);
 	if constexpr (sizeof(void*)==8)

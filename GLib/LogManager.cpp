@@ -7,7 +7,7 @@
 
 using GLib::Flog::LogManager;
 
-std::string LogManager::Unmangle(const char * name)
+std::string LogManager::Unmangle(const std::string & name)
 {
 	return Compat::Unmangle(name);
 }
@@ -19,7 +19,7 @@ void LogManager::SetLevel(GLib::Flog::Level level)
 
 void LogManager::SetThreadName(const char * name)
 {
-	FileLogger::Write(Level::Info, "ThreadName", name ? name : "(null)");
+	FileLogger::Write(Level::Info, "ThreadName", name != nullptr ? name : "(null)");
 	FileLogger::logState.threadName = name;
 }
 

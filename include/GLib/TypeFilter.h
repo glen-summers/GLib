@@ -1,5 +1,7 @@
 #pragma once
 
+#include <type_traits>
+
 namespace GLib
 {
 	namespace Util
@@ -16,7 +18,7 @@ namespace GLib
 		{
 			//typedef First Head;
 			//typedef TypeList<Rest...> Tail;
-			typedef TypeList<First, Rest...> Type;
+			using Type = TypeList<First, Rest...>;
 		};
 
 		template <template <typename> typename Predicate, typename... Types>
@@ -51,7 +53,7 @@ namespace GLib
 		struct SelfTypeFilter
 		{
 			template <typename T> using AllTypesPredicate = Predicate<T, Types...>;
-			typedef typename TypeFilter<AllTypesPredicate, Types...>::TupleType TupleType;
+			using TupleType = typename TypeFilter<AllTypesPredicate, Types...>::TupleType;
 		};
 	}
 }

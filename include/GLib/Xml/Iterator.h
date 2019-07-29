@@ -1,7 +1,7 @@
 #pragma once
 
 #include "GLib/Xml/StateEngine.h"
-#include "GLib/Xml/NameSpacemanager.h"
+#include "GLib/Xml/NameSpaceManager.h"
 #include "GLib/Xml/Element.h"
 
 #include <iterator>
@@ -28,18 +28,18 @@ namespace GLib::Xml
 		Xml::StateEngine engine;
 		NameSpaceManager manager;
 
-		const char * ptr;
-		const char * end;
-		const char * currentPtr;
+		const char * ptr {};
+		const char * end {};
+		const char * currentPtr {};
 
 		/////////// element working data, could just use element storage
-		const char * start;
+		const char * start {};
 		Utils::PtrPair elementName;
 		Utils::PtrPair attributes;
 		Utils::PtrPair attributeName;
-		const char * attributeValueStart;
-		const char * attributesEnd; // could remove, use state change
-		bool contentClosed;
+		const char * attributeValueStart {};
+		const char * attributesEnd {}; // could remove, use state change
+		bool contentClosed {};
 		///////////
 
 		Element element;
@@ -55,24 +55,12 @@ namespace GLib::Xml
 		Iterator(const char * begin, const char * end)
 			: ptr(begin)
 			, end(end)
-			, currentPtr()
 			, start(begin)
-			, attributeValueStart()
-			, attributesEnd()
-			, contentClosed()
 		{
 			Advance();
 		}
 
-		Iterator() // end
-			: ptr()
-			, end()
-			, currentPtr()
-			, start()
-			, attributeValueStart()
-			, attributesEnd()
-			, contentClosed()
-		{}
+		Iterator() = default; // end
 
 		const NameSpaceManager & Manager() const
 		{
@@ -117,7 +105,7 @@ namespace GLib::Xml
 		{
 			currentPtr = ptr;
 			
-			if (!currentPtr)
+			if (currentPtr == nullptr)
 			{
 				throw std::runtime_error("++end");
 			}
@@ -146,7 +134,7 @@ namespace GLib::Xml
 				{
 					IllegalCharacter(*ptr);
 				}
-				++ptr;
+				++ptr; // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic) todo use std::span
 				// should not use ptr below here as could now be end!
 				// would only happen with truncated xml but still fix
 
@@ -188,7 +176,7 @@ namespace GLib::Xml
 						case Xml::State::ElementAttributeValueSingleQuote:
 						{
 							manager.Push(Utils::ToStringView(attributeName),
-								Utils::ToStringView(attributeValueStart+1, oldPtr), elementStack.size());
+								Utils::ToStringView(attributeValueStart+1, oldPtr), elementStack.size()); // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic) todo use std::span
 
 							// better test? currently writes ones per attr
 							attributes.second = ptr;
@@ -237,7 +225,7 @@ namespace GLib::Xml
 							// bug: white space at end is not in outerXml...
 							// don't yield for !doctype atm
 							// just set a member value for now?
-							if (elementName.first)
+							if (elementName.first != nullptr)
 							{
 								ProcessElement(ptr);
 								start = ptr;
@@ -267,7 +255,7 @@ namespace GLib::Xml
 			element.nameSpace = nameSpace;
 			element.outerXml = Utils::ToStringView(start, outerXmlEnd);
 
-			if (attributes.first && attributes.second && element.type != ElementType::Close)
+			if (attributes.first != nullptr && attributes.second != nullptr && element.type != ElementType::Close)
 			{
 				element.attributes = {Utils::ToStringView(attributes), &manager};
 			}

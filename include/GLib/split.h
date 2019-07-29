@@ -12,7 +12,7 @@ namespace GLib
 			template <typename T>
 			class Splitter
 			{
-				typedef std::basic_string<T> StringType;
+				using StringType = std::basic_string<T>;
 				const StringType value;
 				const StringType delimiter;
 
@@ -89,7 +89,7 @@ namespace GLib
 			};
 		}
 
-		typedef Detail::Splitter<char> Splitter;
+		using Splitter = Detail::Splitter<char>;
 
 		template <typename T, typename OutputIterator>
 		void Split(const std::basic_string<T> & value, OutputIterator it,

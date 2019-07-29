@@ -20,7 +20,7 @@ namespace GLib::IcuUtils
 	{
 		inline void AssertNoError(UErrorCode error, const char * msg)
 		{
-			if (U_FAILURE(error))
+			if (U_FAILURE(error) != FALSE)
 			{
 				throw std::runtime_error(std::string(msg) + " : " + ::u_errorName(error));
 			}
@@ -42,7 +42,7 @@ namespace GLib::IcuUtils
 			}
 		};
 
-		typedef std::unique_ptr<UCollator, CollatorCloser> CollatorPtr;
+		using CollatorPtr = std::unique_ptr<UCollator, CollatorCloser>;
 
 		inline CollatorPtr MakeCollator(const char * locale = nullptr)
 		{
@@ -63,7 +63,7 @@ namespace GLib::IcuUtils
 			}
 		};
 
-		typedef std::unique_ptr<UCaseMap, UCaseMapCloser> UCaseMapPtr;
+		using UCaseMapPtr = std::unique_ptr<UCaseMap, UCaseMapCloser>;
 
 		inline UCaseMapPtr MakeUCaseMap(const char * locale = nullptr)
 		{
@@ -108,8 +108,8 @@ namespace GLib::IcuUtils
 		UErrorCode error = U_ZERO_ERROR;
 		auto map = Detail::MakeUCaseMap(locale); // cache
 
-		const int32_t sourceLength = static_cast<int32_t>(value.size());
-		const int32_t destLength = ::ucasemap_utf8ToLower(map.get(), nullptr, 0, value.c_str(), sourceLength, &error);
+		const auto sourceLength = static_cast<int32_t>(value.size());
+		const auto destLength = ::ucasemap_utf8ToLower(map.get(), nullptr, 0, value.c_str(), sourceLength, &error);
 		Detail::AssertTrue(error == U_BUFFER_OVERFLOW_ERROR, "ucasemap_utf8ToLower");
 
 		error = U_ZERO_ERROR;
@@ -125,7 +125,7 @@ namespace GLib::IcuUtils
 		UErrorCode error = U_ZERO_ERROR;
 		auto map = Detail::MakeUCaseMap(locale); // cache
 
-		const int32_t sourceLength = static_cast<int32_t>(value.size());
+		const auto sourceLength = static_cast<int32_t>(value.size());
 		const int32_t destLength = ::ucasemap_utf8ToUpper(map.get(), nullptr, 0, value.c_str(), sourceLength, &error);
 		Detail::AssertTrue(error == U_BUFFER_OVERFLOW_ERROR, "ucasemap_utf8ToUpper");
 

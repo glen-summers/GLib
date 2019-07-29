@@ -27,15 +27,13 @@ namespace GLib
 				sizeWithoutTerminator = ::GetLogicalDriveStringsW(static_cast<DWORD>(s.size()), s.Get());
 				Util::AssertTrue(sizeWithoutTerminator != 0 && sizeWithoutTerminator != s.size() - 1, "GetLogicalDriveStrings failed");
 
-				const wchar_t * p = s.Get();
-				while (*p)
+				std::wstring_view pp { s.Get(), sizeWithoutTerminator };
+				const wchar_t nul = u'\0';
+				for (size_t pos = 0, next = pp.find(nul, pos); next != std::wstring_view::npos; pos = next+1, next = pp.find(nul, pos))
 				{
-					auto drive = Cvt::w2a(p);
-					const auto afterSlash = drive.find_last_not_of('\\');
-					drive.erase(afterSlash + 1);
-					drives.push_back(drive);
-					p += ::wcslen(p) + 1;
+					drives.push_back(Cvt::w2a(std::wstring{pp.substr(pos, next-1-pos)}));
 				}
+
 				return drives;
 			}
 
@@ -144,7 +142,7 @@ namespace GLib
 			{
 				HANDLE h = ::CreateFileW(Cvt::a2w(name).c_str(), GENERIC_READ | GENERIC_WRITE, 0, nullptr, CREATE_ALWAYS,
 					FILE_ATTRIBUTE_TEMPORARY | FILE_FLAG_DELETE_ON_CLOSE, nullptr);
-				Util::AssertTrue(!!h, "CreateFile failed");
+				Util::AssertTrue(h != nullptr, "CreateFile failed");
 				return Handle(h);
 			}
 		}

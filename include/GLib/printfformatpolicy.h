@@ -66,8 +66,9 @@ namespace GLib
 			}
 
 			template <>
-			inline void ToStringImpl(const char *, std::ostream & stm, const Money & value, const std::string & format)
+			inline void ToStringImpl(const char * defaultFormat, std::ostream & stm, const Money & value, const std::string & format)
 			{
+				(void)defaultFormat;
 				CheckFormatEmpty(format);
 				// stream to wide to correctly convert locale symbols, is there a better better way? maybe when code convert gets fixed
 				std::wstringstream wideStream;

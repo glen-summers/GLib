@@ -21,7 +21,15 @@ namespace GLib
 			template <typename T>
 			class Restricted : public T
 			{
-				~Restricted();
+			public:
+				Restricted() = delete;
+				Restricted(const Restricted &) = delete;
+				Restricted(Restricted &&) = delete;
+				Restricted & operator = (const Restricted &) = delete;
+				Restricted & operator = (Restricted &&) = delete;
+				~Restricted() = delete;
+
+			private:
 				ULONG STDMETHODCALLTYPE AddRef();
 				ULONG STDMETHODCALLTYPE Release();
 			};
@@ -29,13 +37,13 @@ namespace GLib
 			template <typename T, typename enable = void>
 			struct CanRestrict
 			{
-				typedef Restricted<T> Type;
+				using Type = Restricted<T>;
 			};
 
 			template <typename T>
 			struct CanRestrict<T, typename std::enable_if<std::is_final<T>::value>::type>
 			{
-				typedef T Type;
+				using Type = T;
 			};
 		}
 #define COM_PTR_FWD(x) template <> struct Util::Detail::CanRestrict<x> { typedef x Type; };
@@ -45,18 +53,27 @@ namespace GLib
 		template <typename T>
 		class ComPtrBase
 		{
-			typedef ComPtrBase<T> Type;
-
 			T * p = nullptr;
+
+		public:
+			ComPtrBase & operator = (const ComPtrBase &) = delete;
 
 		protected:
 			ComPtrBase() = default;
 
-			ComPtrBase(Type && right) noexcept
+			ComPtrBase(const ComPtrBase & other)
+				: p(other.p)
+			{
+				InternalAssign(other.p);
+			}
+
+			ComPtrBase(ComPtrBase && right) noexcept
 				: p(right.p)
 			{
 				right.p = nullptr;
 			}
+
+			~ComPtrBase() = default;
 
 			template<typename U>
 			ComPtrBase(ComPtrBase<U> && right)
@@ -65,7 +82,7 @@ namespace GLib
 				right.p = nullptr;
 			}
 
-			Type & operator=(Type && right) noexcept
+			ComPtrBase & operator=(ComPtrBase && right) noexcept
 			{
 				Swap(std::move(right));
 				return *this;
@@ -150,8 +167,7 @@ namespace GLib
 		class ComPtr : public ComPtrBase<T>
 		{
 		public:
-			typedef ComPtr<T> Type;
-			typedef ComPtrBase<T> BaseType;
+			using BaseType = ComPtrBase<T>;
 
 			ComPtr() noexcept = default;
 
@@ -165,7 +181,7 @@ namespace GLib
 			ComPtr(std::nullptr_t) noexcept
 			{}
 
-			ComPtr(const Type & other) noexcept
+			ComPtr(const ComPtr & other) noexcept
 			{
 				BaseType::InternalAssign(other);
 			}
@@ -176,7 +192,7 @@ namespace GLib
 				BaseType::InternalAssign(other);
 			}
 
-			ComPtr(Type && right) noexcept
+			ComPtr(ComPtr && right) noexcept
 				: BaseType(std::move(right))
 			{}
 
@@ -185,14 +201,14 @@ namespace GLib
 				: BaseType(std::move(right))
 			{}
 
-			Type & operator=(Type && right) noexcept
+			ComPtr & operator=(ComPtr && right) noexcept
 			{
 				ComPtr(std::move(right)).Swap(*this);
 				return *this;
 			}
 
 			template<typename U>
-			Type & operator=(ComPtr<U>&& right) noexcept
+			ComPtr & operator=(ComPtr<U>&& right) noexcept
 			{
 				ComPtr(std::move(right)).Swap(*this);
 				return *this;
@@ -203,14 +219,14 @@ namespace GLib
 				BaseType::InternalRelease();
 			}
 
-			Type & operator=(const Type & right) noexcept
+			ComPtr & operator=(const ComPtr & right) noexcept
 			{
 				ComPtr(right).Swap(*this);
 				return *this;
 			}
 
 			template <typename U>
-			Type & operator=(const ComPtr<U> & right) noexcept
+			ComPtr & operator=(const ComPtr<U> & right) noexcept
 			{
 				ComPtr(right).Swap(*this);
 				return *this;
@@ -227,7 +243,7 @@ namespace GLib
 				ComPtr(other).Swap(*this);
 			}
 
-			void Swap(Type & other) noexcept
+			void Swap(ComPtr & other) noexcept
 			{
 				BaseType::Swap(other);
 			}
@@ -280,25 +296,26 @@ namespace GLib
 			}
 
 			template<typename U>
-			static ComPtr<T> Attach(U * value)
+			static ComPtr Attach(U * value)
 			{
-				return ComPtr<T>(value, false);
+				return ComPtr(value, false);
 			}
 
-			bool operator==(const ComPtr<T> & other) const
+			bool operator==(const ComPtr & other) const
 			{
 				// consider Com Equality? consider template<typename U> compare
 				return other.Get() == Get();
 			}
 
-			bool operator!=(const ComPtr<T> &other) const
+			bool operator!=(const ComPtr &other) const
 			{
 				return !(*this == other);
 			}
 
 		private:
-			ComPtr(T * other, bool) noexcept
+			ComPtr(T * other, bool ignored) noexcept
 			{
+				(void) ignored;
 				BaseType::InternalAttach(other);
 			}
 		};

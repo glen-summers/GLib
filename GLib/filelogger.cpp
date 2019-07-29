@@ -1,9 +1,9 @@
 #include "pch.h"
 
+#include "filelogger.h"
+
 #include "GLib/flogging.h"
 #include "GLib/compat.h"
-
-#include "filelogger.h"
 
 #include <iomanip>
 #include <sstream>
@@ -169,7 +169,7 @@ void FileLogger::WriteToStream(Flog::Level level, const char * prefix, const cha
 			s << std::left
 				<< std::put_time(&tm, "%d %b %Y, %H:%M:%S") << "." << std::setw(3) << std::setfill('0') << ms << std::setfill(' ')
 				<< " : [ " << std::setw(THREAD_ID_WIDTH);
-			if (logState.threadName)
+			if (logState.threadName != nullptr)
 			{
 				s << logState.threadName;
 			}

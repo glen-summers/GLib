@@ -8,19 +8,6 @@ namespace GLib
 {
 	namespace Win
 	{
-		namespace Detail
-		{
-			inline std::string FormatErrorMessage(const char * message, DWORD error, const wchar_t * moduleName = nullptr)
-			{
-				std::ostringstream stm;
-				stm << message << " : ";
-				Util::FormatErrorMessage(stm, error, moduleName);
-				if (error >= 0x80000000) stm << std::hex;
-				stm << " (" << error << ")";
-				return stm.str();
-			}
-		}
-
 		class WinException : public std::runtime_error
 		{
 			unsigned int const errorCode;
@@ -37,15 +24,15 @@ namespace GLib
 				return hResult;
 			}
 
-			WinException(const char * message, DWORD dwErr, const wchar_t * module = nullptr)
-				: runtime_error(Detail::FormatErrorMessage(message, dwErr, module))
+			WinException(std::string message, DWORD dwErr)
+				: runtime_error(move(message))
 				, errorCode(dwErr)
 				, hResult(HRESULT_FROM_WIN32(dwErr))
 			{}
 
 		protected:
-			WinException(HRESULT hr, const std::string & message)
-				: runtime_error(message)
+			WinException(std::string message, HRESULT hr)
+				: runtime_error(move(message))
 				, errorCode(static_cast<unsigned int>(hr))
 				, hResult(hr)
 			{}

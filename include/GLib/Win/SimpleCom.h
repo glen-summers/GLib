@@ -4,13 +4,14 @@
 
 #include <atomic>
 
+#define WRAP(x) x
 #define GLIB_COM_RULE_OF_FIVE(ClassName)\
 public:\
-	ClassName() = default;\
-	ClassName(const ClassName& other) = delete;\
-	ClassName(ClassName&& other) noexcept = delete;\
-	ClassName& operator=(const ClassName& other) = delete;\
-	ClassName& operator=(ClassName&& other) noexcept = delete;\
+	(ClassName)() = default;\
+	(ClassName)(const WRAP(ClassName) & other) = delete;\
+	(ClassName)(WRAP(ClassName) && other) noexcept = delete;\
+	WRAP(ClassName) & operator=(const WRAP(ClassName) & other) = delete;\
+	WRAP(ClassName) & operator=(WRAP(ClassName) && other) noexcept = delete;\
 protected:\
 	virtual ~ClassName() = default;\
 
@@ -73,8 +74,8 @@ namespace GLib
 			std::atomic<ULONG> ref = 1;
 
 		public:
-			typedef I1 DefaultInterface;
-			typedef ComPtr<I1> PtrType;
+			using DefaultInterface = I1;
+			using PtrType = ComPtr<I1>;
 
 			GLIB_COM_RULE_OF_FIVE(Unknown)
 
@@ -83,7 +84,7 @@ namespace GLib
 				return ref;
 			}
 
-			virtual HRESULT STDMETHODCALLTYPE QueryInterface(const IID& id, void** ppvObject) override
+			HRESULT STDMETHODCALLTYPE QueryInterface(const IID& id, void** ppvObject) override
 			{
 				if (!ppvObject)
 				{
@@ -129,8 +130,8 @@ namespace GLib
 			std::atomic<ULONG> ref = 1;
 
 		public:
-			typedef typename std::tuple_element<0, std::tuple<TopLevelInterfaces...>>::type DefaultInterface;
-			typedef ComPtr<DefaultInterface> PtrType;
+			using DefaultInterface = typename std::tuple_element<0, std::tuple<TopLevelInterfaces...>>::type;
+			using PtrType = ComPtr<DefaultInterface>;
 
 			GLIB_COM_RULE_OF_FIVE(Unknown2)
 
@@ -139,7 +140,7 @@ namespace GLib
 				return ref;
 			}
 
-			virtual HRESULT STDMETHODCALLTYPE QueryInterface(const IID& id, void** ppvObject) override
+			HRESULT STDMETHODCALLTYPE QueryInterface(const IID& id, void** ppvObject) override
 			{
 				if (!ppvObject)
 				{

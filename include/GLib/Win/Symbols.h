@@ -2,6 +2,7 @@
 
 #include "GLib/cvt.h"
 #include "GLib/Win/Process.h"
+#include "GLib/Win/Local.h"
 #include "GLib/scope.h"
 
 #define _NO_CVCONST_H
@@ -26,7 +27,7 @@ namespace GLib
 						Util::WarnAssertTrue(::SymCleanup(handle), "SymCleanup failed");
 					}
 				};
-				typedef std::unique_ptr<void, Cleanup> SymbolHandle;
+				using SymbolHandle = std::unique_ptr<void, Cleanup>;
 
 				inline Handle Duplicate(HANDLE handle)
 				{
@@ -34,6 +35,11 @@ namespace GLib
 					Util::AssertTrue(::DuplicateHandle(::GetCurrentProcess(), handle, ::GetCurrentProcess(),
 						&duplicatedHandle, 0, FALSE, DUPLICATE_SAME_ACCESS), "DuplicateHandle");
 					return Handle { duplicatedHandle };
+				}
+
+				inline ULONG64 ConvertBase(void * baseValue)
+				{
+					return reinterpret_cast<ULONG64>(baseValue); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
 				}
 			}
 
@@ -88,11 +94,11 @@ namespace GLib
 				Symbol GetSymbolFromAddress(uint64_t address) const
 				{
 					char buffer[sizeof(SYMBOL_INFO) + MAX_SYM_NAME * sizeof(wchar_t)];
-					auto const symbol = reinterpret_cast<PSYMBOL_INFOW>(buffer);
+					auto const symbol = reinterpret_cast<PSYMBOL_INFOW>(buffer); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
 					symbol->SizeOfStruct = sizeof(SYMBOL_INFOW);
 					symbol->MaxNameLen = MAX_SYM_NAME;
 					Util::AssertTrue(::SymFromAddrW(process.Handle().get(), address, nullptr, symbol), "SymFromAddr");
-					return { symbol->Index, symbol->TypeIndex, static_cast<enum SymTagEnum>(symbol->Tag), Cvt::w2a(symbol->Name) };
+					return { symbol->Index, symbol->TypeIndex, static_cast<enum SymTagEnum>(symbol->Tag), Cvt::w2a(static_cast<const wchar_t *>(symbol->Name)) };
 				}
 
 				bool TryGetClassParent(const Symbol & symbol, Symbol & result) const
@@ -103,13 +109,13 @@ namespace GLib
 					// and the result from TI_GET_CLASSPARENTID is "The type index of the class parent."
 					// so we then get TI_GET_SYMINDEX for indexOfClassParent
 					// but seems to get indexOfClassParent having the same value of typeIndexOfClassParent
-					if (!::SymGetTypeInfo(process.Handle().get(), baseOfImage, symbol.TypeIndex, TI_GET_CLASSPARENTID, &typeIndexOfClassParent))
+					if (::SymGetTypeInfo(process.Handle().get(), baseOfImage, symbol.TypeIndex, TI_GET_CLASSPARENTID, &typeIndexOfClassParent) == FALSE)
 					{
 						return false;
 					}
 
 					DWORD indexOfClassParent;
-					if (!::SymGetTypeInfo(process.Handle().get(), baseOfImage, typeIndexOfClassParent, TI_GET_SYMINDEX, &indexOfClassParent))
+					if (::SymGetTypeInfo(process.Handle().get(), baseOfImage, typeIndexOfClassParent, TI_GET_SYMINDEX, &indexOfClassParent) == FALSE)
 					{
 						return false;
 					}
@@ -194,14 +200,14 @@ namespace GLib
 				void SourceFiles(std::function<void(PSOURCEFILEW)> f, HANDLE process, void * base) const
 				{
 					(void) this;
-					Util::AssertTrue(::SymEnumSourceFilesW(process, reinterpret_cast<ULONG64>(base), nullptr, EnumSourceFiles, &f),
+					Util::AssertTrue(::SymEnumSourceFilesW(process, Detail::ConvertBase(base), nullptr, EnumSourceFiles, &f),
 						"EnumSourceFiles failed");
 				}
 
 				void Lines(std::function<void(PSRCCODEINFOW)> f, HANDLE process, void * base) const
 				{
 					(void) this;
-					Util::AssertTrue(::SymEnumLinesW(process, reinterpret_cast<ULONG64>(base), nullptr, nullptr, EnumLines, &f), "SymEnumLines failed");
+					Util::AssertTrue(::SymEnumLinesW(process, Detail::ConvertBase(base), nullptr, nullptr, EnumLines, &f), "SymEnumLines failed");
 				}
 				
 				template <typename inserter>

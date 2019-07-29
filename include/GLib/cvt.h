@@ -15,9 +15,9 @@ namespace GLib
 		namespace Detail
 		{
 #ifdef __linux__
-			typedef std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> Converter;
+			using Converter = std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t>;
 #elif _WIN32
-			typedef std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t> Converter;
+			using Converter = std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t>;
 #endif
 		}
 

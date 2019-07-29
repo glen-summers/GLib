@@ -1,11 +1,20 @@
 #pragma once
 
 #include <chrono>
+#include <string>
 #include <utility>
+
+namespace GLib
+{
+	namespace Flog
+	{
+		enum class Level : unsigned;
+	}
+}
 
 class Scope
 {
-	typedef std::chrono::high_resolution_clock::time_point TimePoint;
+	using TimePoint = std::chrono::high_resolution_clock::time_point;
 
 	GLib::Flog::Level level;
 	std::string prefix;

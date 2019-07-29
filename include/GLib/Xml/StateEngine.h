@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cctype>
+#include <array>
 
 namespace GLib::Xml
 {
@@ -36,6 +37,8 @@ namespace GLib::Xml
 		CDataValue,
 		CDataEnd1,
 		CDataEnd2,
+
+		Count
 	};
 
 	class StateEngine
@@ -57,24 +60,21 @@ namespace GLib::Xml
 		static constexpr char RightSquareBracket = ']';
 		static constexpr char Ampersand = '&';
 
-		typedef State (StateEngine::*StateFunction)(char);
+		using StateFunction = State (StateEngine::*)(char);
 
 		// use Phase : Prolog, Document, End
 		// could also manage depth here to dtermine end
 		// but try in iterator first?
 		State state;
-		bool isProlog;
-		bool hasDocTypeDecl;
-		bool hasContent;
+		bool isProlog { true };
+		bool hasDocTypeDecl {};
+		bool hasContent {};
 		StateFunction stateFunction;
 
 	public:
 		StateEngine(State state = State::Start)
 		  : state(state)
-		  , isProlog(true)
-		  , hasDocTypeDecl()
-		  , hasContent()
-		  , stateFunction(stateFunctions[static_cast<int>(state)])
+		  , stateFunction(stateFunctions.at(static_cast<int>(state)))
 		{}
 
 		State GetState() const
@@ -101,17 +101,17 @@ namespace GLib::Xml
 
 		static bool IsWhiteSpace(char c)
 		{
-			return !IsContinuation(c) && std::isspace(c);
+			return !IsContinuation(c) && std::isspace(c) != 0;
 		}
 
 		static bool IsNameStart(char c)
 		{
-			return IsContinuation(c) || std::isalpha(c) || c == Colon || c == Underscore; // check docs
+			return IsContinuation(c) || std::isalpha(c) != 0 || c == Colon || c == Underscore; // check docs
 		}
 
 		static bool IsName(char c)
 		{
-			return IsNameStart(c) || std::isdigit(c) || c == FullStop || c == Hyphen; // check docs
+			return IsNameStart(c) || std::isdigit(c) != 0 || c == FullStop || c == Hyphen; // check docs
 		}
 
 		static bool IsAllowedTextCharacter(char c)
@@ -124,7 +124,7 @@ namespace GLib::Xml
 			if (newState != state)
 			{
 				state = newState;
-				stateFunction = stateFunctions[static_cast<int>(state)];
+				stateFunction = stateFunctions.at(static_cast<int>(state));
 			}
 		}
 
@@ -486,7 +486,7 @@ namespace GLib::Xml
 		//////////////////////
 
 		// must be enum order
-		inline static StateFunction stateFunctions[] =
+		inline static std::array<StateFunction, static_cast<int>(State::Count)> stateFunctions =
 		{
 			&StateEngine::Error,
 			&StateEngine::Start,

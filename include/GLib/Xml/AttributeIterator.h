@@ -19,10 +19,10 @@ namespace GLib::Xml
 	class AttributeIterator
 	{
 		Xml::StateEngine engine;
-		const NameSpaceManager * manager;
-		const char * ptr;
-		const char * end;
-		const char * currentPtr;
+		const NameSpaceManager * manager {};
+		const char * ptr {};
+		const char * end {};
+		const char * currentPtr {};
 
 		/////////// working data
 		Utils::PtrPair attributeName;
@@ -35,7 +35,6 @@ namespace GLib::Xml
 			, manager(manager)
 			, ptr(begin)
 			, end(end)
-			, currentPtr()
 		{
 			if (begin!=end)
 			{
@@ -43,13 +42,7 @@ namespace GLib::Xml
 			}
 		}
 
-		AttributeIterator()
-			: manager()
-			, ptr()
-			, end()
-			, currentPtr()
-		{
-		}
+		AttributeIterator() = default;
 
 		bool operator==(const AttributeIterator & other) const
 		{
@@ -72,15 +65,12 @@ namespace GLib::Xml
 			auto qName = Utils::ToStringView(attributeName);
 			auto value = Utils::ToStringView(attributeValue);
 
-			if (manager)
+			if (manager != nullptr)
 			{
 				auto [name, nameSpace] = manager->Normalise(qName);
 				return { name, value, nameSpace };
 			}
-			else
-			{
-				return { qName, value, {} };
-			}
+			return { qName, value, {} };
 		}
 
 	private:
@@ -96,7 +86,7 @@ namespace GLib::Xml
 			attributeName = attributeValue = {};
 			currentPtr = ptr;
 
-			if (!currentPtr)
+			if (currentPtr == nullptr)
 			{
 				throw std::runtime_error("++end");
 			}
@@ -117,7 +107,7 @@ namespace GLib::Xml
 				{
 					IllegalCharacter(*ptr);
 				}
-				++ptr;
+				++ptr; // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic) todo use std::span
 
 				if (newState != oldState)
 				{
@@ -133,7 +123,7 @@ namespace GLib::Xml
 						case Xml::State::ElementAttributeValueSingleQuote:
 						{
 							attributeValue.second = oldPtr;
-							if (!manager || !Xml::NameSpaceManager::IsDeclaration(Utils::ToStringView(attributeName)))
+							if (manager == nullptr || !Xml::NameSpaceManager::IsDeclaration(Utils::ToStringView(attributeName)))
 							{
 								return;
 							}

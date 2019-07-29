@@ -12,34 +12,45 @@ namespace GLib
 	{
 		namespace Util
 		{
+			namespace Detail
+			{
+				inline static constexpr const char * crlf = "\r\n";
+
+				inline DWORD FormatMessageCast(DWORD dwFlags, LPCVOID lpSource, DWORD dwMessageId, LPWSTR* lpBuffer)
+				{
+					return ::FormatMessageW(dwFlags, lpSource, dwMessageId, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+						reinterpret_cast<LPWSTR>(lpBuffer), 0, nullptr); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
+				}
+			}
+
 			inline void FormatErrorMessage(std::ostream & stm, unsigned int error, const wchar_t * moduleName = nullptr)
 			{
 				wchar_t *pszMsg;
 				int flags = FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS;
-				if (moduleName)
+				if (moduleName != nullptr)
 				{
 					flags |= FORMAT_MESSAGE_FROM_HMODULE;
 				}
 
-				// no smart holders so low dependency and and avoid circular references in headers
-				HMODULE module(moduleName ? ::LoadLibraryW(moduleName) : nullptr);
-				if (::FormatMessageW(flags, module, error, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), reinterpret_cast<LPWSTR>(&pszMsg), 0, nullptr) != 0)
+				HMODULE module(moduleName != nullptr ? ::LoadLibraryW(moduleName) : nullptr);
+				if (Detail::FormatMessageCast(flags, module, error, &pszMsg) != 0)
 				{
-					int nLen = lstrlenW(pszMsg);
-					if (nLen > 1 && pszMsg[nLen - 1] == '\n')
+					size_t len = ::lstrlenW(pszMsg);
+					std::wstring_view wMsg { pszMsg,  len }; 
+					const std::wstring_view ending = L"\r\n";
+					if (std::equal(ending.rbegin(), ending.rend(), wMsg.rbegin()))
 					{
-						pszMsg[nLen - 1] = 0;
-						if (pszMsg[nLen - 2] == '\r')
-							pszMsg[nLen - 2] = 0;
+						wMsg = wMsg.substr(0, len - 2);
 					}
-					stm << Cvt::w2a(pszMsg);
+
+					stm << Cvt::w2a(std::wstring{wMsg}); // avoid double alloc
 					::LocalFree(pszMsg);
 				}
 				else
 				{
 					stm << "Unknown error";
 				}
-				if (module)
+				if (module != nullptr)
 				{
 					::FreeLibrary(module);
 				}

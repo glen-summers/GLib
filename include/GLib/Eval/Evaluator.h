@@ -58,7 +58,7 @@ namespace GLib::Eval
 
 		void Pop(const std::string & name)
 		{
-			if (!localValues.erase(name))
+			if (localValues.erase(name) == 0)
 			{
 				throw std::runtime_error(std::string("Local value not found : ") + name);
 			}

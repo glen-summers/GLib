@@ -21,7 +21,11 @@ namespace GLib
 				Stream() << value << std::endl;
 			}
 
-			template <>
+			inline void Write(const char * value)
+			{
+				Stream() << value << std::endl;
+			}
+
 			inline void Write(const std::wstring & value)
 			{
 				Stream() << Cvt::w2a(value) << std::endl;

@@ -63,24 +63,24 @@ namespace GLib
 #ifdef __linux__
 			msg = strerror_r(errno, err, sizeof(err));
 #elif _MSC_VER
-			strerror_s(msg = err, sizeof(err), errno);
+			strerror_s(msg = static_cast<char*>(err), sizeof(err), errno);
 #else
 			//?
 #endif
 			throw std::logic_error(std::string(prefix)+ " : " + msg);
 		}
 
-		inline std::string Unmangle(const char * name)
+		inline std::string Unmangle(const std::string & name)
 		{
 #ifdef _MSC_VER
-			return ::strncmp(name, "class ", 6) == 0
-				? name + 6
-				: ::strncmp(name, "struct ", 7) == 0
-					? name +7
+			return name.compare(0, 6, "class ") == 0
+				? name.substr(6)
+				: name.compare(0, 7, "struct ") == 0
+					? name.substr(7)
 					: name; // etc...
 #elif __GNUG__
 			int status = -1;
-			std::unique_ptr<char, void(*)(void*)> res { abi::__cxa_demangle(name, NULL, NULL, &status), std::free };
+			std::unique_ptr<char, void(*)(void*)> res { abi::__cxa_demangle(name.c_str(), NULL, NULL, &status), std::free };
 			return status == 0 ? res.get() : name;
 #else
 			return name;

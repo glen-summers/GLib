@@ -10,8 +10,8 @@ namespace GLib
 		template <typename T = char, size_t InitialCapacity = 256>
 		class VectorStreamBuffer : public std::basic_streambuf<T>
 		{
-			typedef std::basic_streambuf<T> Base;
-			typedef std::vector<T> BufferType;
+			using Base = std::basic_streambuf<T>;
+			using BufferType = std::vector<T>;
 			mutable BufferType buffer;
 
 		public:

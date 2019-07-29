@@ -3,6 +3,7 @@
 #include <string_view>
 #include <unordered_map>
 #include <stack>
+#include <stdexcept>
 
 namespace GLib::Xml
 {

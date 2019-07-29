@@ -9,7 +9,7 @@ namespace GLib
 		template <typename T, class BufferType>
 		class GenericOutStream : public std::basic_ostream<T>
 		{
-			typedef std::basic_ostream<T> Base;
+			using Base = std::basic_ostream<T>;
 
 			BufferType buffer;
 

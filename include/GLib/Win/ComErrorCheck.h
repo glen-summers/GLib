@@ -1,10 +1,13 @@
 #pragma once
 
 #include "GLib/Win/ComException.h"
+#include "GLib/scope.h"
 
 #ifdef _DEBUG // || defined(GLIB_DEBUG)
 #include "GLib/Win/DebugStream.h"
 #endif
+
+#include <OleAuto.h>
 
 namespace GLib
 {
@@ -12,13 +15,42 @@ namespace GLib
 	{
 		namespace Detail
 		{
+			inline std::string FormatErrorInfo(const char * message, HRESULT hr)
+			{
+				bool hasMessage = false;
+				std::ostringstream stm;
+				stm << message << " : ";
+				IErrorInfo* pErrorInfo;
+				if (::GetErrorInfo(0, &pErrorInfo) == S_OK)
+				{
+					BSTR bstr = nullptr;
+					pErrorInfo->GetDescription(&bstr);
+					SCOPE(_, [=] ()
+					{
+						::SysFreeString(bstr);
+						pErrorInfo->Release();
+					});
+					hasMessage = bstr != nullptr;
+					if (hasMessage)
+					{
+						stm << Cvt::w2a(bstr);
+					}
+				}
+				if (!hasMessage)
+				{
+					Util::FormatErrorMessage(stm, hr);
+				}
+				stm << " (" << std::hex << std::uppercase << hr << ")";
+				return stm.str();
+			}
+
 			__declspec(noreturn) inline void Throw(const char * message, HRESULT hr)
 			{
-				ComException e(hr, message);
+				std::string formattedMessage = FormatErrorInfo(message, hr);
 #ifdef _DEBUG // || defined(GLIB_DEBUG)
-				Debug::Stream() << "ComException : " << e.what() << std::endl;
+				Debug::Stream() << "ComException : " << formattedMessage << std::endl;
 #endif
-				throw e;
+				throw ComException(move(formattedMessage), hr);
 			}
 		}
 
@@ -36,7 +68,7 @@ namespace GLib
 			bool result = SUCCEEDED(hr);
 			if (!result)
 			{
-				Debug::Stream() << "ComException : " << ComException(hr, message).what() << std::endl;
+				Debug::Stream() << "ComWarning : " << Detail::FormatErrorInfo(message, hr) << std::endl;
 			}
 #else
 				UNREFERENCED_PARAMETER(hr);

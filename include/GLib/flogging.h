@@ -118,7 +118,7 @@ namespace GLib
 
 		class LogManager
 		{
-			static std::string Unmangle(const char * name);
+			static std::string Unmangle(const std::string & name);
 
 		public:
 			static void SetLevel(Level level);

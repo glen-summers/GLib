@@ -4,7 +4,7 @@
 
 namespace GLib::Xml::Utils
 {
-	typedef std::pair<const char *, const char *> PtrPair;
+	using PtrPair = std::pair<const char *, const char *>;
 
 	inline std::string_view ToStringView(const PtrPair & value)
 	{

@@ -14,7 +14,8 @@ namespace GLib
 		{
 			namespace Detail
 			{
-				typedef GLib::Util::VectorStreamBuffer<char> Buffer;
+				using Buffer = GLib::Util::VectorStreamBuffer<char>;
+
 				class DebugBuffer : public Buffer
 				{
 					int_type overflow(int_type c) override

@@ -13,19 +13,28 @@ namespace GLib
 			struct OverflowPolicy
 			{
 				// use std::overflow\underflow?
-				static void Underflow(bool err) {
-					if (err) throw std::runtime_error("Underflow");
+				static void Underflow(bool err)
+				{
+					if (err)
+					{
+						throw std::runtime_error("Underflow");
+					}
 				}
-				static void Overflow(bool err) {
-					if (err) throw std::runtime_error("Overflow");
+
+				static void Overflow(bool err)
+				{
+					if (err)
+					{
+						throw std::runtime_error("Overflow");
+					}
 				}
 			};
 
 			template <typename T, typename S, typename OverflowPolicy>
 			struct OverflowHandler
 			{
-				typedef T Target;
-				typedef S Source;
+				using Target = T;
+				using Source = S;
 
 				static void UnderflowMin(Source source)
 				{
@@ -46,11 +55,10 @@ namespace GLib
 			template <typename T, typename S>
 			struct Traits
 			{
-				// removecv
-				typedef T Target;
-				typedef S Source;
-
-				typedef OverflowHandler<T, S, OverflowPolicy> Overflow;
+				// removecv?
+				using Target = T;
+				using Source = S;
+				using Overflow = OverflowHandler<T, S, OverflowPolicy>;
 
 				static Target Convert(Source source)
 				{
@@ -73,7 +81,6 @@ namespace GLib
 				static constexpr bool CheckMax = UnsignedToSigned && TargetSmaller;
 			};
 
-			// prefer this tobe internally specialised so can have better use of typedefs
 			template <typename T, typename S, typename Traits, typename enabled = void>
 			struct RangeChecker
 			{};
@@ -133,7 +140,7 @@ namespace GLib
 		template <typename Target, typename Source>
 		Target checked_cast(Source source)
 		{
-			typedef Detail::Traits<Target, Source> Traits;
+			using Traits = Detail::Traits<Target, Source>;
 			return Detail::RangeChecker<typename Traits::Target, typename Traits::Source, Traits>::Check(source);
 		}
 	}

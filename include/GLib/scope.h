@@ -8,26 +8,30 @@ namespace GLib
 	namespace Detail
 	{
 		// use a UniquePtr?
-		template <typename T>
-		struct ScopeImpl
+		template <typename Function>
+		class ScopedFunction
 		{
-			ScopeImpl(const ScopeImpl &) = delete;
-			ScopeImpl & operator=(const ScopeImpl &) = delete;
-			ScopeImpl(ScopeImpl &&) = default;
-			ScopeImpl & operator=(ScopeImpl &&) = default;
+			Function function;
 
-			ScopeImpl(T t) : t(t) {}
-			T t;
-			~ScopeImpl() {
-				t();
+		public:
+			ScopedFunction(Function function) : function(function)
+			{}
+
+			ScopedFunction(const ScopedFunction &) = delete;
+			ScopedFunction & operator=(const ScopedFunction &) = delete;
+			ScopedFunction(ScopedFunction &&) = default;
+			ScopedFunction & operator=(ScopedFunction &&) = default;
+
+			~ScopedFunction()
+			{
+				function();
 			}
 		};
 
-
-		template <typename T>
-		auto Scope(T && exit)
+		template <typename Function>
+		auto Scope(Function && exit)
 		{
-			return Detail::ScopeImpl<T>(std::forward<T>(exit));
+			return Detail::ScopedFunction<Function>(std::forward<Function>(exit));
 		}
 	}
 }

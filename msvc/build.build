@@ -31,6 +31,13 @@
 		<CoverageExclude>$(Root)\Tests\</CoverageExclude>
 	</PropertyGroup>
 
+	<PropertyGroup>
+		<Tidy>"$(ProgramFiles)\LLVM\bin\clang-tidy.exe"</Tidy>
+		<TidyDefines>-DNOMINMAX</TidyDefines>
+		<TidyIgnore>no-pragma-once-outside-header</TidyIgnore>
+		<TidyChecks>-*,bugprone-*,cert-*,cppcoreguidelines-*,clang-analyzer-*,modernize-*,misc-*,portability-*,readability-*</TidyChecks>
+	</PropertyGroup>
+
 	<Target Name="MakeTempDir">
 		<MakeDir Directories="$(Temp)"/>
 	</Target>
@@ -159,11 +166,29 @@
 			<ClangFormat>"$(ProgramFiles)\LLVM\bin\clang-format.exe"</ClangFormat>
 		</PropertyGroup>
 		<ItemGroup>
-			<FileToFormat Include="$(Source)/include/**/*.cpp"/>
 			<FileToFormat Include="$(Source)/include/**/*.h"/>
 			<FileToFormat Include="$(Source)/GLib/**/*.cpp"/>
 			<FileToFormat Include="$(Source)/GLib/**/*.h"/>
 		</ItemGroup>
 		<Exec Command="$(ClangFormat) -i %(FileToFormat.Identity)"/>
 	</Target>
+
+	<Target Name="Tidy">
+		<ItemGroup>
+			<FileToCheck Include="$(Source)/include/**/*.h"/>
+			<FileToCheck Include="$(Source)/GLib/**/*.cpp"/>
+			<FileToCheck Include="$(Source)/GLib/**/*.h"/>
+			<Relative Include="$([MSBuild]::MakeRelative($(Source), %(FileToCheck.FullPath)))"/>
+		</ItemGroup>
+
+		<!-- slow, split and run in parallel? -->
+		<Exec Command="$(Tidy) @(Relative, ' ') -quiet -checks=$(TidyChecks) -- -Iinclude -std=c++17 $(TidyDefines) -x c++ -W$(TidyIgnore)"
+			WorkingDirectory="$(Source)"/>
+	</Target>
+
+	<Target Name="TidyFile">
+		<Exec Command='$(Tidy) $(FileName) -quiet -checks=$(TidyChecks) -- -Iinclude -std=c++17 $(TidyDefines) -x c++ -W$(TidyIgnore)'
+			WorkingDirectory="$(Source)"/>
+	</Target>
+
 </Project>

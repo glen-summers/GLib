@@ -16,19 +16,6 @@
 #include <filesystem>
 #include <set>
 
-namespace
-{
-	std::string LoadResource(int id)
-	{
-		size_t sz;
-		const void * p;
-		GLib::Win::LoadResourceFile(nullptr, id, RT_HTML, sz, p);
-		std::string s{reinterpret_cast<const char *>(p), sz};
-		s.erase(std::remove(s.begin(), s.end(), '\r'), s.end());
-		return s;
-	}
-}
-
 struct Line
 {
 	std::string text;
@@ -53,8 +40,8 @@ HtmlReport::HtmlReport(const std::string & title, const std::filesystem::path & 
 	: htmlPath(htmlPath)
 	, rootPaths(RootPaths(fileCoverageData))
 	, cssPath(Initialise(htmlPath))
-	, dirTemplate(LoadResource(IDR_DIRECTORY))
-	, fileTemplate(LoadResource(IDR_FILE))
+	, dirTemplate(GLib::Win::LoadResourceString(nullptr, IDR_DIRECTORY, RT_HTML))
+	, fileTemplate(GLib::Win::LoadResourceString(nullptr, IDR_FILE, RT_HTML))
 {
 	for (const auto & fileDataPair : fileCoverageData)
 	{
@@ -72,7 +59,7 @@ HtmlReport::HtmlReport(const std::string & title, const std::filesystem::path & 
 
 std::filesystem::path HtmlReport::Initialise(const std::filesystem::path & path)
 {
-	std::string s = LoadResource(IDR_STYLESHEET);
+	std::string s = GLib::Win::LoadResourceString(nullptr, IDR_STYLESHEET, RT_HTML);
 
 	remove_all(path);
 	create_directories(path);

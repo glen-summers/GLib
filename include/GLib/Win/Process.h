@@ -16,6 +16,21 @@ namespace GLib
 	{
 		namespace Detail
 		{
+			inline const void * ToAddress(uint64_t value)
+			{
+				return reinterpret_cast<const void*>(value); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
+			}
+
+			inline void * ToPseudoWritableAddress(uint64_t value)
+			{
+				return reinterpret_cast<void*>(value); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
+			}
+
+			inline wchar_t * ToPseudoWritableString(const wchar_t * value)
+			{
+				return const_cast<wchar_t *>(value); // NOLINT(cppcoreguidelines-pro-type-const-cast)
+			}
+
 			inline void Terminate(HANDLE process, UINT exitCode)
 			{
 				//if (exitCode == STILL_ACTIVE)?
@@ -68,7 +83,7 @@ namespace GLib
 			static HMODULE CurrentModule()
 			{
 				// http://blogs.msdn.com/b/oldnewthing/archive/2004/10/25/247180.aspx
-				return reinterpret_cast<HMODULE>(&__ImageBase);
+				return reinterpret_cast<HMODULE>(&__ImageBase); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
 			}
 
 			Process(Handle && handle)
@@ -108,7 +123,7 @@ namespace GLib
 			DWORD Id() const
 			{
 				DWORD pid = ::GetProcessId(p.get());
-				Util::AssertTrue(!!pid, "GetProcessId");
+				Util::AssertTrue(pid != 0, "GetProcessId");
 				return pid;
 			}
 
@@ -140,13 +155,22 @@ namespace GLib
 
 			void ReadMemory(uint64_t address, void * buffer, size_t size) const
 			{
-				BOOL result = ::ReadProcessMemory(p.get(), (const void *)address, buffer, size, nullptr);
+				BOOL result = ::ReadProcessMemory(p.get(), Detail::ToAddress(address), buffer, size, nullptr);
 				Util::AssertTrue(result, "ReadProcessMemory");
+			}
+
+			template <typename T>
+			std::unique_ptr<T[]> ReadMemory(uint64_t address, size_t size) const
+			{
+				auto buffer = std::make_unique<T[]>(size);
+				BOOL result = ::ReadProcessMemory(p.get(), Detail::ToAddress(address), buffer.get(), size, nullptr);
+				Util::AssertTrue(result, "ReadProcessMemory");
+				return move(buffer);
 			}
 
 			void WriteMemory(uint64_t address, const void * buffer, size_t size) const
 			{
-				BOOL result = ::WriteProcessMemory(p.get(), (void*)address, buffer, size, nullptr);
+				BOOL result = ::WriteProcessMemory(p.get(), Detail::ToPseudoWritableAddress(address), buffer, size, nullptr);
 				Util::AssertTrue(result, "WriteProcessMemory");
 			}
 
@@ -161,7 +185,7 @@ namespace GLib
 				// add standard handles? verify
 				STARTUPINFOW sui = {};
 				sui.cb = sizeof(STARTUPINFOW);
-				sui.lpDesktop = desktop.empty() ? nullptr : const_cast<LPWSTR>(desktop.c_str());
+				sui.lpDesktop = desktop.empty() ? nullptr : Detail::ToPseudoWritableString(desktop.c_str());
 				PROCESS_INFORMATION pi = {};
 				Util::AssertTrue(::CreateProcessW(app.c_str(), nullptr, nullptr, nullptr, FALSE, creationFlags,
 					nullptr, nullptr, &sui, &pi), "CreateProcess");

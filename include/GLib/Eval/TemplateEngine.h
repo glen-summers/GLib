@@ -13,9 +13,9 @@ namespace GLib::Eval::TemplateEngine
 	{
 		inline static std::regex const varRegex { R"(^(\w+)\s:\s\$\{([\w\.]+)\}$)" };
 		inline static std::regex const propRegex { R"(\$\{([\w\.]+)\})" };
-		inline static constexpr char NameSpace[] = "glib";
-		inline static constexpr char Block[] = "block";
-		inline static constexpr char Each[] = "each";
+		inline static constexpr const char * NameSpace = "glib";
+		inline static constexpr const char * Block = "block";
+		inline static constexpr const char * Each = "each";
 
 		using AttributeMap = std::unordered_map<std::pair<std::string_view, std::string_view>, Xml::Attribute, Util::PairHash>;
 
@@ -119,7 +119,7 @@ namespace GLib::Eval::TemplateEngine
 
 							case Xml::ElementType::Close:
 							{
-								if (!current)
+								if (current == nullptr)
 								{
 									throw std::logic_error("No parent node");
 								}

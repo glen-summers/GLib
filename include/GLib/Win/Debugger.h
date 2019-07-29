@@ -14,6 +14,23 @@ namespace GLib
 {
 	namespace Win
 	{
+		namespace Detail
+		{
+			inline const EXCEPTION_DEBUG_INFO & Exception(const DEBUG_EVENT & event) { return event.u.Exception; } // NOLINT(cppcoreguidelines-pro-type-union-access)
+			inline const CREATE_THREAD_DEBUG_INFO & CreateThread(const DEBUG_EVENT & event) { return event.u.CreateThread; } // NOLINT(cppcoreguidelines-pro-type-union-access)
+			inline const CREATE_PROCESS_DEBUG_INFO & CreateProcessInfo(const DEBUG_EVENT & event) { return event.u.CreateProcessInfo; } // NOLINT(cppcoreguidelines-pro-type-union-access)
+			inline const EXIT_THREAD_DEBUG_INFO & ExitThread(const DEBUG_EVENT & event) { return event.u.ExitThread; } // NOLINT(cppcoreguidelines-pro-type-union-access)
+			inline const EXIT_PROCESS_DEBUG_INFO & ExitProcess(const DEBUG_EVENT & event) { return event.u.ExitProcess; } // NOLINT(cppcoreguidelines-pro-type-union-access)
+			inline const LOAD_DLL_DEBUG_INFO & LoadDll(const DEBUG_EVENT & event) { return event.u.LoadDll; } // NOLINT(cppcoreguidelines-pro-type-union-access)
+			inline const UNLOAD_DLL_DEBUG_INFO & UnloadDll(const DEBUG_EVENT & event) { return event.u.UnloadDll; } // NOLINT(cppcoreguidelines-pro-type-union-access)
+			inline const OUTPUT_DEBUG_STRING_INFO & DebugString(const DEBUG_EVENT & event) { return event.u.DebugString; } // NOLINT(cppcoreguidelines-pro-type-union-access)
+
+			inline uint64_t ConvertAddress(const void * address)
+			{
+				return reinterpret_cast<uint64_t>(address); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
+			}
+		}
+
 		class Debugger
 		{
 			Symbols::Engine symbols;
@@ -64,51 +81,52 @@ namespace GLib
 				{
 					case CREATE_PROCESS_DEBUG_EVENT:
 					{
-						SCOPE(_, [&] { ::CloseHandle(debugEvent.u.CreateProcessInfo.hFile); });
-						OnCreateProcess(processId, threadId, debugEvent.u.CreateProcessInfo);
+						auto pi = Detail::CreateProcessInfo(debugEvent);
+						SCOPE(_, [&] { ::CloseHandle(pi.hFile); });
+						OnCreateProcess(processId, threadId, pi);
 						break;
 					}
 
 					case EXIT_PROCESS_DEBUG_EVENT:
 					{
-						OnExitProcess(processId, threadId, debugEvent.u.ExitProcess);
+						OnExitProcess(processId, threadId, Detail::ExitProcess(debugEvent));
 						break;
 					}
 
 					case CREATE_THREAD_DEBUG_EVENT:
 					{
-						OnCreateThread(processId, threadId, debugEvent.u.CreateThread);
+						OnCreateThread(processId, threadId, Detail::CreateThread(debugEvent));
 						break;
 					}
 
 					case EXIT_THREAD_DEBUG_EVENT:
 					{
-						OnExitThread(processId, threadId, debugEvent.u.ExitThread);
+						OnExitThread(processId, threadId, Detail::ExitThread(debugEvent));
 						break;
 					}
 
 					case LOAD_DLL_DEBUG_EVENT:
 					{
-						SCOPE(_, [&] { ::CloseHandle(debugEvent.u.LoadDll.hFile); });
-						OnLoadDll(processId, threadId, debugEvent.u.LoadDll);
+						SCOPE(_, [&] { ::CloseHandle(Detail::LoadDll(debugEvent).hFile); });
+						OnLoadDll(processId, threadId, Detail::LoadDll(debugEvent));
 						break;
 					}
 
 					case UNLOAD_DLL_DEBUG_EVENT:
 					{
-						OnUnloadDll(processId, threadId, debugEvent.u.UnloadDll);
+						OnUnloadDll(processId, threadId, Detail::UnloadDll(debugEvent));
 						break;
 					}
 
 					case EXCEPTION_DEBUG_EVENT:
 					{
-						continueStatus = OnException(processId, threadId, debugEvent.u.Exception);
+						continueStatus = OnException(processId, threadId, Detail::Exception(debugEvent));
 						break;
 					}
 
 					case OUTPUT_DEBUG_STRING_EVENT:
 					{
-						OnDebugString(processId, threadId, debugEvent.u.DebugString);
+						OnDebugString(processId, threadId, Detail::DebugString(debugEvent));
 						break;
 					}
 
@@ -143,7 +161,7 @@ namespace GLib
 				std::string const name = FileSystem::NormalisePath(logicalName, driveMap);
 
 				// when using DEBUG_ONLY_THIS_PROCESS only get called here for main executable
-				const Symbols::SymProcess & process = symbols.AddProcess(processId, info.hProcess, reinterpret_cast<uint64_t>(info.lpBaseOfImage), info.hFile, name);
+				const Symbols::SymProcess & process = symbols.AddProcess(processId, info.hProcess, Detail::ConvertAddress(info.lpBaseOfImage), info.hFile, name);
 
 				IMAGE_DOS_HEADER header {};
 				process.ReadMemory(0, &header, sizeof(header));
@@ -243,17 +261,21 @@ namespace GLib
 				UNREFERENCED_PARAMETER(processId);
 				UNREFERENCED_PARAMETER(threadId);
 
-				auto buffer = std::make_unique<unsigned char[]>(info.nDebugStringLength);
-				mainProcess.ReadMemory(reinterpret_cast<uint64_t>(info.lpDebugStringData), buffer.get(), info.nDebugStringLength);
+				//size_t bytes = info.nDebugStringLength;
+				//auto buffer = std::make_unique<unsigned char[]>(bytes);
+				//mainProcess.ReadMemory(Detail::ConvertAddress(info.lpDebugStringData), buffer.get(), bytes);
+				auto address = Detail::ConvertAddress(info.lpDebugStringData);
 
 				std::string message;
-				if (info.fUnicode)
+				if (info.fUnicode != 0)
 				{
-					message = Cvt::w2a(std::wstring(reinterpret_cast<const wchar_t*>(buffer.get()), info.nDebugStringLength / 2 - 1));
+					size_t size = info.nDebugStringLength / 2 - 1;
+					message =  Cvt::w2a(std::wstring{ mainProcess.ReadMemory<wchar_t>(address, size).get(), size });
 				}
 				else
 				{
-					message = std::string(reinterpret_cast<const char *>(buffer.get()), info.nDebugStringLength - 1);
+					size_t size = info.nDebugStringLength - 1;
+					message =  std::string{ mainProcess.ReadMemory<char>(address, size).get(), size };
 				}
 
 				message.erase(std::remove(message.begin(), message.end(), '\r'), message.end());

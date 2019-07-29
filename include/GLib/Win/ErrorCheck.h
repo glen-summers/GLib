@@ -14,13 +14,27 @@ namespace GLib
 		{
 			namespace Detail
 			{
+				inline std::string FormatErrorMessage(const char * message, DWORD error, const wchar_t * moduleName = nullptr)
+				{
+					std::ostringstream stm;
+					stm << message << " : ";
+					Util::FormatErrorMessage(stm, error, moduleName);
+					if (error >= 0x80000000)
+					{
+						stm << std::hex;
+					}
+					stm << " (" << error << ")";
+					return stm.str();
+				}
+
 				__declspec(noreturn) inline void Throw(const char * message, DWORD result)
 				{
-					WinException e(message, result);
+					std::string formattedMessage = FormatErrorMessage(message, result);
+
 #ifdef _DEBUG // || defined(GLIB_DEBUG)
-					Debug::Stream() << "WinException : " << e.what() << std::endl;
+					Debug::Stream() << "WinException : " << formattedMessage << std::endl;
 #endif
-					throw e;
+					throw WinException(formattedMessage, result);
 				}
 
 				// only allow specific params to prevent accidental int -> bool and misinterpreting win32 results
@@ -53,7 +67,7 @@ namespace GLib
 						if (!result)
 						{
 							DWORD dwErr = ::GetLastError();
-							Debug::Stream() << "GLib warning: " << Win::Detail::FormatErrorMessage(message, dwErr) << std::endl;
+							Debug::Stream() << "GLib warning: " << Detail::FormatErrorMessage(message, dwErr) << std::endl;
 						}
 #else
 						UNREFERENCED_PARAMETER(result);
