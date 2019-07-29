@@ -11,8 +11,6 @@ namespace GLib::Eval::TemplateEngine
 {
 	namespace Detail
 	{
-		inline static std::regex const varRegex { R"(^(\w+)\s:\s\$\{([\w\.]+)\}$)" };
-		inline static std::regex const propRegex { R"(\$\{([\w\.]+)\})" };
 		inline static constexpr const char * NameSpace = "glib";
 		inline static constexpr const char * Block = "block";
 		inline static constexpr const char * Each = "each";
@@ -79,6 +77,7 @@ namespace GLib::Eval::TemplateEngine
 
 		class Nodes
 		{
+			std::regex const varRegex { R"(^(\w+)\s:\s\$\{([\w\.]+)\}$)" };
 			Node root;
 			Node * current;
 
@@ -224,59 +223,77 @@ namespace GLib::Eval::TemplateEngine
 			}
 		};
 
-		inline void Generate(Evaluator & evaluator, const Node & node, std::ostream & out)
+		class Generator
 		{
-			if (!node.Enumeration().empty())
-			{
-				evaluator.ForEach(node.Enumeration(), [&](const ValueBase & value)
-				{
-					evaluator.Push(node.Variable(), value);
-					SCOPE(pop, [&](){evaluator.Pop(node.Variable());});
+			std::regex const propRegex { R"(\$\{([\w\.]+)\})" };
 
-					for (const auto & child : node.Children())
-					{
-						Generate(evaluator, child, out);
-					}
-				});
-				return;
+			Evaluator & evaluator;
+
+		public:
+			Generator(Evaluator & evaluator)
+				: evaluator(evaluator)
+			{}
+
+			void Generate(const std::string_view & xml, std::ostream & out)
+			{
+				Detail::Nodes nodes{xml};
+				Generate(nodes.GetRoot(), out);
 			}
 
-			if (!node.Value().empty())
+		private:
+			void Generate(const Node & node, std::ostream & out)
 			{
-				std::regex r(propRegex);
-				std::cregex_iterator it(node.Value().data(), node.Value().data() + node.Value().size(), r);
-				auto end = std::cregex_iterator{};
-				if (it==end)
+				if (!node.Enumeration().empty())
 				{
-					out << node.Value();
-				}
-				else
-				{
-					for (;;)
+					evaluator.ForEach(node.Enumeration(), [&](const ValueBase & value)
 					{
-						out << it->prefix();
-						auto var = (*it)[1]; // +format;
-						out << evaluator.Evaluate(var);
-						auto suffix = it->suffix();
-						if (++it == end)
+						evaluator.Push(node.Variable(), value);
+						SCOPE(pop, [&](){evaluator.Pop(node.Variable());});
+
+						for (const auto & child : node.Children())
 						{
-							out << suffix;
-							break;
+							Generate(child, out);
+						}
+					});
+					return;
+				}
+
+				if (!node.Value().empty())
+				{
+					std::regex r(propRegex);
+					std::cregex_iterator it(node.Value().data(), node.Value().data() + node.Value().size(), r);
+					auto end = std::cregex_iterator{};
+					if (it==end)
+					{
+						out << node.Value();
+					}
+					else
+					{
+						for (;;)
+						{
+							out << it->prefix();
+							auto var = (*it)[1]; // +format;
+							out << evaluator.Evaluate(var);
+							auto suffix = it->suffix();
+							if (++it == end)
+							{
+								out << suffix;
+								break;
+							}
 						}
 					}
 				}
-			}
 
-			for (const auto & child : node.Children())
-			{
-				Generate(evaluator, child, out);
+				for (const auto & child : node.Children())
+				{
+					Generate(child, out);
+				}
 			}
-		}
+		};
 	}
 
 	inline void Generate(Evaluator & e, const std::string_view & xml, std::ostream & out)
 	{
-		Detail::Nodes nodes{xml};
-		Detail::Generate(e, nodes.GetRoot(), out);
+		Detail::Generator(e).Generate(xml, out);
 	}
 }

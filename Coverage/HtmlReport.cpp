@@ -13,7 +13,6 @@
 #include "GLib/Eval/Evaluator.h"
 
 #include <fstream>
-#include <filesystem>
 #include <set>
 
 struct Line
@@ -28,20 +27,37 @@ struct GLib::Eval::Visitor<Line>
 {
 	static void Visit(const Line & line, const std::string & propertyName, const ValueVisitor & f)
 	{
-		if (propertyName == "style") return f(Value(line.style));
-		if (propertyName == "number") return f(Value(line.number));
-		if (propertyName == "text") return f(Value(line.text));
+		if (propertyName == "style")
+		{
+			return f(Value(line.style));
+		}
+
+		if (propertyName == "number")
+		{
+			return f(Value(line.number));
+		}
+
+		if (propertyName == "text")
+		{
+			return f(Value(line.text));
+		}
+
 		throw std::runtime_error(std::string("Unknown property : '") + propertyName + '\'');
 	}
 };
+
+std::string LoadHtml(unsigned int id)
+{
+	return GLib::Win::LoadResourceString(nullptr, id, RT_HTML); // NOLINT(cppcoreguidelines-pro-type-cstyle-cast) baad macro
+}
 
 HtmlReport::HtmlReport(const std::string & title, const std::filesystem::path & htmlPath,
 	const std::map<std::filesystem::path, FileCoverageData> & fileCoverageData)
 	: htmlPath(htmlPath)
 	, rootPaths(RootPaths(fileCoverageData))
 	, cssPath(Initialise(htmlPath))
-	, dirTemplate(GLib::Win::LoadResourceString(nullptr, IDR_DIRECTORY, RT_HTML))
-	, fileTemplate(GLib::Win::LoadResourceString(nullptr, IDR_FILE, RT_HTML))
+	, dirTemplate(LoadHtml(IDR_DIRECTORY))
+	, fileTemplate(LoadHtml(IDR_FILE))
 {
 	for (const auto & fileDataPair : fileCoverageData)
 	{
@@ -59,7 +75,7 @@ HtmlReport::HtmlReport(const std::string & title, const std::filesystem::path & 
 
 std::filesystem::path HtmlReport::Initialise(const std::filesystem::path & path)
 {
-	std::string s = GLib::Win::LoadResourceString(nullptr, IDR_STYLESHEET, RT_HTML);
+	std::string s = LoadHtml(IDR_STYLESHEET);
 
 	remove_all(path);
 	create_directories(path);
@@ -70,7 +86,7 @@ std::filesystem::path HtmlReport::Initialise(const std::filesystem::path & path)
 		throw std::runtime_error("Unable to create file");
 	}
 	css << s;
-	return cssPath;
+	return std::move(cssPath);
 }
 
 std::set<std::filesystem::path> HtmlReport::RootPaths(const std::map<std::filesystem::path, FileCoverageData>& data)

@@ -2,6 +2,8 @@
 
 #include "GLib/Win/ErrorCheck.h"
 
+#include <algorithm>
+
 namespace GLib
 {
 	namespace Win
@@ -15,11 +17,11 @@ namespace GLib
 			return { static_cast<const T*>(::LockResource(resourceData)), ::SizeofResource(instance, resource) };
 		}
 
-		std::string LoadResourceString(HINSTANCE instance, unsigned int id, LPCWSTR resourceType)
+		inline std::string LoadResourceString(HINSTANCE instance, unsigned int id, LPCWSTR resourceType)
 		{
 			auto [p, size] = LoadResource<char>(instance, id, resourceType);
 			std::string s { p, size };
-			s.erase(std::remove(s.begin(), s.end(), '\r'), s.end());
+			s.erase(remove(s.begin(), s.end(), '\r'), s.end());
 			return s;
 		}
 	}

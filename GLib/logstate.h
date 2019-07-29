@@ -12,9 +12,13 @@ struct LogState
 	using Stream = GLib::Util::GenericOutStream<char, GLib::Util::VectorStreamBuffer<char>>;
 
 	std::stack<Scope> scopes;
-	int depth {};
-	bool pending {};
-	const char * threadName {};
-	Stream stream { std::ios_base::boolalpha };
+	int depth;
+	bool pending;
+	const char * threadName;
+	Stream stream;
+
+	LogState() noexcept
+		: depth{}, pending{}, threadName{}
+	{}
 };
 

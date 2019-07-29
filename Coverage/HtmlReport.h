@@ -4,16 +4,7 @@
 #include <set>
 #include <list>
 #include <string>
-
-class HtmlPrinter;
-
-namespace std
-{
-	namespace filesystem
-	{
-		class path;
-	}
-}
+#include <filesystem>
 
 class FileCoverageData;
 
@@ -21,7 +12,7 @@ class HtmlReport
 {
 	const std::filesystem::path & htmlPath;
 	std::set<std::filesystem::path> rootPaths;
-	const std::filesystem::path & cssPath;
+	std::filesystem::path cssPath;
 	std::string dirTemplate; // store compiled Nodes(ren)
 	std::string fileTemplate;
 
