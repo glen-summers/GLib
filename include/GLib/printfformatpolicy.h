@@ -43,13 +43,13 @@ namespace GLib
 			{
 				const char * f = CheckFormat(defaultFormat, format);
 				Util::StackOrHeap<char, 21> s;
-				const int len = ::snprintf(nullptr, 0, f, value);
+				const int len = ::snprintf(nullptr, 0, f, value); // NOLINT(cppcoreguidelines-pro-type-vararg) by design
 				if (len < 0)
 				{
 					Compat::StrError("snprintf failed");
 				}
 				s.EnsureSize(len + 1);
-				::snprintf(s.Get(), s.size(), f, value);
+				::snprintf(s.Get(), s.size(), f, value); // NOLINT(cppcoreguidelines-pro-type-vararg) by design
 
 				stm << s.Get();
 			}
@@ -77,19 +77,19 @@ namespace GLib
 				stm << Cvt::w2a(wideStream.str());
 			}
 
-			template<unsigned int> void FormatPointer(std::ostream & stm, void * const & value)
+			template<size_t> void FormatPointer(std::ostream & stm, void * const & value)
 			{
-				static_assert("Unknown pointer size");
+				throw std::runtime_error("Unknown pointer size : " + std::to_string(sizeof(value)));
 			}
 
 			template<>
-			inline void FormatPointer<4>(std::ostream & stm, void * const & value)
+			inline void FormatPointer<size_t(4)>(std::ostream & stm, void * const & value)
 			{
 				ToStringImpl("", stm, value, "%08x");
 			}
 
 			template<>
-			inline void FormatPointer<8>(std::ostream & stm, void * const & value)
+			inline void FormatPointer<size_t(8)>(std::ostream & stm, void * const & value)
 			{
 				ToStringImpl("", stm, value, "%016x");
 			}

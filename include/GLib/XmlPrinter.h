@@ -27,12 +27,12 @@ public:
 		s << R"(<?xml version="1.0" encoding="UTF-8" ?>)" << std::endl;
 	}
 
-	void OpenElement(const char * name)
+	void OpenElement(const std::string & name)
 	{
 		OpenElement(name, format);
 	}
 
-	void OpenElement(const char * name, bool elementFormat)
+	void OpenElement(const std::string & name, bool elementFormat)
 	{
 		CloseJustOpenedElement();
 		stack.push(name);
@@ -50,7 +50,7 @@ public:
 		++depth;
 	}
 
-	void PushAttribute(const char * name, const char * value)
+	void PushAttribute(const std::string & name, const char * value)
 	{
 		AssertTrue(elementOpen, "Element not open");
 		s << ' ' << name << R"(=")";
@@ -58,32 +58,27 @@ public:
 		s << '"';
 	}
 
-	void PushAttribute(const char * name, const std::string & value)
+	void PushAttribute(const std::string & name, const std::string & value)
 	{
 		AssertTrue(elementOpen, "Element not open");
 		s << ' ' << name << R"(=")";
-		Text(value.c_str());
+		Text(value);
 		s << '"';
 	}
 
-	void PushAttribute(const char * name, int64_t value)
+	void PushAttribute(const std::string & name, int64_t value)
 	{
 		PushAttribute(name, std::to_string(value).c_str());
 	}
 
-	void PushText(const char * text)
+	void PushText(const std::string & text)
 	{
 		textDepth = depth - 1;
 		CloseJustOpenedElement();
 		Text(text);
 	}
 
-	void PushText(const std::string & text)
-	{
-		PushText(text.c_str());
-	}
-
-	void PushDocType(const char * docType)
+	void PushDocType(const std::string & docType)
 	{
 		s << "<!DOCTYPE " << docType << '>' << std::endl;
 	}
@@ -166,15 +161,18 @@ private:
 		}
 	}
 
-	void Text(std::string && value)
+	void Text(const std::string & value)
 	{
-		Escape(value);
-		s << value;
+		s << Escape(std::string{value});
 	}
 
-	static void Escape(std::string & value)
+	void Text(std::string && value)
 	{
-		// better to stream to new string, if no change move?
+		s << Escape(move(value));
+	}
+
+	static std::string Escape(std::string && value)
+	{
 		for (size_t startPos = 0;;)
 		{
 			const char * replacement = {};
@@ -190,11 +188,12 @@ private:
 			}
 			if (pos == std::string::npos)
 			{
-				return;
+				break;
 			}
 			value.replace(pos, 1, replacement);
 			startPos = pos + ::strlen(replacement);
 		}
+		return move(value);
 	}
 
 	static void AssertTrue(bool value, const char * message)

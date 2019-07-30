@@ -182,6 +182,7 @@
 		</ItemGroup>
 
 		<!-- slow, split and run in parallel? -->
+		<!-- add boost include to check test code?-->
 		<Exec Command="$(Tidy) @(Relative, ' ') -quiet -checks=$(TidyChecks) -- -Iinclude -std=c++17 $(TidyDefines) -x c++ -W$(TidyIgnore)"
 			WorkingDirectory="$(Source)"/>
 	</Target>

@@ -14,6 +14,7 @@ namespace
 {
 	bool IsInvalidFormat(const std::logic_error & e) { return e.what() == std::string("Invalid format string"); }
 	bool IsIndexOutOfRange(const std::logic_error & e) { return e.what() == std::string("IndexOutOfRange"); }
+	bool IsNoArguments(const std::logic_error & e) { return e.what() == std::string("NoArguments"); }
 
 	const auto ukLocale =
 #ifdef __linux__
@@ -70,7 +71,7 @@ BOOST_AUTO_TEST_CASE(TestEscapes)
 
 BOOST_AUTO_TEST_CASE(NoArgumentsThrows)
 {
-	BOOST_CHECK_EXCEPTION(Formatter::Format("{0}"), std::logic_error, IsIndexOutOfRange);
+	BOOST_CHECK_EXCEPTION(Formatter::Format("{0}"), std::logic_error, IsNoArguments);
 }
 
 BOOST_AUTO_TEST_CASE(TestInvalidEscapeThrows)

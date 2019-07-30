@@ -11,9 +11,9 @@ namespace GLib::Eval::TemplateEngine
 {
 	namespace Detail
 	{
-		inline static constexpr const char * NameSpace = "glib";
-		inline static constexpr const char * Block = "block";
-		inline static constexpr const char * Each = "each";
+		inline static constexpr auto NameSpace = std::string_view {"glib"};
+		inline static constexpr auto Block = std::string_view {"block"};
+		inline static constexpr auto Each = std::string_view {"each"};
 
 		using AttributeMap = std::unordered_map<std::pair<std::string_view, std::string_view>, Xml::Attribute, Util::PairHash>;
 
@@ -26,8 +26,7 @@ namespace GLib::Eval::TemplateEngine
 			std::string enumeration;
 
 		public:
-			Node()
-				: parent {}
+			Node() : parent {}
 			{}
 
 			Node(Node * parent, std::string_view value) : parent(parent), value(value)
@@ -87,6 +86,7 @@ namespace GLib::Eval::TemplateEngine
 				for (auto it = holder.begin(), end = holder.end(); it != end; ++it)
 				{
 					const Xml::Element & e = *it;
+
 					if (e.nameSpace == NameSpace && e.name == Block)
 					{
 						switch (e.type)
@@ -132,7 +132,7 @@ namespace GLib::Eval::TemplateEngine
 							}
 						}
 					}
-					else
+					else if (e.type != Xml::ElementType::Close)
 					{
 						AttributeMap atMap;
 						bool replaced = false;
@@ -176,6 +176,8 @@ namespace GLib::Eval::TemplateEngine
 										continue;
 									}
 									// preserve quote type?
+									// could add entire attr text, would need initial space as part of value
+									// could also accumulate and add single fragment
 									current->AddFragment(a.name);
 									current->AddFragment("=\"");
 									current->AddFragment(a.value);
@@ -213,6 +215,10 @@ namespace GLib::Eval::TemplateEngine
 							}
 							current->AddFragment(Xml::Utils::ToStringView(p, e.outerXml.data()+e.outerXml.size()));
 						}
+					}
+					else
+					{
+						current->AddFragment(e.outerXml);
 					}
 				}
 			}
