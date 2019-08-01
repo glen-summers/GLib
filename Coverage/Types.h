@@ -20,10 +20,10 @@ using CaseInsensitiveMap = std::map<std::basic_string<T>, Value, GLib::NoCaseLes
 template <typename T>
 using CaseInsensitiveSet = std::set<std::basic_string<T>, GLib::NoCaseLess<T>>;
 
-typedef CaseInsensitiveSet<wchar_t> WideStrings;
-typedef CaseInsensitiveSet<char> Strings;
+using WideStrings = CaseInsensitiveSet<wchar_t>;
+using Strings = CaseInsensitiveSet<char>;
 
-typedef std::map<unsigned int, bool> Lines;
-typedef CaseInsensitiveMap<wchar_t, Lines> FileLines;
+using Lines = std::map<unsigned int, bool>;
+using FileLines = CaseInsensitiveMap<wchar_t, Lines>;
 class Address;
-typedef std::map<uint64_t, Address> Addresses;
+using Addresses = std::map<uint64_t, Address>;

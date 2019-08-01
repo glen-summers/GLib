@@ -210,7 +210,7 @@ void HtmlReport::GenerateSourceFile(std::filesystem::path & path, const std::str
 
 	e.Add("styleSheet", css);
 	e.Add("title", title);
-	e.Add("coverageStyle", CoverageStyle(coveragePercent));
+	e.Add("coverageStyle", CoverageLevel(coveragePercent));
 	e.Add("coveredLines", data.CoveredLines());
 	e.Add("coverableLines", lc.size());
 	e.Add("coveragePercent", coveragePercent);

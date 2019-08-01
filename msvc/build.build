@@ -176,8 +176,11 @@
 	<Target Name="Tidy">
 		<ItemGroup>
 			<FileToCheck Include="$(Source)/include/**/*.h"/>
-			<FileToCheck Include="$(Source)/GLib/**/*.cpp"/>
 			<FileToCheck Include="$(Source)/GLib/**/*.h"/>
+			<FileToCheck Include="$(Source)/GLib/**/*.cpp"/>
+			<FileToCheck Include="$(Source)/Coverage/**/*.cpp"/>
+			<FileToCheck Include="$(Source)/Coverage/**/*.h"/>
+
 			<Relative Include="$([MSBuild]::MakeRelative($(Source), %(FileToCheck.FullPath)))"/>
 		</ItemGroup>
 

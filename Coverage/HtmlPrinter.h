@@ -4,7 +4,7 @@
 
 #include <filesystem>
 
-// strict XHTML?
+// strict XHTML? no longer used
 class HtmlPrinter : public XmlPrinter
 {
 public:
@@ -61,6 +61,6 @@ public:
 	void LineBreak(const char * element = "hr")
 	{
 		OpenElement(element);
-		CloseElement(element);
+		CloseElement(true);
 	}
 };

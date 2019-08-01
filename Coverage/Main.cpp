@@ -2,6 +2,8 @@
 
 #include "Coverage.h"
 
+#include "GLib/span.h"
+
 #include <iostream>
 
 using namespace std::string_literals;
@@ -10,6 +12,8 @@ int main(int argc, char *argv[])
 {
 	int errorCode = 0;
 
+	GLib::Span<char *> const args { argv+1, argc-1 };
+
 	try
 	{
 		if (argc < 3)
@@ -17,31 +21,34 @@ int main(int argc, char *argv[])
 			throw std::runtime_error("Coverage <Executable> <Report> [-i IncludePath]... [-x excludePath]...");
 		}
 
-		const auto executable = argv[1];
-		const auto report = argv[2];
+		auto it = args.begin();
+		auto end = args.end();
+		const auto executable = *it++;
+		const auto report = *it++;
 
 		Strings includes, excludes;
-		for (int i = 3; i < argc; ++i)
+		for (; it!=end; ++it)
 		{
-			if (strcmp(argv[i], "-i") == 0)
+			auto arg = *it++;
+			if (strcmp(arg, "-i") == 0)
 			{
-				if(++i== argc)
+				if (it == end)
 				{
 					throw std::runtime_error("Missing include value");
 				}
-				includes.insert(argv[i]);
+				includes.insert(*it);
 			}
-			else if (strcmp(argv[i], "-x") == 0)
+			else if (strcmp(arg, "-x") == 0)
 			{
-				if(++i== argc)
+				if (it == end)
 				{
-					throw std::runtime_error("Missing include value");
+					throw std::runtime_error("Missing exclude value");
 				}
-				excludes.insert(argv[i]);
+				excludes.insert(*it);
 			}
 			else
 			{
-				throw std::runtime_error("Unexpected: "s + argv[i]);
+				throw std::runtime_error("Unexpected: "s + *it);
 			}
 		}
 

@@ -159,6 +159,7 @@
     <ClInclude Include="..\include\GLib\PairHash.h" />
     <ClInclude Include="..\include\GLib\printfformatpolicy.h" />
     <ClInclude Include="..\include\GLib\scope.h" />
+    <ClInclude Include="..\include\GLib\Span.h" />
     <ClInclude Include="..\include\GLib\split.h" />
     <ClInclude Include="..\include\GLib\stackorheap.h" />
     <ClInclude Include="..\include\GLib\TypeFilter.h" />

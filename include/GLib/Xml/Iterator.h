@@ -175,8 +175,7 @@ namespace GLib::Xml
 						case Xml::State::ElementAttributeValueQuote:
 						case Xml::State::ElementAttributeValueSingleQuote:
 						{
-							manager.Push(Utils::ToStringView(attributeName),
-								Utils::ToStringView(attributeValueStart+1, oldPtr), elementStack.size()); // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic) todo use std::span
+							manager.Push(Utils::ToStringView(attributeName), Utils::ToStringView(attributeValueStart, oldPtr).substr(1), elementStack.size());
 
 							// better test? currently writes ones per attr
 							attributes.second = ptr;

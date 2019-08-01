@@ -1,13 +1,14 @@
 #pragma once
 
 #include "Types.h"
+#include "Address.h"
 
 #include <regex>
 #include <utility>
 
 class Function
 {
-	inline static std::regex const namespaceRegex{ R"(^(?:[A-Za-z_][A-Za-z_0-9]*::)*)" }; // +some extra unicode chars?
+	inline static std::regex const namespaceRegex{ R"(^(?:[A-Za-z_][A-Za-z_0-9]*::)*)" }; // +some extra unicode chars? // move
 
 	std::string nameSpace;
 	std::string className;

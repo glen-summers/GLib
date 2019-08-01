@@ -1,6 +1,7 @@
 #ifndef FORMATTER_H
 #define FORMATTER_H
 
+#include "GLib/Span.h"
 #include "GLib/printfformatpolicy.h"
 
 #include <sstream>
@@ -42,7 +43,7 @@ namespace GLib
 			}
 		}
 
-		inline std::ostream & AppendFormatHelper(std::ostream & str, const std::string_view & view, StreamFunction args[], size_t argsCount)
+		inline std::ostream & AppendFormatHelper(std::ostream & str, const std::string_view & view, const Span<StreamFunction> & args)
 		{
 			char ch = {};
 			for (auto it = view.begin(), end = view.end();;)
@@ -155,12 +156,6 @@ namespace GLib
 					++it;
 				}
 
-				if (index >= argsCount)
-				{
-					throw std::logic_error("IndexOutOfRange"); // add extra info
-				}
-
-				const StreamFunction & arg = args[index]; // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic) verified in range
 				std::string format; // use strng_view?
 
 				if (ch == ':')
@@ -215,7 +210,7 @@ namespace GLib
 					str << (leftJustify ? std::left : std::right) << std::setw(width);
 				}
 
-				arg(str, format);
+				args[index](str, format);
 			}
 			return str;
 		}
@@ -228,7 +223,7 @@ namespace GLib
 		template <typename... Ts> static std::ostream & Format(std::ostream & str, const char * format, const Ts&... ts)
 		{
 			FormatterDetail::StreamFunction ar[]{ ToStreamFunctions(ts)...};
-			return FormatterDetail::AppendFormatHelper(str, format, ar, sizeof...(Ts));
+			return FormatterDetail::AppendFormatHelper(str, format, {ar, sizeof...(Ts)});
 		}
 
 		template <typename... Ts> static std::string Format(const char * format, Ts&&... ts)

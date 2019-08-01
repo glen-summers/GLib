@@ -191,6 +191,9 @@
     <ClInclude Include="..\include\GLib\Win\Local.h">
       <Filter>Include Files\Win</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\GLib\Span.h">
+      <Filter>Include Files\Util</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="filelogger.cpp">
