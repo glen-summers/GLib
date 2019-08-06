@@ -20,7 +20,7 @@ void LogManager::SetLevel(GLib::Flog::Level level)
 void LogManager::SetThreadName(const char * name)
 {
 	FileLogger::Write(Level::Info, "ThreadName", name != nullptr ? name : "(null)");
-	FileLogger::logState.threadName = name;
+	FileLogger::logState.ThreadName(name);
 }
 
 std::string LogManager::GetLogPath()

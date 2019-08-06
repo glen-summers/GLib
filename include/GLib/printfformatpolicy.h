@@ -42,7 +42,8 @@ namespace GLib
 			static void ToStringImpl(const char * defaultFormat, std::ostream & stm, const T & value, const std::string & format)
 			{
 				const char * f = CheckFormat(defaultFormat, format);
-				Util::StackOrHeap<char, 21> s;
+				constexpr auto InitialBufferSize = 21;
+				Util::StackOrHeap<char, InitialBufferSize> s;
 				const int len = ::snprintf(nullptr, 0, f, value); // NOLINT(cppcoreguidelines-pro-type-vararg) by design
 				if (len < 0)
 				{
@@ -83,13 +84,13 @@ namespace GLib
 			}
 
 			template<>
-			inline void FormatPointer<size_t(4)>(std::ostream & stm, void * const & value)
+			inline void FormatPointer<sizeof(uint32_t)>(std::ostream & stm, void * const & value)
 			{
 				ToStringImpl("", stm, value, "%08x");
 			}
 
 			template<>
-			inline void FormatPointer<size_t(8)>(std::ostream & stm, void * const & value)
+			inline void FormatPointer<sizeof(uint64_t)>(std::ostream & stm, void * const & value)
 			{
 				ToStringImpl("", stm, value, "%016x");
 			}

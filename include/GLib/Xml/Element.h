@@ -9,16 +9,19 @@ namespace GLib::Xml
 		Open, Empty, Close
 	};
 
-	struct Element // class
+	class Element
 	{
+		friend class Iterator; // avoid
+
 		std::string_view qName;
 		std::string_view name;
 		std::string_view nameSpace;
 		std::string_view outerXml;
 		ElementType type {};
-		Attributes attributes;
+		::GLib::Xml::Attributes attributes;
 		size_t depth {}; // move/remove?
 
+	public:
 		Element(std::string_view qName, std::string_view name, std::string_view nameSpace, ElementType type, Attributes attributes={})
 			: qName(qName), name(name), nameSpace(nameSpace), type(type), attributes(attributes)
 		{}
@@ -28,5 +31,40 @@ namespace GLib::Xml
 		{}
 
 		Element() = default;
+
+		const std::string_view & QName() const
+		{
+			return qName;
+		}
+
+		const std::string_view & Name() const
+		{
+			return name;
+		}
+
+		const std::string_view & NameSpace() const
+		{
+			return nameSpace;
+		}
+
+		const std::string_view & OuterXml() const
+		{
+			return outerXml;
+		}
+
+		ElementType Type() const
+		{
+			return type;
+		}
+
+		const ::GLib::Xml::Attributes & Attributes() const
+		{
+			return attributes;
+		}
+
+		size_t Depth() const  // move/remove?
+		{
+			return depth;
+		}
 	};
 }

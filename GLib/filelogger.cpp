@@ -2,31 +2,16 @@
 
 #include "filelogger.h"
 
+#include "DurationPrinter.h"
+#include "Manipulator.h"
+
 #include "GLib/flogging.h"
 #include "GLib/compat.h"
 
-#include <iomanip>
 #include <sstream>
 #include <thread>
 
 using namespace GLib;
-
-namespace
-{
-	template<class Arg> struct Manipulator
-	{
-		Manipulator(void(*left)(std::ostream&, Arg), Arg val) : p(left), arg(val) {}
-		void(*p)(std::ostream&, Arg);
-		Arg arg;
-	};
-
-	template <typename Arg>
-	std::ostream & operator<<(std::ostream& str, const Manipulator<Arg>& m)
-	{
-		(*m.p)(str, m.arg);
-		return str;
-	}
-}
 
 thread_local LogState FileLogger::logState;
 
@@ -50,7 +35,7 @@ void FileLogger::Write(Flog::Level level, const char * prefix, const char * mess
 
 void FileLogger::Write(char c)
 {
-	logState.stream.put(c);
+	logState.Put(c);
 }
 
 extern "C" void Flog::Detail::Write(char c)
@@ -163,22 +148,12 @@ void FileLogger::WriteToStream(Flog::Level level, const char * prefix, const cha
 			std::tm tm{};
 			Compat::LocalTime(tm, t);
 
-			const int ms = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count() % 1000;
+			const auto ms = static_cast<int>(std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count() % 1000);
 
-			auto & s = streamInfo.Stream();
-			s << std::left
+			streamInfo.Stream() << std::left
 				<< std::put_time(&tm, "%d %b %Y, %H:%M:%S") << "." << std::setw(3) << std::setfill('0') << ms << std::setfill(' ')
-				<< " : [ " << std::setw(THREAD_ID_WIDTH);
-			if (logState.threadName != nullptr)
-			{
-				s << logState.threadName;
-			}
-			else
-			{
-				s << std::this_thread::get_id();
-			}
-			s << " ] : "
-				<< std::setw(LEVEL_WIDTH) << Manipulator<Flog::Level>(TranslateLevel, level) << " : "
+				<< " : [ " << std::setw(THREAD_ID_WIDTH) << Manipulate(ThreadName, logState.ThreadName()) << " ] : "
+				<< std::setw(LEVEL_WIDTH) << Manipulate(TranslateLevel, level) << " : "
 				<< std::setw(PREFIX_WIDTH) << prefix << " : "
 				<< message << std::endl << std::flush;
 		}
@@ -212,7 +187,7 @@ void FileLogger::HandleFileRollover(size_t newEntrySize)
 	}
 }
 
-void FileLogger::CloseStream()
+void FileLogger::CloseStream() noexcept
 {
 	if (streamInfo)
 	{
@@ -284,93 +259,47 @@ bool FileLogger::ResourcesAvailable(size_t newEntrySize) const
 
 void FileLogger::CommitPendingScope()
 {
-	if (!logState.pending)
+	if (!logState.Pending())
 	{
 		return;
 	}
 
-	const Scope & scope = logState.scopes.top();
+	const Scope & scope = logState.Top();
 	std::ostringstream s; // use thread stream
-	s << std::setw(logState.depth) << "" << scope.Stem() << "> " << scope.ScopeText();
+	s << std::setw(logState.Depth()) << "" << scope.Stem() << "> " << scope.ScopeText();
+
 	// need to go via Instance() again as method is static due to use of logState
 	Instance().WriteToStream(scope.Level(), scope.Prefix().c_str(), s.str().c_str());
-	++logState.depth;
-	logState.pending = false;
+
+	logState.Commit();
 }
 
 void FileLogger::ScopeStart(Flog::Level level, const char * prefix, const char * scope, const char * stem)
 {
 	// level check?
 	CommitPendingScope();
-	logState.scopes.push({ level, prefix, scope, stem });
-	logState.pending = true;
+	logState.Push({ level, prefix, scope, stem });
 }
 
 void FileLogger::CommitBuffer(Flog::Level level, const char * prefix)
 {
-	Write(level, prefix, logState.stream.Buffer().Get());
-	logState.stream.Buffer().Reset(); // had AV here
+	Write(level, prefix, logState.Get());
+	logState.Reset(); // had AV here
 }
 
 void FileLogger::ScopeEnd(const char * prefix)
 {
-	const Scope scope = logState.scopes.top();
-	logState.scopes.pop();
-
-	if (!logState.pending)
-	{
-		--logState.depth;
-	}
+	const Scope scope = logState.Top();
+	bool pending = logState.Pop();
 
 	std::ostringstream s; // use thread stream
-	s << std::setw(logState.depth) << "" << "<" << scope.Stem();
+	s << std::setw(logState.Depth()) << "" << "<" << scope.Stem();
 
-	if (logState.pending)
+	if (pending)
 	{
 		s << ">";
-		logState.pending = false;
 	}
-	s << " " << scope.ScopeText() << " ";
-
-	auto duration = scope.Duration();
-	if (std::chrono::duration_cast<std::chrono::seconds>(duration).count() == 0)
-	{
-		s << std::setprecision(1) << std::fixed << std::chrono::duration<double>(duration).count() * 1000 << "ms";
-	}
-	else
-	{
-		using days = std::chrono::duration<long, std::ratio_multiply<std::chrono::hours::period, std::ratio<24>>>;
-		auto day = std::chrono::duration_cast<days>(duration);
-		duration -= day;
-		auto hours = std::chrono::duration_cast<std::chrono::hours>(duration);
-		duration -= hours;
-		auto minutes = std::chrono::duration_cast<std::chrono::minutes>(duration);
-		duration -= minutes;
-
-		long long millis = duration.count() / 1000000;
-		int effectiveDigits = 3;
-		while (effectiveDigits > 0)
-		{
-			if (millis % 10 == 0)
-			{
-				millis /= 10;
-				effectiveDigits--;
-			}
-			else
-			{
-				break;
-			}
-		}
-
-		if (day.count() != 0)
-		{
-			s << day.count() << ".";
-		}
-		s << hours.count() << ":";
-		s << minutes.count() << ":";
-		s << std::setprecision(effectiveDigits) << std::fixed << duration.count() / 1e9;
-	}
-
+	s << " " << scope.ScopeText() << " " << scope.Duration<std::chrono::nanoseconds>();
 	Write(scope.Level(), prefix, s.str().c_str());
 }
 
@@ -382,7 +311,7 @@ FileLogger& FileLogger::Instance()
 
 std::ostream & FileLogger::Stream()
 {
-	return Instance().logState.stream;
+	return Instance().logState.Stream();
 }
 
 void FileLogger::SetLogLevel(Flog::Level level)
@@ -391,32 +320,40 @@ void FileLogger::SetLogLevel(Flog::Level level)
 }
 
 // use map, use config, set field width
-void FileLogger::TranslateLevel(std::ostream & stm, GLib::Flog::Level level)
+std::ostream & FileLogger::TranslateLevel(std::ostream & stream, GLib::Flog::Level level)
 {
 	switch (level)
 	{
 		case GLib::Flog::Level::Fatal:
-			stm << "FATAL   ";
+			stream << "FATAL   ";
 			break;
 		case GLib::Flog::Level::Critical:
-			stm << "CRITICAL";
+			stream << "CRITICAL";
 			break;
 		case GLib::Flog::Level::Error:
-			stm << "ERROR   ";
+			stream << "ERROR   ";
 			break;
 		case GLib::Flog::Level::Warning:
-			stm << "WARNING ";
+			stream << "WARNING ";
 			break;
 		case GLib::Flog::Level::Info:
-			stm << "INFO    ";
+			stream << "INFO    ";
 			break;
 		case GLib::Flog::Level::Debug:
-			stm << "DEBUG   ";
+			stream << "DEBUG   ";
 			break;
 		case GLib::Flog::Level::Spam:
-			stm << "SPAM    ";
+			stream << "SPAM    ";
 			break;
 	}
+	return stream;
+}
+
+std:: ostream & FileLogger::ThreadName(std:: ostream & stream, const char * threadName)
+{
+	return threadName != nullptr
+		? stream << threadName
+		: stream << std::this_thread::get_id();
 }
 
 unsigned FileLogger::GetDate()
@@ -424,7 +361,9 @@ unsigned FileLogger::GetDate()
 	const std::time_t t = std::time(nullptr);
 	std::tm tm {};
 	Compat::LocalTime(tm, t);
-	return ((1900 + tm.tm_year) * 100 + tm.tm_mon + 1) * 100 + tm.tm_mday;
+	constexpr auto TmEpochYear = 1900;
+	constexpr auto ShiftTwoDecimals = 100;
+	return ((TmEpochYear + tm.tm_year) * ShiftTwoDecimals + tm.tm_mon + 1) * ShiftTwoDecimals + tm.tm_mday;
 }
 
 uintmax_t FileLogger::GetFreeDiskSpace(const fs::path& path)

@@ -2,7 +2,7 @@
 
 #include "Coverage.h"
 
-#include "GLib/span.h"
+#include "GLib/Span.h"
 
 #include <iostream>
 
@@ -26,7 +26,8 @@ int main(int argc, char *argv[])
 		const auto executable = *it++;
 		const auto report = *it++;
 
-		Strings includes, excludes;
+		Strings includes;
+		Strings excludes;
 		for (; it!=end; ++it)
 		{
 			auto arg = *it++;
@@ -48,12 +49,13 @@ int main(int argc, char *argv[])
 			}
 			else
 			{
-				throw std::runtime_error("Unexpected: "s + *it);
+				throw std::runtime_error("Unexpected: "s + *it); // NOLINT(cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers) bug in clang-tidy
 			}
 		}
 
 		Coverage dbg(executable, report, includes, excludes);
-		for(;dbg.ProcessEvents(1000);) // just use INFINITE?
+		constexpr unsigned TimeoutMilliseconds = 1000; // just use INFINITE?
+		for(;dbg.ProcessEvents(TimeoutMilliseconds);)
 		{}
 		std::cout << "Exited: Process exited with code: " << dbg.ExitCode() << std::endl;
 

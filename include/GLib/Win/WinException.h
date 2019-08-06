@@ -4,38 +4,35 @@
 
 #include <sstream>
 
-namespace GLib
+namespace GLib::Win
 {
-	namespace Win
+	class WinException : public std::runtime_error
 	{
-		class WinException : public std::runtime_error
+		unsigned int const errorCode;
+		HRESULT const hResult;
+
+	public:
+		unsigned int ErrorCode() const
 		{
-			unsigned int const errorCode;
-			HRESULT const hResult;
+			return errorCode;
+		}
 
-		public:
-			unsigned int ErrorCode() const
-			{
-				return errorCode;
-			}
+		HRESULT HResult() const
+		{
+			return hResult;
+		}
 
-			HRESULT HResult() const
-			{
-				return hResult;
-			}
+		WinException(std::string message, DWORD dwErr)
+			: runtime_error(move(message))
+			, errorCode(dwErr)
+			, hResult(HRESULT_FROM_WIN32(dwErr))
+		{}
 
-			WinException(std::string message, DWORD dwErr)
-				: runtime_error(move(message))
-				, errorCode(dwErr)
-				, hResult(HRESULT_FROM_WIN32(dwErr))
-			{}
-
-		protected:
-			WinException(std::string message, HRESULT hr)
-				: runtime_error(move(message))
-				, errorCode(static_cast<unsigned int>(hr))
-				, hResult(hr)
-			{}
-		};
-	}
+	protected:
+		WinException(std::string message, HRESULT hr)
+			: runtime_error(move(message))
+			, errorCode(static_cast<unsigned int>(hr))
+			, hResult(hr)
+		{}
+	};
 }

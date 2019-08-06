@@ -60,6 +60,9 @@ namespace GLib::Xml
 		static constexpr char RightSquareBracket = ']';
 		static constexpr char Ampersand = '&';
 
+		static constexpr auto ContinuationMask = 0x80;
+
+
 		using StateFunction = State (StateEngine::*)(char);
 
 		// use Phase : Prolog, Document, End
@@ -96,7 +99,7 @@ namespace GLib::Xml
 	private:
 		static bool IsContinuation(char c)
 		{
-			return (c & 0x80) != 0;
+			return (c & ContinuationMask) != 0;
 		}
 
 		static bool IsWhiteSpace(char c)
@@ -486,7 +489,7 @@ namespace GLib::Xml
 		//////////////////////
 
 		// must be enum order
-		inline static std::array<StateFunction, static_cast<int>(State::Count)> stateFunctions =
+		static constexpr std::array<StateFunction, static_cast<int>(State::Count)> stateFunctions =
 		{
 			&StateEngine::Error,
 			&StateEngine::Start,

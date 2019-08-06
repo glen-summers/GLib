@@ -11,9 +11,9 @@ namespace GLib::Eval::TemplateEngine
 {
 	namespace Detail
 	{
-		inline static constexpr auto NameSpace = std::string_view {"glib"};
-		inline static constexpr auto Block = std::string_view {"block"};
-		inline static constexpr auto Each = std::string_view {"each"};
+		static constexpr auto NameSpace = std::string_view {"glib"};
+		static constexpr auto Block = std::string_view {"block"};
+		static constexpr auto Each = std::string_view {"each"};
 
 		using AttributeMap = std::unordered_map<std::pair<std::string_view, std::string_view>, Xml::Attribute, Util::PairHash>;
 
@@ -87,14 +87,14 @@ namespace GLib::Eval::TemplateEngine
 				{
 					const Xml::Element & e = *it;
 
-					if (e.nameSpace == NameSpace && e.name == Block)
+					if (e.NameSpace() == NameSpace && e.Name() == Block)
 					{
-						switch (e.type)
+						switch (e.Type())
 						{
 							case Xml::ElementType::Open:
 							{
-								auto eachIt = e.attributes.begin();
-								if (eachIt == e.attributes.end() || (*eachIt).name != Each)
+								auto eachIt = e.Attributes().begin();
+								if (eachIt == e.Attributes().end() || (*eachIt).name != Each)
 								{
 									throw std::runtime_error("No each attribute");
 								}
@@ -132,13 +132,13 @@ namespace GLib::Eval::TemplateEngine
 							}
 						}
 					}
-					else if (e.type != Xml::ElementType::Close)
+					else if (e.Type() != Xml::ElementType::Close)
 					{
 						AttributeMap atMap;
 						bool replaced = false;
 						const auto & manager = it.Manager();
 
-						Xml::Attributes attributes { e.attributes.Value(), nullptr };
+						Xml::Attributes attributes { e.Attributes().Value(), nullptr };
 						for (auto a : attributes)
 						{
 							if (!Xml::NameSpaceManager::IsDeclaration(a.name))
@@ -163,7 +163,7 @@ namespace GLib::Eval::TemplateEngine
 
 						if (replaced)
 						{
-							current->AddFragment(Xml::Utils::ToStringView(e.outerXml.data(), e.attributes.Value().data()));
+							current->AddFragment(Xml::Utils::ToStringView(e.OuterXml().data(), e.Attributes().Value().data()));
 
 							for (const auto & a : attributes)
 							{
@@ -196,11 +196,11 @@ namespace GLib::Eval::TemplateEngine
 									}
 								}
 							}
-							current->AddFragment(Xml::Utils::ToStringView(e.attributes.Value().data()+e.attributes.Value().size(), e.outerXml.data()+e.outerXml.size()));
+							current->AddFragment(Xml::Utils::ToStringView(e.Attributes().Value().data()+e.Attributes().Value().size(), e.OuterXml().data()+e.OuterXml().size()));
 						}
 						else
 						{
-							auto p = e.outerXml.data();
+							auto p = e.OuterXml().data();
 							for (const Xml::Attribute & a : attributes)
 							{
 								std::string_view prefix;
@@ -213,12 +213,12 @@ namespace GLib::Eval::TemplateEngine
 									}
 								}
 							}
-							current->AddFragment(Xml::Utils::ToStringView(p, e.outerXml.data()+e.outerXml.size()));
+							current->AddFragment(Xml::Utils::ToStringView(p, e.OuterXml().data()+e.OuterXml().size()));
 						}
 					}
 					else
 					{
-						current->AddFragment(e.outerXml);
+						current->AddFragment(e.OuterXml());
 					}
 				}
 			}

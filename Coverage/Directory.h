@@ -38,7 +38,7 @@ public:
 
 	unsigned int CoveragePercent() const
 	{
-		return 100 * coveredLines / coverableLines;
+		return HundredPercent * coveredLines / coverableLines;
 	}
 
 	unsigned int CoveredLines() const

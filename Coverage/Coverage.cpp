@@ -20,6 +20,12 @@ WideStrings Coverage::a2w(const Strings& strings)
 
 void Coverage::AddLine(const std::wstring & fileName, unsigned lineNumber, const GLib::Win::Symbols::SymProcess & process, DWORD64 address)
 {
+	// filter out unknown source lines, looks like these cause the out of memory exceptions in ReportGenerator
+	if (lineNumber == FooFoo || lineNumber == FeeFee)
+	{
+		return;
+	}
+
 	if (wideFiles.find(fileName) == wideFiles.end())
 	{
 		bool include = includes.empty();
@@ -69,13 +75,8 @@ void Coverage::OnCreateProcess(DWORD processId, DWORD threadId, const CREATE_PRO
 	//using Clock = std::chrono::high_resolution_clock;
 	//auto startValue = Clock::now();
 
-	Symbols().Lines([&](PSRCCODEINFOW lineInfo) noexcept
+	Symbols().Lines([&](PSRCCODEINFOW lineInfo)
 	{
-		// filter out unknown source lines, looks like these cause the out of memory exceptions in ReportGenerator
-		if (lineInfo->LineNumber == 0xf00f00 || lineInfo->LineNumber == 0xfeefee)
-		{
-			return;
-		}
 		AddLine(static_cast<const wchar_t *>(lineInfo->FileName), lineInfo->LineNumber, process, lineInfo->Address);
 	}, process.Handle().get(), info.lpBaseOfImage);
 
@@ -202,7 +203,8 @@ void Coverage::CreateXmlReport(const std::map<ULONG, Function> & indexToFunction
 	// 	}
 	// }
 
-	size_t allLines{}, coveredLines{};
+	size_t allLines{};
+	size_t coveredLines{};
 	for (const auto & x : indexToFunction)
 	{
 		allLines += x.second.AllLines();

@@ -1,4 +1,6 @@
 
+#include "../GLib/DurationPrinter.h"
+
 #include "GLib/flogging.h"
 #include "GLib/scope.h"
 
@@ -6,7 +8,23 @@
 
 #include <fstream>
 
+std::string ToString(const std::chrono::nanoseconds & duration)
+{
+	std::ostringstream s; 
+	s << duration;
+	return s.str();
+}
+
 BOOST_AUTO_TEST_SUITE(FlogTests)
+
+	BOOST_AUTO_TEST_CASE(Duration)
+	{
+		BOOST_TEST("578.9ms"   == ToString(std::chrono::microseconds{578912}));
+		BOOST_TEST("0:0:1.234" == ToString(std::chrono::milliseconds{1234}));
+		BOOST_TEST("0:34:13"   == ToString(std::chrono::seconds{34*60+13}));
+		BOOST_TEST("9:34:13"   == ToString(std::chrono::seconds{9*3600+34*60+13}));
+		BOOST_TEST("1.9:34:13" == ToString(std::chrono::seconds{33*3600+34*60+13}));
+	}
 
 	struct Fred {};
 
@@ -20,6 +38,22 @@ BOOST_AUTO_TEST_SUITE(FlogTests)
 		std::string contents((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
 		BOOST_TEST(contents.find(" : INFO     : FlogTests::Fred  : Hello") != std::string::npos);
 		BOOST_TEST(contents.find(" : INFO     : FlogTests::Fred  : Format: 1 , 2") != std::string::npos);
+	}
+
+	BOOST_AUTO_TEST_CASE(ProcessName)
+	{
+		{
+			auto log = GLib::Flog::LogManager::GetLog<Fred>();
+			log.Info("Hello");
+		}
+
+		std::ifstream in(GLib::Flog::LogManager::GetLogPath());
+		std::string contents((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
+
+		auto processName = GLib::Compat::ProcessName();
+		auto processPath= GLib::Compat::ProcessPath();
+		BOOST_TEST(contents.find("ProcessName : (64 bit) " + processName) != std::string::npos);
+		BOOST_TEST(contents.find("FullPath    : " + processPath) != std::string::npos);
 	}
 
 	BOOST_AUTO_TEST_CASE(SetThreadName)

@@ -54,6 +54,7 @@ BOOST_AUTO_TEST_SUITE(WinTests)
 		GLib::Win::Debug::Write("DebugStreamTest1");
 		GLib::Win::Debug::Write("DebugStreamTest2 {0} {1} {2}", 1, 2, 3);
 		GLib::Win::Debug::Write("Utf8 \xE2\x82\xAC");
+		::OutputDebugStringA("Write utf8 \xE2\x82\xAC directly for Debugger test\r\n");
 	}
 
 	BOOST_AUTO_TEST_CASE(TestProcess)

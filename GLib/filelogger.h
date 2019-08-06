@@ -48,7 +48,7 @@ private:
 	void WriteToStream(GLib::Flog::Level level, const char * prefix, const char * message);
 	void EnsureStreamIsOpen();
 	void HandleFileRollover(size_t newEntrySize);
-	void CloseStream();
+	void CloseStream() noexcept;
 	static void WriteHeader(std::ostream & writer);
 	static void WriteFooter(std::ostream & writer);
 	bool ResourcesAvailable(size_t newEntrySize) const;
@@ -58,7 +58,8 @@ private:
 	static FileLogger & Instance();
 	static std::ostream & Stream();
 	static void SetLogLevel(GLib::Flog::Level);
-	static void TranslateLevel(std::ostream & stm, GLib::Flog::Level level);
+	static std::ostream & TranslateLevel(std::ostream & stream, GLib::Flog::Level level);
+	static std::ostream & ThreadName(std::ostream & stream, const char * threadName);
 	static unsigned int GetDate();
 	static uintmax_t GetFreeDiskSpace(const fs::path & path);
 

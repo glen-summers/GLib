@@ -45,6 +45,7 @@ namespace GLib
 
 		inline std::ostream & AppendFormatHelper(std::ostream & str, const std::string_view & view, const Span<StreamFunction> & args)
 		{
+			constexpr auto DecimalShift = 10;
 			char ch = {};
 			for (auto it = view.begin(), end = view.end();;)
 			{
@@ -93,14 +94,14 @@ namespace GLib
 				size_t index {};
 				do
 				{
-					index = index * 10 + ch - '0';
+					index = index * DecimalShift + ch - '0';
 					++it;
 					if (it == end)
 					{
 						FormatError();
 					}
 					ch = *it;
-				} while (ch >= '0' && ch <= '9' && index < 1000000);
+				} while (ch >= '0' && ch <= '9');
 
 				while (it != end && (ch = *it) == ' ')
 				{
@@ -141,14 +142,14 @@ namespace GLib
 
 					do
 					{
-						width = width * 10 + ch - '0';
+						width = width * DecimalShift + ch - '0';
 						++it;
 						if (it == end)
 						{
 							FormatError();
 						}
 						ch = *it;
-					} while (ch >= '0' && ch <= '9' && width < 1000000);
+					} while (ch >= '0' && ch <= '9');
 				}
 
 				while (it != end && (ch = *it) == ' ')

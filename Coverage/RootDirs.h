@@ -11,7 +11,8 @@ namespace Detail
 		bool result = false;
 		for (auto it1 = p1.begin(), it2 = p2.begin(); it1 != p1.end() && it2 != p2.end(); ++it1, ++it2)
 		{
-			auto part1 = *it1, part2 = *it2;
+			auto part1 = *it1;
+			auto part2 = *it2;
 			if (part1 != part2)
 			{
 				break;
@@ -28,7 +29,8 @@ inline void RootDirectories(std::set<std::filesystem::path> & paths)
 {
 	for (auto it = paths.begin(); it != paths.end();)
 	{
-		auto current = it++, next = it;
+		auto current = it++;
+		auto next = it;
 		if (next == paths.end())
 		{
 			break;

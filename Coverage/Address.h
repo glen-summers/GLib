@@ -12,9 +12,20 @@ public:
 	Address(unsigned char oldData) : oldData(oldData), visited()
 	{}
 
-	unsigned char OldData() const { return oldData; }
-	const FileLines & FileLines() const { return fileLines; }
-	bool Visited() const { return visited; }
+	unsigned char OldData() const
+	{
+		return oldData;
+	}
+
+	const FileLines & FileLines() const
+	{
+		return fileLines;
+	}
+
+	bool Visited() const
+	{
+		return visited;
+	}
 
 	void Visit()
 	{

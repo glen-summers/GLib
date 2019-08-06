@@ -7,6 +7,8 @@ enum class CoverageLevel : int
 	Red, Amber, Green
 };
 
+constexpr unsigned int HundredPercent = 100;
+
 inline std::ostream & operator << (std::ostream & s, enum CoverageLevel coverageLevel)
 {
 	switch (coverageLevel)

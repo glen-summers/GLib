@@ -6,41 +6,36 @@
 #include "GLib/vectorstreambuffer.h"
 #include "GLib/cvt.h"
 
-namespace GLib
+namespace GLib::Win::Debug
 {
-	namespace Win
+	namespace Detail
 	{
-		namespace Debug
+		static constexpr auto DefaultCapacity = 256;
+		using Buffer = GLib::Util::VectorStreamBuffer<char, DefaultCapacity>;
+
+		class DebugBuffer : public Buffer
 		{
-			namespace Detail
+			int_type overflow(int_type c) override
 			{
-				using Buffer = GLib::Util::VectorStreamBuffer<char>;
-
-				class DebugBuffer : public Buffer
+				c = Buffer::overflow(c);
+				if (c == traits_type::to_char_type('\n'))
 				{
-					int_type overflow(int_type c) override
-					{
-						c = Buffer::overflow(c);
-						if (c == traits_type::to_char_type('\n'))
-						{
-							Write(Get());
-						}
-						return c;
-					}
-
-					void Write(const char* s)
-					{
-						::OutputDebugStringW(Cvt::a2w(s).c_str());
-						Reset();
-					}
-				};
+					Write(Get());
+				}
+				return c;
 			}
 
-			inline std::ostream & Stream()
+			void Write(const char* s)
 			{
-				static thread_local GLib::Util::GenericOutStream<char, Detail::DebugBuffer> debugStream(std::ios_base::boolalpha);
-				return debugStream;
+				::OutputDebugStringW(Cvt::a2w(s).c_str());
+				Reset();
 			}
-		}
+		};
+	}
+
+	inline std::ostream & Stream()
+	{
+		static thread_local GLib::Util::GenericOutStream<char, Detail::DebugBuffer> debugStream(std::ios_base::boolalpha);
+		return debugStream;
 	}
 }

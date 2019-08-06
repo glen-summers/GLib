@@ -1,5 +1,6 @@
 #pragma once
 
+#include <array>
 #include <sstream>
 #include <stack>
 
@@ -143,13 +144,14 @@ private:
 		char c;
 	};
 
-	inline static const Entity entities[]
+	static constexpr auto EntitySize = 5;
+	static constexpr std::array<Entity, EntitySize> entities
 	{
-		{ "&quot;", '\"' },
-		{ "&amp;" , '&'  },
-		{ "&apos;", '\'' },
-		{ "&lt;"  , '<'  },
-		{ "&gt;"  , '>'  }
+		Entity{ "&quot;", '\"' },
+		Entity{ "&amp;" , '&'  },
+		Entity{ "&apos;", '\'' },
+		Entity{ "&lt;"  , '<'  },
+		Entity{ "&gt;"  , '>'  }
 	};
 
 	void CloseJustOpenedElement()

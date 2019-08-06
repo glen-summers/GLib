@@ -111,7 +111,8 @@ void HtmlReport::GenerateRootIndex(const std::string & title) const
 		const auto& link = name / "index.html";
 		const auto& children = pathChildrenPair.second;
 
-		unsigned int totalCoveredLines{}, totalCoverableLines{};
+		unsigned int totalCoveredLines{};
+		unsigned int totalCoverableLines{};
 		for (const FileCoverageData & data : children)
 		{
 			totalCoveredLines += data.CoveredLines();
@@ -144,7 +145,8 @@ void HtmlReport::GenerateIndices(const std::string & title) const
 
 		std::vector<Directory> directories;
 
-		unsigned int totalCoveredLines{}, totalCoverableLines{};
+		unsigned int totalCoveredLines{};
+		unsigned int totalCoverableLines{};
 		for (const FileCoverageData & data : children)
 		{
 			totalCoveredLines += data.CoveredLines();
@@ -199,14 +201,16 @@ void HtmlReport::GenerateSourceFile(std::filesystem::path & path, const std::str
 			style = it->second == 0 ? "ncov" : "cov";
 		}
 		std::ostringstream l;
-		l << std::setw(6) << line; // use format specifier
+		constexpr unsigned int MaxLineNumberWidth = 6; // loop twice and get log10(maxLine)+1
+		l << std::setw(MaxLineNumberWidth) << line; // use format specifier
 		lines.push_back({move(s), l.str(), style});
 	}
 
 	GLib::Eval::Evaluator e;
 
 	auto css = (relative(htmlPath, path.parent_path()) / "coverage.css").generic_u8string();
-	auto coveragePercent = static_cast<unsigned int>(data.CoveredLines()*100 / lc.size());
+
+	auto coveragePercent = static_cast<unsigned int>(data.CoveredLines()*HundredPercent / lc.size());
 
 	e.Add("styleSheet", css);
 	e.Add("title", title);

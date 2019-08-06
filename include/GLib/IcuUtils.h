@@ -18,6 +18,9 @@ namespace GLib::IcuUtils
 {
 	namespace Detail
 	{
+		constexpr auto DefaultStackReserveSize = 256;
+		using Buffer = Util::StackOrHeap<char, DefaultStackReserveSize>;
+
 		inline void AssertNoError(UErrorCode error, const char * msg)
 		{
 			if (U_FAILURE(error) != FALSE)
@@ -81,7 +84,8 @@ namespace GLib::IcuUtils
 		auto collator = Detail::MakeCollator(locale); // cache? perf test
 		::ucol_setStrength(collator.get(), UCOL_SECONDARY);
 
-		UCharIterator i1, i2;
+		UCharIterator i1;
+		UCharIterator i2;
 		::uiter_setUTF8(&i1, s1, static_cast<int32_t>(s1size));
 		::uiter_setUTF8(&i2, s2, static_cast<int32_t>(s2size));
 
@@ -113,7 +117,7 @@ namespace GLib::IcuUtils
 		Detail::AssertTrue(error == U_BUFFER_OVERFLOW_ERROR, "ucasemap_utf8ToLower");
 
 		error = U_ZERO_ERROR;
-		Util::StackOrHeap<char, 256> s;
+		Detail::Buffer s;
 		s.EnsureSize(destLength);
 		::ucasemap_utf8ToLower(map.get(), s.Get(), destLength, value.c_str(), sourceLength, &error);
 		Detail::AssertNoError(error, "ucasemap_utf8ToLower");
@@ -130,7 +134,7 @@ namespace GLib::IcuUtils
 		Detail::AssertTrue(error == U_BUFFER_OVERFLOW_ERROR, "ucasemap_utf8ToUpper");
 
 		error = U_ZERO_ERROR;
-		Util::StackOrHeap<char, 256> s;
+		Detail::Buffer s;
 		s.EnsureSize(destLength);
 		::ucasemap_utf8ToUpper(map.get(), s.Get(), destLength, value.c_str(), sourceLength, &error);
 		Detail::AssertNoError(error, "ucasemap_utf8ToUpper");

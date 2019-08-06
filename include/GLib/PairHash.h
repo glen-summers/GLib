@@ -2,17 +2,14 @@
 
 #include <utility>
 
-namespace GLib
+namespace GLib::Util
 {
-	namespace Util
+	struct PairHash
 	{
-		struct PairHash
+		template <class T1, class T2>
+		std::size_t operator() (const std::pair<T1, T2> & pair) const
 		{
-			template <class T1, class T2>
-			std::size_t operator() (const std::pair<T1, T2> & pair) const
-			{
-				return std::hash<T1>()(pair.first) ^ std::hash<T2>()(pair.second);
-			}
-		};
-	}
+			return std::hash<T1>()(pair.first) ^ std::hash<T2>()(pair.second);
+		}
+	};
 }

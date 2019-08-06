@@ -9,7 +9,7 @@ namespace GLib::Xml
 {
 	class NameSpaceManager
 	{
-		inline static constexpr std::string_view Attribute = "xmlns:";
+		static constexpr std::string_view Attribute = "xmlns:";
 
 		std::unordered_map<std::string_view, std::string_view> nameSpaces;
 		std::stack<std::pair<size_t, std::pair<std::string_view,std::string_view>>> nameSpaceStack;

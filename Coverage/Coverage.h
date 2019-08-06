@@ -10,6 +10,8 @@ class Function;
 class Coverage : public GLib::Win::Debugger
 {
 	static constexpr unsigned char debugBreakByte = 0xCC;
+	static constexpr unsigned int FooFoo = 0xf00f00;
+	static constexpr unsigned int FeeFee = 0xfeefee;
 
 	std::string executable;
 	std::filesystem::path reportPath;

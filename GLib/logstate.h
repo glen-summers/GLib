@@ -6,19 +6,87 @@
 
 #include <stack>
 
-// class\accesors
-struct LogState
+class LogState
 {
-	using Stream = GLib::Util::GenericOutStream<char, GLib::Util::VectorStreamBuffer<char>>;
+	static constexpr auto DefaultCapacity = 256;
+	using StreamType = GLib::Util::GenericOutStream<char, GLib::Util::VectorStreamBuffer<char, DefaultCapacity>>;
 
 	std::stack<Scope> scopes;
 	int depth;
 	bool pending;
 	const char * threadName;
-	Stream stream;
+	StreamType stream;
 
+public:
 	LogState() noexcept
 		: depth{}, pending{}, threadName{}
 	{}
+
+	StreamType & Stream()
+	{
+		return stream;
+	}
+
+	const Scope & Top() const
+	{
+		return scopes.top();
+	}
+
+	bool Pop()
+	{
+		scopes.pop();
+		if (!pending)
+		{
+			--depth;
+		}
+		return std::exchange(pending, false);
+	}
+
+	void Push(Scope scope)
+	{
+		scopes.push(scope);
+		pending = true;
+	}
+
+	int Depth() const
+	{
+		return depth;
+	}
+
+	bool Pending() const
+	{
+		return pending;
+	}
+
+	const char * ThreadName() const
+	{
+		return threadName;
+	}
+
+	void ThreadName(const char * name)
+	{
+		threadName= name;
+	}
+
+	void Put(char c)
+	{
+		stream.put(c);
+	}
+
+	const char * Get() const
+	{
+		return stream.Buffer().Get();
+	}
+
+	void Reset()
+	{
+		stream.Buffer().Reset();
+	}
+
+	void Commit()
+	{
+		++depth;
+		pending = false;
+	}
 };
 

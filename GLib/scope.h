@@ -4,12 +4,9 @@
 #include <string>
 #include <utility>
 
-namespace GLib
+namespace GLib::Flog
 {
-	namespace Flog
-	{
-		enum class Level : unsigned;
-	}
+	enum class Level : unsigned;
 }
 
 class Scope
@@ -54,5 +51,11 @@ public:
 	auto Duration() const
 	{
 		return std::chrono::high_resolution_clock::now() - start;
+	}
+
+	template <typename T>
+	auto Duration() const
+	{
+		return std::chrono::duration_cast<T>(Duration());
 	}
 };

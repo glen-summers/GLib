@@ -105,11 +105,11 @@ BOOST_AUTO_TEST_CASE(IterateAttributes)
 
 	std::vector<Xml::Attribute> expectedAttr0 = { {"a", "1", ""}, {"b", "2", ""} };
 	BOOST_CHECK_EQUAL_COLLECTIONS(expectedAttr0.begin(), expectedAttr0.end(),
-		actual[0].attributes.begin(), actual[0].attributes.end());
+		actual[0].Attributes().begin(), actual[0].Attributes().end());
 
 	std::vector<Xml::Attribute> expectedAttr1 = { {"c", "3", ""}, {"d", "4", ""} };
 	BOOST_CHECK_EQUAL_COLLECTIONS(expectedAttr1.begin(), expectedAttr1.end(),
-		actual[1].attributes.begin(), actual[1].attributes.end());
+		actual[1].Attributes().begin(), actual[1].Attributes().end());
 }
 
 BOOST_AUTO_TEST_CASE(AttributeSpace)
@@ -130,12 +130,12 @@ BOOST_AUTO_TEST_CASE(OuterXml)
 </root>)" };
 
 	auto it = xml.begin();
-	BOOST_CHECK(it->name=="root" && it->outerXml == "<root a='1' b='2' >");
+	BOOST_CHECK(it->Name()=="root" && it->OuterXml() == "<root a='1' b='2' >");
 	++it;
-	BOOST_CHECK(it->name=="sub" && it->outerXml == R"(
+	BOOST_CHECK(it->Name()=="sub" && it->OuterXml() == R"(
 	<sub c='3' d=""/>)");
 	++it;
-	BOOST_CHECK(it->name=="root" && it->outerXml == R"(
+	BOOST_CHECK(it->Name()=="root" && it->OuterXml() == R"(
 </root>)");
 	BOOST_CHECK(++it == xml.end());
 }

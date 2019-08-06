@@ -194,6 +194,12 @@
     <ClInclude Include="..\include\GLib\Span.h">
       <Filter>Include Files\Util</Filter>
     </ClInclude>
+    <ClInclude Include="Manipulator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DurationPrinter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="filelogger.cpp">
