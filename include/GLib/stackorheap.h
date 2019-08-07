@@ -1,19 +1,21 @@
 #ifndef STACK_OR_HEAP_H
 #define STACK_OR_HEAP_H
 
+#include <array>
 #include <memory>
 #include <variant>
-#include <array>
 
 namespace GLib::Util
 {
 	// ?rework as MakeStackOrHeap<size>(actual) -> actual < size ? Stack() : Heap()
-
 	template <typename T, size_t StackElementCount>
 	class StackOrHeap
 	{
+		using Stack = std::array<T, StackElementCount>;
+		using Heap = std::unique_ptr<T[]>; // NOLINT(cppcoreguidelines-avoid-c-arrays,hicpp-avoid-c-arrays,modernize-avoid-c-arrays)
+
 		size_t heapSize;
-		std::variant<std::array<T, StackElementCount>, std::unique_ptr<T[]>> storage; // NOLINT(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
+		std::variant<Stack, Heap> storage;
 
 	public:
 		StackOrHeap() : heapSize{}
@@ -46,7 +48,7 @@ namespace GLib::Util
 
 		const T* Get() const
 		{
-			return HeapInUse() ? std::get<1>(storage).get() : std::get<0>(storage).data();
+				return HeapInUse() ? std::get<1>(storage).get() : std::get<0>(storage).data();
 		}
 
 	private:
@@ -62,7 +64,7 @@ namespace GLib::Util
 
 		void AllocateHeap(size_t size)
 		{
-			storage = std::make_unique<T[]>(size);
+			storage = std::make_unique<T[]>(size); // NOLINT(cppcoreguidelines-avoid-c-arrays,hicpp-avoid-c-arrays,modernize-avoid-c-arrays)
 			heapSize = size;
 		}
 	};

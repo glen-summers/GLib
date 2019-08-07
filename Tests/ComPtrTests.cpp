@@ -48,7 +48,7 @@ BOOST_AUTO_TEST_CASE(NullInitialisedComPtrHasZeroUseCount)
 	BOOST_TEST(false == static_cast<bool>(p1));
 	BOOST_TEST(nullptr == p1.Get());
 
-	GLib::Win::ComPtr<ITest1> p2 = nullptr;
+	GLib::Win::ComPtr<ITest1> p2 = {};
 	BOOST_TEST(0U == p2.UseCount());
 	BOOST_TEST(false == static_cast<bool>(p2));
 	BOOST_TEST(nullptr == p2.Get());

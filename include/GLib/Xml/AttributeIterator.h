@@ -1,11 +1,11 @@
 #pragma once
 
-#include "GLib/Xml/StateEngine.h"
 #include "GLib/Xml/NameSpaceManager.h"
+#include "GLib/Xml/StateEngine.h"
 #include "GLib/Xml/Utils.h"
 
-#include <stdexcept>
 #include <sstream>
+#include <stdexcept>
 
 namespace GLib::Xml
 {

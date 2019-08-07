@@ -31,13 +31,6 @@
 		<CoverageExclude>$(Root)\Tests\</CoverageExclude>
 	</PropertyGroup>
 
-	<PropertyGroup>
-		<Tidy>"$(ProgramFiles)\LLVM\bin\clang-tidy.exe"</Tidy>
-		<TidyDefines>-DNOMINMAX -DUNICODE</TidyDefines>
-		<TidyIgnore>no-pragma-once-outside-header</TidyIgnore>
-		<TidyChecks>-*,bugprone-*,cert-*,cppcoreguidelines-*,clang-analyzer-*,clang-diagnostic-*,modernize-*,-modernize-use-nodiscard,misc-*,portability-*,readability-*</TidyChecks>
-	</PropertyGroup>
-
 	<Target Name="MakeTempDir">
 		<MakeDir Directories="$(Temp)"/>
 	</Target>
@@ -173,25 +166,58 @@
 		<Exec Command="$(ClangFormat) -i %(FileToFormat.Identity)"/>
 	</Target>
 
+	<ItemGroup>
+		<TidyDefine Include="NDEBUG"/>
+		<TidyDefine Include="_UNICODE"/>
+		<TidyDefine Include="UNICODE"/>
+		<TidyDefine Include="NOMINMAX"/>
+		<TidyDefine Include="WIN32_LEAN_AND_MEAN"/>
+		<TidyDefine Include="_WIN64"/>
+
+		<TidyIgnoreWarning Include="no-pragma-once-outside-header"/>
+
+		<TidyCheck Include="%2A"/>
+		<TidyCheck Include="-modernize-use-nodiscard"/>
+		<TidyCheck Include="-llvm-header-guard"/>
+		<TidyCheck Include="-llvm-namespace-comment"/>
+		<TidyCheck Include="-clang-diagnostic-deprecated-declarations"/>
+		<TidyCheck Include="-fuchsia-overloaded-operator"/>
+		<TidyCheck Include="-fuchsia-default-arguments"/>
+		<TidyCheck Include="-google-runtime-int"/>
+		<TidyCheck Include="-google-runtime-references"/>
+		<TidyCheck Include="-google-readability-namespace-comments"/>
+		<TidyCheck Include="-google-readability-todo"/>
+		<TidyCheck Include="-google-explicit-constructor"/>
+		<TidyCheck Include="-hicpp-explicit-conversions"/>
+	</ItemGroup>
+	
+	<PropertyGroup>
+		<Tidy>"$(ProgramFiles)\LLVM\bin\clang-tidy.exe"</Tidy>
+	</PropertyGroup>
+	
 	<Target Name="Tidy">
 		<ItemGroup>
-			<FileToCheck Include="$(Source)/include/**/*.h"/>
+			<FileToCheck Include="$(Source)/include/**/*.h" Exclude="$(Source)/include/GLib/CompatLinux.h"/>
 			<FileToCheck Include="$(Source)/GLib/**/*.h"/>
 			<FileToCheck Include="$(Source)/GLib/**/*.cpp"/>
 			<FileToCheck Include="$(Source)/Coverage/**/*.cpp"/>
 			<FileToCheck Include="$(Source)/Coverage/**/*.h" Exclude="$(Source)/Coverage/resource.h"/>
+			<!--
+			<FileToCheck Include="$(Source)/Tests/**/*.h"/>
+			<FileToCheck Include="$(Source)/Tests/**/*.cpp"/> // crash, need boost include?
+			-->
 
 			<Relative Include="$([MSBuild]::MakeRelative($(Source), %(FileToCheck.FullPath)))"/>
 		</ItemGroup>
 
 		<!-- slow, split and run in parallel? -->
 		<!-- add boost include to check test code?-->
-		<Exec Command="$(Tidy) @(Relative, ' ') -quiet -checks=$(TidyChecks) -- -Iinclude -std=c++17 $(TidyDefines) -x c++ -W$(TidyIgnore)"
+		<Exec Command="$(Tidy) @(Relative, ' ') -quiet -checks=@(TidyCheck, ',') -- -I$(Source)/include -std=c++17 -D@(TidyDefine, ' -D') -x c++ -W@(TidyIgnoreWarning, ',')"
 			WorkingDirectory="$(Source)"/>
 	</Target>
 
 	<Target Name="TidyFile">
-		<Exec Command='$(Tidy) $(FileName) -quiet -checks=$(TidyChecks) -- -Iinclude -std=c++17 $(TidyDefines) -x c++ -W$(TidyIgnore)'
+		<Exec Command="$(Tidy) $(FileName) -checks=@(TidyCheck, ',') -- -I$(Source)/include -std=c++17 -D@(TidyDefine, ' -D') -x c++ -W@(TidyIgnoreWarning, ',')"
 			WorkingDirectory="$(Source)"/>
 	</Target>
 

@@ -5,12 +5,13 @@
 
 namespace GLib::Util
 {
+	// convert to circular buffer
 	template <typename T, size_t DefaultCapacity>
 	class VectorStreamBuffer : public std::basic_streambuf<T>
 	{
 		using Base = std::basic_streambuf<T>;
 		using BufferType = std::vector<T>;
-		mutable BufferType buffer;
+		BufferType buffer;
 
 	public:
 		using typename Base::int_type;
@@ -20,7 +21,7 @@ namespace GLib::Util
 			buffer.reserve(initialCapacity);
 		}
 
-		const T * Get() const
+		const T * Get()
 		{
 			if (buffer.empty() || *buffer.rbegin() != T())
 			{
@@ -29,7 +30,7 @@ namespace GLib::Util
 			return buffer.data();
 		}
 
-		void Reset() const
+		void Reset()
 		{
 			// decay size if large and not often used
 			// poss use list of chunks that can be shared?

@@ -1,16 +1,17 @@
 #pragma once
 
-#include "GLib/cvt.h"
-#include "GLib/Win/Process.h"
 #include "GLib/Win/Local.h"
+#include "GLib/Win/Process.h"
 #include "GLib/scope.h"
 
 #define _NO_CVCONST_H
 #include <DbgHelp.h>
 #pragma comment(lib , "DbgHelp.lib")
 
-#include <sstream>
+#include <array>
+#include <filesystem>
 #include <functional>
+#include <sstream>
 
 namespace GLib::Win::Symbols
 {
@@ -89,8 +90,8 @@ namespace GLib::Win::Symbols
 
 		Symbol GetSymbolFromAddress(uint64_t address) const
 		{
-			char buffer[sizeof(SYMBOL_INFO) + MAX_SYM_NAME * sizeof(wchar_t)]; // NOLINT(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
-			auto const symbol = reinterpret_cast<PSYMBOL_INFOW>(buffer); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
+			std::array<SYMBOL_INFOW, 2 + MAX_SYM_NAME * sizeof(wchar_t) / sizeof(SYMBOL_INFO)> buffer {};
+			auto const symbol = buffer.data();
 			symbol->SizeOfStruct = sizeof(SYMBOL_INFOW);
 			symbol->MaxNameLen = MAX_SYM_NAME;
 			Util::AssertTrue(::SymFromAddrW(process.Handle().get(), address, nullptr, symbol), "SymFromAddr");
@@ -172,7 +173,7 @@ namespace GLib::Win::Symbols
 				static_cast<DWORD64>(baseOfImage), 0, nullptr, 0);
 				Util::AssertTrue(0 != loadBase, "SymLoadModuleEx failed");
 
-			return handles.insert(std::make_pair(processId, SymProcess{ std::move(duplicate), baseOfImage })).first->second;
+			return handles.emplace(processId, SymProcess{ std::move(duplicate), baseOfImage }).first->second;
 		}
 
 		const SymProcess & GetProcess(DWORD processId) const
@@ -205,12 +206,12 @@ namespace GLib::Win::Symbols
 			(void) this;
 			Util::AssertTrue(::SymEnumLinesW(process, Detail::ConvertBase(base), nullptr, nullptr, EnumLines, &f), "SymEnumLines failed");
 		}
-				
-		template <typename inserter>
-		void Processes(inserter && back_inserter) const
+
+		template <typename Inserter>
+		void Processes(Inserter && inserter) const
 		{
 			(void) this;
-			std::function<void(HANDLE)> f = [&](HANDLE h) { *back_inserter++ = h; };
+			std::function<void(HANDLE)> f = [&](HANDLE h) { *inserter++ = h; };
 			Util::AssertTrue(::SymEnumProcesses(EnumProcesses, &f), "SymEnumLines failed");
 		}
 

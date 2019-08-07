@@ -1,16 +1,16 @@
 #include "pch.h"
 
-#include "HtmlReport.h"
-#include "FileCoverageData.h"
-#include "RootDirs.h"
 #include "Directory.h"
+#include "FileCoverageData.h"
+#include "HtmlReport.h"
+#include "RootDirs.h"
 
 #include "resource.h"
 
-#include "GLib/formatter.h"
-#include "GLib/Win/Resources.h"
-#include "GLib/Eval/TemplateEngine.h"
 #include "GLib/Eval/Evaluator.h"
+#include "GLib/Eval/TemplateEngine.h"
+#include "GLib/Win/Resources.h"
+#include "GLib/formatter.h"
 
 #include <fstream>
 #include <set>

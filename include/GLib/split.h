@@ -1,21 +1,22 @@
 #pragma once
 
+#include <iterator>
 #include <string>
-#include <algorithm>
 
 namespace GLib::Util
 {
 	namespace Detail
 	{
-		template <typename T>
+		template <typename StringType>
 		class Splitter
 		{
-			using StringType = std::basic_string<T>;
-			const StringType value;
-			const StringType delimiter;
+			using T = typename StringType::value_type;
+			StringType value;
+			StringType delimiter;
 
 		public:
-			Splitter(const StringType & value, const StringType & delimiter = std::basic_string<T>(1, T(',')))
+			// clang-tidy does not warn for modernize-pass-by-value here
+			Splitter(const StringType & value, const StringType & delimiter = StringType(1, T(',')))
 				: value(value)
 				, delimiter(delimiter)
 			{}
@@ -27,7 +28,7 @@ namespace GLib::Util
 
 			public:
 				using iterator_category = std::forward_iterator_tag;
-				using value_type = void; // StringType;
+				using value_type = StringType;
 				using difference_type = void;
 				using pointer = void;
 				using reference = void;
@@ -87,13 +88,13 @@ namespace GLib::Util
 		};
 	}
 
-	using Splitter = Detail::Splitter<char>;
+	using Splitter = Detail::Splitter<std::string>;
 
 	template <typename T, typename OutputIterator>
 	void Split(const std::basic_string<T> & value, OutputIterator it,
 		const std::basic_string<T> & delimiter = std::basic_string<T>(1, T(',')))
 	{
-		Detail::Splitter<T> splitter { value, delimiter };
+		Detail::Splitter<std::basic_string<T>> splitter { value, delimiter };
 		std::copy(splitter.begin(), splitter.end(), it);
 	}
 }

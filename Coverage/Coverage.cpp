@@ -1,11 +1,10 @@
 #include "pch.h"
 
 #include "Coverage.h"
-#include "Function.h"
-#include "RootDirs.h"
 
-#include "HtmlReport.h"
 #include "FileCoverageData.h"
+#include "Function.h"
+#include "HtmlReport.h"
 
 #include <GLib/XmlPrinter.h>
 
@@ -56,7 +55,7 @@ void Coverage::AddLine(const std::wstring & fileName, unsigned lineNumber, const
 	if (it == addresses.end())
 	{
 		const auto oldByte = process.Read<unsigned char>(address);
-		it = addresses.insert({ address, oldByte }).first;
+		it = addresses.emplace(address, oldByte).first;
 	}
 	it->second.AddFileLine(fileName, lineNumber);
 
@@ -138,7 +137,7 @@ DWORD Coverage::OnException(DWORD processId, DWORD threadId, const EXCEPTION_DEB
 			}
 
 			CONTEXT ctx {};
-			ctx.ContextFlags = CONTEXT_ALL;
+			ctx.ContextFlags = CONTEXT_ALL; // NOLINT(hicpp-signed-bitwise) baad macro
 			 GLib::Win::Util::AssertTrue(::GetThreadContext(tit->second, &ctx), "GetThreadContext");
 #ifdef _WIN64
 			--ctx.Rip;
@@ -173,7 +172,11 @@ void Coverage::CreateReport(unsigned int processId)
 			// ok need to merge multiple hits from templates, but not overloads?
 			// store namespaceName+className+functionName+isTemplate
 			 // if not a template then generate additional inserts? template specialisations?
-			it = indexToFunction.insert({ symbol.Index, { std::move(symbol.name), std::move(parent.name) } }).first;
+			std::string nameSpace;
+			std::string typeName;
+			std::string functionName;
+			CleanupFunctionNames(symbol.name, parent.name, nameSpace, typeName, functionName);
+			it = indexToFunction.emplace(symbol.Index, Function{ nameSpace, typeName, functionName }).first;
 		}
 
 		it->second.Accumulate(address);
@@ -215,7 +218,7 @@ void Coverage::CreateXmlReport(const std::map<ULONG, Function> & indexToFunction
 	std::map<std::wstring, size_t> files;
 	for (const auto & f : wideFiles)
 	{
-		files.insert({ f, fileId++ });
+		files.emplace(f, fileId++);
 	}
 
 	XmlPrinter p;
@@ -248,7 +251,7 @@ void Coverage::CreateXmlReport(const std::map<ULONG, Function> & indexToFunction
 		// id="3048656" name="TestCollision" namespace="Sat" type_name="" block_coverage="0.00" line_coverage="0.00" blocks_covered="0" blocks_not_covered="30" lines_covered="0" lines_partially_covered="0" lines_not_covered="20">
 		p.PushAttribute("id", functionId++);
 		p.PushAttribute("name", function.FunctionName());
-		p.PushAttribute("namespace", function.Namespace());
+		p.PushAttribute("namespace", function.NameSpace());
 		p.PushAttribute("type_name", function.ClassName());
 
 		// todo calculate these
@@ -332,7 +335,7 @@ std::map<std::filesystem::path, FileCoverageData> Coverage::ConvertFunctionDataT
 			const std::wstring & fileName = fileLineIt.first;
 			const std::map<unsigned, bool> & lineCoverage = fileLineIt.second;
 			unsigned int startLine = lineCoverage.begin()->first;
-			fileNameToFunctionMap[fileName].insert({ startLine, function });
+			fileNameToFunctionMap[fileName].emplace(startLine, function);
 		}
 	}
 
@@ -346,7 +349,7 @@ std::map<std::filesystem::path, FileCoverageData> Coverage::ConvertFunctionDataT
 		auto fileIt = fileCoverageData.find(filePath);
 		if (fileIt == fileCoverageData.end())
 		{
-			fileIt = fileCoverageData.insert({ filePath, {filePath} }).first;
+			fileIt = fileCoverageData.emplace(filePath, filePath).first;
 		}
 
 		FileCoverageData & coverageData = fileIt->second;
@@ -372,3 +375,65 @@ std::map<std::filesystem::path, FileCoverageData> Coverage::ConvertFunctionDataT
 	return fileCoverageData;
 }
 
+void Coverage::Delaminate(std::string & name)
+{
+	for (size_t pos = name.find("<lambda"); pos != std::string::npos; pos = name.find("<lambda", pos))
+	{
+		name.erase(pos, 1);
+		pos = name.find('>', pos);
+		if (pos != std::string::npos)
+		{
+			name.erase(pos, 1);
+		}
+	}
+}
+
+void Coverage::CleanupFunctionNames(const std::string & name, const std::string & typeName,
+	std::string & className, std::string & functionName, std::string & nameSpace) const
+{
+	className = typeName;
+	functionName = name;
+	Delaminate(className);
+	Delaminate(functionName);
+
+	std::smatch m;
+	if (!className.empty())
+	{
+		std::regex_search(className, m, nameSpaceRegex);
+		if (!m.empty())
+		{
+			size_t len = m[0].str().size();
+			if (len >= 2)
+			{
+				nameSpace = className.substr(0, len - 2);
+
+				if (className.compare(0, nameSpace.size(), nameSpace) == 0)
+				{
+					className.erase(0, len);
+				}
+				if (functionName.compare(0, nameSpace.size(), nameSpace) == 0)
+				{
+					functionName.erase(0, len);
+				}
+			}
+			if (functionName.compare(0, className.size(), className) == 0)
+			{
+				functionName.erase(0, className.size() + 2);
+			}
+		}
+	}
+	else
+	{
+		std::regex_search(functionName, m, nameSpaceRegex);
+		if (!m.empty())
+		{
+			size_t len = m[0].str().size();
+			if (len >= 2)
+			{
+				nameSpace = functionName.substr(0, len - 2);
+				functionName.erase(0, len);
+			}
+			className = "<Functions>"; // avoid blank line in ReportGenerator
+		}
+	}
+}

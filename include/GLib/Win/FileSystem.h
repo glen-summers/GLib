@@ -2,11 +2,12 @@
 
 #include "GLib/Win/ErrorCheck.h"
 #include "GLib/Win/Handle.h"
-#include "GLib/stackorheap.h"
-#include "GLib/IcuUtils.h"
 
-#include <vector>
+#include "GLib/IcuUtils.h"
+#include "GLib/stackorheap.h"
+
 #include <map>
+#include <vector>
 
 namespace GLib::Win::FileSystem
 {
@@ -51,7 +52,7 @@ namespace GLib::Win::FileSystem
 			DWORD ret = ::QueryDosDeviceW(Cvt::a2w(logicalDrive).c_str(), s.Get(), static_cast<DWORD>(s.size()));
 			Util::AssertTrue(ret != 0, "QueryDosDeviceW");
 			std::string dosDeviceName = Cvt::w2a(s.Get());
-			result.insert({ logicalDrive, dosDeviceName });
+			result.emplace(logicalDrive, dosDeviceName);
 		}
 		return result;
 	}
@@ -142,8 +143,8 @@ namespace GLib::Win::FileSystem
 
 	inline Handle CreateAutoDeleteFile(const std::string & name)
 	{
-		HANDLE h = ::CreateFileW(Cvt::a2w(name).c_str(), GENERIC_READ | GENERIC_WRITE, 0, nullptr, CREATE_ALWAYS,
-			FILE_ATTRIBUTE_TEMPORARY | FILE_FLAG_DELETE_ON_CLOSE, nullptr);
+		HANDLE h = ::CreateFileW(Cvt::a2w(name).c_str(), GENERIC_READ | GENERIC_WRITE, 0, nullptr, CREATE_ALWAYS, // NOLINT(hicpp-signed-bitwise) baad macro
+			FILE_ATTRIBUTE_TEMPORARY | FILE_FLAG_DELETE_ON_CLOSE, nullptr); // NOLINT(hicpp-signed-bitwise) baad macro
 		Util::AssertTrue(h != nullptr, "CreateFile failed");
 		return Handle(h);
 	}

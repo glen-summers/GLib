@@ -18,7 +18,7 @@ class XmlPrinter
 	std::stack<std::string> stack;
 
 public:
-	XmlPrinter(bool format = true)
+	explicit XmlPrinter(bool format = true)
 		: format(format)
 		, textDepth(TextDepthNotSet)
 	{}

@@ -1,7 +1,7 @@
 #pragma once
 
-#include <map>
 #include <filesystem>
+#include <map>
 #include <utility>
 
 class FileCoverageData

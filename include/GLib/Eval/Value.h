@@ -3,9 +3,9 @@
 #include "GLib/Eval/Utils.h"
 #include "GLib/compat.h"
 
+#include <functional>
 #include <memory>
 #include <string>
-#include <functional>
 
 namespace GLib::Eval
 {
@@ -57,7 +57,7 @@ namespace GLib::Eval
 		ValueType value;
 
 	public:
-		Value(ValueType value)
+		explicit Value(ValueType value)
 			: value(std::move(value))
 		{}
 

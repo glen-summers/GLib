@@ -6,7 +6,7 @@ using namespace GLib::Util;
 
 namespace
 {
-	typedef std::runtime_error Exception;
+	using Exception = std::runtime_error;
 	bool IsOverflow(const Exception & e) { return e.what() == std::string("Overflow"); }
 	bool IsUnderflow(const Exception & e) { return e.what() == std::string("Underflow"); }
 }

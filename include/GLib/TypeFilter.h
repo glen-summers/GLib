@@ -14,8 +14,6 @@ namespace GLib::Util
 
 	template<typename First, typename... Rest> struct Tuple<First, Rest...> : Tuple<Rest...>
 	{
-		//typedef First Head;
-		//typedef TypeList<Rest...> Tail;
 		using Type = TypeList<First, Rest...>;
 	};
 

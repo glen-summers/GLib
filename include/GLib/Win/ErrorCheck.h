@@ -15,7 +15,7 @@ namespace GLib::Win::Util
 			std::ostringstream stm;
 			stm << message << " : ";
 			Util::FormatErrorMessage(stm, error, moduleName);
-			if (!IS_ERROR(error)) // if ComError print more readable value
+			if (!IS_ERROR(error)) // NOLINT(hicpp-signed-bitwise) baad mmacro
 			{
 				stm << std::hex;
 			}

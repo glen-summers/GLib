@@ -118,7 +118,7 @@ BOOST_AUTO_TEST_CASE(TestTypeListCompare)
 
 BOOST_AUTO_TEST_CASE(TestIntegralFilter)
 {
-	typedef GLib::Util::TypeFilter<std::is_integral, int, float, long>::TupleType::Type Result;
+	using Result = GLib::Util::TypeFilter<std::is_integral, int, float, long>::TupleType::Type;
 	std::list<std::type_index> expected { typeid(int), typeid(long) };
 
 	std::list<std::type_index> actual;
@@ -128,8 +128,8 @@ BOOST_AUTO_TEST_CASE(TestIntegralFilter)
 
 BOOST_AUTO_TEST_CASE(TestInterfaceFilter)
 {
-	typedef GLib::Util::TypeFilter<Predicates::IsDerivedFromFoo,
-			Interfaces::IFoo, Interfaces::IBar, Interfaces::IFoo2>::TupleType::Type Result;
+	using Result = GLib::Util::TypeFilter<Predicates::IsDerivedFromFoo,
+			Interfaces::IFoo, Interfaces::IBar, Interfaces::IFoo2>::TupleType::Type;
 	std::list<std::type_index> expected { typeid(Interfaces::IFoo2) };
 
 	std::list<std::type_index> actual;
@@ -139,8 +139,8 @@ BOOST_AUTO_TEST_CASE(TestInterfaceFilter)
 
 BOOST_AUTO_TEST_CASE(TestSelfFilter)
 {
-	typedef GLib::Util::SelfTypeFilter<Predicates::HasNoInheritor,
-		Interfaces::IFoo, Interfaces::IFoo2, Interfaces::IBar>::TupleType::Type Result;
+	using Result = GLib::Util::SelfTypeFilter<Predicates::HasNoInheritor,
+		Interfaces::IFoo, Interfaces::IFoo2, Interfaces::IBar>::TupleType::Type;
 	std::list<std::type_index> expected { typeid(Interfaces::IFoo2),typeid(Interfaces::IBar) };
 
 	std::list<std::type_index> actual;

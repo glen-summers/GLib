@@ -9,7 +9,7 @@
 // workaround for strings generating empty test errors with invalid encoding : check result == expected has failed [ != ]
 template<typename T> struct StringHolder
 {
-	typedef std::basic_string<T> StringType;
+	using StringType = std::basic_string<T>;
 	StringType value;
 	StringHolder(StringType value) : value(std::move(value)) {}
 	bool operator==(const StringHolder<T> & right) const
@@ -29,7 +29,7 @@ std::ostream & operator << (std::ostream & stm, const StringHolder<T> & holder)
 	SCOPE(resetState, [&]() { stm.copyfmt(state); });
 	stm << std::hex << std::noshowbase << std::uppercase << std::setfill('0');
 
-	typedef typename std::make_unsigned<T>::type UT;
+	using UT = typename std::make_unsigned<T>::type;
 	for (T c : holder.value)
 	{
 		stm

@@ -55,16 +55,18 @@ namespace GLib
 
 		class Iterator
 		{
+		public:
+			using iterator_category = std::random_access_iterator_tag;
+			using value_type = typename Span::value_type;
+			using difference_type = typename Span::index_type;
+			using pointer = const value_type *;
+			using reference = const value_type &;
+
+		private:
 			pointer ptr = {};
 			pointer end = {};
 
 		public:
-			using iterator_category = std::random_access_iterator_tag;
-			using value_type = Span::value_type;
-			using difference_type = Span::index_type;
-			using pointer2 = const value_type *;
-			using reference = const value_type &;
-
 			constexpr Iterator() noexcept = default;
 
 			constexpr Iterator(pointer ptr, size_type size) noexcept

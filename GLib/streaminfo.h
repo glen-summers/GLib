@@ -32,7 +32,7 @@ public:
 		return date;
 	}
 
-	operator bool() const
+	explicit operator bool() const
 	{
 		return stream.is_open() && stream.good();
 	}

@@ -145,6 +145,8 @@
   <ItemGroup>
     <ClInclude Include="..\include\GLib\checked_cast.h" />
     <ClInclude Include="..\include\GLib\compat.h" />
+    <ClInclude Include="..\include\GLib\CompatLinux.h" />
+    <ClInclude Include="..\include\GLib\CompatWindows.h" />
     <ClInclude Include="..\include\GLib\cvt.h" />
     <ClInclude Include="..\include\GLib\Eval\Collection.h" />
     <ClInclude Include="..\include\GLib\Eval\Evaluator.h" />

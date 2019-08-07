@@ -1,9 +1,9 @@
 #pragma once
 
-#include <string>
-#include <stdexcept>
-
 #include <GLib/stackorheap.h>
+
+#include <stdexcept>
+#include <string>
 
 #ifdef __linux__
 #include <unicode/ucol.h>

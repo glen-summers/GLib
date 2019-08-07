@@ -8,7 +8,7 @@
 class HtmlPrinter : public XmlPrinter
 {
 public:
-	HtmlPrinter(const std::string & title, const std::filesystem::path & css = {})
+	HtmlPrinter(const std::string & title, const std::filesystem::path & css)
 		: XmlPrinter(true)
 	{
 		PushDocType("html");

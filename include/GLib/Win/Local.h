@@ -23,7 +23,7 @@ namespace GLib::Win
 			T * value;
 
 		public:
-			Transfer(LocalPtr & local) : local(local), value()
+			explicit Transfer(LocalPtr & local) : local(local), value()
 			{}
 
 			Transfer() = delete;
@@ -50,7 +50,7 @@ namespace GLib::Win
 		Ptr p;
 
 	public:
-		Local(T * value = nullptr) : p(value)
+		explicit Local(T * value = nullptr) : p(value)
 		{}
 
 		const T * Get() const
@@ -60,7 +60,7 @@ namespace GLib::Win
 
 		Detail::Transfer<T, Ptr> GetPtr()
 		{
-			return {p};
+			return Detail::Transfer<T, Ptr>{static_cast<Ptr&>(p)};
 		}
 	};
 }

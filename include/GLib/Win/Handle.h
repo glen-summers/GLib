@@ -2,8 +2,8 @@
 
 #include "GLib/Win/ErrorCheck.h"
 
-#include <memory>
 #include <cassert>
+#include <memory>
 
 namespace GLib::Win
 {

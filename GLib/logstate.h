@@ -42,7 +42,7 @@ public:
 		return std::exchange(pending, false);
 	}
 
-	void Push(Scope scope)
+	void Push(const Scope & scope)
 	{
 		scopes.push(scope);
 		pending = true;
@@ -73,7 +73,7 @@ public:
 		stream.put(c);
 	}
 
-	const char * Get() const
+	const char * Get()
 	{
 		return stream.Buffer().Get();
 	}

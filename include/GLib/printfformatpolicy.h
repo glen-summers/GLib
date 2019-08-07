@@ -5,8 +5,8 @@
 #include "GLib/compat.h"
 #include "GLib/cvt.h"
 
-#include <ostream>
 #include <iomanip>
+#include <ostream>
 
 namespace GLib
 {
@@ -44,13 +44,13 @@ namespace GLib
 				const char * f = CheckFormat(defaultFormat, format);
 				constexpr auto InitialBufferSize = 21;
 				Util::StackOrHeap<char, InitialBufferSize> s;
-				const int len = ::snprintf(nullptr, 0, f, value); // NOLINT(cppcoreguidelines-pro-type-vararg) by design
+				const int len = ::snprintf(nullptr, 0, f, value); // NOLINT(cppcoreguidelines-pro-type-vararg,hicpp-vararg) by design
 				if (len < 0)
 				{
 					Compat::StrError("snprintf failed");
 				}
 				s.EnsureSize(len + 1);
-				::snprintf(s.Get(), s.size(), f, value); // NOLINT(cppcoreguidelines-pro-type-vararg) by design
+				::snprintf(s.Get(), s.size(), f, value); // NOLINT(cppcoreguidelines-pro-type-vararg,hicpp-vararg) by design
 
 				stm << s.Get();
 			}
@@ -80,6 +80,7 @@ namespace GLib
 
 			template<size_t> void FormatPointer(std::ostream & stm, void * const & value)
 			{
+				(void)value;
 				throw std::runtime_error("Unknown pointer size : " + std::to_string(sizeof(value)));
 			}
 
@@ -166,12 +167,9 @@ namespace GLib
 
 			static void Format(std::ostream & stm, void * const & value, const std::string & format)
 			{
-				// format appears to have no affect on %p windows gets %0p, linux gets %#p
-				//ToStringImpl("%p", stm, value, format);
 				if (format.empty())
 				{
 					Detail::FormatPointer<sizeof(void*)>(stm, value);
-					// or << std::hex << << std::noshowbase << std::left << std::setfill('0') << std::setw(sizeof(value)/4) << value
 				}
 				else
 				{
@@ -182,9 +180,6 @@ namespace GLib
 			// actually not printf calls, move to a shared c++ policy?
 			static void Format(std::ostream & stm, const std::tm & value, const std::string & format)
 			{
-				// %c linux:   Sun 06 Nov 1967 18:00:00 BST
-				// %c windows: 06/11/1967 18:00:00
-				// so using a specific default format
 				Detail::ToStringImpl("%d %b %Y, %H:%M:%S", stm, value, format);
 			}
 

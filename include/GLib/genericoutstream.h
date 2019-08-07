@@ -12,12 +12,12 @@ namespace GLib::Util
 		BufferType buffer;
 
 	public:
-		GenericOutStream(std::ios_base::fmtflags f = std::ios_base::fmtflags()) : Base(&buffer)
+		explicit GenericOutStream(std::ios_base::fmtflags flags = {}) : Base(&buffer)
 		{
-			Base::setf(f);
+			Base::setf(flags);
 		}
 
-		const BufferType & Buffer() const
+		BufferType & Buffer()
 		{
 			return buffer;
 		}

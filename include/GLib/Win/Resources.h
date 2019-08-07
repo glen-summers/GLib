@@ -7,7 +7,7 @@
 namespace GLib::Win
 {
 	template <typename T>
-	inline std::tuple<const T *, size_t> LoadResource(HINSTANCE instance, unsigned int id, LPCWSTR resourceType)
+	std::tuple<const T *, size_t> LoadResource(HINSTANCE instance, unsigned int id, LPCWSTR resourceType)
 	{
 		HRSRC resource = ::FindResourceW(instance, MAKEINTRESOURCEW(id), resourceType); // NOLINT(cppcoreguidelines-pro-type-cstyle-cast)
 		Util::AssertTrue(resource != nullptr, "FindResource failed");

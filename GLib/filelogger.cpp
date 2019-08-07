@@ -5,18 +5,16 @@
 #include "DurationPrinter.h"
 #include "Manipulator.h"
 
-#include "GLib/flogging.h"
 #include "GLib/compat.h"
+#include "GLib/flogging.h"
 
 #include <sstream>
 #include <thread>
 
-using namespace GLib;
-
 thread_local LogState FileLogger::logState;
 
 FileLogger::FileLogger()
-	: baseFileName(Compat::ProcessName() + "_" + std::to_string(Compat::ProcessId()))
+	: baseFileName(GLib::Compat::ProcessName() + "_" + std::to_string(GLib::Compat::ProcessId()))
 	, path(fs::temp_directory_path() / "glogfiles")
 {
 	create_directories(path);
@@ -28,7 +26,7 @@ FileLogger::~FileLogger()
 	CloseStream(); //
 }
 
-void FileLogger::Write(Flog::Level level, const char * prefix, const char * message)
+void FileLogger::Write(GLib::Flog::Level level, const char * prefix, const char * message)
 {
 	Instance().InternalWrite(level, prefix, message);
 }
@@ -38,7 +36,7 @@ void FileLogger::Write(char c)
 	logState.Put(c);
 }
 
-extern "C" void Flog::Detail::Write(char c)
+extern "C" void GLib::Flog::Detail::Write(char c)
 {
 	FileLogger::Write(c);
 }
@@ -114,7 +112,7 @@ StreamInfo FileLogger::GetStream() const
 	throw std::runtime_error("Exhausted possible stream names " + logFileName.u8string());
 }
 
-void FileLogger::InternalWrite(Flog::Level level, const char * prefix, const char * message)
+void FileLogger::InternalWrite(GLib::Flog::Level level, const char * prefix, const char * message)
 {
 	// ShouldTrace ...
 	if (level < logLevel)
@@ -126,7 +124,7 @@ void FileLogger::InternalWrite(Flog::Level level, const char * prefix, const cha
 	WriteToStream(level, prefix, message);
 }
 
-void FileLogger::WriteToStream(Flog::Level level, const char * prefix, const char * message)
+void FileLogger::WriteToStream(GLib::Flog::Level level, const char * prefix, const char * message)
 {
 	std::lock_guard<std::mutex> guard(streamMonitor);
 	{
@@ -146,7 +144,7 @@ void FileLogger::WriteToStream(Flog::Level level, const char * prefix, const cha
 			auto now = std::chrono::system_clock::now();
 			const std::time_t t = std::chrono::system_clock::to_time_t(now);
 			std::tm tm{};
-			Compat::LocalTime(tm, t);
+			GLib::Compat::LocalTime(tm, t);
 
 			const auto ms = static_cast<int>(std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count() % 1000);
 
@@ -216,9 +214,9 @@ void FileLogger::WriteHeader(std::ostream &writer)
 
 	const std::time_t t = std::time(nullptr);
 	std::tm tm {};
-	Compat::LocalTime(tm, t);
+	GLib::Compat::LocalTime(tm, t);
 	std::tm gtm {};
-	Compat::GmTime(gtm, t);
+	GLib::Compat::GmTime(gtm, t);
 
 	static constexpr bool is64BitProcess = sizeof(void*) == 8;
 	static constexpr int bits = is64BitProcess ? 64 : 32; // more?
@@ -226,9 +224,9 @@ void FileLogger::WriteHeader(std::ostream &writer)
 	writer
 		<< "Opened      : " << std::put_time(&tm, "%d %b %Y, %H:%M:%S (%z)") << std::endl
 		<< "OpenedUtc   : " << std::put_time(&gtm, "%F %TZ") << std::endl
-		<< "ProcessName : (" << bits << " bit) " << Compat::ProcessName() << std::endl
-		<< "FullPath    : " << Compat::ProcessPath() << std::endl
-		<< "ProcessId   : " << Compat::ProcessId() << std::endl
+		<< "ProcessName : (" << bits << " bit) " << GLib::Compat::ProcessName() << std::endl
+		<< "FullPath    : " << GLib::Compat::ProcessPath() << std::endl
+		<< "ProcessId   : " << GLib::Compat::ProcessId() << std::endl
 		<< "ThreadId    : " << std::this_thread::get_id() << std::endl;
 	//Formatter::Format(writer, "UserName    : {0}\\{1}", Environment.UserDomainName, Environment.UserName);
 
@@ -240,7 +238,7 @@ void FileLogger::WriteFooter(std::ostream &writer)
 {
 	const std::time_t t = std::time(nullptr);
 	std::tm tm {};
-	Compat::LocalTime(tm, t);
+	GLib::Compat::LocalTime(tm, t);
 
 	writer
 		<< HeaderFooterSeparator << std::endl
@@ -274,14 +272,14 @@ void FileLogger::CommitPendingScope()
 	logState.Commit();
 }
 
-void FileLogger::ScopeStart(Flog::Level level, const char * prefix, const char * scope, const char * stem)
+void FileLogger::ScopeStart(GLib::Flog::Level level, const char * prefix, const char * scope, const char * stem)
 {
 	// level check?
 	CommitPendingScope();
 	logState.Push({ level, prefix, scope, stem });
 }
 
-void FileLogger::CommitBuffer(Flog::Level level, const char * prefix)
+void FileLogger::CommitBuffer(GLib::Flog::Level level, const char * prefix)
 {
 	Write(level, prefix, logState.Get());
 	logState.Reset(); // had AV here
@@ -314,7 +312,7 @@ std::ostream & FileLogger::Stream()
 	return Instance().logState.Stream();
 }
 
-void FileLogger::SetLogLevel(Flog::Level level)
+void FileLogger::SetLogLevel(GLib::Flog::Level level)
 {
 	Instance().logLevel = level;
 }
@@ -360,7 +358,7 @@ unsigned FileLogger::GetDate()
 {
 	const std::time_t t = std::time(nullptr);
 	std::tm tm {};
-	Compat::LocalTime(tm, t);
+	GLib::Compat::LocalTime(tm, t);
 	constexpr auto TmEpochYear = 1900;
 	constexpr auto ShiftTwoDecimals = 100;
 	return ((TmEpochYear + tm.tm_year) * ShiftTwoDecimals + tm.tm_mon + 1) * ShiftTwoDecimals + tm.tm_mday;

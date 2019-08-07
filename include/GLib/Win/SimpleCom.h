@@ -84,7 +84,7 @@ namespace GLib::Win
 
 		HRESULT STDMETHODCALLTYPE QueryInterface(const IID& id, void** ppvObject) override
 		{
-			if (!ppvObject)
+			if (ppvObject == nullptr)
 			{
 				return E_POINTER;
 			}
@@ -123,7 +123,9 @@ namespace GLib::Win
 	class __declspec(novtable) Unknown2<T, TypeList<TopLevelInterfaces...>, TypeList<AllInterfaces...>>
 		: public TopLevelInterfaces...
 	{
-		template <typename T> friend class ComPtrBase; // allows ComPtr to hold concrete class
+		// not getting clang-tidy errors in this class! resharper is ok
+
+		template <typename> friend class ComPtrBase; // allows ComPtr to hold concrete class
 
 		std::atomic<ULONG> ref = 1;
 
@@ -140,7 +142,7 @@ namespace GLib::Win
 
 		HRESULT STDMETHODCALLTYPE QueryInterface(const IID& id, void** ppvObject) override
 		{
-			if (!ppvObject)
+			if (ppvObject == nullptr)
 			{
 				return E_POINTER;
 			}

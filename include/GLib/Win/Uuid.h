@@ -13,14 +13,14 @@ namespace GLib::Win::Util
 		UUID const id;
 
 	public:
-		Uuid(const UUID & id) :id(id)
+		explicit Uuid(const UUID & id) :id(id)
 		{}
 
 		static Uuid CreateRandom()
 		{
 			UUID uuid;
 			CheckHr(::UuidCreate(&uuid), "UuidCreate");
-			return uuid;
+			return Uuid{uuid};
 		}
 
 	private:

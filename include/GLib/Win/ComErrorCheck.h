@@ -21,17 +21,17 @@ namespace GLib::Win
 			IErrorInfo* pErrorInfo;
 			if (::GetErrorInfo(0, &pErrorInfo) == S_OK)
 			{
-				BSTR bstr = nullptr;
-				pErrorInfo->GetDescription(&bstr);
+				BSTR description = nullptr;
+				pErrorInfo->GetDescription(&description);
 				SCOPE(_, [=] ()
 				{
-					::SysFreeString(bstr);
+					::SysFreeString(description);
 					pErrorInfo->Release();
 				});
-				hasMessage = bstr != nullptr;
+				hasMessage = description != nullptr;
 				if (hasMessage)
 				{
-					stm << Cvt::w2a(bstr);
+					stm << Cvt::w2a(description);
 				}
 			}
 			if (!hasMessage)
@@ -48,7 +48,7 @@ namespace GLib::Win
 #ifdef _DEBUG // || defined(GLIB_DEBUG)
 			Debug::Stream() << "ComException : " << formattedMessage << std::endl;
 #endif
-			throw ComException(move(formattedMessage), hr);
+			throw ComException(formattedMessage, hr);
 		}
 	}
 

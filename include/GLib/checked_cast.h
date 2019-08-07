@@ -1,8 +1,8 @@
 #pragma once
 
-#include <type_traits>
 #include <limits>
 #include <stdexcept>
+#include <type_traits>
 
 namespace GLib::Util
 {
@@ -53,7 +53,6 @@ namespace GLib::Util
 		template <typename T, typename S>
 		struct Traits
 		{
-			// removecv?
 			using Target = T;
 			using Source = S;
 			using Overflow = OverflowHandler<T, S, OverflowPolicy>;
@@ -72,7 +71,7 @@ namespace GLib::Util
 			static constexpr bool UnsignedToSigned = std::is_unsigned<Source>::value && std::is_signed<Target>::value;
 			static constexpr bool TargetSmaller = std::numeric_limits<Target>::digits < std::numeric_limits<Source>::digits;
 
-			static constexpr bool TrvialCopy = !SignedToUnsigned && !TargetSmaller;
+			static constexpr bool TrivialCopy = !SignedToUnsigned && !TargetSmaller;
 			static constexpr bool CheckMinMax = SameSign && TargetSmaller;
 			static constexpr bool CheckZeroMax = SignedToUnsigned && TargetSmaller;
 			static constexpr bool CheckZero = SignedToUnsigned && !TargetSmaller;
@@ -84,7 +83,7 @@ namespace GLib::Util
 		{};
 
 		template <typename T, typename S, typename Traits>
-		struct RangeChecker<T, S, Traits, typename std::enable_if<Flags<T, S>::TrvialCopy>::type>
+		struct RangeChecker<T, S, Traits, typename std::enable_if<Flags<T, S>::TrivialCopy>::type>
 		{
 			static T Check(S source)
 			{

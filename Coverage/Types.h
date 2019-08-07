@@ -2,9 +2,9 @@
 
 #include <GLib/NoCase.h>
 
-#include <string>
 #include <map>
 #include <set>
+#include <string>
 
 template<> struct GLib::NoCaseLess<wchar_t>
 {

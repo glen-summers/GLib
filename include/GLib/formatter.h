@@ -4,10 +4,9 @@
 #include "GLib/Span.h"
 #include "GLib/printfformatpolicy.h"
 
-#include <sstream>
 #include <functional>
 #include <iomanip>
-#include <array>
+#include <sstream>
 
 // namespace Formatter?
 
@@ -22,7 +21,7 @@ namespace GLib
 			static auto test(int) -> decltype(&C::Format, std::true_type());
 
 			template <typename>
-			static auto test(...) -> std::false_type;
+			static auto test(...) -> decltype(std::false_type());
 
 			static const bool value = decltype(test<T>(0))::value;
 		};

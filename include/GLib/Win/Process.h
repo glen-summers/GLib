@@ -1,12 +1,12 @@
 #pragma once
 
 #include "GLib/Win/ErrorCheck.h"
-#include "GLib/Win/Handle.h"
 #include "GLib/Win/FileSystem.h"
+#include "GLib/Win/Handle.h"
 
 #include "GLib/checked_cast.h"
 
-#include <filesystem>
+#include <chrono>
 
 EXTERN_C IMAGE_DOS_HEADER __ImageBase;
 
@@ -87,7 +87,7 @@ namespace GLib::Win
 			return reinterpret_cast<HMODULE>(&__ImageBase); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
 		}
 
-		Process(Handle && handle)
+		Process(Handle handle)
 			: p(std::move(handle))
 			, threadId(::GetThreadId(p.get()))
 		{}
@@ -190,6 +190,7 @@ namespace GLib::Win
 				nullptr, nullptr, &sui, &pi), "CreateProcess");
 			Win::Handle p(pi.hProcess);
 			Win::Handle t(pi.hThread);
+			(void)t;
 			//DWORD pid = pi.dwProcessId;
 			return p;
 		}

@@ -11,7 +11,7 @@ namespace GLib::Xml
 		const NameSpaceManager * manager;
 
 	public:
-		Attributes(std::string_view data={}, const NameSpaceManager * manager={})
+		Attributes(std::string_view data = {}, const NameSpaceManager * manager = {})
 			: data(data)
 			, manager(manager)
 		{}

@@ -5,6 +5,8 @@
 
 #include <GLib/Win/Debugger.h>
 
+#include <regex>
+
 class Function;
 
 class Coverage : public GLib::Win::Debugger
@@ -12,6 +14,8 @@ class Coverage : public GLib::Win::Debugger
 	static constexpr unsigned char debugBreakByte = 0xCC;
 	static constexpr unsigned int FooFoo = 0xf00f00;
 	static constexpr unsigned int FeeFee = 0xfeefee;
+
+	std::regex nameSpaceRegex{ R"(^(?:[A-Za-z_][A-Za-z_0-9]*::)*)" }; // +some extra unicode chars?
 
 	std::string executable;
 	std::filesystem::path reportPath;
@@ -44,6 +48,10 @@ private:
 	void OnCreateThread(DWORD processId, DWORD threadId, const CREATE_THREAD_DEBUG_INFO & info) override;
 	void OnExitThread(DWORD processId, DWORD threadId, const EXIT_THREAD_DEBUG_INFO & info) override;
 	DWORD OnException(DWORD processId, DWORD threadId, const EXCEPTION_DEBUG_INFO & info) override;
+
+	static void Delaminate(std::string & name);
+	void CleanupFunctionNames(const std::string & name, const std::string & typeName,
+		std::string & className, std::string & functionName, std::string & nameSpace) const;
 
 	void CreateHtmlReport(const std::map<ULONG, Function> & indexToFunctionMap, const std::string & title) const;
 	static std::map<std::filesystem::path, FileCoverageData> ConvertFunctionDataToFileData(const std::map<ULONG, Function> & indexToFunctionMap);

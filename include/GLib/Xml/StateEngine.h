@@ -1,7 +1,7 @@
 #pragma once
 
-#include <cctype>
 #include <array>
+#include <cctype>
 
 namespace GLib::Xml
 {
@@ -60,7 +60,7 @@ namespace GLib::Xml
 		static constexpr char RightSquareBracket = ']';
 		static constexpr char Ampersand = '&';
 
-		static constexpr auto ContinuationMask = 0x80;
+		static constexpr auto ContinuationMask = 0x80U;
 
 
 		using StateFunction = State (StateEngine::*)(char);
@@ -75,7 +75,7 @@ namespace GLib::Xml
 		StateFunction stateFunction;
 
 	public:
-		StateEngine(State state = State::Start)
+		explicit StateEngine(State state = State::Start)
 		  : state(state)
 		  , stateFunction(stateFunctions.at(static_cast<int>(state)))
 		{}
@@ -99,7 +99,7 @@ namespace GLib::Xml
 	private:
 		static bool IsContinuation(char c)
 		{
-			return (c & ContinuationMask) != 0;
+			return (static_cast<unsigned char>(c) & ContinuationMask) != 0;
 		}
 
 		static bool IsWhiteSpace(char c)

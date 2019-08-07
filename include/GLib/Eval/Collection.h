@@ -20,7 +20,7 @@ namespace GLib::Eval
 		const Container & container;
 
 	public:
-		explicit Collection(const Container & container)
+		Collection(const Container & container)
 			: container(container)
 		{
 		}

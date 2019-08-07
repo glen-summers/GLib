@@ -2,9 +2,9 @@
 
 #include "GLib/compat.h"
 
-#include <type_traits>
-#include <string>
 #include <sstream>
+#include <string>
+#include <type_traits>
 
 namespace GLib::Eval::Utils
 {
@@ -17,7 +17,7 @@ namespace GLib::Eval::Utils
 			static auto test(int) -> decltype(std::to_string(C{}), std::true_type());
 
 			template <typename>
-			static auto test(...) -> std::false_type;
+			static auto test(...) -> decltype(std::false_type());
 
 			static const bool value = decltype(test<T>(0))::value;
 		};
@@ -26,10 +26,10 @@ namespace GLib::Eval::Utils
 		struct CanStream
 		{
 			template <typename C>
-			static auto test(int) -> decltype( std::declval<std::ostream&>() << std::declval<C>(), std::true_type() );
+			static auto test(int) -> decltype(std::declval<std::ostream&>() << std::declval<C>(), std::true_type());
 
 			template <typename>
-			static auto test(...) -> std::false_type;
+			static auto test(...) -> decltype(std::false_type());
 
 			static const bool value = decltype(test<T>(0))::value;
 		};
@@ -42,7 +42,7 @@ namespace GLib::Eval::Utils
 			static auto test(int) -> decltype(typename C::const_iterator{}, std::true_type());
 
 			template <typename>
-			static auto test(...) -> std::false_type;
+			static auto test(...) -> decltype(std::false_type());
 
 			static constexpr bool value = decltype(test<T>(0))::value;
 		};

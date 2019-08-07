@@ -1,10 +1,10 @@
 #pragma once
 
+#include <filesystem>
+#include <list>
 #include <map>
 #include <set>
-#include <list>
 #include <string>
-#include <filesystem>
 
 class FileCoverageData;
 

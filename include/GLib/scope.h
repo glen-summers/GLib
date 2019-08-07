@@ -12,13 +12,13 @@ namespace GLib::Detail
 		Function function;
 
 	public:
-		ScopedFunction(Function function) : function(function)
+		explicit ScopedFunction(Function function) : function(function)
 		{}
 
 		ScopedFunction(const ScopedFunction &) = delete;
 		ScopedFunction & operator=(const ScopedFunction &) = delete;
-		ScopedFunction(ScopedFunction &&) = default;
-		ScopedFunction & operator=(ScopedFunction &&) = default;
+		ScopedFunction(ScopedFunction &&) noexcept = default;
+		ScopedFunction & operator=(ScopedFunction &&) noexcept = default;
 
 		~ScopedFunction()
 		{

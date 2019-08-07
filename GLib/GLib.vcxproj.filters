@@ -200,6 +200,12 @@
     <ClInclude Include="DurationPrinter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\GLib\CompatLinux.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\GLib\CompatWindows.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="filelogger.cpp">

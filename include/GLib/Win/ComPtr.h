@@ -10,6 +10,7 @@
 
 #include <objbase.h>
 #include <type_traits>
+
 #include "cassert"
 
 namespace GLib::Win
@@ -44,10 +45,10 @@ namespace GLib::Win
 			using Type = T;
 		};
 	}
-#define COM_PTR_FWD(x) template <> struct Util::Detail::CanRestrict<x> { typedef x Type; }; // NOLINT(cppcoreguidelines-macro-usage) just remove this?
+#define COM_PTR_FWD(x) template <> struct Util::Detail::CanRestrict<x> { using Type = x; }; // NOLINT(cppcoreguidelines-macro-usage) just remove this?
 
 	// avoid base
-	// rewrite and simplefy
+	// rewrite and simplify
 	template <typename T>
 	class ComPtrBase
 	{
@@ -74,7 +75,7 @@ namespace GLib::Win
 		~ComPtrBase() = default;
 
 		template<typename U>
-		ComPtrBase(ComPtrBase<U> && right)
+		explicit ComPtrBase(ComPtrBase<U> && right)
 			: p(right.p)
 		{
 			right.p = nullptr;
@@ -171,12 +172,12 @@ namespace GLib::Win
 
 		// implicit ptr ctor allows conversions, differs from shared_ptr definition, should be ok as non-com pointers will cause compile errors??
 		template <typename U>
-		ComPtr(U * u)
+		explicit ComPtr(U * u)
 		{
 			BaseType::InternalAssign(u);
 		}
 
-		ComPtr(std::nullptr_t) noexcept
+		explicit ComPtr(std::nullptr_t) noexcept
 		{}
 
 		ComPtr(const ComPtr & other) noexcept
@@ -185,7 +186,7 @@ namespace GLib::Win
 		}
 
 		template<typename U, typename = typename std::enable_if<std::is_convertible<U*, T*>::value, void>::type>
-		ComPtr(const ComPtr<U> & other) noexcept
+		explicit ComPtr(const ComPtr<U> & other) noexcept
 		{
 			BaseType::InternalAssign(other);
 		}
@@ -195,7 +196,7 @@ namespace GLib::Win
 		{}
 
 		template<typename U, typename = typename std::enable_if<std::is_convertible<U*, T*>::value, void>::type>
-		ComPtr(ComPtr<U> && right) noexcept
+		explicit ComPtr(ComPtr<U> && right) noexcept
 			: BaseType(std::move(right))
 		{}
 
@@ -269,7 +270,7 @@ namespace GLib::Win
 			return BaseType::Get() != nullptr;
 		}
 
-		T** operator&() noexcept
+		T** operator&() noexcept // NOLINT(google-runtime-operator) use transfer semantics
 		{
 			assert(Get() == nullptr);
 			return const_cast<T**>(BaseType::GetAddress());

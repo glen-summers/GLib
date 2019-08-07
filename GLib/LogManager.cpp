@@ -1,7 +1,7 @@
 #include "pch.h"
 
-#include "GLib/flogging.h"
 #include "GLib/compat.h"
+#include "GLib/flogging.h"
 
 #include "filelogger.h"
 

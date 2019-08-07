@@ -9,7 +9,7 @@ class Address
 	bool visited;
 
 public:
-	Address(unsigned char oldData) : oldData(oldData), visited()
+	explicit Address(unsigned char oldData) : oldData(oldData), visited()
 	{}
 
 	unsigned char OldData() const
@@ -37,7 +37,7 @@ public:
 	// 1. release build of {return atomicType++;} returns 3 lines for same address
 	void AddFileLine(const std::wstring & fileName, unsigned int lineNumber)
 	{
-		fileLines[fileName].insert({ lineNumber, false });
+		fileLines[fileName].emplace(lineNumber, false);
 	}
 };
 

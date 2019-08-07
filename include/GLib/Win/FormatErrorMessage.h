@@ -12,7 +12,7 @@ namespace GLib::Win::Util
 	{
 		inline DWORD FormatMessageCast(DWORD dwFlags, LPCVOID lpSource, DWORD dwMessageId, LPWSTR* lpBuffer)
 		{
-			return ::FormatMessageW(dwFlags, lpSource, dwMessageId, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+			return ::FormatMessageW(dwFlags, lpSource, dwMessageId, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // NOLINT(hicpp-signed-bitwise) baad macro
 				reinterpret_cast<LPWSTR>(lpBuffer), 0, nullptr); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
 		}
 	}
@@ -20,10 +20,10 @@ namespace GLib::Win::Util
 	inline void FormatErrorMessage(std::ostream & stm, unsigned int error, const wchar_t * moduleName = nullptr)
 	{
 		wchar_t *pszMsg;
-		int flags = FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS;
+		int flags = FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS; // NOLINT(hicpp-signed-bitwise) baad macro
 		if (moduleName != nullptr)
 		{
-			flags |= FORMAT_MESSAGE_FROM_HMODULE;
+			flags |= FORMAT_MESSAGE_FROM_HMODULE; // NOLINT(hicpp-signed-bitwise) baad macro
 		}
 
 		HMODULE module(moduleName != nullptr ? ::LoadLibraryW(moduleName) : nullptr);
