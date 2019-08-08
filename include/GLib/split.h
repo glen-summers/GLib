@@ -1,12 +1,17 @@
 #pragma once
 
 #include <iterator>
+#include <stdexcept>
 #include <string>
 
 namespace GLib::Util
 {
 	namespace Detail
 	{
+		template <typename CharType> const CharType * DeFaultDeliminator();
+		template <> inline const char * DeFaultDeliminator() { return ","; }
+		template <> inline const wchar_t * DeFaultDeliminator() { return L","; }
+
 		template <typename StringType>
 		class Splitter
 		{
@@ -16,10 +21,15 @@ namespace GLib::Util
 
 		public:
 			// clang-tidy does not warn for modernize-pass-by-value here
-			Splitter(const StringType & value, const StringType & delimiter = StringType(1, T(',')))
+			Splitter(const StringType & value, const StringType & delimiter = DeFaultDeliminator<typename StringType::value_type>())
 				: value(value)
 				, delimiter(delimiter)
-			{}
+			{
+				if (delimiter.empty())
+				{
+					throw std::logic_error("Delimiter is empty");
+				}
+			}
 
 			class iterator
 			{
@@ -90,11 +100,10 @@ namespace GLib::Util
 
 	using Splitter = Detail::Splitter<std::string>;
 
-	template <typename T, typename OutputIterator>
-	void Split(const std::basic_string<T> & value, OutputIterator it,
-		const std::basic_string<T> & delimiter = std::basic_string<T>(1, T(',')))
+	template <typename StringType, typename OutputIterator>
+	void Split(const StringType & value, OutputIterator it, const StringType & delimiter = Detail::DeFaultDeliminator<typename StringType::value_type>())
 	{
-		Detail::Splitter<std::basic_string<T>> splitter { value, delimiter };
+		Detail::Splitter<StringType> splitter { value, delimiter };
 		std::copy(splitter.begin(), splitter.end(), it);
 	}
 }
