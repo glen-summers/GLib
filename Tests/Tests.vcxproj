@@ -156,6 +156,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="CheckedCastTests.cpp" />
+    <ClCompile Include="CompatTests.cpp" />
     <ClCompile Include="ComPtrTests.cpp" />
     <ClCompile Include="ConverterTests.cpp" />
     <ClCompile Include="EvaluatorTests.cpp" />

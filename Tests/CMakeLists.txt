@@ -32,6 +32,7 @@ link_directories(${BOOST_DIR}/stage/lib)
 
 set(SOURCES Main.cpp
 	CheckedCastTests.cpp
+	CompatTests.cpp
 	ConverterTests.cpp
 	EvaluatorTests.cpp
 	FlogTests.cpp

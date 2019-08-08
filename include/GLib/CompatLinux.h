@@ -29,7 +29,7 @@ namespace GLib::Compat
 		constexpr auto ErrorBufferSize = 256;
 		std::array<char, ErrorBufferSize> err{};
 		char * msg = strerror_r(errno, err.data(), err.size());
-		throw std::logic_error(std::string(prefix)+ " : " + msg);
+		throw std::runtime_error(std::string(prefix)+ " : " + msg);
 	}
 
 	inline std::string Unmangle(const std::string & name)
