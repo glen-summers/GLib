@@ -10,7 +10,9 @@
 #include "GLib/Eval/Evaluator.h"
 #include "GLib/Eval/TemplateEngine.h"
 #include "GLib/Win/Resources.h"
+#include "GLib/XmlPrinter.h"
 #include "GLib/formatter.h"
+
 
 #include <fstream>
 #include <set>
@@ -193,6 +195,7 @@ void HtmlReport::GenerateSourceFile(std::filesystem::path & path, const std::str
 	{
 		std::string s;
 		std::getline(in, s);
+		s = Xml::Escape(move(s));
 		auto line = static_cast<unsigned int>(lines.size()+1);
 		const char * style = "";
 		auto it = lc.find(line);

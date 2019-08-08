@@ -80,7 +80,7 @@ BOOST_AUTO_TEST_SUITE(WinTests)
 
 	BOOST_AUTO_TEST_CASE(TestXmlprinterEscapes) // move, expand
 	{
-		XmlPrinter p;
+		Xml::Printer p;
 		p.PushText("Start && End");
 		BOOST_TEST("Start &amp;&amp; End" == p.Xml());
 	}
@@ -88,7 +88,7 @@ BOOST_AUTO_TEST_SUITE(WinTests)
 	BOOST_AUTO_TEST_CASE(TestXmlPrinterFormat)
 	{
 		{
-			XmlPrinter formatted{ true };
+			Xml::Printer formatted{ true };
 			formatted.OpenElement("Root");
 			formatted.OpenElement("Nested");
 			formatted.CloseElement();
@@ -101,7 +101,7 @@ BOOST_AUTO_TEST_SUITE(WinTests)
 		}
 
 		{
-			XmlPrinter unFormatted{ false };
+			Xml::Printer unFormatted{ false };
 			unFormatted.OpenElement("Root");
 			unFormatted.OpenElement("Nested");
 			unFormatted.CloseElement();
@@ -111,7 +111,7 @@ BOOST_AUTO_TEST_SUITE(WinTests)
 		}
 
 		{
-			XmlPrinter unFormatted2{ true };
+			Xml::Printer unFormatted2{ true };
 			unFormatted2.OpenElement("Root", false);
 			unFormatted2.OpenElement("Nested", false);
 			unFormatted2.CloseElement(false);
