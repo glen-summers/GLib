@@ -177,7 +177,7 @@ namespace GLib::Eval::TemplateEngine
 										continue;
 									}
 									// preserve quote type?
-									// could add entire attr text, would need initial space as part of value
+									// could add entire attribute text, would need initial space as part of value
 									// could also accumulate and add single fragment
 									current->AddFragment(a.name);
 									current->AddFragment("=\"");

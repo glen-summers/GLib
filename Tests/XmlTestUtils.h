@@ -1,7 +1,7 @@
 #pragma once
 
-#include <GLib/Xml/Iterator.h>
-#include <GLib/Xml/AttributeIterator.h>
+#include "GLib/Xml/Iterator.h"
+#include "GLib/Xml/AttributeIterator.h"
 
 namespace GLib::Xml
 {

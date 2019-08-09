@@ -26,7 +26,7 @@ FileLogger::~FileLogger()
 	CloseStream(); //
 }
 
-void FileLogger::Write(GLib::Flog::Level level, const char * prefix, const char * message)
+void FileLogger::Write(GLib::Flog::Level level, const char * prefix, std::string_view message)
 {
 	Instance().InternalWrite(level, prefix, message);
 }
@@ -112,7 +112,7 @@ StreamInfo FileLogger::GetStream() const
 	throw std::runtime_error("Exhausted possible stream names " + logFileName.u8string());
 }
 
-void FileLogger::InternalWrite(GLib::Flog::Level level, const char * prefix, const char * message)
+void FileLogger::InternalWrite(GLib::Flog::Level level, const char * prefix, std::string_view message)
 {
 	// ShouldTrace ...
 	if (level < logLevel)
@@ -124,13 +124,13 @@ void FileLogger::InternalWrite(GLib::Flog::Level level, const char * prefix, con
 	WriteToStream(level, prefix, message);
 }
 
-void FileLogger::WriteToStream(GLib::Flog::Level level, const char * prefix, const char * message)
+void FileLogger::WriteToStream(GLib::Flog::Level level, const char * prefix, std::string_view message)
 {
 	std::lock_guard<std::mutex> guard(streamMonitor);
 	{
 		try
 		{
-			const size_t newEntrySize = strlen(message);
+			const size_t newEntrySize = message.size();
 			HandleFileRollover(newEntrySize);
 			EnsureStreamIsOpen();
 			if (!ResourcesAvailable(newEntrySize))

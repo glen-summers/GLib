@@ -1,6 +1,6 @@
 #pragma once
 
-#include <GLib/NoCase.h>
+#include "GLib/NoCase.h"
 
 #include <map>
 #include <set>

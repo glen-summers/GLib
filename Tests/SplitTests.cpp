@@ -1,6 +1,6 @@
 #include <boost/test/unit_test.hpp>
 
-#include <GLib/split.h>
+#include "GLib/split.h"
 #include "GLib/cvt.h"
 
 #include "TestUtils.h"

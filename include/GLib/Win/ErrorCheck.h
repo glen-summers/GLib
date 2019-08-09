@@ -1,10 +1,13 @@
 #pragma once
 
+#include "GLib/Win/FormatErrorMessage.h"
 #include "GLib/Win/WinException.h"
 
 #ifdef _DEBUG // || defined(GLIB_DEBUG)
 #include "GLib/Win/DebugStream.h"
 #endif
+
+#include <sstream>
 
 namespace GLib::Win::Util
 {
@@ -15,7 +18,7 @@ namespace GLib::Win::Util
 			std::ostringstream stm;
 			stm << message << " : ";
 			Util::FormatErrorMessage(stm, error, moduleName);
-			if (!IS_ERROR(error)) // NOLINT(hicpp-signed-bitwise) baad mmacro
+			if (!IS_ERROR(error)) // NOLINT(hicpp-signed-bitwise) baad macro
 			{
 				stm << std::hex;
 			}
@@ -33,14 +36,15 @@ namespace GLib::Win::Util
 			throw WinException(formattedMessage, result);
 		}
 
-		// only allow specific params to prevent accidental int -> bool and misinterpreting win32 results
+		// only allow specific parameters to prevent accidental int -> boolean and misinterpreting win32 results
 		// https://stackoverflow.com/questions/175689/can-you-use-keyword-explicit-to-prevent-automatic-conversion-of-method-parameter
 		class Checker
 		{
 		public:
 			template<typename T> static void AssertTrue(T value, const char * message)
 			{
-				UNREFERENCED_PARAMETER(message);
+				(void)value;
+				(void)message;
 				static_assert(false, "Invalid check parameter, only bool and BOOL allowed");
 			}
 
@@ -66,8 +70,8 @@ namespace GLib::Win::Util
 					Debug::Stream() << "GLib warning: " << Detail::FormatErrorMessage(message, dwErr) << std::endl;
 				}
 #else
-				UNREFERENCED_PARAMETER(result);
-				UNREFERENCED_PARAMETER(message);
+				(void)result;
+				(void)message;
 #endif
 			}
 

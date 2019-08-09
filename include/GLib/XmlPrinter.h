@@ -11,7 +11,7 @@ namespace Xml
 	{
 		struct Entity
 		{
-			const char * escaped;
+			std::string_view escaped;
 			char c;
 		};
 
@@ -30,7 +30,7 @@ namespace Xml
 	{
 		for (size_t startPos = 0;;)
 		{
-			const char * replacement = {};
+			std::string_view replacement;
 			size_t pos = std::string::npos;
 			for (const auto & e : Detail::entities)
 			{
@@ -46,7 +46,7 @@ namespace Xml
 				break;
 			}
 			value.replace(pos, 1, replacement);
-			startPos = pos + ::strlen(replacement);
+			startPos = pos + replacement.size();
 		}
 		return move(value);
 	}

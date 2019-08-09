@@ -1,18 +1,18 @@
 #pragma once
 
-#include "GLib/Win/FormatErrorMessage.h"
+#include <Windows.h>
 
-#include <sstream>
+#include <stdexcept>
 
 namespace GLib::Win
 {
 	class WinException : public std::runtime_error
 	{
-		unsigned int const errorCode;
+		DWORD const errorCode;
 		HRESULT const hResult;
 
 	public:
-		unsigned int ErrorCode() const
+		DWORD ErrorCode() const
 		{
 			return errorCode;
 		}

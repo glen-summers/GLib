@@ -5,6 +5,7 @@
 #include "GLib/cvt.h"
 
 #include <ostream>
+#include <string_view>
 
 namespace GLib::Win::Util
 {
@@ -29,7 +30,7 @@ namespace GLib::Win::Util
 		HMODULE module(moduleName != nullptr ? ::LoadLibraryW(moduleName) : nullptr);
 		if (Detail::FormatMessageCast(flags, module, error, &pszMsg) != 0)
 		{
-			size_t len = ::lstrlenW(pszMsg);
+			size_t len = ::wcslen(pszMsg);
 			std::wstring_view wMsg { pszMsg,  len }; 
 			constexpr std::wstring_view ending = L"\r\n";
 			if (std::equal(ending.rbegin(), ending.rend(), wMsg.rbegin()))
@@ -37,7 +38,7 @@ namespace GLib::Win::Util
 				wMsg = wMsg.substr(0, len - ending.size());
 			}
 
-			stm << Cvt::w2a(std::wstring{wMsg}); // avoid double alloc
+			stm << Cvt::w2a(wMsg);
 			::LocalFree(pszMsg);
 		}
 		else

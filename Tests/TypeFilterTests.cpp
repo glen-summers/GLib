@@ -1,6 +1,6 @@
 #include <boost/test/unit_test.hpp>
 
-#include <GLib/TypeFilter.h>
+#include "GLib/TypeFilter.h"
 
 #include <typeindex>
 

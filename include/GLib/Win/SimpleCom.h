@@ -44,7 +44,7 @@ namespace GLib::Win
 #ifdef SIMPLECOM_LOG_QI_MISS
 			ComDiags::LogIid("QI miss", typeid(t).name(), iid);
 #else
-			UNREFERENCED_PARAMETER(iid);
+			(void)iid;
 #endif
 			*ppvObject = nullptr;
 			return E_NOINTERFACE;

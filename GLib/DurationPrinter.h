@@ -8,8 +8,8 @@ inline std::ostream & operator<< (std::ostream & s, std::chrono::nanoseconds dur
 {
 	if (std::chrono::duration_cast<std::chrono::seconds>(duration).count() == 0)
 	{
-		constexpr auto milli = 1000;
-		return s << std::setprecision(1) << std::fixed << std::chrono::duration<double>(duration).count() * milli << "ms";
+		constexpr auto ToMilliseconds = 1000;
+		return s << std::setprecision(1) << std::fixed << std::chrono::duration<double>(duration).count() * ToMilliseconds << "ms";
 	}
 
 	constexpr auto HoursInAnEarthDay = 24; // until c++20 days constant
@@ -21,15 +21,15 @@ inline std::ostream & operator<< (std::ostream & s, std::chrono::nanoseconds dur
 	auto minutes = std::chrono::duration_cast<std::chrono::minutes>(duration);
 	duration -= minutes;
 
-	constexpr auto NanoSecondsInAMillisecond = 1000000;
-	long long millis = duration.count() / NanoSecondsInAMillisecond;
+	constexpr auto NanosecondsToMilliseconds = 1000000;
+	long long milliseconds = duration.count() / NanosecondsToMilliseconds;
 	int effectiveDigits = 3;
 	while (effectiveDigits > 0)
 	{
 		constexpr auto DecimalModulus = 10;
-		if (millis % DecimalModulus == 0)
+		if (milliseconds % DecimalModulus == 0)
 		{
-			millis /= DecimalModulus;
+			milliseconds /= DecimalModulus;
 			effectiveDigits--;
 		}
 		else
@@ -45,6 +45,6 @@ inline std::ostream & operator<< (std::ostream & s, std::chrono::nanoseconds dur
 	s << hours.count() << ":";
 	s << minutes.count() << ":";
 
-	const auto Nanos= 1e9;
-	return s << std::setprecision(effectiveDigits) << std::fixed << duration.count() / Nanos;
+	const auto NanosecondsToSeconds = 1e9;
+	return s << std::setprecision(effectiveDigits) << std::fixed << duration.count() / NanosecondsToSeconds;
 }

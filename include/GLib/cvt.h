@@ -19,15 +19,15 @@ namespace GLib::Cvt
 #endif
 	}
 
-	inline std::wstring a2w(const std::string & s)
+	inline std::wstring a2w(std::string_view s)
 	{
-		return Detail::Converter().from_bytes(s);
+		return Detail::Converter().from_bytes(s.data(), s.data()+s.size());
 		//Detail::AssertTrue(convert.converted() == s.size(), "conversion failed");
 	}
 
-	inline std::string w2a(const std::wstring & s)
+	inline std::string w2a(std::wstring_view s)
 	{
-		return Detail::Converter().to_bytes(s);
+		return Detail::Converter().to_bytes(s.data(), s.data()+s.size());
 		//Detail::AssertTrue(convert.converted() == s.size(), "conversion failed");
 	}
 

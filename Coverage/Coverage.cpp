@@ -6,7 +6,7 @@
 #include "Function.h"
 #include "HtmlReport.h"
 
-#include <GLib/XmlPrinter.h>
+#include "GLib/XmlPrinter.h"
 
 #include <fstream>
 
@@ -99,15 +99,15 @@ void Coverage::OnExitProcess(DWORD processId, DWORD threadId, const EXIT_PROCESS
 
 void Coverage::OnCreateThread(DWORD processId, DWORD threadId, const CREATE_THREAD_DEBUG_INFO& info)
 {
-	UNREFERENCED_PARAMETER(processId);
+	(void)processId;
 
 	threads.insert({ threadId, info.hThread });
 }
 
 void Coverage::OnExitThread(DWORD processId, DWORD threadId, const EXIT_THREAD_DEBUG_INFO& info)
 {
-	UNREFERENCED_PARAMETER(processId);
-	UNREFERENCED_PARAMETER(info);
+	(void)processId;
+	(void)info;
 
 	threads.erase(threadId);
 }

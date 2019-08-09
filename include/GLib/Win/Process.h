@@ -61,7 +61,7 @@ namespace GLib::Win
 				s.EnsureSize(size);
 				size = ::GetEnvironmentVariableW(w.c_str(), s.Get(), static_cast<DWORD>(s.size()));
 			}
-			return size == 0 ? "" : Cvt::w2a(s.Get());
+			return size == 0 ? "" : Cvt::w2a(std::wstring_view{s.Get(), size});
 		}
 	}
 

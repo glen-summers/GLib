@@ -95,7 +95,7 @@ namespace GLib::Win::Symbols
 			symbol->SizeOfStruct = sizeof(SYMBOL_INFOW);
 			symbol->MaxNameLen = MAX_SYM_NAME;
 			Util::AssertTrue(::SymFromAddrW(process.Handle().get(), address, nullptr, symbol), "SymFromAddr");
-			return { symbol->Index, symbol->TypeIndex, static_cast<enum SymTagEnum>(symbol->Tag), Cvt::w2a(static_cast<const wchar_t *>(symbol->Name)) };
+			return { symbol->Index, symbol->TypeIndex, static_cast<enum SymTagEnum>(symbol->Tag), Cvt::w2a(std::wstring_view{static_cast<const wchar_t *>(symbol->Name)}) };
 		}
 
 		bool TryGetClassParent(const Symbol & symbol, Symbol & result) const
@@ -121,7 +121,7 @@ namespace GLib::Win::Symbols
 			Util::AssertTrue(::SymGetTypeInfo(process.Handle().get(), baseOfImage, indexOfClassParent, TI_GET_SYMNAME, name.GetPtr().Address()), "SymGetTypeInfo");
 			result.Index = indexOfClassParent;
 			result.TypeIndex = typeIndexOfClassParent;
-			result.name = Cvt::w2a(name.Get());
+			result.name = Cvt::w2a(std::wstring_view{name.Get()});
 			return true;
 		}
 

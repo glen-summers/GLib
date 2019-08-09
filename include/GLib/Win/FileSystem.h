@@ -25,16 +25,16 @@ namespace GLib::Win::FileSystem
 		std::vector<std::string> drives;
 		Detail::Buffer s;
 
-		DWORD sizeWithoutTerminator = ::GetLogicalDriveStringsW(0, nullptr);
-		s.EnsureSize(static_cast<size_t>(sizeWithoutTerminator) + 1);
-		sizeWithoutTerminator = ::GetLogicalDriveStringsW(static_cast<DWORD>(s.size()), s.Get());
-		Util::AssertTrue(sizeWithoutTerminator != 0 && sizeWithoutTerminator != s.size() - 1, "GetLogicalDriveStrings failed");
+		DWORD sizeWithFinalTerminator = ::GetLogicalDriveStringsW(0, nullptr);
+		s.EnsureSize(static_cast<size_t>(sizeWithFinalTerminator-1));
+		auto size = ::GetLogicalDriveStringsW(static_cast<DWORD>(s.size()), s.Get());
+		Util::AssertTrue(size != 0 && size < sizeWithFinalTerminator, "GetLogicalDriveStrings failed");
 
-		std::wstring_view pp { s.Get(), sizeWithoutTerminator };
+		std::wstring_view pp { s.Get(), size};
 		const wchar_t nul = u'\0';
 		for (size_t pos = 0, next = pp.find(nul, pos); next != std::wstring_view::npos; pos = next+1, next = pp.find(nul, pos))
 		{
-			drives.push_back(Cvt::w2a(std::wstring{pp.substr(pos, next-1-pos)}));
+			drives.push_back(Cvt::w2a(pp.substr(pos, next-1-pos)));
 		}
 
 		return drives;
@@ -48,10 +48,12 @@ namespace GLib::Win::FileSystem
 
 		for (const auto & logicalDrive : LogicalDrives())
 		{
-			// need grow buffer...
-			DWORD ret = ::QueryDosDeviceW(Cvt::a2w(logicalDrive).c_str(), s.Get(), static_cast<DWORD>(s.size()));
-			Util::AssertTrue(ret != 0, "QueryDosDeviceW");
-			std::string dosDeviceName = Cvt::w2a(s.Get());
+			DWORD length = ::QueryDosDeviceW(Cvt::a2w(logicalDrive).c_str(), s.Get(), static_cast<DWORD>(s.size()));
+			Util::AssertTrue(length != 0, "QueryDosDeviceW");
+
+			s.EnsureSize(length);
+			size_t sizeWithoutTwoTrailingNulls = length - 2;
+			std::string dosDeviceName = Cvt::w2a({s.Get(), sizeWithoutTwoTrailingNulls});
 			result.emplace(logicalDrive, dosDeviceName);
 		}
 		return result;
@@ -60,12 +62,12 @@ namespace GLib::Win::FileSystem
 	inline std::string PathOfFileHandle(HANDLE fileHandle, DWORD flags)
 	{
 		Detail::Buffer s;
-		DWORD pathLen = ::GetFinalPathNameByHandleW(fileHandle, nullptr, 0, flags);
-		Util::AssertTrue(pathLen != 0 && pathLen != s.size(), "GetFinalPathNameByHandleW failed");
-		s.EnsureSize(static_cast<size_t>(pathLen) + 1);
-		pathLen = ::GetFinalPathNameByHandleW(fileHandle, s.Get(), static_cast<DWORD>(s.size()), flags);
-		Util::AssertTrue(pathLen != 0 && pathLen != s.size(), "GetFinalPathNameByHandleW failed");
-		return Cvt::w2a(s.Get());
+		DWORD length = ::GetFinalPathNameByHandleW(fileHandle, nullptr, 0, flags);
+		Util::AssertTrue(length != 0, "GetFinalPathNameByHandleW failed");
+		s.EnsureSize(length);
+		length = ::GetFinalPathNameByHandleW(fileHandle, s.Get(), static_cast<DWORD>(s.size()), flags);
+		Util::AssertTrue(length != 0 && length < s.size(), "GetFinalPathNameByHandleW failed");
+		return Cvt::w2a(std::wstring_view{s.Get(), length});
 	}
 
 	inline std::string NormalisePath(const std::string & path, const std::map<std::string, std::string> & driveMap)
@@ -109,9 +111,9 @@ namespace GLib::Win::FileSystem
 
 		s.EnsureSize(length);
 		length = ::GetModuleFileNameW(module, s.Get(), static_cast<unsigned int>(s.size()));
-		Util::AssertTrue(length != 0 && length != s.size(), "GetModuleFileName failed");
+		Util::AssertTrue(length != 0 && length < s.size(), "GetModuleFileName failed");
 
-		return Cvt::w2a(s.Get());
+		return Cvt::w2a(std::wstring_view{s.Get(), length});
 	}
 
 	inline std::string PathOfProcessHandle(HANDLE process)
@@ -138,7 +140,7 @@ namespace GLib::Win::FileSystem
 		s.EnsureSize(requiredSize);
 		Util::AssertTrue(::QueryFullProcessImageNameW(process, 0, s.Get(), &requiredSize), "QueryFullProcessImageNameW");
 
-		return Cvt::w2a(s.Get());
+		return Cvt::w2a(std::wstring_view{s.Get(), requiredSize});
 	}
 
 	inline Handle CreateAutoDeleteFile(const std::string & name)

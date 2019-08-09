@@ -1,14 +1,10 @@
-
-#include "GLib/formatter.h"
-#if _WIN32
-#include "GLib/Win/DebugStream.h"
-#endif
-#include "Xyzzy.h"
-
 #include <boost/test/unit_test.hpp>
 
-#include <chrono>
+#include "GLib/formatter.h"
 
+#include "Xyzzy.h"
+
+#include <chrono>
 
 namespace
 {

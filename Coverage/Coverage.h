@@ -3,7 +3,7 @@
 #include "Address.h"
 #include "FileCoverageData.h"
 
-#include <GLib/Win/Debugger.h>
+#include "GLib/Win/Debugger.h"
 
 #include <regex>
 

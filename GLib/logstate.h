@@ -73,7 +73,7 @@ public:
 		stream.put(c);
 	}
 
-	const char * Get()
+	std::string_view Get()
 	{
 		return stream.Buffer().Get();
 	}

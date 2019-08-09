@@ -1,10 +1,9 @@
-
-#include "../GLib/DurationPrinter.h"
+#include <boost/test/unit_test.hpp>
 
 #include "GLib/flogging.h"
-#include "GLib/scope.h"
+#include "GLib/formatter.h"
 
-#include <boost/test/unit_test.hpp>
+#include "../GLib/DurationPrinter.h"
 
 #include <fstream>
 

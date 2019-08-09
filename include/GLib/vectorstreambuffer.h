@@ -21,13 +21,13 @@ namespace GLib::Util
 			buffer.reserve(initialCapacity);
 		}
 
-		const T * Get()
+		std::basic_string_view<T> Get()
 		{
 			if (buffer.empty() || *buffer.rbegin() != T())
 			{
 				buffer.push_back(T());
 			}
-			return buffer.data();
+			return {buffer.data(), buffer.size()};
 		}
 
 		void Reset()

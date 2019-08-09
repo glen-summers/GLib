@@ -1,6 +1,7 @@
 #pragma once
 
 #include "GLib/Win/ComException.h"
+#include "GLib/Win/FormatErrorMessage.h"
 #include "GLib/scope.h"
 
 #ifdef _DEBUG // || defined(GLIB_DEBUG)
@@ -69,8 +70,8 @@ namespace GLib::Win
 			Debug::Stream() << "ComWarning : " << Detail::FormatErrorInfo(message, hr) << std::endl;
 		}
 #else
-			UNREFERENCED_PARAMETER(hr);
-			UNREFERENCED_PARAMETER(message);
+			(void)hr;
+			(void)message;
 #endif
 	}
 }

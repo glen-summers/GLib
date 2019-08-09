@@ -20,12 +20,12 @@ namespace GLib
 	{
 		namespace Detail
 		{
-			inline const char * CheckFormat(const char * defaultFormat, const std::string & format)
+			inline std::string CheckFormat(const char * defaultFormat, const std::string & format)
 			{
-				const char * f = format.empty() ? defaultFormat : format.c_str();
-				if (*f != '%')
+				std::string f = format.empty() ? defaultFormat : format;
+				if (*f.begin() != '%')
 				{
-					throw std::logic_error("Invalid format : " + format);
+					throw std::logic_error("Invalid format : " + f);
 				}
 				return f;
 			}
@@ -41,16 +41,16 @@ namespace GLib
 			template <typename T>
 			static void ToStringImpl(const char * defaultFormat, std::ostream & stm, const T & value, const std::string & format)
 			{
-				const char * f = CheckFormat(defaultFormat, format);
+				std::string f = CheckFormat(defaultFormat, format);
 				constexpr auto InitialBufferSize = 21;
 				Util::StackOrHeap<char, InitialBufferSize> s;
-				const int len = ::snprintf(nullptr, 0, f, value); // NOLINT(cppcoreguidelines-pro-type-vararg,hicpp-vararg) by design
+				const int len = ::snprintf(nullptr, 0, f.c_str(), value); // NOLINT(cppcoreguidelines-pro-type-vararg,hicpp-vararg) by design
 				if (len < 0)
 				{
 					Compat::StrError("snprintf failed");
 				}
 				s.EnsureSize(len + 1);
-				::snprintf(s.Get(), s.size(), f, value); // NOLINT(cppcoreguidelines-pro-type-vararg,hicpp-vararg) by design
+				::snprintf(s.Get(), s.size(), f.c_str(), value); // NOLINT(cppcoreguidelines-pro-type-vararg,hicpp-vararg) by design
 
 				stm << s.Get();
 			}
@@ -58,7 +58,7 @@ namespace GLib
 			template <>
 			inline void ToStringImpl(const char * defaultFormat, std::ostream & stm, const std::tm & value, const std::string & format)
 			{
-				const char * f = CheckFormat(defaultFormat, format);
+				std::string f = CheckFormat(defaultFormat, format);
 				// stream to wide to correctly convert locale symbols, is there a better better way? maybe when code convert gets fixed
 				std::wstringstream wideStream;
 				wideStream.imbue(stm.getloc());

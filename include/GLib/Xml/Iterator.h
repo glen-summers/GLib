@@ -11,7 +11,7 @@
 Design:
 xml input is a contiguous sequence of utf8 characters
 string_view's are used to hold pieces of the xml input to avoid copying
-seperatet attribute iterator exposed, enumerated first for namespaces then for values
+separate attribute iterator exposed, enumerated first for namespaces then for values
 
 todo:
 improve error msgs to include error detail line\column numbers
@@ -25,7 +25,7 @@ namespace GLib::Xml
 	{
 		friend class AttributeIterator;
 
-		Xml::StateEngine engine;
+		StateEngine engine;
 		NameSpaceManager manager;
 
 		const char * ptr {};
@@ -38,7 +38,6 @@ namespace GLib::Xml
 		Utils::PtrPair attributes;
 		Utils::PtrPair attributeName;
 		const char * attributeValueStart {};
-		const char * attributesEnd {}; // could remove, use state change
 		bool contentClosed {};
 		///////////
 

@@ -40,12 +40,12 @@ public:
 	static void Write(char c);
 
 private:
-	static void Write(GLib::Flog::Level level, const char * prefix, const char * message);
+	static void Write(GLib::Flog::Level level, const char * prefix, std::string_view message);
 	~FileLogger();
 
 	StreamInfo GetStream() const;
-	void InternalWrite(GLib::Flog::Level level, const char * prefix, const char * message);
-	void WriteToStream(GLib::Flog::Level level, const char * prefix, const char * message);
+	void InternalWrite(GLib::Flog::Level level, const char * prefix, std::string_view message);
+	void WriteToStream(GLib::Flog::Level level, const char * prefix, std::string_view message);
 	void EnsureStreamIsOpen();
 	void HandleFileRollover(size_t newEntrySize);
 	void CloseStream() noexcept;

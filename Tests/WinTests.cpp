@@ -1,12 +1,14 @@
 #include <boost/test/unit_test.hpp>
 
-#include <GLib/Win/FileSystem.h>
-#include <GLib/Win/DebugStream.h>
-#include <GLib/Win/DebugWrite.h>
-#include <GLib/Win/Process.h>
-#include <GLib/Win/Symbols.h>
-#include <GLib/Win/Uuid.h>
-#include <GLib/XmlPrinter.h>
+#include <Windows.h>
+
+#include "GLib/Win/FileSystem.h"
+#include "GLib/Win/DebugStream.h"
+#include "GLib/Win/DebugWrite.h"
+#include "GLib/Win/Process.h"
+#include "GLib/Win/Symbols.h"
+#include "GLib/Win/Uuid.h"
+#include "GLib/XmlPrinter.h"
 
 #include "TestUtils.h"
 
@@ -18,6 +20,7 @@ BOOST_AUTO_TEST_SUITE(WinTests)
 	BOOST_AUTO_TEST_CASE(TestDriveInfo)
 	{
 		auto ld = GLib::Win::FileSystem::LogicalDrives();
+		(void)ld;
 		auto dm = GLib::Win::FileSystem::DriveMap();
 
 		std::filesystem::path tempFilePath = std::filesystem::temp_directory_path() / GLib::Cvt::a2w(to_string(GLib::Win::Util::Uuid::CreateRandom()) + ".tmp");
@@ -68,7 +71,7 @@ BOOST_AUTO_TEST_SUITE(WinTests)
 		}
 
 		BOOST_TEST(!p.IsRunning());
-		BOOST_TEST(1u == p.ExitCode());
+		BOOST_TEST(1U == p.ExitCode());
 	}
 
 	BOOST_AUTO_TEST_CASE(TestErrorCheck)
@@ -76,6 +79,19 @@ BOOST_AUTO_TEST_SUITE(WinTests)
 		::SetLastError(ERROR_ACCESS_DENIED);
 		BOOST_CHECK_EXCEPTION_EX(GLib::Win::Util::AssertTrue(false, "test fail"),
 			GLib::Win::WinException, TestUtils::ExpectException, "test fail : Access is denied. (5)");
+	}
+
+	BOOST_AUTO_TEST_CASE(EnvironmentVariable)
+	{
+		const size_t UNLEN = 256;
+		wchar_t userName[UNLEN+1];
+		DWORD userNameLen = 256;
+		GLib::Win::Util::AssertTrue(::GetUserNameW(userName, &userNameLen), "GetUserNameW");
+
+		std::string result = GLib::Win::Detail::EnvironmentVariable("USERNAME");
+		BOOST_CHECK(result == GLib::Cvt::w2a(userName));
+
+		auto path = GLib::Win::Detail::EnvironmentVariable("PATH");
 	}
 
 	BOOST_AUTO_TEST_CASE(TestXmlprinterEscapes) // move, expand
