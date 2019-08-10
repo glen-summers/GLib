@@ -1,8 +1,8 @@
 #ifndef FILE_LOGGER_H
 #define FILE_LOGGER_H
 
-#include "streaminfo.h"
 #include "logstate.h"
+#include "streaminfo.h"
 
 #include "GLib/flogging.h"
 
@@ -57,7 +57,7 @@ private:
 	// improve
 	static FileLogger & Instance();
 	static std::ostream & Stream();
-	static void SetLogLevel(GLib::Flog::Level);
+	static void SetLogLevel(GLib::Flog::Level level);
 	static std::ostream & TranslateLevel(std::ostream & stream, GLib::Flog::Level level);
 	static std::ostream & ThreadName(std::ostream & stream, const char * threadName);
 	static unsigned int GetDate();

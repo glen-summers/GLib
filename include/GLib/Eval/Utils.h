@@ -19,7 +19,7 @@ namespace GLib::Eval::Utils
 			template <typename>
 			static auto test(...) -> decltype(std::false_type());
 
-			static const bool value = decltype(test<T>(0))::value;
+			static constexpr bool value = decltype(test<T>(0))::value;
 		};
 
 		template<typename T>
@@ -31,7 +31,7 @@ namespace GLib::Eval::Utils
 			template <typename>
 			static auto test(...) -> decltype(std::false_type());
 
-			static const bool value = decltype(test<T>(0))::value;
+			static constexpr bool value = decltype(test<T>(0))::value;
 		};
 
 		// basic container test has iterator, add begin\end.

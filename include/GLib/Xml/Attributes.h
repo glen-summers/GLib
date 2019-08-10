@@ -1,7 +1,7 @@
 #pragma once
 
-#include "GLib/Xml/NameSpaceManager.h"
 #include "GLib/Xml/AttributeIterator.h"
+#include "GLib/Xml/NameSpaceManager.h"
 
 namespace GLib::Xml
 {

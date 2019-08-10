@@ -196,7 +196,7 @@ namespace GLib::Win
 
 		virtual void On64BitProcess(const IMAGE_NT_HEADERS64 & headers)
 		{
-			headers;
+			(void)headers;
 		}
 
 		virtual void OnExitProcess(DWORD processId, DWORD threadId, const EXIT_PROCESS_DEBUG_INFO & info)

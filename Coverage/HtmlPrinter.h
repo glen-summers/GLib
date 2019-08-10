@@ -5,11 +5,11 @@
 #include <filesystem>
 
 // strict XHTML? no longer used
-class HtmlPrinter : public XmlPrinter
+class HtmlPrinter : public Xml::Printer
 {
 public:
 	HtmlPrinter(const std::string & title, const std::filesystem::path & css)
-		: XmlPrinter(true)
+		: Xml::Printer(true)
 	{
 		PushDocType("html");
 		OpenElement("html");

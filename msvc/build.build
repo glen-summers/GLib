@@ -1,4 +1,6 @@
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="14.0">
+	<Import Project="Default.props"/>
+
 	<PropertyGroup>
 		<Root>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)\..'))</Root>
 		<Nuget>https://dist.nuget.org/win-x86-commandline/v4.8.1/nuget.exe</Nuget>
@@ -174,6 +176,9 @@
 		<TidyDefine Include="WIN32_LEAN_AND_MEAN"/>
 		<TidyDefine Include="_WIN64"/>
 
+		<TidyInclude Include="$(Source)\include"/>
+		<TidyInclude Include="$(Boost)"/>
+
 		<TidyIgnoreWarning Include="no-pragma-once-outside-header"/>
 
 		<TidyCheck Include="%2A"/>
@@ -190,9 +195,10 @@
 		<TidyCheck Include="-google-explicit-constructor"/>
 		<TidyCheck Include="-hicpp-explicit-conversions"/>
 	</ItemGroup>
-	
+
 	<PropertyGroup>
 		<Tidy>"$(ProgramFiles)\LLVM\bin\clang-tidy.exe"</Tidy>
+		<TidyCmd>-quiet -checks=@(TidyCheck, ',') --header-filter=^.*\\GLib\\.*$ -- -I@(TidyInclude, ' -I') -std=c++17 -D@(TidyDefine, ' -D') -x c++ -W@(TidyIgnoreWarning, ',')</TidyCmd>
 	</PropertyGroup>
 	
 	<Target Name="Tidy">
@@ -202,23 +208,26 @@
 			<FileToCheck Include="$(Source)/GLib/**/*.cpp"/>
 			<FileToCheck Include="$(Source)/Coverage/**/*.cpp"/>
 			<FileToCheck Include="$(Source)/Coverage/**/*.h" Exclude="$(Source)/Coverage/resource.h"/>
-			<!--
-			<FileToCheck Include="$(Source)/Tests/**/*.h"/>
-			<FileToCheck Include="$(Source)/Tests/**/*.cpp"/> // crash, need boost include?
-			-->
-
 			<Relative Include="$([MSBuild]::MakeRelative($(Source), %(FileToCheck.FullPath)))"/>
 		</ItemGroup>
 
-		<!-- slow, split and run in parallel? -->
-		<!-- add boost include to check test code?-->
-		<Exec Command="$(Tidy) @(Relative, ' ') -quiet -checks=@(TidyCheck, ',') -- -I$(Source)/include -std=c++17 -D@(TidyDefine, ' -D') -x c++ -W@(TidyIgnoreWarning, ',')"
-			WorkingDirectory="$(Source)"/>
+		<!-- slow, split and run in parallel? or add compilation database json? -->
+		<Exec Command="$(Tidy) @(Relative, ' ') $(TidyCmd)" WorkingDirectory="$(Source)"/>
+	</Target>
+
+	<Target Name="TidyTests">
+		<ItemGroup>
+			<FileToCheck Include="$(Source)/Tests/**/*.h"/>
+			<FileToCheck Include="$(Source)/Tests/**/*.cpp"/>
+			<Relative Include="$([MSBuild]::MakeRelative($(Source), %(FileToCheck.FullPath)))"/>
+		</ItemGroup>
+
+		<!-- vvslow, split and run in parallel? or add compilation database json? -->
+		<Exec Command="$(Tidy) @(Relative, ' ') $(TidyCmd)" WorkingDirectory="$(Source)"/>
 	</Target>
 
 	<Target Name="TidyFile">
-		<Exec Command="$(Tidy) $(FileName) -checks=@(TidyCheck, ',') -- -I$(Source)/include -std=c++17 -D@(TidyDefine, ' -D') -x c++ -W@(TidyIgnoreWarning, ',')"
-			WorkingDirectory="$(Source)"/>
+		<Exec Command="$(Tidy) $(FileName) $(TidyCmd)" WorkingDirectory="$(Source)"/>
 	</Target>
 
 </Project>

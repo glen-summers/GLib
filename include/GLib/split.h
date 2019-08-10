@@ -20,9 +20,8 @@ namespace GLib::Util
 			StringType delimiter;
 
 		public:
-			// clang-tidy does not warn for modernize-pass-by-value here
-			Splitter(const StringType & value, const StringType & delimiter = DeFaultDeliminator<typename StringType::value_type>())
-				: value(value)
+			Splitter(StringType value, const StringType & delimiter = DeFaultDeliminator<typename StringType::value_type>())
+				: value(move(value))
 				, delimiter(delimiter)
 			{
 				if (delimiter.empty())

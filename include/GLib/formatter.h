@@ -23,7 +23,7 @@ namespace GLib
 			template <typename>
 			static auto test(...) -> decltype(std::false_type());
 
-			static const bool value = decltype(test<T>(0))::value;
+			static constexpr bool value = decltype(test<T>(0))::value;
 		};
 
 		// todo: use string_view for formats

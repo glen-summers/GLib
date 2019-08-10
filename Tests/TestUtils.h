@@ -2,6 +2,7 @@
 
 #include "GLib/cvt.h"
 
+#include <algorithm>
 #include <iostream>
 
 namespace TestUtils
@@ -18,7 +19,7 @@ namespace TestUtils
 	}
 
 	template <typename Iterator>
-	inline void Dump(std::ostream & s, Iterator begin, Iterator end, unsigned count)
+	void Dump(std::ostream & s, Iterator begin, Iterator end, unsigned count)
 	{
 		if (begin == end)
 		{

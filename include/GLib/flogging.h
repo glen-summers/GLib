@@ -11,7 +11,7 @@ namespace GLib::Flog
 {
 	namespace Detail
 	{
-		extern "C" void Write(char);
+		extern "C" void Write(char c);
 
 		// perf test
 		class Buffer : public std::basic_streambuf<char>

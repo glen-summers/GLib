@@ -8,6 +8,8 @@
 #include "GLib/Win/DebugStream.h"
 #endif
 
+#include <sstream>
+
 #include <OleAuto.h>
 
 namespace GLib::Win
