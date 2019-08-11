@@ -29,11 +29,10 @@ namespace GLib::Flog
 		};
 		using StreamType = Util::GenericOutStream<char, Buffer>;
 
-		// warning C4505: 'GLib::Flog::Detail::Stream': unreferenced local function has been removed
-		inline StreamType & Stream()
+		inline std::ostream & Stream()
 		{
 			static StreamType stream;
-			return stream;
+			return stream.Stream();
 		}
 	}
 

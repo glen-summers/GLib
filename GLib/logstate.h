@@ -22,9 +22,9 @@ public:
 		: depth{}, pending{}, threadName{}
 	{}
 
-	StreamType & Stream()
+	std::ostream & Stream()
 	{
-		return stream;
+		return stream.Stream();
 	}
 
 	const Scope & Top() const
@@ -70,7 +70,7 @@ public:
 
 	void Put(char c)
 	{
-		stream.put(c);
+		stream.Stream().put(c);
 	}
 
 	std::string_view Get()

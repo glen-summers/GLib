@@ -36,6 +36,6 @@ namespace GLib::Win::Debug
 	inline std::ostream & Stream()
 	{
 		static thread_local GLib::Util::GenericOutStream<char, Detail::DebugBuffer> debugStream(std::ios_base::boolalpha);
-		return debugStream;
+		return debugStream.Stream();
 	}
 }
