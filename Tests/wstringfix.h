@@ -26,7 +26,7 @@ std::ostream & operator << (std::ostream & stm, const StringHolder<T> & holder)
 {
 	std::ios state(nullptr);
 	state.copyfmt(stm);
-	SCOPE(resetState, [&]() { stm.copyfmt(state); });
+	SCOPE(resetState, [&]() noexcept { stm.copyfmt(state); });
 	stm << std::hex << std::noshowbase << std::uppercase << std::setfill('0');
 
 	using UT = typename std::make_unsigned<T>::type;

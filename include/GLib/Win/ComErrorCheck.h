@@ -26,7 +26,7 @@ namespace GLib::Win
 			{
 				BSTR description = nullptr;
 				pErrorInfo->GetDescription(&description);
-				SCOPE(_, [=] ()
+				SCOPE(_, [=] () noexcept
 				{
 					::SysFreeString(description);
 					pErrorInfo->Release();

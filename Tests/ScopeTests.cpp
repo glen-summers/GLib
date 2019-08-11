@@ -9,7 +9,7 @@ BOOST_AUTO_TEST_CASE(SimpleTest)
 {
 	bool deScoped = false;
 	{
-		SCOPE(_, [&]() { deScoped = true; });
+		SCOPE(_, [&]() noexcept { deScoped = true; });
 		BOOST_TEST(!deScoped);
 	}
 	BOOST_TEST(deScoped);
@@ -19,8 +19,8 @@ BOOST_AUTO_TEST_CASE(TwoScopes)
 {
 	int deScoped = 0;
 	{
-		SCOPE(_1, [&]() { deScoped+=1; });
-		SCOPE(_1, [&]() { deScoped+=2; });
+		SCOPE(_1, [&]() noexcept { deScoped+=1; });
+		SCOPE(_1, [&]() noexcept { deScoped+=2; });
 		BOOST_TEST(0 == deScoped);
 	}
 	BOOST_TEST(3 == deScoped);

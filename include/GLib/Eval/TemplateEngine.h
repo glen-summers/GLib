@@ -255,12 +255,13 @@ namespace GLib::Eval::TemplateEngine
 					evaluator.ForEach(node.Enumeration(), [&](const ValueBase & value)
 					{
 						evaluator.Push(node.Variable(), value);
-						SCOPE(pop, [&](){evaluator.Pop(node.Variable());});
 
 						for (const auto & child : node.Children())
 						{
 							Generate(child, out);
 						}
+
+						evaluator.Pop(node.Variable());
 					});
 					return;
 				}
