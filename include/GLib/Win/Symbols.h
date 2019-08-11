@@ -40,12 +40,62 @@ namespace GLib::Win::Symbols
 		}
 	}
 
-	struct Symbol
+	class Symbol
 	{
-		ULONG Index;
-		ULONG TypeIndex;
-		enum SymTagEnum Tag;
+		ULONG index {};
+		ULONG typeIndex {};
+		enum SymTagEnum tag {};
 		std::string name;
+
+	public:
+		Symbol() = default;
+
+		Symbol(ULONG index, ULONG typeIndex, enum SymTagEnum tag, std::string name)
+			: index(index)
+			, typeIndex(typeIndex)
+			, tag(tag)
+			, name(move(name))
+		{}
+
+		ULONG Index() const
+		{
+			return index;
+		}
+
+		void Index(ULONG value)
+		{
+			index = value;
+		}
+
+		ULONG TypeIndex() const
+		{
+			return typeIndex;
+		}
+
+		void TypeIndex(ULONG value)
+		{
+			typeIndex = value;
+		}
+
+		enum SymTagEnum Tag() const
+		{
+			return tag;
+		}
+
+		void Tag(enum SymTagEnum value)
+		{
+			tag = value;
+		}
+
+		const std::string & Name()
+		{
+			return name;
+		}
+
+		void Name(std::string value)
+		{
+			name = move(value);
+		}
 	};
 
 	class SymProcess
@@ -106,7 +156,7 @@ namespace GLib::Win::Symbols
 			// and the result from TI_GET_CLASSPARENTID is "The type index of the class parent."
 			// so we then get TI_GET_SYMINDEX for indexOfClassParent
 			// but seems to get indexOfClassParent having the same value of typeIndexOfClassParent
-			if (::SymGetTypeInfo(process.Handle().get(), baseOfImage, symbol.TypeIndex, TI_GET_CLASSPARENTID, &typeIndexOfClassParent) == FALSE)
+			if (::SymGetTypeInfo(process.Handle().get(), baseOfImage, symbol.TypeIndex(), TI_GET_CLASSPARENTID, &typeIndexOfClassParent) == FALSE)
 			{
 				return false;
 			}
@@ -119,9 +169,9 @@ namespace GLib::Win::Symbols
 
 			Local<WCHAR> name;
 			Util::AssertTrue(::SymGetTypeInfo(process.Handle().get(), baseOfImage, indexOfClassParent, TI_GET_SYMNAME, name.GetPtr().Address()), "SymGetTypeInfo");
-			result.Index = indexOfClassParent;
-			result.TypeIndex = typeIndexOfClassParent;
-			result.name = Cvt::w2a(std::wstring_view{name.Get()});
+			result.Index(indexOfClassParent);
+			result.TypeIndex(typeIndexOfClassParent);
+			result.Name(Cvt::w2a(std::wstring_view{name.Get()}));
 			return true;
 		}
 

@@ -2,9 +2,9 @@
 // Microsoft Visual C++ generated include file.
 // Used by Coverage.rc
 //
-#define IDR_STYLESHEET                       100
-#define IDR_DIRECTORY                        101
-#define IDR_FILE                             102
+#define IDR_STYLESHEET                       100 // NOLINT(cppcoreguidelines-macro-usage)
+#define IDR_DIRECTORY                        101 // NOLINT(cppcoreguidelines-macro-usage)
+#define IDR_FILE                             102 // NOLINT(cppcoreguidelines-macro-usage)
 
 // Next default values for new objects
 // 

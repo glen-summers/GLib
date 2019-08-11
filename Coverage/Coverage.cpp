@@ -163,7 +163,7 @@ void Coverage::CreateReport(unsigned int processId)
 		GLib::Win::Symbols::Symbol symbol = process.GetSymbolFromAddress(a.first);
 		const Address & address = a.second;
 
-		auto it = indexToFunction.find(symbol.Index);
+		auto it = indexToFunction.find(symbol.Index());
 		if (it == indexToFunction.end())
 		{
 			GLib::Win::Symbols::Symbol parent;
@@ -175,8 +175,8 @@ void Coverage::CreateReport(unsigned int processId)
 			std::string nameSpace;
 			std::string typeName;
 			std::string functionName;
-			CleanupFunctionNames(symbol.name, parent.name, nameSpace, typeName, functionName);
-			it = indexToFunction.emplace(symbol.Index, Function{ nameSpace, typeName, functionName }).first;
+			CleanupFunctionNames(symbol.Name(), parent.Name(), nameSpace, typeName, functionName);
+			it = indexToFunction.emplace(symbol.Index(), Function{ nameSpace, typeName, functionName }).first;
 		}
 
 		it->second.Accumulate(address);

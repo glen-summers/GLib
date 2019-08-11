@@ -4,6 +4,7 @@
 #include "GLib/Span.h"
 #include "GLib/printfformatpolicy.h"
 
+#include <array>
 #include <functional>
 #include <iomanip>
 #include <sstream>
@@ -222,8 +223,8 @@ namespace GLib
 	public:
 		template <typename... Ts> static std::ostream & Format(std::ostream & str, const char * format, const Ts&... ts)
 		{
-			FormatterDetail::StreamFunction ar[]{ ToStreamFunctions(ts)...};
-			return FormatterDetail::AppendFormatHelper(str, format, {ar, sizeof...(Ts)});
+			std::array<FormatterDetail::StreamFunction, sizeof...(Ts)> ar {ToStreamFunctions(ts)...};
+			return FormatterDetail::AppendFormatHelper(str, format, {ar.data(), ar.size()});
 		}
 
 		template <typename... Ts> static std::string Format(const char * format, Ts&&... ts)
