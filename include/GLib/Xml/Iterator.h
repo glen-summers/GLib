@@ -30,10 +30,9 @@ namespace GLib::Xml
 
 		const char * ptr {};
 		const char * end {};
-		const char * currentPtr {};
+		const char * lastPtr {};
 
 		/////////// element working data, could just use element storage
-		const char * start {};
 		Utils::PtrPair elementName;
 		Utils::PtrPair attributes;
 		Utils::PtrPair attributeName;
@@ -54,7 +53,7 @@ namespace GLib::Xml
 		Iterator(const char * begin, const char * end)
 			: ptr(begin)
 			, end(end)
-			, start(begin)
+			, lastPtr(begin)
 		{
 			Advance();
 		}
@@ -68,7 +67,7 @@ namespace GLib::Xml
 
 		bool operator==(const Iterator & other) const
 		{
-			return currentPtr == other.currentPtr;
+			return lastPtr == other.lastPtr;
 		}
 
 		bool operator!=(const Iterator & it) const
@@ -102,9 +101,7 @@ namespace GLib::Xml
 
 		void Advance()
 		{
-			currentPtr = ptr;
-			
-			if (currentPtr == nullptr)
+			if (lastPtr == nullptr)
 			{
 				throw std::runtime_error("++end");
 			}
@@ -113,7 +110,7 @@ namespace GLib::Xml
 			{
 				if (ptr == end)
 				{
-					currentPtr = nullptr;
+					lastPtr = nullptr;
 					if (!engine.HasRootElement())
 					{
 						throw std::runtime_error("No root element");
@@ -226,7 +223,7 @@ namespace GLib::Xml
 							if (elementName.first != nullptr)
 							{
 								ProcessElement(ptr);
-								start = ptr;
+								lastPtr = ptr;
 								return;
 							}
 							break;
@@ -251,7 +248,7 @@ namespace GLib::Xml
 			element.qName = qName;
 			element.name = name;
 			element.nameSpace = nameSpace;
-			element.outerXml = Utils::ToStringView(start, outerXmlEnd);
+			element.outerXml = Utils::ToStringView(lastPtr, outerXmlEnd);
 
 			if (attributes.first != nullptr && attributes.second != nullptr && element.type != ElementType::Close)
 			{

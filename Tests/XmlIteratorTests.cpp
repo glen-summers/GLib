@@ -53,6 +53,21 @@ BOOST_AUTO_TEST_CASE(Element)
 	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), xml.begin(), xml.end());
 }
 
+BOOST_AUTO_TEST_CASE(SubElementExtra)
+{
+	Xml::Holder xml { "<xml><sub/></xml>" };
+
+	std::vector<Xml::Element> expected
+	{
+		{"xml", Xml::ElementType::Open, {}},
+		{"sub", Xml::ElementType::Empty, {}},
+		{"xml", Xml::ElementType::Close, {}},
+	};
+
+	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), xml.begin(), xml.end());
+}
+
+
 BOOST_AUTO_TEST_CASE(SubElement)
 {
 	Xml::Holder xml { "<xml><sub/></xml>" };
