@@ -34,6 +34,7 @@ set(SOURCES Main.cpp
 	CheckedCastTests.cpp
 	CompatTests.cpp
 	ConverterTests.cpp
+	CppIteratorTests.cpp
 	EvaluatorTests.cpp
 	FlogTests.cpp
 	FormatterTests.cpp

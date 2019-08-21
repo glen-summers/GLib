@@ -27,6 +27,9 @@
     <Filter Include="Include Files\Formatter">
       <UniqueIdentifier>{9ab6929a-e791-49f6-9aea-00adbdebfcf9}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Include Files\Cpp">
+      <UniqueIdentifier>{e64bf24d-06a2-41b7-b871-90544ff676f5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="targetver.h">
@@ -205,6 +208,12 @@
     </ClInclude>
     <ClInclude Include="..\include\GLib\CompatWindows.h">
       <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\GLib\Cpp\Iterator.h">
+      <Filter>Include Files\Cpp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\GLib\Cpp\StateEngine.h">
+      <Filter>Include Files\Cpp</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

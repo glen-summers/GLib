@@ -159,6 +159,7 @@
     <ClCompile Include="CompatTests.cpp" />
     <ClCompile Include="ComPtrTests.cpp" />
     <ClCompile Include="ConverterTests.cpp" />
+    <ClCompile Include="CppIteratorTests.cpp" />
     <ClCompile Include="EvaluatorTests.cpp" />
     <ClCompile Include="FormatterTests.cpp" />
     <ClCompile Include="IcuUtilsTests.cpp" />
