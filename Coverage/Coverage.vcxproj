@@ -149,7 +149,6 @@
     <ClInclude Include="Directory.h" />
     <ClInclude Include="FileCoverageData.h" />
     <ClInclude Include="Function.h" />
-    <ClInclude Include="HtmlPrinter.h" />
     <ClInclude Include="HtmlReport.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="resource.h" />

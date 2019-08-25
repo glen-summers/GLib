@@ -128,9 +128,6 @@
     <ClInclude Include="..\include\GLib\Xml\Iterator.h">
       <Filter>Include Files\Xml</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\GLib\XmlPrinter.h">
-      <Filter>Include Files\Xml</Filter>
-    </ClInclude>
     <ClInclude Include="..\include\GLib\checked_cast.h">
       <Filter>Include Files\Util</Filter>
     </ClInclude>
@@ -214,6 +211,9 @@
     </ClInclude>
     <ClInclude Include="..\include\GLib\Cpp\StateEngine.h">
       <Filter>Include Files\Cpp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\GLib\Xml\Printer.h">
+      <Filter>Include Files\Xml</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

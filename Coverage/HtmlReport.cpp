@@ -10,7 +10,7 @@
 #include "GLib/Eval/Evaluator.h"
 #include "GLib/Eval/TemplateEngine.h"
 #include "GLib/Win/Resources.h"
-#include "GLib/XmlPrinter.h"
+#include "GLib/Xml/Printer.h"
 #include "GLib/formatter.h"
 
 
@@ -195,7 +195,9 @@ void HtmlReport::GenerateSourceFile(std::filesystem::path & path, const std::str
 	{
 		std::string s;
 		std::getline(in, s);
-		s = Xml::Escape(move(s));
+
+		std::ostringstream ss;
+		GLib::Xml::Utils::Escape(s, ss);
 		auto line = static_cast<unsigned int>(lines.size()+1);
 		const char * style = "";
 		auto it = lc.find(line);
@@ -206,7 +208,7 @@ void HtmlReport::GenerateSourceFile(std::filesystem::path & path, const std::str
 		std::ostringstream l;
 		constexpr unsigned int MaxLineNumberWidth = 6; // loop twice and get log10(maxLine)+1
 		l << std::setw(MaxLineNumberWidth) << line; // use format specifier
-		lines.push_back({move(s), l.str(), style});
+		lines.push_back({ss.str(), l.str(), style});
 	}
 
 	GLib::Eval::Evaluator e;

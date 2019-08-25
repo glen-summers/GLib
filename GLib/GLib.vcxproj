@@ -186,12 +186,12 @@
     <ClInclude Include="..\include\GLib\Win\Symbols.h" />
     <ClInclude Include="..\include\GLib\Win\Uuid.h" />
     <ClInclude Include="..\include\GLib\win\WinException.h" />
-    <ClInclude Include="..\include\GLib\XmlPrinter.h" />
     <ClInclude Include="..\include\GLib\Xml\AttributeIterator.h" />
     <ClInclude Include="..\include\GLib\Xml\Attributes.h" />
     <ClInclude Include="..\include\GLib\Xml\Element.h" />
     <ClInclude Include="..\include\GLib\Xml\Iterator.h" />
     <ClInclude Include="..\include\GLib\Xml\NameSpaceManager.h" />
+    <ClInclude Include="..\include\GLib\Xml\Printer.h" />
     <ClInclude Include="..\include\GLib\Xml\StateEngine.h" />
     <ClInclude Include="..\include\GLib\Xml\Utils.h" />
     <ClInclude Include="filelogger.h" />

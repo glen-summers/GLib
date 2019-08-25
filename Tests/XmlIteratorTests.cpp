@@ -1,5 +1,7 @@
 #include <boost/test/unit_test.hpp>
 
+#include "GLib/Xml/Printer.h"
+
 #include "TestUtils.h"
 #include "XmlTestUtils.h"
 
@@ -517,5 +519,48 @@ BOOST_AUTO_TEST_CASE(AttributeIteratorEnum)
 
 	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), attr.begin(), attr.end());
 }
+
+	BOOST_AUTO_TEST_CASE(PrinterEscapes) // move, expand
+	{
+		GLib::Xml::Printer p;
+		p.PushText("Start && End");
+		BOOST_TEST("Start &amp;&amp; End" == p.Xml());
+	}
+
+	BOOST_AUTO_TEST_CASE(PrinterFormat)
+	{
+		{
+			GLib::Xml::Printer formatted{ true };
+			formatted.OpenElement("Root");
+			formatted.OpenElement("Nested");
+			formatted.CloseElement();
+			formatted.CloseElement();
+			std::string xmlFormatted = formatted.Xml();
+			BOOST_TEST(R"(<Root>
+ <Nested/>
+</Root>
+)" == xmlFormatted);
+		}
+
+		{
+			GLib::Xml::Printer unFormatted{ false };
+			unFormatted.OpenElement("Root");
+			unFormatted.OpenElement("Nested");
+			unFormatted.CloseElement();
+			unFormatted.CloseElement();
+			auto xmlUnFormatted = unFormatted.Xml();
+			BOOST_TEST("<Root><Nested/></Root>" == xmlUnFormatted);
+		}
+
+		{
+			GLib::Xml::Printer unFormatted2{ true };
+			unFormatted2.OpenElement("Root", false);
+			unFormatted2.OpenElement("Nested", false);
+			unFormatted2.CloseElement(false);
+			unFormatted2.CloseElement(false);
+			auto xmlUnFormatted = unFormatted2.Xml();
+			BOOST_TEST("<Root><Nested/></Root>" == xmlUnFormatted);
+		}
+	}
 
 BOOST_AUTO_TEST_SUITE_END()

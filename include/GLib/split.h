@@ -44,7 +44,7 @@ namespace GLib::Util
 
 				iterator(const Splitter & splitter)
 					: splitter(&splitter)
-					, current(splitter.value.empty() ? StringType::npos : 0)
+					, current(0)
 					, nextDelimiter(splitter.value.find(splitter.delimiter, 0))
 				{}
 
@@ -98,6 +98,7 @@ namespace GLib::Util
 	}
 
 	using Splitter = Detail::Splitter<std::string>;
+	using SplitterView = Detail::Splitter<std::string_view>;
 
 	template <typename StringType, typename OutputIterator>
 	void Split(const StringType & value, OutputIterator it, const StringType & delimiter = Detail::DeFaultDeliminator<typename StringType::value_type>())

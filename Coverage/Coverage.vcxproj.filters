@@ -36,9 +36,6 @@
     <ClInclude Include="RootDirs.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="HtmlPrinter.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="HtmlReport.h">
       <Filter>Header Files</Filter>
     </ClInclude>

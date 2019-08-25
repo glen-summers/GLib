@@ -1,5 +1,6 @@
 #pragma once
 
+#include <array>
 #include <string_view>
 
 namespace GLib::Xml::Utils
@@ -14,5 +15,43 @@ namespace GLib::Xml::Utils
 	inline std::string_view ToStringView(const char * start, const char * end)
 	{
 		return {start, static_cast<size_t>(end - start) };
+	}
+
+	using Entity = std::pair<const char *, char>;
+
+	static constexpr auto EntitySize = 5;
+	static constexpr std::array<Entity, EntitySize> entities
+	{
+		Entity{ "&quot;", '\"' },
+		Entity{ "&amp;" , '&'  },
+		Entity{ "&apos;", '\'' },
+		Entity{ "&lt;"  , '<'  },
+		Entity{ "&gt;"  , '>'  }
+	};
+
+	inline std::ostream & Escape(std::string_view value, std::ostream & out)
+	{
+		for (size_t startPos = 0;;)
+		{
+			std::string_view replacement;
+			size_t pos = std::string::npos;
+			for (const auto & e : entities)
+			{
+				size_t const find = value.find(e.second, startPos);
+				if (find != std::string::npos && find < pos)
+				{
+					pos = find;
+					replacement = e.first;
+				}
+			}
+			if (pos == std::string::npos)
+			{
+				out << value.substr(startPos, value.size()-startPos) << replacement;
+				break;
+			}
+			out << value.substr(startPos, pos-startPos) << replacement;
+			startPos = pos + 1;
+		}
+		return out;
 	}
 }

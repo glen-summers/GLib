@@ -4,53 +4,10 @@
 #include <sstream>
 #include <stack>
 
-// move to xml dir
-namespace Xml
+#include "GLib/Xml/Utils.h"
+
+namespace GLib::Xml
 {
-	namespace Detail
-	{
-		struct Entity
-		{
-			std::string_view escaped;
-			char c;
-		};
-
-		static constexpr auto EntitySize = 5;
-		static constexpr std::array<Entity, EntitySize> entities
-		{
-			Entity{ "&quot;", '\"' },
-			Entity{ "&amp;" , '&'  },
-			Entity{ "&apos;", '\'' },
-			Entity{ "&lt;"  , '<'  },
-			Entity{ "&gt;"  , '>'  }
-		};
-	}
-
-	inline std::string Escape(std::string && value)
-	{
-		for (size_t startPos = 0;;)
-		{
-			std::string_view replacement;
-			size_t pos = std::string::npos;
-			for (const auto & e : Detail::entities)
-			{
-				size_t const find = value.find(e.c, startPos);
-				if (find != std::string::npos && find < pos)
-				{
-					pos = find;
-					replacement = e.escaped;
-				}
-			}
-			if (pos == std::string::npos)
-			{
-				break;
-			}
-			value.replace(pos, 1, replacement);
-			startPos = pos + replacement.size();
-		}
-		return move(value);
-	}
-
 	class Printer
 	{
 		static constexpr int TextDepthNotSet = -1;
@@ -193,14 +150,9 @@ namespace Xml
 			}
 		}
 
-		void Text(const std::string & value)
+		void Text(const std::string_view & value)
 		{
-			s << Escape(std::string{value});
-		}
-
-		void Text(std::string && value)
-		{
-			s << Escape(move(value));
+			Utils::Escape(value, s);
 		}
 
 		static void AssertTrue(bool value, const char * message)

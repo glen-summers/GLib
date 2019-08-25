@@ -450,8 +450,8 @@ BOOST_AUTO_TEST_CASE(CharacterEscapeError)
 BOOST_AUTO_TEST_CASE(Guard)
 {
 	Holder code = { R"(/* comment */
-#ifndef file_included
-#define file_included 1
+#ifndef file_included // another comment
+#define file_included
 
 #endif /* not file_included */
 )" };
@@ -460,8 +460,9 @@ BOOST_AUTO_TEST_CASE(Guard)
 	{
 		{ State::CommentBlock, "/* comment */" },
 		{ State::WhiteSpace, "\n" },
-		{ State::Directive, "#ifndef file_included" },
-		{ State::Directive, "\n#define file_included 1" },
+		{ State::Directive, "#ifndef file_included " },
+		{ State::CommentLine, "// another comment\n" },
+		{ State::Directive, "#define file_included" },
 		{ State::WhiteSpace, "\n\n" },
 		{ State::Directive, "#endif " },
 		{ State::CommentBlock, "/* not file_included */" },

@@ -6,7 +6,7 @@
 #include "Function.h"
 #include "HtmlReport.h"
 
-#include "GLib/XmlPrinter.h"
+#include "GLib/Xml/Printer.h"
 
 #include <fstream>
 
@@ -221,7 +221,7 @@ void Coverage::CreateXmlReport(const std::map<ULONG, Function> & indexToFunction
 		files.emplace(f, fileId++);
 	}
 
-	Xml::Printer p;
+	GLib::Xml::Printer p;
 
 	p.PushDeclaration();
 	p.OpenElement("results");

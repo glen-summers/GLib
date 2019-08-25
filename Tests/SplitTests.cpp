@@ -16,7 +16,7 @@ BOOST_AUTO_TEST_CASE(TestString)
 
 BOOST_AUTO_TEST_CASE(TestStringView)
 {
-	GLib::Util::Detail::Splitter<std::string_view> s("a<->bc<->def<->ghijkl", "<->");
+	GLib::Util::SplitterView s("a<->bc<->def<->ghijkl", "<->");
 	std::vector<std::string_view> expected { "a", "bc", "def", "ghijkl" };
 	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), s.begin(), s.end());
 }
@@ -36,7 +36,14 @@ BOOST_AUTO_TEST_CASE(TestFor)
 BOOST_AUTO_TEST_CASE(TestEmptyString)
 {
 	GLib::Util::Splitter s("");
-	std::vector<std::string> expected { };
+	std::vector<std::string> expected { "" };
+	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), s.begin(), s.end());
+}
+
+BOOST_AUTO_TEST_CASE(TestEmptyoken)
+{
+	GLib::Util::Splitter s(",");
+	std::vector<std::string> expected { "","" };
 	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), s.begin(), s.end());
 }
 

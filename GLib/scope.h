@@ -1,13 +1,10 @@
 #pragma once
 
+#include "fwd.h"
+
 #include <chrono>
 #include <string>
 #include <utility>
-
-namespace GLib::Flog
-{
-	enum class Level : unsigned;
-}
 
 class Scope
 {
