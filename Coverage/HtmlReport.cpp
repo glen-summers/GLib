@@ -1,5 +1,6 @@
 #include "pch.h"
 
+#include "CppHtmlGenerator.h"
 #include "Directory.h"
 #include "FileCoverageData.h"
 #include "HtmlReport.h"
@@ -190,25 +191,29 @@ void HtmlReport::GenerateSourceFile(std::filesystem::path & path, const std::str
 	}
 
 	const auto & lc = data.LineCoverage();
-	std::vector<Line> lines;
-	while (!in.eof())
-	{
-		std::string s;
-		std::getline(in, s);
 
-		std::ostringstream ss;
-		GLib::Xml::Utils::Escape(s, ss);
-		auto line = static_cast<unsigned int>(lines.size()+1);
+	std::ostringstream source;
+	{
+		std::stringstream buffer;
+		buffer << in.rdbuf();
+		Htmlify(std::string_view{buffer.str()}, source);
+	}
+
+	std::vector<Line> lines;
+	unsigned int MaxLineNumberWidth = 6;
+
+	for (auto sourceLine : GLib::Util::Splitter{source.str(), "\n"})
+	{
+		auto lineNumber = static_cast<unsigned int>(lines.size()+1);
 		const char * style = "";
-		auto it = lc.find(line);
+		auto it = lc.find(lineNumber);
 		if (it != lc.end())
 		{
 			style = it->second == 0 ? "ncov" : "cov";
 		}
-		std::ostringstream l;
-		constexpr unsigned int MaxLineNumberWidth = 6; // loop twice and get log10(maxLine)+1
-		l << std::setw(MaxLineNumberWidth) << line; // use format specifier
-		lines.push_back({ss.str(), l.str(), style});
+		std::ostringstream paddedLineNumber;
+		paddedLineNumber << std::setw(MaxLineNumberWidth) << lineNumber; // use format specifier
+		lines.push_back({sourceLine, paddedLineNumber.str(), style});
 	}
 
 	GLib::Eval::Evaluator e;

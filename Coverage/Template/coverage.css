@@ -1,6 +1,6 @@
 body {
-	color: #000000;
-	background-color: #FFFFFF;
+	color: black;
+	background-color: white;
 }
 
 hr {
@@ -46,6 +46,23 @@ span.ncov {
 	background-color: #F7DEDE;
 	margin: 0;
 	padding: 0;
+}
+
+span.w {
+	color: darkcyan;
+}
+
+span.c {
+	color: darkgreen;
+	background: white;
+}
+
+span.s {
+	color: darkred;
+}
+
+span.d {
+	color: gray;
 }
 
 div.box {

@@ -1,6 +1,6 @@
 #include <boost/test/unit_test.hpp>
 
-#include "GLib/Cpp/Iterator.h"
+#include "../Coverage/CppHtmlGenerator.h"
 
 #include "TestUtils.h"
 
@@ -500,6 +500,50 @@ BOOST_AUTO_TEST_CASE(TerminationError)
 	std::string_view code = R"("stringNotClosed)";
 
 	GLIB_CHECK_RUNTIME_EXCEPTION(Parse(code), "Termination error, State: 9");
+}
+
+BOOST_AUTO_TEST_CASE(Html)
+{
+	std::string_view code = ";";
+
+	std::ostringstream stm;
+	Htmlify(code, stm);
+
+	auto expected = ";";
+	BOOST_TEST(expected == stm.str());
+}
+
+
+BOOST_AUTO_TEST_CASE(Html2)
+{
+	std::string_view code = "#include \"foo.h\"";
+
+	std::ostringstream stm;
+	Htmlify(code, stm);
+
+	auto expected = R"(<span class="d">#include </span><span class="s">&quot;foo.h&quot;</span>)";
+
+	BOOST_TEST(expected == stm.str());
+}
+
+BOOST_AUTO_TEST_CASE(Html3)
+{
+	std::string_view code = R"(/*
+1
+2
+3
+*/)";
+
+	std::ostringstream stm;
+	Htmlify(code, stm);
+
+	auto expected = R"(<span class="c">/*</span>
+<span class="c">1</span>
+<span class="c">2</span>
+<span class="c">3</span>
+<span class="c">*/</span>)";
+
+	BOOST_TEST(expected == stm.str());
 }
 
 BOOST_AUTO_TEST_SUITE_END()
