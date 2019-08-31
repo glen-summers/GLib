@@ -106,4 +106,24 @@ namespace GLib::Util
 		Detail::Splitter<StringType> splitter { value, delimiter };
 		std::copy(splitter.begin(), splitter.end(), it);
 	}
+
+	template <typename Predicate, typename OutYes, typename OutNo>
+	inline void Split(const std::string_view & value, Predicate predicate, OutYes outYes, OutNo outNo)
+	{
+		for(auto it = value.begin(); it != value.end();)
+		{
+			auto falseStart = std::find_if_not(it, value.end(), predicate);
+			if (falseStart != it)
+			{
+				outYes(std::string_view {&*it, static_cast<size_t>(falseStart - it)});
+			}
+
+			auto trueStart = std::find_if(falseStart, value.end(), predicate);
+			if (trueStart != falseStart)
+			{
+				outNo(std::string_view {&*falseStart, static_cast<size_t>(trueStart - falseStart)});
+			}
+			it = trueStart;
+		}
+	}
 }

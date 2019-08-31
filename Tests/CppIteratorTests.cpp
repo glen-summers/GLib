@@ -521,7 +521,7 @@ BOOST_AUTO_TEST_CASE(Html2)
 	std::ostringstream stm;
 	Htmlify(code, stm);
 
-	auto expected = R"(<span class="d">#include </span><span class="s">&quot;foo.h&quot;</span>)";
+	auto expected = "<span class=\"d\">#include\xC2\xB7</span><span class=\"s\">&quot;foo.h&quot;</span>";
 
 	BOOST_TEST(expected == stm.str());
 }
