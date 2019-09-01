@@ -6,10 +6,10 @@ body {
 hr {
 	display: block;
 	height: 2px;
-	border: 0;
+	border: 0px;
 	border-top: 1px solid blue;
-	margin: 1em 0;
-	padding: 0;
+	margin: 1em 0px;
+	padding: 0px;
 }
 
 table.centre {
@@ -23,9 +23,7 @@ td.title {
 
 table {
 	border: none;
-	border-collapse: collapse;
-	margin: 0;
-	padding: 0;
+	border-spacing: 0px;
 }
 
 td.coverageNumber {
@@ -36,16 +34,20 @@ span.line {
 	color: blue;
 }
 
-span.cov {
-	background-color: #DCF4DC;
-	margin: 0;
-	padding: 0;
+td {
+	padding: 0px;
 }
 
-span.ncov {
+td.cov {
+	background-color: #DCF4DC;
+}
+
+td.ncov {
 	background-color: #F7DEDE;
-	margin: 0;
-	padding: 0;
+}
+
+pre {
+	margin: 0px;
 }
 
 span.w {
