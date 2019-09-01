@@ -21,11 +21,6 @@ td.title {
 	font-size: 18pt;
 }
 
-table {
-	border: none;
-	border-spacing: 0px;
-}
-
 td.coverageNumber {
 	text-align: right;
 }
@@ -34,7 +29,13 @@ span.line {
 	color: blue;
 }
 
-td {
+table.source {
+	width: 100%;
+	border: none;
+	border-spacing: 0px;
+}
+
+table.source td {
 	padding: 0px;
 }
 
