@@ -200,7 +200,6 @@ void HtmlReport::GenerateSourceFile(std::filesystem::path & path, const std::str
 	}
 
 	std::vector<Line> lines;
-	unsigned int MaxLineNumberWidth = 6;
 
 	for (auto sourceLine : GLib::Util::Splitter{source.str(), "\n"})
 	{
@@ -211,9 +210,15 @@ void HtmlReport::GenerateSourceFile(std::filesystem::path & path, const std::str
 		{
 			style = it->second == 0 ? "ncov" : "cov";
 		}
+		lines.push_back({sourceLine, {}, style});
+	}
+
+	auto maxLineNumberWidth = static_cast<unsigned int>(floor(log10(lines.size()))) + 1;
+	for (size_t i = 0; i < lines.size(); ++i)
+	{
 		std::ostringstream paddedLineNumber;
-		paddedLineNumber << std::setw(MaxLineNumberWidth) << lineNumber; // use format specifier
-		lines.push_back({sourceLine, paddedLineNumber.str(), style});
+		paddedLineNumber << std::setw(maxLineNumberWidth) << i + 1; // use a width format specifier in template?
+		lines[i].number = paddedLineNumber.str();
 	}
 
 	GLib::Eval::Evaluator e;

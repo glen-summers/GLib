@@ -25,8 +25,21 @@ td.coverageNumber {
 	text-align: right;
 }
 
+pre {
+	margin: 0px;
+}
+
 span.line {
-	color: blue;
+	color: darkred;
+	background-color: white;
+}
+
+tr.cov {
+	background-color: #DCF4DC;
+}
+
+tr.ncov {
+	background-color: #F7DEDE;
 }
 
 table.source {
@@ -39,25 +52,12 @@ table.source td {
 	padding: 0px;
 }
 
-td.cov {
-	background-color: #DCF4DC;
-}
-
-td.ncov {
-	background-color: #F7DEDE;
-}
-
-pre {
-	margin: 0px;
-}
-
 span.w {
 	color: darkcyan;
 }
 
 span.c {
 	color: darkgreen;
-	background: white;
 }
 
 span.s {
@@ -77,18 +77,23 @@ span.t {
 }
 
 div.box {
-	width:100px; height:10px; border:1px solid #000;
+	width:100px;
+	height:10px;
+	border:1px solid #000;
 	margin: auto;
 }
 
 div.red {
-	height:100%; background-color: #CE1620;
+	height:100%;
+	background-color: #CE1620;
 }
 
 div.amber {
-	height:100%; background-color: #FF7518;
+	height: 100%;
+	background-color: #FFBF00;
 }
 
 div.green {
-	height:100%; background-color: #03C03C;
+	height:100%;
+	background-color: #03C03C;
 }

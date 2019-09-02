@@ -32,7 +32,7 @@
 				<hr />
 				<table class="source">
 					<gl:block each="line : ${lines}">
-<tr><td class="cov" gl:class="${line.style}"><pre><span class="line">${line.number} : </span>${line.text}</pre></td></tr>
+						<tr class="cov" gl:class="${line.style}"><td><pre><code><span class="line">[${line.number}]</span>${line.text}</code></pre></td></tr>
 					</gl:block>
 				</table>
 				<hr />
