@@ -180,6 +180,15 @@ namespace GLib::Cpp
 						break;
 					}
 
+					case State::SystemInclude:
+					{
+						if (Set(oldState, ptr)) // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic) todo use std::span
+						{
+							return;
+						}
+						break;
+					}
+
 					default:
 					{
 						break;

@@ -90,6 +90,7 @@ inline void Htmlify(const GLib::Cpp::Holder & code, std::ostream & out)
 		{ GLib::Cpp::State::RawString, Style::String},
 		{ GLib::Cpp::State::CharacterLiteral, Style::String},
 		{ GLib::Cpp::State::Directive, Style::Directive},
+		{ GLib::Cpp::State::SystemInclude, Style::String},
 	};
 
 	auto alphaNumUnd = [](unsigned char c){ return std::isalnum(c) || c == '_'; };

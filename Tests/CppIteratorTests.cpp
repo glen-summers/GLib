@@ -340,7 +340,7 @@ int main() // main
 	std::vector<Fragment> expected
 	{
 		{ State::Directive, { "#include " }},
-		{ State::Directive, { "<iostream>" }}, // merge, or SystemInclude
+		{ State::SystemInclude, { "<iostream>" }},
 		{ State::WhiteSpace, { "\n\n" }},
 		{ State::Code, { "int" }},
 		{ State::WhiteSpace, { " " }},
@@ -391,7 +391,7 @@ BOOST_AUTO_TEST_CASE(SystemInclude)
 	std::vector<Fragment> expected
 	{
 		{ State::Directive, { "#include " }},
-		{ State::Directive, { "<experimental/filesystem>" }},
+		{ State::SystemInclude, { "<experimental/filesystem>" }},
 	};
 
 	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), code.begin(), code.end());
