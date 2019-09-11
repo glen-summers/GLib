@@ -11,6 +11,7 @@ namespace GLib::Html
 		std::string_view value;
 		std::string variable;
 		std::string enumeration;
+		std::string_view condition;
 		std::list<Node> children; // use ostream for xml fragmemts, single optional child for the rest, polymorphic?
 
 	public:
@@ -19,8 +20,12 @@ namespace GLib::Html
 		Node(Node * parent, std::string_view value) : parent(parent), value(value)
 		{}
 
-		Node(Node * parent, std::string variable, std::string enumeration)
-			: parent(parent), variable(move(variable)), enumeration(move(enumeration))
+		Node(Node * parent, std::string variable, std::string enumeration, std::string_view condition)
+			: parent(parent), variable(move(variable)), enumeration(move(enumeration)), condition(condition)
+		{}
+
+		Node(Node * parent, std::string_view condition, bool)
+			: parent(parent), condition(condition)
 		{}
 
 		Node * Parent() const
@@ -43,6 +48,11 @@ namespace GLib::Html
 			return enumeration;
 		}
 
+		const std::string_view & Condition() const
+		{
+			return condition;
+		}
+
 		const std::list<Node> & Children() const
 		{
 			return children;
@@ -59,9 +69,15 @@ namespace GLib::Html
 			return AddFragment({start, static_cast<size_t>(end - start) });
 		}
 
-		Node * AddEnumeration(const std::string & var, const std::string & e)
+		Node * AddEnumeration(const std::string & var, const std::string & e, const std::string_view & c)
 		{
-			children.emplace_back(this, var, e);
+			children.emplace_back(this, var, e, c);
+			return &children.back();
+		}
+
+		Node * AddConditional(const std::string_view & c)
+		{
+			children.emplace_back(this, c, true);
 			return &children.back();
 		}
 	};

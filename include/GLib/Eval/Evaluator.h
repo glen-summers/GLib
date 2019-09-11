@@ -29,7 +29,7 @@ namespace GLib::Eval
 			}
 		}
 
-		// specialise add with IsCollection?
+		// specialise add with IsCollection? allow value types?
 		template<typename Container> void AddCollection(const std::string & name, const Container & container)
 		{
 			if (!values.emplace(name, std::make_unique<Collection<Container>>(container)).second)

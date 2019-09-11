@@ -19,6 +19,7 @@ namespace GLib::Html
 		static constexpr auto NameSpace = std::string_view {"glib"};
 		static constexpr auto Block = std::string_view {"block"};
 		static constexpr auto Each = std::string_view {"each"};
+		static constexpr auto If = std::string_view {"if"};
 
 		std::regex const propRegex { R"(\$\{([\w\.]+)\})" };
 		std::regex const varRegex { R"(^(\w+)\s:\s\$\{([\w\.]+)\}$)" };
@@ -74,21 +75,25 @@ namespace GLib::Html
 			{
 				case Xml::ElementType::Open:
 				{
-					auto eachIt = e.Attributes().begin();
-					if (eachIt == e.Attributes().end() || (*eachIt).name != Each)
+					std::string_view eachValue, ifValue;
+					for (auto attr : e.Attributes())
 					{
-						throw std::runtime_error("No each attribute");
+						if (attr.name == Each)
+						{
+							eachValue = attr.value;
+						}
+						else if (attr.name == If)
+						{
+							ifValue = attr.value;
+						}
 					}
 
-					const std::string_view & var = (*eachIt).value;
-					std::match_results<std::string_view::const_iterator> m;
-					std::regex_search(var.begin(), var.end(), m, varRegex);
-					if (m.empty())
+					if (eachValue.empty() && ifValue.empty())
 					{
-						throw std::runtime_error("Error in var : " + std::string(var));
+						throw std::runtime_error("No action attribute");
 					}
 
-					return node->AddEnumeration(m[1], m[2]);
+					return AddBlock(eachValue, ifValue, node);
 				}
 
 				case Xml::ElementType::Empty:
@@ -110,6 +115,22 @@ namespace GLib::Html
 					throw std::logic_error("Unexpected enumeration value");
 				}
 			}
+		}
+
+		Node* AddBlock(const std::string_view & eachValue, const std::string_view & ifValue, Node * node)
+		{
+			if (!eachValue.empty())
+			{
+				std::match_results<std::string_view::const_iterator> m;
+				std::regex_search(eachValue.begin(), eachValue.end(), m, varRegex);
+				if (m.empty())
+				{
+					throw std::runtime_error("Error in each value : " + std::string(eachValue));
+				}
+				return node->AddEnumeration(m[1], m[2], ifValue);
+			}
+
+			return node->AddConditional(ifValue);
 		}
 
 		Node * ProcessElement(const Xml::Element & e, Node * node, const Xml::NameSpaceManager & manager)
@@ -195,6 +216,11 @@ namespace GLib::Html
 
 		void Generate(const Node & node, std::ostream & out)
 		{
+			if (!node.Condition().empty() && evaluator.Evaluate(std::string{node.Condition()}) == "0")
+			{
+				return;
+			}
+
 			if (!node.Enumeration().empty())
 			{
 				evaluator.ForEach(node.Enumeration(), [&](const Eval::ValueBase & value)

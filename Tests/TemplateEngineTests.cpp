@@ -131,6 +131,68 @@ BOOST_AUTO_TEST_CASE(SimpleProperty)
 		BOOST_TEST(stm.str() == expected);
 	}
 
+	BOOST_AUTO_TEST_CASE(If)
+	{
+		auto xml = R"(<xml xmlns:gl='glib'>
+<gl:block if='value'>
+	<td>In Block</td>
+</gl:block>
+</xml>)";
+
+		auto expectedYes = R"(<xml>
+	<td>In Block</td>
+</xml>)";
+
+		auto expectedNo = R"(<xml>
+</xml>)";
+
+		std::ostringstream stm;
+		Evaluator evaluator;
+
+		evaluator.Add("value", true);
+		Generate(evaluator, xml, stm);
+		BOOST_TEST(stm.str() == expectedYes);
+
+		stm.str("");
+		evaluator.Remove("value");
+		evaluator.Add("value", false);
+		Generate(evaluator, xml, stm);
+		BOOST_TEST(stm.str() == expectedNo);
+	}
+
+	BOOST_AUTO_TEST_CASE(IfEach)
+	{
+		auto xml = R"(<xml xmlns:gl='glib'>
+<gl:block if='value' each='var : ${vars}'>
+	<td>${var}</td>
+</gl:block>
+</xml>)";
+
+		auto expectedYes = R"(<xml>
+	<td>1</td>
+	<td>2</td>
+	<td>3</td>
+</xml>)";
+
+		auto expectedNo= R"(<xml>
+</xml>)";
+
+		std::ostringstream stm;
+		Evaluator evaluator;
+
+		std::vector<int> vars{1,2,3};
+		evaluator.AddCollection("vars", vars);
+		evaluator.Add("value", true);
+		Generate(evaluator, xml, stm);
+		BOOST_TEST(stm.str() == expectedYes);
+
+		stm.str("");
+		evaluator.Remove("value");
+		evaluator.Add("value", false);
+		Generate(evaluator, xml, stm);
+		BOOST_TEST(stm.str() == expectedNo);
+	}
+
 	BOOST_AUTO_TEST_CASE(TestUtilsTests) // move
 	{
 		TestUtils::Compare("1234", "1234");
