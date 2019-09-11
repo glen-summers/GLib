@@ -68,7 +68,7 @@
 		</ItemGroup>
 		<MSBuild Projects="$(Solution)" Properties="@(Properties)" BuildInParallel="$(BuildInParallel)"/>
 	</Target>
-	
+
 	<Target Name="CompileTests">
 		<ItemGroup>
 			<Properties Remove="@(Properties)"/>
@@ -120,7 +120,7 @@
 		<Exec Command="wsl.exe ./go.sh coverage" WorkingDirectory="$(Root)"/>
 		<Exec Command="start $(Out)\cmake\build\Debug\TestsCoverage\index.html"/>
 	</Target>
-	
+
 	<Target Name="All" DependsOnTargets="Build;CMake;Wsl"/>
 
 	<UsingTask TaskName="DownloadFile" TaskFactory="CodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll">
@@ -200,7 +200,7 @@
 		<Tidy>"$(ProgramFiles)\LLVM\bin\clang-tidy.exe"</Tidy>
 		<TidyCmd>-quiet -checks=@(TidyCheck, ',') --header-filter=^.*\\GLib\\.*$ -- -I@(TidyInclude, ' -I') -std=c++17 -D@(TidyDefine, ' -D') -x c++ -W@(TidyIgnoreWarning, ',')</TidyCmd>
 	</PropertyGroup>
-	
+
 	<Target Name="Tidy">
 		<ItemGroup>
 			<FileToCheck Include="$(Source)/include/**/*.h" Exclude="$(Source)/include/GLib/CompatLinux.h"/>

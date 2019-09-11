@@ -9,7 +9,7 @@
 #include "resource.h"
 
 #include "GLib/Eval/Evaluator.h"
-#include "GLib/Eval/TemplateEngine.h"
+#include "GLib/Html/TemplateEngine.h"
 #include "GLib/Win/Resources.h"
 #include "GLib/Xml/Printer.h"
 #include "GLib/formatter.h"
@@ -136,7 +136,7 @@ void HtmlReport::GenerateRootIndex(const std::string & title) const
 		throw std::runtime_error("Unable to create output file : " + rootIndex.u8string());
 	}
 
-	GLib::Eval::TemplateEngine::Generate(e, dirTemplate, out);
+	GLib::Html::Generate(e, dirTemplate, out);
 }
 
 void HtmlReport::GenerateIndices(const std::string & title) const
@@ -177,7 +177,7 @@ void HtmlReport::GenerateIndices(const std::string & title) const
 			throw std::runtime_error("Unable to create output file : " + pathIndex.u8string());
 		}
 
-		GLib::Eval::TemplateEngine::Generate(e, dirTemplate, out);
+		GLib::Html::Generate(e, dirTemplate, out);
 	}
 }
 
@@ -243,5 +243,5 @@ void HtmlReport::GenerateSourceFile(std::filesystem::path & path, const std::str
 		throw std::runtime_error("Unable to create file");
 	}
 
-	GLib::Eval::TemplateEngine::Generate(e, fileTemplate, out);
+	GLib::Html::Generate(e, fileTemplate, out);
 }

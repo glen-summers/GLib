@@ -26,11 +26,11 @@ namespace GLib::Xml
 		friend class AttributeIterator;
 
 		StateEngine engine;
-		NameSpaceManager manager;
 
 		const char * ptr {};
 		const char * end {};
 		const char * lastPtr {};
+		NameSpaceManager * manager = {};
 
 		/////////// element working data, could just use element storage
 		Utils::PtrPair elementName;
@@ -50,20 +50,16 @@ namespace GLib::Xml
 		using pointer = void;
 		using reference = void;
 
-		Iterator(const char * begin, const char * end)
+		Iterator(const char * begin, const char * end, NameSpaceManager * manager)
 			: ptr(begin)
 			, end(end)
 			, lastPtr(begin)
+			, manager(manager)
 		{
 			Advance();
 		}
 
 		Iterator() = default; // end
-
-		const NameSpaceManager & Manager() const
-		{
-			return manager;
-		}
 
 		bool operator==(const Iterator & other) const
 		{
@@ -171,7 +167,7 @@ namespace GLib::Xml
 						case Xml::State::ElementAttributeValueQuote:
 						case Xml::State::ElementAttributeValueSingleQuote:
 						{
-							manager.Push(Utils::ToStringView(attributeName), Utils::ToStringView(attributeValueStart, oldPtr).substr(1), elementStack.size());
+							manager->Push(Utils::ToStringView(attributeName), Utils::ToStringView(attributeValueStart, oldPtr).substr(1), elementStack.size());
 
 							// better test? currently writes ones per attr
 							attributes.second = ptr;
@@ -243,7 +239,7 @@ namespace GLib::Xml
 			}
 
 			auto qName = Utils::ToStringView(elementName);
-			auto [name, nameSpace] = manager.Normalise(qName);
+			auto [name, nameSpace] = manager->Normalise(qName);
 
 			element.qName = qName;
 			element.name = name;
@@ -252,7 +248,7 @@ namespace GLib::Xml
 
 			if (attributes.first != nullptr && attributes.second != nullptr && element.type != ElementType::Close)
 			{
-				element.attributes = {Utils::ToStringView(attributes), &manager};
+				element.attributes = {Utils::ToStringView(attributes), manager};
 			}
 			else
 			{
@@ -272,7 +268,7 @@ namespace GLib::Xml
 				case ElementType::Empty:
 				{
 					element.depth = elementStack.size() + 1;
-					manager.Pop(elementStack.size());
+					manager->Pop(elementStack.size());
 					if (element.depth == 1)
 					{
 						contentClosed = true;
@@ -295,7 +291,7 @@ namespace GLib::Xml
 						contentClosed = true;
 					}
 					elementStack.pop();
-					manager.Pop(elementStack.size());
+					manager->Pop(elementStack.size());
 					break;
 				}
 
@@ -310,21 +306,27 @@ namespace GLib::Xml
 	class Holder
 	{
 		std::string_view const value;
+		NameSpaceManager manager;
 
 	public:
 		Holder(std::string_view value)
 			: value(value)
 		{}
 
-		Iterator begin() const
+		Iterator begin()
 		{
-			return Iterator{value.data(), value.size() + value.data()};
+			return {value.data(), value.size() + value.data(), &manager};
 		}
 
 		Iterator end() const
 		{
 			(void)this;
 			return Iterator{};
+		}
+
+		const NameSpaceManager & Manager()
+		{
+			return manager;
 		}
 	};
 }

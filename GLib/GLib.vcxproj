@@ -152,12 +152,13 @@
     <ClInclude Include="..\include\GLib\cvt.h" />
     <ClInclude Include="..\include\GLib\Eval\Collection.h" />
     <ClInclude Include="..\include\GLib\Eval\Evaluator.h" />
-    <ClInclude Include="..\include\GLib\Eval\TemplateEngine.h" />
     <ClInclude Include="..\include\GLib\Eval\Utils.h" />
     <ClInclude Include="..\include\GLib\Eval\Value.h" />
     <ClInclude Include="..\include\GLib\flogging.h" />
     <ClInclude Include="..\include\GLib\formatter.h" />
     <ClInclude Include="..\include\GLib\genericoutstream.h" />
+    <ClInclude Include="..\include\GLib\Html\Node.h" />
+    <ClInclude Include="..\include\GLib\Html\TemplateEngine.h" />
     <ClInclude Include="..\include\GLib\IcuUtils.h" />
     <ClInclude Include="..\include\GLib\NoCase.h" />
     <ClInclude Include="..\include\GLib\PairHash.h" />

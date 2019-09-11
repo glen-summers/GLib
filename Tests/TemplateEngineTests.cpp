@@ -1,12 +1,13 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include "GLib/Eval/TemplateEngine.h"
+#include "GLib/Html/TemplateEngine.h"
 
 #include "TestStructs.h"
 #include "TestUtils.h"
 
 using namespace GLib::Eval;
+using namespace GLib::Html;
 
 BOOST_AUTO_TEST_SUITE(TemplateEngineTests)
 
@@ -16,7 +17,7 @@ BOOST_AUTO_TEST_CASE(SimpleProperty)
 	evaluator.Add<std::string>("name", "fred");
 
 	std::ostringstream stm;
-	TemplateEngine::Generate(evaluator, "<xml attr='${name}' />", stm);
+	Generate(evaluator, "<xml attr='${name}' />", stm);
 
 	BOOST_TEST(stm.str() == "<xml attr='fred' />");
 }
@@ -25,7 +26,7 @@ BOOST_AUTO_TEST_CASE(SimpleProperty)
 	{
 		Evaluator evaluator;
 		std::ostringstream stm;
-		TemplateEngine::Generate(evaluator, "<xml xmlns:gl='glib'/>", stm);
+		Generate(evaluator, "<xml xmlns:gl='glib'/>", stm);
 		BOOST_TEST(stm.str() == "<xml/>");
 	}
 
@@ -33,7 +34,7 @@ BOOST_AUTO_TEST_CASE(SimpleProperty)
 	{
 		Evaluator evaluator;
 		std::ostringstream stm;
-		TemplateEngine::Generate(evaluator, "<xml xmlns:gl1='glib' xmlns:gl2='glib'/>", stm);
+		Generate(evaluator, "<xml xmlns:gl1='glib' xmlns:gl2='glib'/>", stm);
 		BOOST_TEST(stm.str() == "<xml/>");
 	}
 
@@ -53,7 +54,7 @@ BOOST_AUTO_TEST_CASE(SimpleProperty)
 </xml>)";
 
 		std::ostringstream stm;
-		TemplateEngine::Generate(evaluator, xml, stm);
+		Generate(evaluator, xml, stm);
 
 	auto expected= R"(<xml>
 	<User name='Fred' />
@@ -87,7 +88,7 @@ BOOST_AUTO_TEST_CASE(SimpleProperty)
 </xml>)";
 
 		std::ostringstream stm;
-		TemplateEngine::Generate(evaluator, xml, stm);
+		Generate(evaluator, xml, stm);
 
 		auto expected= R"(<xml>
 	<User name='Fred'>
@@ -112,7 +113,7 @@ BOOST_AUTO_TEST_CASE(SimpleProperty)
 		auto expected = R"(<xml attr="replacedValue" />)";
 
 		std::ostringstream stm;
-		TemplateEngine::Generate(evaluator, xml, stm);
+		Generate(evaluator, xml, stm);
 
 		BOOST_TEST(stm.str() == expected);
 	}
@@ -125,7 +126,7 @@ BOOST_AUTO_TEST_CASE(SimpleProperty)
 		auto expected = R"(<xml xmlns:foo="bar" attr="replacedValue" />)";
 
 		std::ostringstream stm;
-		TemplateEngine::Generate(evaluator, xml, stm);
+		Generate(evaluator, xml, stm);
 
 		BOOST_TEST(stm.str() == expected);
 	}

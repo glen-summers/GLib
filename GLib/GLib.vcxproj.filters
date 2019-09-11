@@ -30,6 +30,9 @@
     <Filter Include="Include Files\Cpp">
       <UniqueIdentifier>{e64bf24d-06a2-41b7-b871-90544ff676f5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Include Files\Html">
+      <UniqueIdentifier>{b866b8d8-3d8c-4511-9c2b-6e4d28e7d654}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="targetver.h">
@@ -164,9 +167,6 @@
     <ClInclude Include="..\include\GLib\Eval\Value.h">
       <Filter>Include Files\Eval</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\GLib\Eval\TemplateEngine.h">
-      <Filter>Include Files\Eval</Filter>
-    </ClInclude>
     <ClInclude Include="..\include\GLib\Xml\AttributeIterator.h">
       <Filter>Include Files\Xml</Filter>
     </ClInclude>
@@ -214,6 +214,12 @@
     </ClInclude>
     <ClInclude Include="..\include\GLib\Xml\Printer.h">
       <Filter>Include Files\Xml</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\GLib\Html\TemplateEngine.h">
+      <Filter>Include Files\Html</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\GLib\Html\Node.h">
+      <Filter>Include Files\Html</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
