@@ -14,6 +14,7 @@ namespace GLib::Xml
 		std::string_view name;
 		std::string_view value;
 		std::string_view nameSpace;
+		std::string_view rawValue;
 	};
 
 	class AttributeIterator
@@ -64,13 +65,14 @@ namespace GLib::Xml
 		{
 			auto qName = Utils::ToStringView(attributeName);
 			auto value = Utils::ToStringView(attributeValue);
+			auto rawValue = Utils::ToStringView(attributeName.first, attributeValue.second+1);
 
 			if (manager != nullptr)
 			{
 				auto [name, nameSpace] = manager->Normalise(qName);
-				return { name, value, nameSpace };
+				return { name, value, nameSpace, rawValue };
 			}
-			return { qName, value, {} };
+			return { qName, value, {}, rawValue };
 		}
 
 	private:

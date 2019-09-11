@@ -54,6 +54,11 @@ namespace GLib::Html
 			return &children.back();
 		}
 
+		Node * AddFragment(const char * start, const char * end)
+		{
+			return AddFragment({start, static_cast<size_t>(end - start) });
+		}
+
 		Node * AddEnumeration(const std::string & var, const std::string & e)
 		{
 			children.emplace_back(this, var, e);

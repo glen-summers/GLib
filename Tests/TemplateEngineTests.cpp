@@ -110,7 +110,7 @@ BOOST_AUTO_TEST_CASE(SimpleProperty)
 		Evaluator evaluator;
 
 		auto xml = "<xml xmlns:gl='glib' attr='value' gl:attr='replacedValue'/>";
-		auto expected = R"(<xml attr="replacedValue" />)";
+		auto expected = R"(<xml attr='replacedValue'/>)";
 
 		std::ostringstream stm;
 		Generate(evaluator, xml, stm);
@@ -123,7 +123,7 @@ BOOST_AUTO_TEST_CASE(SimpleProperty)
 		Evaluator evaluator;
 
 		auto xml = "<xml xmlns:gl='glib' xmlns:foo='bar' attr='value' gl:attr='replacedValue'/>";
-		auto expected = R"(<xml xmlns:foo="bar" attr="replacedValue" />)";
+		auto expected = R"(<xml xmlns:foo='bar' attr='replacedValue'/>)";
 
 		std::ostringstream stm;
 		Generate(evaluator, xml, stm);

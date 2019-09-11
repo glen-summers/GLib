@@ -36,6 +36,11 @@ namespace GLib::Html
 		}
 
 	private:
+		static const char * EndOf(const std::string_view & value)
+		{
+			return value.data() + value.size(); // &*value.rbegin()+1;
+		}
+
 		Node Parse(const std::string_view xml)
 		{
 			Node root;
@@ -112,7 +117,8 @@ namespace GLib::Html
 			AttributeMap atMap;
 			bool replaced = false;
 
-			Xml::Attributes attributes { e.Attributes().Value(), nullptr };
+			auto attr = e.Attributes().Value();
+			Xml::Attributes attributes { attr, nullptr };
 			for (auto a : attributes)
 			{
 				if (!Xml::NameSpaceManager::IsDeclaration(a.name))
@@ -137,7 +143,7 @@ namespace GLib::Html
 
 			if (replaced)
 			{
-				node->AddFragment(Xml::Utils::ToStringView(e.OuterXml().data(), e.Attributes().Value().data()));
+				node->AddFragment(e.OuterXml().data(), attr.data()-1);
 
 				for (const auto & a : attributes)
 				{
@@ -149,28 +155,23 @@ namespace GLib::Html
 						{
 							continue;
 						}
-						// preserve quote type?
-						// could add entire attribute text, would need initial space as part of value
-						// could also accumulate and add single fragment
-						node->AddFragment(a.name);
-						node->AddFragment("=\"");
-						node->AddFragment(a.value);
-						node->AddFragment("\" ");
+
+						node->AddFragment(" ");
+						node->AddFragment(a.rawValue);
 					}
 					else
 					{
 						auto [name, nameSpace] = manager.Normalise(a.name);
 						if (nameSpace.empty())
 						{
-							// preserve quote type?
-							node->AddFragment(name);
-							node->AddFragment("=\"");
+							node->AddFragment(" ");
+							node->AddFragment(name.data(), a.value.data());
 							node->AddFragment(atMap[std::make_pair(nameSpace, name)].value);
-							node->AddFragment("\" ");
+							node->AddFragment(a.value.data() - 1, a.value.data());
 						}
 					}
 				}
-				node->AddFragment(Xml::Utils::ToStringView(e.Attributes().Value().data()+e.Attributes().Value().size(), e.OuterXml().data()+e.OuterXml().size()));
+				node->AddFragment(EndOf(attr), EndOf(e.OuterXml()));
 			}
 			else
 			{
@@ -182,12 +183,12 @@ namespace GLib::Html
 					{
 						if (manager.Get(prefix) == NameSpace)
 						{
-							node->AddFragment(Xml::Utils::ToStringView(p, a.name.data()-1)); // -1 minus space prefix
-							p = a.value.data() + a.value.size() + 1; // +1 trailing quote
+							node->AddFragment(p, a.name.data() - 1); // -1 minus space prefix
+							p = EndOf(a.value) + 1; // +1 trailing quote
 						}
 					}
 				}
-				node->AddFragment(Xml::Utils::ToStringView(p, e.OuterXml().data()+e.OuterXml().size()));
+				node->AddFragment(p, EndOf(e.OuterXml()));
 			}
 			return node;
 		}
@@ -213,7 +214,7 @@ namespace GLib::Html
 			if (!node.Value().empty())
 			{
 				std::regex r(propRegex);
-				std::cregex_iterator it(node.Value().data(), node.Value().data() + node.Value().size(), r);
+				std::cregex_iterator it(node.Value().data(), EndOf(node.Value()), r);
 				auto end = std::cregex_iterator{};
 				if (it==end)
 				{
