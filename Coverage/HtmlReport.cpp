@@ -14,7 +14,6 @@
 #include "GLib/Xml/Printer.h"
 #include "GLib/formatter.h"
 
-
 #include <fstream>
 #include <set>
 
@@ -54,9 +53,20 @@ std::string LoadHtml(unsigned int id)
 	return GLib::Win::LoadResourceString(nullptr, id, RT_HTML); // NOLINT(cppcoreguidelines-pro-type-cstyle-cast) baad macro
 }
 
-HtmlReport::HtmlReport(const std::string & title, const std::filesystem::path & htmlPath,
+std::string GetDateTime(time_t t)
+{
+	std::tm tm {};
+	GLib::Compat::LocalTime(tm, t);
+	std::ostringstream os;
+	os << std::put_time(&tm, "%d %b %Y, %H:%M:%S (%z)");
+	return os.str();
+}
+
+HtmlReport::HtmlReport(const std::string & testName, const std::filesystem::path & htmlPath,
 	const std::map<std::filesystem::path, FileCoverageData> & fileCoverageData)
-	: htmlPath(htmlPath)
+	: testName(testName)
+	, time(GetDateTime(std::time(nullptr)))
+	, htmlPath(htmlPath)
 	, rootPaths(RootPaths(fileCoverageData))
 	, cssPath(Initialise(htmlPath))
 	, dirTemplate(LoadHtml(IDR_DIRECTORY))
@@ -66,14 +76,13 @@ HtmlReport::HtmlReport(const std::string & title, const std::filesystem::path & 
 	{
 		const FileCoverageData & data = fileDataPair.second;
 
-		std::filesystem::path subPath = Reduce(data.Path(), rootPaths);
-		std::filesystem::path targetPath = (htmlPath / subPath).concat(L".html");
-		GenerateSourceFile(targetPath, "Coverage - " + subPath.u8string(), data);
+		auto subPath = Reduce(data.Path(), rootPaths);
+		GenerateSourceFile(subPath, data);
 
 		index[subPath.parent_path()].push_back(data);
 	}
-	GenerateRootIndex(title);
-	GenerateIndices(title);
+	GenerateRootIndex();
+	GenerateIndices();
 }
 
 std::filesystem::path HtmlReport::Initialise(const std::filesystem::path & path)
@@ -103,9 +112,7 @@ std::set<std::filesystem::path> HtmlReport::RootPaths(const std::map<std::filesy
 	return rootPaths;
 }
 
-// move
-
-void HtmlReport::GenerateRootIndex(const std::string & title) const
+void HtmlReport::GenerateRootIndex() const
 {
 	std::vector<Directory> directories;
 	for (const auto & pathChildrenPair : index)
@@ -125,7 +132,10 @@ void HtmlReport::GenerateRootIndex(const std::string & title) const
 	}
 
 	GLib::Eval::Evaluator e;
-	e.Add("title", title);
+	e.Add("title", testName);
+	e.Add("time", time);
+	e.Add("isRoot", true);
+	e.Add("isChild", false); // todo !isRoot
 	e.Add("styleSheet", "./coverage.css");
 	e.Add("directories", directories);
 
@@ -139,11 +149,11 @@ void HtmlReport::GenerateRootIndex(const std::string & title) const
 	GLib::Html::Generate(e, dirTemplate, out);
 }
 
-void HtmlReport::GenerateIndices(const std::string & title) const
+void HtmlReport::GenerateIndices() const
 {
 	for (const auto & pathChildrenPair : index)
 	{
-		const auto& relativePath = pathChildrenPair.first;
+		const auto& subPath = pathChildrenPair.first;
 		const auto& children = pathChildrenPair.second;
 
 		std::vector<Directory> directories;
@@ -162,15 +172,21 @@ void HtmlReport::GenerateIndices(const std::string & title) const
 			directories.emplace_back(text, text+".html", data.CoveredLines(), data.CoverableLines());
 		}
 
-		auto path = htmlPath / relativePath;
-		auto css = (std::filesystem::relative(htmlPath, path) / "coverage.css").generic_u8string();
-		auto pathIndex = path / "index.html";
+		auto path = htmlPath / subPath;
+		auto relativePath = std::filesystem::relative(htmlPath, path);
+		auto css = (relativePath / "coverage.css").generic_u8string();
 
 		GLib::Eval::Evaluator e;
-		e.Add("title", title);
+		e.Add("title", testName);
+		e.Add("time", time);
+		e.Add("isRoot", false);
+		e.Add("isChild", true); // todo !isRoot
+		e.Add("index", (relativePath / "index.html").generic_u8string());
+		e.Add("subPath", subPath.generic_u8string());
 		e.Add("styleSheet", css);
 		e.Add("directories", directories);
 
+		auto pathIndex = path / "index.html";
 		std::ofstream out(pathIndex);
 		if (!out)
 		{
@@ -181,8 +197,11 @@ void HtmlReport::GenerateIndices(const std::string & title) const
 	}
 }
 
-void HtmlReport::GenerateSourceFile(std::filesystem::path & path, const std::string & title, const FileCoverageData & data) const
+void HtmlReport::GenerateSourceFile(std::filesystem::path & subPath, const FileCoverageData & data) const
 {
+	auto targetPath = (htmlPath / subPath);
+	auto relativePath = std::filesystem::relative(htmlPath, targetPath.parent_path());
+
 	const std::filesystem::path & sourceFile = data.Path();
 	std::ifstream in(sourceFile);
 	if (!in)
@@ -223,21 +242,26 @@ void HtmlReport::GenerateSourceFile(std::filesystem::path & path, const std::str
 
 	GLib::Eval::Evaluator e;
 
-	auto css = (relative(htmlPath, path.parent_path()) / "coverage.css").generic_u8string();
-
+	auto parent = subPath.parent_path();
+	auto css = (relativePath / "coverage.css").generic_u8string();
 	auto coveragePercent = static_cast<unsigned int>(data.CoveredLines()*HundredPercent / lc.size());
 
+	e.Add("title", subPath.generic_u8string());
+	e.Add("testName", testName);
+	e.Add("time", time);
+	e.Add("parent", parent.generic_u8string());
+	e.Add("fileName", targetPath.filename().u8string());
 	e.Add("styleSheet", css);
-	e.Add("title", title);
 	e.Add("coverageStyle", CoverageLevel(coveragePercent));
 	e.Add("coveredLines", data.CoveredLines());
 	e.Add("coverableLines", lc.size());
 	e.Add("coveragePercent", coveragePercent);
+	e.Add("index", (relativePath / "index.html").generic_u8string());
 
 	e.AddCollection("lines", lines);
 
-	create_directories(path.parent_path());
-	std::ofstream out(path);
+	create_directories(targetPath.parent_path());
+	std::ofstream out(targetPath.concat(L".html"));
 	if(!out)
 	{
 		throw std::runtime_error("Unable to create file");

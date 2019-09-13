@@ -4,26 +4,90 @@ body {
 }
 
 hr {
-	display: block;
 	height: 2px;
 	border: 0px;
 	border-top: 1px solid blue;
-	margin: 1em 0px;
+	margin: 0.5em 0px;
 	padding: 0px;
 }
 
-table.centre {
+table.info {
 	margin: auto;
+	border: 0px;
 }
 
-td.title {
+p.title {
 	text-align: center;
 	font-size: 18pt;
+	margin: 0px;
+	padding: 0px;
+}
+
+p.footer {
+	text-align: center;
+	font-size: 12pt;
+	margin: 0px;
+	padding: 0px;
 }
 
 td.coverageNumber {
 	text-align: right;
 }
+
+/*new tweak colours etc.*/
+td.headerItem {
+	text-align: right;
+	padding-right: 6px;
+	font-family: sans-serif;
+	font-weight: bold;
+	vertical-align: top;
+	white-space: nowrap;
+}
+
+td.headerValue {
+	text-align: left;
+	color: #284FA8;
+	font-family: sans-serif;
+	font-weight: bold;
+	white-space: nowrap;
+}
+
+table.dirs {
+	margin: auto;
+	width: 80%;
+	border: 0px;
+	padding: 1px;
+	border-spacing: 1px;
+	border-collapse: separate;
+}
+
+td.dirsHeader {
+	text-align: center;
+	color: #FFFFFF;
+	background-color: #6688D4;
+	font-family: sans-serif;
+	font-size: 120%;
+	font-weight: bold;
+	white-space: nowrap;
+	padding-left: 4px;
+	padding-right: 4px;
+}
+
+td.coverFile {
+	text-align: left;
+	padding-left: 10px;
+	padding-right: 20px;
+	color: #284FA8;
+	background-color: #DAE7FE;
+	font-family: monospace;
+}
+
+td.coverItem {
+	padding-left: 10px;
+	padding-right: 10px;
+	background-color: #DAE7FE;
+}
+/*new*/
 
 pre {
 	margin: 0px;
