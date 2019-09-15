@@ -34,6 +34,18 @@ td.coverageNumber {
 	text-align: right;
 }
 
+.red {
+	background-color: #CE1620 !important;
+}
+
+.amber {
+	background-color: #FFBF00 !important;
+}
+
+.green {
+	background-color: #03C03C !important;
+}
+
 /*new tweak colours etc.*/
 td.headerItem {
 	text-align: right;
@@ -50,6 +62,17 @@ td.headerValue {
 	font-family: sans-serif;
 	font-weight: bold;
 	white-space: nowrap;
+}
+
+td.coverageValue {
+	text-align: right;
+	color: #284FA8;
+	font-family: sans-serif;
+	font-weight: bold;
+	white-space: nowrap;
+	padding-left: 12px;
+	padding-right: 4px;
+	background-color: #DAE7FE;
 }
 
 table.dirs {
@@ -147,17 +170,6 @@ div.box {
 	margin: auto;
 }
 
-div.red {
-	height:100%;
-	background-color: #CE1620;
-}
-
-div.amber {
+div.bar {
 	height: 100%;
-	background-color: #FFBF00;
-}
-
-div.green {
-	height:100%;
-	background-color: #03C03C;
 }
