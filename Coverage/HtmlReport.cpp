@@ -114,22 +114,29 @@ std::set<std::filesystem::path> HtmlReport::RootPaths(const std::map<std::filesy
 
 void HtmlReport::GenerateRootIndex() const
 {
+	unsigned int totalCoveredLines{};
+	unsigned int totalCoverableLines{};
 	std::vector<Directory> directories;
+
 	for (const auto & pathChildrenPair : index)
 	{
 		const auto& name = pathChildrenPair.first;
 		const auto& link = name / "index.html";
 		const auto& children = pathChildrenPair.second;
 
-		unsigned int totalCoveredLines{};
-		unsigned int totalCoverableLines{};
+		unsigned int coveredLines{};
+		unsigned int coverableLines{};
 		for (const FileCoverageData & data : children)
 		{
-			totalCoveredLines += data.CoveredLines();
-			totalCoverableLines += data.CoverableLines();
+			coveredLines += data.CoveredLines();
+			coverableLines += data.CoverableLines();
 		}
-		directories.emplace_back(name.u8string(), link.generic_u8string(), totalCoveredLines, totalCoverableLines);
+		directories.emplace_back(name.u8string(), link.generic_u8string(), coveredLines, coverableLines);
+		totalCoveredLines += coveredLines;
+		totalCoverableLines += coverableLines;
 	}
+
+	auto coveragePercent = static_cast<unsigned int>(totalCoveredLines*HundredPercent / totalCoverableLines);
 
 	GLib::Eval::Evaluator e;
 	e.Add("title", testName);
@@ -138,6 +145,10 @@ void HtmlReport::GenerateRootIndex() const
 	e.Add("isChild", false); // todo !isRoot
 	e.Add("styleSheet", "./coverage.css");
 	e.Add("directories", directories);
+	e.Add("coveredLines", totalCoveredLines);
+	e.Add("coverableLines", totalCoverableLines);
+	e.Add("coveragePercent", coveragePercent);
+	e.Add("coverageStyle", CoverageLevel(coveragePercent));
 
 	auto rootIndex = htmlPath / "index.html";
 	std::ofstream out(rootIndex);
@@ -165,6 +176,7 @@ void HtmlReport::GenerateIndices() const
 			totalCoveredLines += data.CoveredLines();
 			totalCoverableLines += data.CoverableLines();
 		}
+		auto coveragePercent = static_cast<unsigned int>(totalCoveredLines*HundredPercent / totalCoverableLines);
 
 		for (const FileCoverageData & data : children)
 		{
@@ -185,6 +197,10 @@ void HtmlReport::GenerateIndices() const
 		e.Add("subPath", subPath.generic_u8string());
 		e.Add("styleSheet", css);
 		e.Add("directories", directories);
+		e.Add("coveredLines", totalCoveredLines);
+		e.Add("coverableLines", totalCoverableLines);
+		e.Add("coveragePercent", coveragePercent);
+		e.Add("coverageStyle", CoverageLevel(coveragePercent));
 
 		auto pathIndex = path / "index.html";
 		std::ofstream out(pathIndex);

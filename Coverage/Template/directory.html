@@ -10,22 +10,35 @@
 		<hr />
 		<table class="info">
 			<tr>
-				<td class="headerItem" style="width:10%">Current view:</td>
+				<td style="width:15%" class="headerItem" style="width:10%">Current view:</td>
 				<gl:block if="isRoot">
-					<td class="headerValue">TopLevel</td>
+					<td  style="width:35%" class="headerValue">TopLevel</td>
 				</gl:block>
 
 				<gl:block if="isChild">
-					<td class="headerValue"><a href="${index}">TopLevel</a> - ${subPath}</td>
+					<td  style="width:35%" class="headerValue"><a href="${index}">TopLevel</a> - ${subPath}</td>
 				</gl:block>
+
+				<td style="width:20%"></td>
+				<td style="width:10%" class="headerItem">Hit</td>
+				<td style="width:10%" class="headerItem">Total</td>
+				<td style="width:10%" class="headerItem">Coverage</td>
 			</tr>
 			<tr>
 				<td class="headerItem">Test:</td>
 				<td class="headerValue">${title}</td>
+				<td class="headerItem">Lines:</td>
+				<td class="coverageValue">${coveredLines}</td>
+				<td class="coverageValue">${coverableLines}</td>
+				<td class="green coverageValue" gl:class="${coverageStyle} coverageValue">${coveragePercent}&nbsp;%</td>
 			</tr>
 			<tr>
 				<td class="headerItem">Time:</td>
 				<td class="headerValue">${time}</td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
 			</tr>
 		</table>
 		<hr />
