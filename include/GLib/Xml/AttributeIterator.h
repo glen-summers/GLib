@@ -111,6 +111,11 @@ namespace GLib::Xml
 				}
 				++ptr; // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic) todo use std::span
 
+				if (newState == Xml::State::Entity || oldState == Xml::State::Entity)
+				{
+					continue; // currenly ignoring entities, receiver needs to decode
+				}
+
 				if (newState != oldState)
 				{
 					switch (oldState)
@@ -121,8 +126,7 @@ namespace GLib::Xml
 							break;
 						}
 
-						case Xml::State::ElementAttributeValueQuote:
-						case Xml::State::ElementAttributeValueSingleQuote:
+						case Xml::State::ElementAttributeValue:
 						{
 							attributeValue.second = oldPtr;
 							if (manager == nullptr || !Xml::NameSpaceManager::IsDeclaration(Utils::ToStringView(attributeName)))
@@ -142,8 +146,7 @@ namespace GLib::Xml
 							break;
 						}
 
-						case Xml::State::ElementAttributeValueQuote:
-						case Xml::State::ElementAttributeValueSingleQuote:
+						case Xml::State::ElementAttributeValue:
 						{
 							attributeValue.first = ptr;
 							break;

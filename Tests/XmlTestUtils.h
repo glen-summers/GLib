@@ -15,6 +15,11 @@ namespace GLib::Xml
 		return !(a1 == a2);
 	}
 
+	inline std::ostream & operator<<(std::ostream & s, State state)
+	{
+		return s << static_cast<int>(state);
+	}
+
 	inline std::ostream & operator<<(std::ostream & s, const Attribute & a)
 	{
 		return s << "Attr: " << a.nameSpace << ":" << a.name << "=" << a.value << std::endl;

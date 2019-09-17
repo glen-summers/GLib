@@ -164,8 +164,7 @@ namespace GLib::Xml
 							break;
 						}
 
-						case Xml::State::ElementAttributeValueQuote:
-						case Xml::State::ElementAttributeValueSingleQuote:
+						case Xml::State::ElementAttributeValue:
 						{
 							manager->Push(Utils::ToStringView(attributeName), Utils::ToStringView(attributeValueStart, oldPtr).substr(1), elementStack.size());
 
@@ -204,8 +203,7 @@ namespace GLib::Xml
 							break;
 						}
 
-						case Xml::State::ElementAttributeValueQuote:
-						case Xml::State::ElementAttributeValueSingleQuote:
+						case Xml::State::ElementAttributeValue:
 						{
 							attributeValueStart = oldPtr;
 							break;

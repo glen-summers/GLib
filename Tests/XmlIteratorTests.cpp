@@ -444,18 +444,18 @@ BOOST_AUTO_TEST_CASE(AttributeValueError)
 	GLIB_CHECK_RUNTIME_EXCEPTION( { Xml::Parse("<x a='<' />"); }, "Illegal character: '<' (0x3c)");
 	GLIB_CHECK_RUNTIME_EXCEPTION( { Xml::Parse(R"(<x a="<" />)"); }, "Illegal character: '<' (0x3c)");
 
-	GLIB_CHECK_RUNTIME_EXCEPTION( { Xml::Parse("<x a='&' />"); }, "Illegal character: '&' (0x26)");
-	GLIB_CHECK_RUNTIME_EXCEPTION( { Xml::Parse(R"(<x a="&" />)"); }, "Illegal character: '&' (0x26)");
+	GLIB_CHECK_RUNTIME_EXCEPTION( { Xml::Parse("<x a='&' />"); }, "Xml not closed");
+	GLIB_CHECK_RUNTIME_EXCEPTION( { Xml::Parse(R"(<x a="&" />)"); }, "Xml not closed");
 }
 
 BOOST_AUTO_TEST_CASE(ErrorMeansError)
 {
 	Xml::StateEngine engine;
-	BOOST_CHECK(engine.GetState() == Xml::State::Start);
+	BOOST_TEST(engine.GetState() == Xml::State::Start);
 	engine.Push('!');
-	BOOST_CHECK(engine.GetState() == Xml::State::Error);
+	BOOST_TEST(engine.GetState() == Xml::State::Error);
 	engine.Push('!');
-	BOOST_CHECK(engine.GetState() == Xml::State::Error);
+	BOOST_TEST(engine.GetState() == Xml::State::Error);
 }
 
 BOOST_AUTO_TEST_CASE(EndOfTheWorld)
@@ -475,20 +475,27 @@ BOOST_AUTO_TEST_CASE(AttrNamespaceNotFound)
 	GLIB_CHECK_RUNTIME_EXCEPTION( { Xml::Parse("<xml bar:baz='barbazd'/>"); }, "NameSpace bar not found");
 }
 
-BOOST_AUTO_TEST_CASE(EntitiesToDo)
+BOOST_AUTO_TEST_CASE(Entities)
 {
-	/* CharRef: '&#' [0-9]+ ';' | '&#x' [0-9a-fA-F]+ ';'
-		EntityRef: '&' Name '; [amp, lt, gt, apos, quot]
-		validate in engine? evaluate in iterator but raw value no longer useful
-		add stream operator?
-	*/
-	GLIB_CHECK_RUNTIME_EXCEPTION({ Xml::Parse("<xml value='&#x20ac;'/>"); }, "Illegal character: '&' (0x26)");
-	GLIB_CHECK_RUNTIME_EXCEPTION({ Xml::Parse("<xml value='&#8364;'/>"); }, "Illegal character: '&' (0x26)");
-	GLIB_CHECK_RUNTIME_EXCEPTION({ Xml::Parse("<xml value='&amp; &lt; &gt; &apos; &quot;'/>"); }, "Illegal character: '&' (0x26)");
+/* TODO have iterator convert standard entites rather than just passing them on
+	CharRef: '&#' [0-9]+ ';' | '&#x' [0-9a-fA-F]+ ';'
+	EntityRef: '&' Name '; [amp, lt, gt, apos, quot]
+*/
 
-	GLIB_CHECK_RUNTIME_EXCEPTION({ Xml::Parse("<xml>&#x20ac;</xml>"); }, "Illegal character: '&' (0x26)");
-	GLIB_CHECK_RUNTIME_EXCEPTION({ Xml::Parse("<xml>&#8364;</xml>"); }, "Illegal character: '&' (0x26)");
-	GLIB_CHECK_RUNTIME_EXCEPTION({ Xml::Parse("<xml>&amp; &lt; &gt; &apos; &quot;</xml>"); }, "Illegal character: '&' (0x26)");
+	Xml::Parse("<xml>&#x20ac;</xml>");
+	Xml::Parse("<xml>&#8364;</xml>");
+	Xml::Parse("<xml>&amp; &lt; &gt; &apos; &quot;</xml>");
+}
+
+BOOST_AUTO_TEST_CASE(AttributeEntity)
+{
+	Xml::Attributes attr("attr='&customEntity;'");
+
+	std::vector<Xml::Attribute> expected
+	{
+		{"attr", "&customEntity;", "", "attr='&customEntity;'"}
+	};
+	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), attr.begin(), attr.end());
 }
 
 // move to another file

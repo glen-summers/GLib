@@ -20,9 +20,8 @@ namespace GLib::Xml
 		ElementAttributeName,
 		ElementAttributeNameSpace,
 		ElementAttributeValueStart,
-		ElementAttributeValueQuote,
-		ElementAttributeValueSingleQuote,
-		ElementAttributeQuoteEnd,
+		ElementAttributeValue,
+		ElementAttributeEnd,
 		Text,
 
 		Bang,
@@ -38,6 +37,8 @@ namespace GLib::Xml
 		CDataEnd1,
 		CDataEnd2,
 
+		Entity,
+
 		Count
 	};
 
@@ -50,6 +51,7 @@ namespace GLib::Xml
 		static constexpr char DoubleQuote = '"';
 		static constexpr char SingleQuote = '\'';
 		static constexpr char Colon = ':';
+		static constexpr char SemiColon = ';';
 		static constexpr char Underscore = '_';
 		static constexpr char FullStop = '.';
 		static constexpr char Hyphen = '-';
@@ -71,6 +73,8 @@ namespace GLib::Xml
 		bool mutable isProlog { true };
 		bool mutable hasDocTypeDecl {};
 		bool mutable hasContent {};
+		char mutable attributeQuoteChar {};
+		State mutable entityReturnState {};
 		StateFunction stateFunction;
 
 	public:
@@ -118,7 +122,7 @@ namespace GLib::Xml
 
 		static bool IsAllowedTextCharacter(char c)
 		{
-			return c != LeftAngleBracket && c != Ampersand;
+			return c != LeftAngleBracket;
 		}
 
 		void SetState(Xml::State newState)
@@ -319,22 +323,24 @@ namespace GLib::Xml
 			{
 				return state;
 			}
-			if (c == DoubleQuote)
+			if (c == DoubleQuote || c == SingleQuote)
 			{
-				return State::ElementAttributeValueQuote;
-			}
-			if (c == SingleQuote)
-			{
-				return State::ElementAttributeValueSingleQuote;
+				attributeQuoteChar = c;
+				return State::ElementAttributeValue;
 			}
 			return State::Error;
 		}
 
-		Xml::State ElementAttributeValueQuote(char c) const
+		Xml::State ElementAttributeValue(char c) const
 		{
-			if (c == DoubleQuote)
+			if (c == attributeQuoteChar)
 			{
-				return State::ElementAttributeQuoteEnd;
+				return State::ElementAttributeEnd;
+			}
+			if (c == Ampersand)
+			{
+				entityReturnState = state;
+				return State::Entity;
 			}
 			if (IsAllowedTextCharacter(c))
 			{
@@ -343,20 +349,7 @@ namespace GLib::Xml
 			return State::Error;
 		}
 
-		Xml::State ElementAttributeValueSingleQuote(char c) const
-		{
-			if (c == SingleQuote)
-			{
-				return State::ElementAttributeQuoteEnd;
-			}
-			if (IsAllowedTextCharacter(c))
-			{
-				return state;
-			}
-			return State::Error;
-		}
-
-		Xml::State ElementAttributeQuoteEnd(char c) const
+		Xml::State ElementAttributeEnd(char c) const
 		{
 			if (IsWhiteSpace(c))
 			{
@@ -378,6 +371,11 @@ namespace GLib::Xml
 			if (c == LeftAngleBracket)
 			{
 				return State::ElementStart;
+			}
+			if (c == Ampersand)
+			{
+				entityReturnState = state;
+				return State::Entity;
 			}
 			if (IsAllowedTextCharacter(c))
 			{
@@ -484,6 +482,16 @@ namespace GLib::Xml
 			}
 			return Xml::State::CDataValue;
 		}
+
+		Xml::State Entity(char c) const
+		{
+			if (c == SemiColon)
+			{
+				return std::exchange(entityReturnState, State::Error);
+			}
+			return state;
+		}
+
 		// state functions
 		//////////////////////
 
@@ -503,9 +511,8 @@ namespace GLib::Xml
 			&StateEngine::ElementAttributeName,
 			&StateEngine::ElementAttributeNameSpace,
 			&StateEngine::ElementAttributeValueStart,
-			&StateEngine::ElementAttributeValueQuote,
-			&StateEngine::ElementAttributeValueSingleQuote,
-			&StateEngine::ElementAttributeQuoteEnd,
+			&StateEngine::ElementAttributeValue,
+			&StateEngine::ElementAttributeEnd,
 			&StateEngine::Text,
 
 			&StateEngine::Bang,
@@ -520,6 +527,8 @@ namespace GLib::Xml
 			&StateEngine::CDataValue,
 			&StateEngine::CDataEnd1,
 			&StateEngine::CDataEnd2,
+
+			&StateEngine::Entity,
 		};
 	};
 }
