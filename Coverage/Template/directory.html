@@ -11,11 +11,11 @@
 		<table class="info">
 			<tr>
 				<td style="width:15%" class="headerItem" style="width:10%">Current view:</td>
-				<gl:block if="isRoot">
+				<gl:block if="${isRoot}">
 					<td  style="width:35%" class="headerValue">TopLevel</td>
 				</gl:block>
 
-				<gl:block if="isChild">
+				<gl:block if="${isChild}">
 					<td  style="width:35%" class="headerValue"><a href="${index}">TopLevel</a> - ${subPath}</td>
 				</gl:block>
 

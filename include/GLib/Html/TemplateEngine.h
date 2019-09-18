@@ -127,6 +127,9 @@ namespace GLib::Html
 				{
 					throw std::runtime_error("Error in each value : " + std::string(eachValue));
 				}
+
+				//
+
 				return node->AddEnumeration(m[1], m[2], ifValue);
 			}
 
@@ -216,9 +219,31 @@ namespace GLib::Html
 
 		void Generate(const Node & node, std::ostream & out)
 		{
-			if (!node.Condition().empty() && evaluator.Evaluate(std::string{node.Condition()}) == "0")
+			// todo eval during parse, store bool or property to evaluate
+			const std::string_view & condition = node.Condition();
+			if (!condition.empty() && condition != "true")
 			{
-				return;
+				if (condition == "false")
+				{
+					return;
+				}
+
+				std::match_results<std::string_view::const_iterator> m;
+				std::regex_search(condition.begin(), condition.end(), m, propRegex);
+				if (m.empty())
+				{
+					throw std::runtime_error("Error in if value : " + std::string(condition));
+				}
+
+				auto result = evaluator.Evaluate(m[1]);
+				if (result == "false")
+				{
+					return;
+				}
+				else if (result !="true")
+				{
+					throw std::runtime_error("Expected boolean value, got: " + result);
+				}
 			}
 
 			if (!node.Enumeration().empty())

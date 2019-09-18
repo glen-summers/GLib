@@ -48,6 +48,11 @@ namespace GLib::Eval::Utils
 		};
 	}
 
+	inline std::string ToString(const bool & value)
+	{
+		return value ? "true":"false";
+	}
+
 	template <typename T, std::enable_if_t<Detail::HasToString<T>::value>* = nullptr>
 	std::string ToString(const T & value)
 	{

@@ -181,7 +181,15 @@ BOOST_AUTO_TEST_SUITE(EvaluatorTests)
 		evaluator.Add("HasNoToString", HasNoToString{});
 		GLIB_CHECK_RUNTIME_EXCEPTION({ (void)evaluator.Evaluate("HasNoToString"); },
 			"Cannot convert type to string : HasNoToString");
-		;
+	}
+
+	BOOST_AUTO_TEST_CASE(Bool)
+	{
+		GLib::Eval::Evaluator evaluator;
+		evaluator.Add("valueTrue", true);
+		evaluator.Add("valueFalse", false);
+		BOOST_TEST("true" == evaluator.Evaluate("valueTrue"));
+		BOOST_TEST("false" == evaluator.Evaluate("valueFalse"));
 	}
 
 BOOST_AUTO_TEST_SUITE_END()

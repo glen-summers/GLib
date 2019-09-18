@@ -134,7 +134,7 @@ BOOST_AUTO_TEST_CASE(SimpleProperty)
 	BOOST_AUTO_TEST_CASE(If)
 	{
 		auto xml = R"(<xml xmlns:gl='glib'>
-<gl:block if='value'>
+<gl:block if='${value}'>
 	<td>In Block</td>
 </gl:block>
 </xml>)";
@@ -163,7 +163,7 @@ BOOST_AUTO_TEST_CASE(SimpleProperty)
 	BOOST_AUTO_TEST_CASE(IfEach)
 	{
 		auto xml = R"(<xml xmlns:gl='glib'>
-<gl:block if='value' each='var : ${vars}'>
+<gl:block if='${value}' each='var : ${vars}'>
 	<td>${var}</td>
 </gl:block>
 </xml>)";
