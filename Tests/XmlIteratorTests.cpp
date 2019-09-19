@@ -166,6 +166,7 @@ BOOST_AUTO_TEST_CASE(XmlDecl)
 	std::vector<Xml::Element> expected
 	{
 		Xml::Element{"greeting", Xml::ElementType::Open, {}},
+		Xml::Element{Xml::ElementType::Text, "Hello, world!"},
 		Xml::Element{"greeting", Xml::ElementType::Close, {}},
 	};
 	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), xml.begin(), xml.end());
@@ -272,7 +273,11 @@ BOOST_AUTO_TEST_CASE(CommentAtStart)
 	Xml::Holder xml { R"(<!-- Comment -->
 <Xml/>)"};
 
-	std::vector<Xml::Element> expected { {"Xml", Xml::ElementType::Empty, {} } };
+	std::vector<Xml::Element> expected
+	{
+		{Xml::ElementType::Comment, " Comment "},
+		{"Xml", Xml::ElementType::Empty, {}}
+	};
 	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), xml.begin(), xml.end());
 }
 
@@ -282,7 +287,12 @@ BOOST_AUTO_TEST_CASE(TwoCommentsAtStartWouldBeAnExtravegance)
 <!-- Comment -->
 <Xml/>)"};
 
-	std::vector<Xml::Element> expected { {"Xml", Xml::ElementType::Empty, {} } };
+	std::vector<Xml::Element> expected
+	{
+		{Xml::ElementType::Comment, " Comment "},
+		{Xml::ElementType::Comment, " Comment "},
+		{"Xml", Xml::ElementType::Empty, {}}
+	};
 	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), xml.begin(), xml.end());
 }
 
@@ -291,7 +301,11 @@ BOOST_AUTO_TEST_CASE(CommentAtEnd)
 	Xml::Holder xml { R"(<Xml/>
 <!-- Comment -->)"};
 
-	std::vector<Xml::Element> expected { {"Xml", Xml::ElementType::Empty, {} } };
+	std::vector<Xml::Element> expected
+	{
+		{"Xml", Xml::ElementType::Empty, {} },
+		{Xml::ElementType::Comment, " Comment "}
+	};
 	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), xml.begin(), xml.end());
 }
 
@@ -300,14 +314,17 @@ BOOST_AUTO_TEST_CASE(AbundanceOfComments)
 	Xml::Holder xml { R"(<!-- Comment1 -->
 <Xml>
 <!-- Comment2 -->
-</Xml>)
+</Xml>
 <!-- Comment3 -->
 )"};
 
 	std::vector<Xml::Element> expected
 	{
+		Xml::Element{Xml::ElementType::Comment, " Comment1 "},
 		Xml::Element{"Xml", Xml::ElementType::Open, {}},
+		Xml::Element{Xml::ElementType::Comment, " Comment2 "},
 		Xml::Element{"Xml", Xml::ElementType::Close, {}},
+		Xml::Element{Xml::ElementType::Comment, " Comment3 "},
 	};
 	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), xml.begin(), xml.end());
 }

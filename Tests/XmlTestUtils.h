@@ -29,7 +29,8 @@ namespace GLib::Xml
 	{
 		if (e1.Type()!= e2.Type() ||
 			e1.QName() != e2.QName() ||
-			e1.NameSpace() != e2.NameSpace())
+			e1.NameSpace() != e2.NameSpace() ||
+			e1.Text() != e2.Text())
 		{
 			return false;
 		}
@@ -60,7 +61,12 @@ namespace GLib::Xml
 
 	inline std::ostream & operator<<(std::ostream & s, const Element & e)
 	{
-		s << "NameSpace: " << e.NameSpace() << ", Name: " << e.Name() << ", type : " << (int)e.Type();
+		s
+			<< "NameSpace: " << e.NameSpace()
+			<< ", Name: " << e.Name()
+			<< ", type : " << (int)e.Type()
+			<< ", text : " << e.Text();
+
 		if (!e.Attributes().empty())
 		{
 			s << std::endl;

@@ -6,7 +6,7 @@ namespace GLib::Xml
 {
 	enum class ElementType : int
 	{
-		Open, Empty, Close
+		Open, Empty, Close, Text, Comment
 	};
 
 	class Element
@@ -20,6 +20,7 @@ namespace GLib::Xml
 		ElementType type {};
 		GLib::Xml::Attributes attributes;
 		size_t depth {}; // move/remove?
+		std::string_view text; // value?
 
 	public:
 		Element(std::string_view qName, std::string_view name, std::string_view nameSpace, ElementType type, Attributes attributes={})
@@ -28,6 +29,10 @@ namespace GLib::Xml
 
 		Element(std::string_view name, ElementType type, Attributes attributes={})
 			: qName(name), name(name), type(type), attributes(attributes)
+		{}
+
+		Element(ElementType type, std::string_view text)
+			: type(type), text(text)
 		{}
 
 		Element() = default;
@@ -65,6 +70,12 @@ namespace GLib::Xml
 		size_t Depth() const  // move/remove?
 		{
 			return depth;
+		}
+
+		// haxor
+		const std::string_view & Text() const
+		{
+			return text;
 		}
 	};
 }

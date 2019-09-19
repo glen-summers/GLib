@@ -20,11 +20,13 @@ namespace GLib::Html
 		static constexpr auto Block = std::string_view {"block"};
 		static constexpr auto Each = std::string_view {"each"};
 		static constexpr auto If = std::string_view {"if"};
+		static constexpr auto Text = std::string_view {"text"};
 
 		std::regex const propRegex { R"(\$\{([\w\.]+)\})" };
 		std::regex const varRegex { R"(^(\w+)\s:\s\$\{([\w\.]+)\}$)" };
 
 		Eval::Evaluator & evaluator;
+		std::string_view textReplacement;
 
 	public:
 		Generator(Eval::Evaluator & evaluator)
@@ -56,13 +58,44 @@ namespace GLib::Html
 				{
 					current = ProcessBlock(e, current);
 				}
-				else if (e.Type() != Xml::ElementType::Close)
-				{
-					current = ProcessElement(e, current, holder.Manager());
-				}
 				else
 				{
-					current->AddFragment(e.OuterXml());
+					switch (e.Type())
+					{
+						case Xml::ElementType::Open:
+						case Xml::ElementType::Empty:
+						{
+							textReplacement = ProcessElement(e, current, holder.Manager());
+							break;
+						}
+
+						case Xml::ElementType::Close:
+						{
+							current->AddFragment(e.OuterXml());
+							break;
+						}
+
+						case Xml::ElementType::Text:
+						{
+							if (textReplacement.empty())
+							{
+								// loses whitespace
+								current->AddFragment(e.Text());
+							}
+							else
+							{
+								current->AddFragment(std::exchange(textReplacement,{}));
+							}
+
+							break;
+						}
+
+						case Xml::ElementType::Comment:
+						{
+							current->AddFragment(e.Text());
+							break;
+						}
+					}
 				}
 			}
 
@@ -136,28 +169,41 @@ namespace GLib::Html
 			return node->AddConditional(ifValue);
 		}
 
-		Node * ProcessElement(const Xml::Element & e, Node * node, const Xml::NameSpaceManager & manager)
+		std::string_view ProcessElement(const Xml::Element & e, Node * node, const Xml::NameSpaceManager & manager)
 		{
 			AttributeMap atMap;
 			bool replaced = false;
-
+			std::string_view text;
 			auto attr = e.Attributes().Value();
-			Xml::Attributes attributes { attr, nullptr };
+			Xml::Attributes attributes { e.Attributes().Value(), nullptr };
+
 			for (auto a : attributes)
 			{
 				if (!Xml::NameSpaceManager::IsDeclaration(a.name))
 				{
 					auto [name, nameSpace] = manager.Normalise(a.name);
-					if (nameSpace.empty())
+					atMap.emplace(std::make_pair(nameSpace, name), a);
+				}
+			}
+
+			for (auto [namespaceName, a] : atMap)
+			{
+				if (namespaceName.first == NameSpace)
+				{
+					if (namespaceName.second == Text)
 					{
-						atMap.emplace(std::make_pair(nameSpace, name), a);
+						if (e.Type() != Xml::ElementType::Open)
+						{
+							throw std::runtime_error("Misplaced Attribute");
+						}
+						text = a.value;
 					}
-					else if (nameSpace == NameSpace)
+					else
 					{
-						auto existingIt = atMap.find(std::make_pair("",name));
+						auto existingIt = atMap.find(std::make_pair("", namespaceName.second));
 						if (existingIt == atMap.end())
 						{
-							throw std::runtime_error(std::string("Attribute not found : '") + std::string(name) + "'");
+							throw std::runtime_error(std::string("Attribute not found : '") + std::string(namespaceName.second) + "'");
 						}
 						existingIt->second.value = a.value;
 						replaced = true;
@@ -165,7 +211,7 @@ namespace GLib::Html
 				}
 			}
 
-			if (replaced)
+			if (replaced || !text.empty())
 			{
 				node->AddFragment(e.OuterXml().data(), attr.data()-1);
 
@@ -214,7 +260,8 @@ namespace GLib::Html
 				}
 				node->AddFragment(p, EndOf(e.OuterXml()));
 			}
-			return node;
+
+			return text;
 		}
 
 		void Generate(const Node & node, std::ostream & out)

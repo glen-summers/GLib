@@ -131,6 +131,48 @@ BOOST_AUTO_TEST_CASE(SimpleProperty)
 		BOOST_TEST(stm.str() == expected);
 	}
 
+	BOOST_AUTO_TEST_CASE(ReplaceText)
+	{
+		Evaluator evaluator;
+
+		auto xml = "<xml xmlns:gl='glib' gl:text='new'>old</xml>";
+		auto exp = "<xml>new</xml>";
+
+		std::ostringstream stm;
+		Generate(evaluator, xml, stm);
+
+		BOOST_TEST(stm.str() == exp);
+	}
+
+	BOOST_AUTO_TEST_CASE(ReplaceTextAndAttr)
+	{
+		Evaluator evaluator;
+
+		auto xml = R"(<xml xmlns:gl='glib' gl:attr='newAttr' gl:text='new' attr='oldAttr'>old</xml>)";
+		auto exp = R"(<xml attr='newAttr'>new</xml>)";
+
+		std::ostringstream stm;
+		Generate(evaluator, xml, stm);
+
+		BOOST_TEST(stm.str() == exp);
+	}
+
+	BOOST_AUTO_TEST_CASE(BugReplaceLosesWhiteSpace)
+	{
+		Evaluator evaluator;
+
+		auto xml = R"(<xml xmlns:gl='glib' gl:text='new'>
+old
+</xml>)";
+
+		auto exp = R"(<xml>new</xml>)";
+
+		std::ostringstream stm;
+		Generate(evaluator, xml, stm);
+
+		BOOST_TEST(stm.str() == exp);
+	}
+
 	BOOST_AUTO_TEST_CASE(If)
 	{
 		auto xml = R"(<xml xmlns:gl='glib'>

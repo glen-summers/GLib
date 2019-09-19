@@ -33,10 +33,13 @@ namespace GLib::Xml
 		NameSpaceManager * manager = {};
 
 		/////////// element working data, could just use element storage
+		ElementType elementType {};
 		Utils::PtrPair elementName;
 		Utils::PtrPair attributes;
 		Utils::PtrPair attributeName;
 		const char * attributeValueStart {};
+		const char * elementTextStart {};
+		const char * commentStart {};
 		bool contentClosed {};
 		///////////
 
@@ -134,16 +137,26 @@ namespace GLib::Xml
 				{
 					switch (oldState)
 					{
-						case Xml::State::Start:
+						case Xml::State::Text:
 						{
-							element = {};
-							break;
+							element = {Xml::ElementType::Text, Utils::ToStringView(elementTextStart, oldPtr)};
+							elementTextStart = nullptr;
+							lastPtr = oldPtr;
+							return;
+						}
+
+						case Xml::State::Comment:
+						{
+							element = {Xml::ElementType::Comment, Utils::ToStringView(commentStart, oldPtr)};
+							commentStart = nullptr;
+							lastPtr = oldPtr;
+							return;
 						}
 
 						case Xml::State::ElementName:
 						{
 							elementName.second = oldPtr;
-							element.type = ElementType::Open;
+							elementType = ElementType::Open;
 							if (newState == State::ElementAttributeSpace)
 							{
 								attributes = {ptr, nullptr};
@@ -154,7 +167,7 @@ namespace GLib::Xml
 						case Xml::State::ElementEndName:
 						{
 							elementName.second = oldPtr;
-							element.type = ElementType::Close;
+							elementType = ElementType::Close;
 							break;
 						}
 
@@ -193,7 +206,7 @@ namespace GLib::Xml
 
 						case Xml::State::EmptyElement:
 						{
-							element.type = ElementType::Empty;
+							elementType = ElementType::Empty;
 							break;
 						}
 
@@ -223,6 +236,18 @@ namespace GLib::Xml
 							break;
 						}
 
+						case Xml::State::Text:
+						{
+							elementTextStart = oldPtr;
+							break;
+						}
+
+						case Xml::State::Comment:
+						{
+							commentStart = ptr;
+							break;
+						}
+
 						default:;
 					}
 				}
@@ -239,9 +264,7 @@ namespace GLib::Xml
 			auto qName = Utils::ToStringView(elementName);
 			auto [name, nameSpace] = manager->Normalise(qName);
 
-			element.qName = qName;
-			element.name = name;
-			element.nameSpace = nameSpace;
+			element = {qName, name, nameSpace, elementType};
 			element.outerXml = Utils::ToStringView(lastPtr, outerXmlEnd);
 
 			if (attributes.first != nullptr && attributes.second != nullptr && element.type != ElementType::Close)
