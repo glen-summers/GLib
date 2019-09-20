@@ -492,16 +492,33 @@ BOOST_AUTO_TEST_CASE(AttrNamespaceNotFound)
 	GLIB_CHECK_RUNTIME_EXCEPTION( { Xml::Parse("<xml bar:baz='barbazd'/>"); }, "NameSpace bar not found");
 }
 
-BOOST_AUTO_TEST_CASE(Entities)
+BOOST_AUTO_TEST_CASE(ElementTextEntities)
 {
-/* TODO have iterator convert standard entites rather than just passing them on
+/* TODO have iterator convert standard entities rather than just passing them on
 	CharRef: '&#' [0-9]+ ';' | '&#x' [0-9a-fA-F]+ ';'
 	EntityRef: '&' Name '; [amp, lt, gt, apos, quot]
 */
 
-	Xml::Parse("<xml>&#x20ac;</xml>");
-	Xml::Parse("<xml>&#8364;</xml>");
-	Xml::Parse("<xml>&amp; &lt; &gt; &apos; &quot;</xml>");
+	Xml::Holder xml = { "<xml>&amp; &lt; &gt; &apos; &quot; &#x20ac; &#8364;</xml>" };
+
+	std::vector<Xml::Element> expected
+	{
+		Xml::Element{"xml", Xml::ElementType::Open, {}},
+		Xml::Element{Xml::ElementType::Text, "&amp; &lt; &gt; &apos; &quot; &#x20ac; &#8364;"},
+		Xml::Element{"xml", Xml::ElementType::Close, {}},
+	};
+	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), xml.begin(), xml.end());
+}
+
+BOOST_AUTO_TEST_CASE(AttributeEntities)
+{
+	Xml::Holder xml = { "<xml attr='&lt;'/>" };
+
+	std::vector<Xml::Element> expected
+	{
+		Xml::Element{"xml", Xml::ElementType::Empty, {"attr='&lt;'"}},
+	};
+	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), xml.begin(), xml.end());
 }
 
 BOOST_AUTO_TEST_CASE(AttributeEntity)
@@ -543,6 +560,8 @@ BOOST_AUTO_TEST_CASE(AttributeIteratorEnum)
 
 	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), attr.begin(), attr.end());
 }
+
+// test comment, text, attributes with entities and combos
 
 	BOOST_AUTO_TEST_CASE(PrinterEscapes) // move, expand
 	{

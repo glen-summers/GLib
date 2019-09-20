@@ -2,39 +2,49 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:gl="glib">
 	<head>
 		<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
-		<title>Coverage - ${title}</title>
+		<title gl:text="Coverage - ${title}">Coverage - Example</title>
 		<link rel="stylesheet" type="text/css" href="./coverage.css" gl:href="${styleSheet}"/>
 	</head>
 	<body>
 		<p class="title">GLib - coverage report</p>
 		<hr />
 		<table class="info">
-			<tr>
-				<td style="width:15%" class="headerItem" style="width:10%">Current view:</td>
-				<gl:block if="${isRoot}">
-					<td  style="width:35%" class="headerValue">TopLevel</td>
-				</gl:block>
+			<gl:block if="${isRoot}">
+				<tr>
+					<td style="width:15%" class="headerItem">Current view:</td>
+					<td style="width:35%" class="headerValue">TopLevel</td>
+					<td style="width:20%"></td>
+					<td style="width:10%" class="headerItem">Hit</td>
+					<td style="width:10%" class="headerItem">Total</td>
+					<td style="width:10%" class="headerItem">Coverage</td>
+				</tr>
+			</gl:block>
+			<gl:block if="${isChild}">
+				<tr>
+					<td style="width:15%" class="headerItem">Current view:</td>
+					<td style="width:35%" class="headerValue">
+						<a href="./directory.html" gl:href="${index}">TopLevel</a>
+						<span gl:text=" - ${subPath}"> - SubPath</span>
+					</td>
+					<td style="width:20%"></td>
+					<td style="width:10%" class="headerItem">Hit</td>
+					<td style="width:10%" class="headerItem">Total</td>
+					<td style="width:10%" class="headerItem">Coverage</td>
+				</tr>
+			</gl:block>
 
-				<gl:block if="${isChild}">
-					<td  style="width:35%" class="headerValue"><a href="./directory.html" gl:href="${index}">TopLevel</a> - ${subPath}</td>
-				</gl:block>
 
-				<td style="width:20%"></td>
-				<td style="width:10%" class="headerItem">Hit</td>
-				<td style="width:10%" class="headerItem">Total</td>
-				<td style="width:10%" class="headerItem">Coverage</td>
-			</tr>
 			<tr>
 				<td class="headerItem">Test:</td>
-				<td class="headerValue">${title}</td>
+				<td class="headerValue" gl:text="${title}">Title</td>
 				<td class="headerItem">Lines:</td>
-				<td class="coverageValue">${coveredLines}</td>
-				<td class="coverageValue">${coverableLines}</td>
-				<td class="green coverageValue" gl:class="${coverageStyle} coverageValue">${coveragePercent}&nbsp;%</td>
+				<td class="coverageValue" gl:text="${coveredLines}">123</td>
+				<td class="coverageValue" gl:text="${coverableLines}">234</td>
+				<td class="green coverageValue" gl:class="${coverageStyle} coverageValue" gl:text="${coveragePercent}&nbsp;%">75&nbsp;%</td>
 			</tr>
 			<tr>
 				<td class="headerItem">Time:</td>
-				<td class="headerValue">${time}</td>
+				<td class="headerValue" gl:text="${time}">19 Sep 2019, 14:42:43 (+0100)</td>
 				<td></td>
 				<td></td>
 				<td></td>
@@ -53,7 +63,7 @@
 			<gl:block each="directory : ${directories}">
 				<tr>
 					<td class="coverFile">
-						<a href="file.html" gl:href="${directory.link}">${directory.name}</a>
+						<a href="file.html" gl:href="${directory.link}" gl:text="${directory.name}">Directory</a>
 					</td>
 					<td class="coverItem">
 						<div class="box">
@@ -61,8 +71,8 @@
 							</div>
 						</div>
 					</td>
-					<td class="coverItem">${directory.coveragePercent}&nbsp;%</td>
-					<td class="coverageNumber coverItem">${directory.coveredLines}&nbsp;/&nbsp;${directory.coverableLines}</td>
+					<td class="coverItem" gl:text="${directory.coveragePercent}&nbsp;%">75&nbsp;%</td>
+					<td class="coverageNumber coverItem" gl:text="${directory.coveredLines}&nbsp;/&nbsp;${directory.coverableLines}">123&nbsp;/&nbsp;234</td>
 				</tr>
 			</gl:block>
 		</table>

@@ -37,9 +37,11 @@ namespace GLib::Xml
 		Utils::PtrPair elementName;
 		Utils::PtrPair attributes;
 		Utils::PtrPair attributeName;
-		const char * attributeValueStart {};
+
+		const char * attributeValueStart {}; // can use just one start Ptr?
 		const char * elementTextStart {};
 		const char * commentStart {};
+
 		bool contentClosed {};
 		///////////
 
@@ -139,6 +141,11 @@ namespace GLib::Xml
 					{
 						case Xml::State::Text:
 						{
+							if (newState == Xml::State::TextEntity) // hack
+							{
+								break;
+							}
+
 							element = {Xml::ElementType::Text, Utils::ToStringView(elementTextStart, oldPtr)};
 							elementTextStart = nullptr;
 							lastPtr = oldPtr;
@@ -157,7 +164,7 @@ namespace GLib::Xml
 						{
 							elementName.second = oldPtr;
 							elementType = ElementType::Open;
-							if (newState == State::ElementAttributeSpace)
+							if (newState == State::AttributeSpace)
 							{
 								attributes = {ptr, nullptr};
 							}
@@ -171,14 +178,19 @@ namespace GLib::Xml
 							break;
 						}
 
-						case Xml::State::ElementAttributeName:
+						case Xml::State::AttributeName:
 						{
 							attributeName.second = oldPtr;
 							break;
 						}
 
-						case Xml::State::ElementAttributeValue:
+						case Xml::State::AttributeValue:
 						{
+							if (newState == Xml::State::AttributeEntity) // hack
+							{
+								break;
+							}
+
 							manager->Push(Utils::ToStringView(attributeName), Utils::ToStringView(attributeValueStart, oldPtr).substr(1), elementStack.size());
 
 							// better test? currently writes ones per attr
@@ -210,13 +222,13 @@ namespace GLib::Xml
 							break;
 						}
 
-						case Xml::State::ElementAttributeName:
+						case Xml::State::AttributeName:
 						{
 							attributeName.first = oldPtr;
 							break;
 						}
 
-						case Xml::State::ElementAttributeValue:
+						case Xml::State::AttributeValue:
 						{
 							attributeValueStart = oldPtr;
 							break;
@@ -238,7 +250,10 @@ namespace GLib::Xml
 
 						case Xml::State::Text:
 						{
-							elementTextStart = oldPtr;
+							if (oldState != Xml::State::TextEntity)
+							{
+								elementTextStart = oldPtr;
+							}
 							break;
 						}
 

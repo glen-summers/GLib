@@ -40,6 +40,7 @@ namespace GLib::Xml
 			return nit->second;
 		}
 
+		// rename?
 		void Push(const std::string_view & qualifiedName, const std::string_view & value, size_t depth)
 		{
 			std::string_view prefix;

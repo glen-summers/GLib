@@ -32,7 +32,7 @@ namespace GLib::Xml
 
 	public:
 		AttributeIterator(const NameSpaceManager * manager, const char * begin, const char * end)
-			: engine(State::ElementAttributeSpace)
+			: engine(State::AttributeSpace)
 			, manager(manager)
 			, ptr(begin)
 			, end(end)
@@ -111,22 +111,22 @@ namespace GLib::Xml
 				}
 				++ptr; // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic) todo use std::span
 
-				if (newState == Xml::State::Entity || oldState == Xml::State::Entity)
-				{
-					continue; // currenly ignoring entities, receiver needs to decode
-				}
-
 				if (newState != oldState)
 				{
+					if (newState == Xml::State::AttributeEntity || oldState == Xml::State::AttributeEntity)
+					{
+						continue; // currenly ignoring entities, receiver needs to decode
+					}
+
 					switch (oldState)
 					{
-						case Xml::State::ElementAttributeName:
+						case Xml::State::AttributeName:
 						{
 							attributeName.second = oldPtr;
 							break;
 						}
 
-						case Xml::State::ElementAttributeValue:
+						case Xml::State::AttributeValue:
 						{
 							attributeValue.second = oldPtr;
 							if (manager == nullptr || !Xml::NameSpaceManager::IsDeclaration(Utils::ToStringView(attributeName)))
@@ -140,13 +140,13 @@ namespace GLib::Xml
 
 					switch (newState)
 					{
-						case Xml::State::ElementAttributeName:
+						case Xml::State::AttributeName:
 						{
 							attributeName.first = oldPtr;
 							break;
 						}
 
-						case Xml::State::ElementAttributeValue:
+						case Xml::State::AttributeValue:
 						{
 							attributeValue.first = ptr;
 							break;

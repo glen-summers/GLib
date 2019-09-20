@@ -22,7 +22,7 @@ namespace GLib::Xml
 
 	inline std::ostream & operator<<(std::ostream & s, const Attribute & a)
 	{
-		return s << "Attr: " << a.nameSpace << ":" << a.name << "=" << a.value << std::endl;
+		return s << "Attr: [" << a.nameSpace << "]:[" << a.name << "]=[" << a.value << ']' << std::endl;
 	}
 
 	inline bool operator==(const Element & e1, const Element & e2)
@@ -62,17 +62,17 @@ namespace GLib::Xml
 	inline std::ostream & operator<<(std::ostream & s, const Element & e)
 	{
 		s
-			<< "NameSpace: " << e.NameSpace()
-			<< ", Name: " << e.Name()
-			<< ", type : " << (int)e.Type()
-			<< ", text : " << e.Text();
+			<< "NameSpace: [" << e.NameSpace()
+			<< "], Name: [" << e.Name()
+			<< "], type : [" << (int)e.Type()
+			<< "], text : [" << e.Text() << ']';
 
 		if (!e.Attributes().empty())
 		{
 			s << std::endl;
 			for(const auto & a : e.Attributes())
 			{
-				s << "Attr: " << a.nameSpace << ":" << a.name << "=" << a.value << std::endl;
+				s << "Attr: [" << a.nameSpace << "]:[" << a.name << "]=[" << a.value << ']' << std::endl;
 			}
 		}
 		return s;

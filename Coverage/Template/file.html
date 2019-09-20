@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:gl="glib">
 <head>
 	<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
-	<title>Coverage - ${title}</title>
+	<title gl:text="Coverage - ${title}">Coverage - Example</title>
 	<link rel="stylesheet" type="text/css" href="./coverage.css" gl:href="${styleSheet}" />
 </head>
 <body>
@@ -13,7 +13,7 @@
 		<tr>
 			<td style="width:15%" class="headerItem">Current view:</td>
 			<td style="width:35%" class="headerValue">
-				<a href="./directory.html" gl:href="${index}">TopLevel</a> - <a href="./directory.html" gl:href="./index.html">${parent}</a> - ${fileName}</td>
+				<a href="./directory.html" gl:href="${index}">TopLevel</a> - <a href="./directory.html" gl:href="./index.html" gl:text="${parent}">parent</a> - <span gl:text="${fileName}">fileName</span></td>
 			<td style="width:20%"></td>
 			<td style="width:10%" class="headerItem">Hit</td>
 			<td style="width:10%" class="headerItem">Total</td>
@@ -21,15 +21,15 @@
 		</tr>
 		<tr>
 			<td class="headerItem">Test:</td>
-			<td class="headerValue">${testName}</td>
+			<td class="headerValue" gl:text="${testName}">Test name</td>
 			<td class="headerItem">Lines:</td>
-			<td class="coverageValue">${coveredLines}</td>
-			<td class="coverageValue">${coverableLines}</td>
-			<td class="green coverageValue" gl:class="${coverageStyle} coverageValue">${coveragePercent}&nbsp;%</td>
+			<td class="coverageValue" gl:text="${coveredLines}">123</td>
+			<td class="coverageValue" gl:text="${coverableLines}">234</td>
+			<td class="green coverageValue" gl:class="${coverageStyle} coverageValue" gl:text="${coveragePercent}&nbsp;%">74&nbsp;%</td>
 		</tr>
 		<tr>
 			<td class="headerItem">Time:</td>
-			<td class="headerValue">${time}</td>
+			<td class="headerValue" gl:text="${time}">19 Sep 2019, 14:42:43 (+0100)</td>
 			<td></td>
 			<td></td>
 			<td></td>
@@ -40,10 +40,9 @@
 
 	<table class="source">
 		<gl:block each="line : ${lines}">
-			<tr class="cov" gl:class="${line.style}"><td><pre><code><span class="line">[${line.number}]</span>${line.text}</code></pre></td></tr>
+			<tr class="cov" gl:class="${line.style}"><td><pre><code><span class="line" gl:text="[${line.number}]">[1]</span><span gl:text="${line.text}">auto foo = bar();</span></code></pre></td></tr>
 		</gl:block>
 		<gl:block if="false">
-			<tr class="cov"><td><pre><code><span class="line">[1]</span>auto foo = bar();</code></pre></td></tr>
 			<tr class="ncov"><td><pre><code><span class="line">[2]</span>auto baz = bum();</code></pre></td></tr>
 		</gl:block>
 	</table>

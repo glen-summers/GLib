@@ -16,12 +16,12 @@ namespace GLib::Xml
 		ElementEndSpace,
 		ElementName,
 		EmptyElement,
-		ElementAttributeSpace,
-		ElementAttributeName,
-		ElementAttributeNameSpace,
-		ElementAttributeValueStart,
-		ElementAttributeValue,
-		ElementAttributeEnd,
+		AttributeSpace,
+		AttributeName,
+		AttributeNameSpace,
+		AttributeValueStart,
+		AttributeValue,
+		AttributeEnd,
 		Text,
 
 		Bang,
@@ -37,7 +37,8 @@ namespace GLib::Xml
 		CDataEnd1,
 		CDataEnd2,
 
-		Entity,
+		TextEntity,
+		AttributeEntity,
 
 		Count
 	};
@@ -74,7 +75,6 @@ namespace GLib::Xml
 		bool mutable hasDocTypeDecl {};
 		bool mutable hasContent {};
 		char mutable attributeQuoteChar {};
-		State mutable entityReturnState {};
 		StateFunction stateFunction;
 
 	public:
@@ -252,7 +252,7 @@ namespace GLib::Xml
 			}
 			if (IsWhiteSpace(c))
 			{
-				return State::ElementAttributeSpace;
+				return State::AttributeSpace;
 			}
 			return State::Error;
 		}
@@ -266,7 +266,7 @@ namespace GLib::Xml
 			return State::Error;
 		}
 
-		Xml::State ElementAttributeSpace(char c) const
+		Xml::State AttributeSpace(char c) const
 		{
 			if (IsWhiteSpace(c))
 			{
@@ -282,12 +282,12 @@ namespace GLib::Xml
 			}
 			if (IsNameStart(c))
 			{
-				return State::ElementAttributeName;
+				return State::AttributeName;
 			}
 			return State::Error;
 		}
 
-		Xml::State ElementAttributeName(char c) const
+		Xml::State AttributeName(char c) const
 		{
 			if (IsName(c))
 			{
@@ -295,16 +295,16 @@ namespace GLib::Xml
 			}
 			if (IsWhiteSpace(c))
 			{
-				return State::ElementAttributeNameSpace;
+				return State::AttributeNameSpace;
 			}
 			if (c == Equals)
 			{
-				return State::ElementAttributeValueStart;
+				return State::AttributeValueStart;
 			}
 			return State::Error;
 		}
 
-		Xml::State ElementAttributeNameSpace(char c) const
+		Xml::State AttributeNameSpace(char c) const
 		{
 			if (IsWhiteSpace(c))
 			{
@@ -312,12 +312,12 @@ namespace GLib::Xml
 			}
 			if (c == Equals)
 			{
-				return State::ElementAttributeValueStart;
+				return State::AttributeValueStart;
 			}
 			return State::Error;
 		}
 
-		Xml::State ElementAttributeValueStart(char c) const
+		Xml::State AttributeValueStart(char c) const
 		{
 			if (IsWhiteSpace(c))
 			{
@@ -326,21 +326,20 @@ namespace GLib::Xml
 			if (c == DoubleQuote || c == SingleQuote)
 			{
 				attributeQuoteChar = c;
-				return State::ElementAttributeValue;
+				return State::AttributeValue;
 			}
 			return State::Error;
 		}
 
-		Xml::State ElementAttributeValue(char c) const
+		Xml::State AttributeValue(char c) const
 		{
 			if (c == attributeQuoteChar)
 			{
-				return State::ElementAttributeEnd;
+				return State::AttributeEnd;
 			}
 			if (c == Ampersand)
 			{
-				entityReturnState = state;
-				return State::Entity;
+				return State::AttributeEntity;
 			}
 			if (IsAllowedTextCharacter(c))
 			{
@@ -349,11 +348,11 @@ namespace GLib::Xml
 			return State::Error;
 		}
 
-		Xml::State ElementAttributeEnd(char c) const
+		Xml::State AttributeEnd(char c) const
 		{
 			if (IsWhiteSpace(c))
 			{
-				return State::ElementAttributeSpace;
+				return State::AttributeSpace;
 			}
 			if (c == RightAngleBracket)
 			{
@@ -374,8 +373,7 @@ namespace GLib::Xml
 			}
 			if (c == Ampersand)
 			{
-				entityReturnState = state;
-				return State::Entity;
+				return State::TextEntity;
 			}
 			if (IsAllowedTextCharacter(c))
 			{
@@ -483,12 +481,23 @@ namespace GLib::Xml
 			return Xml::State::CDataValue;
 		}
 
-		Xml::State Entity(char c) const
+		Xml::State TextEntity(char c) const
 		{
 			if (c == SemiColon)
 			{
-				return std::exchange(entityReturnState, State::Error);
+				return State::Text;
 			}
+			// todo: validate chars, more states for decimal, hex numbers
+			return state;
+		}
+
+		Xml::State AttributeEntity(char c) const
+		{
+			if (c == SemiColon)
+			{
+				return State::AttributeValue;
+			}
+			// todo: validate chars, more states for decimal, hex numbers
 			return state;
 		}
 
@@ -507,12 +516,12 @@ namespace GLib::Xml
 			&StateEngine::ElementEndSpace,
 			&StateEngine::ElementName,
 			&StateEngine::EmptyElement,
-			&StateEngine::ElementAttributeSpace,
-			&StateEngine::ElementAttributeName,
-			&StateEngine::ElementAttributeNameSpace,
-			&StateEngine::ElementAttributeValueStart,
-			&StateEngine::ElementAttributeValue,
-			&StateEngine::ElementAttributeEnd,
+			&StateEngine::AttributeSpace,
+			&StateEngine::AttributeName,
+			&StateEngine::AttributeNameSpace,
+			&StateEngine::AttributeValueStart,
+			&StateEngine::AttributeValue,
+			&StateEngine::AttributeEnd,
 			&StateEngine::Text,
 
 			&StateEngine::Bang,
@@ -528,7 +537,9 @@ namespace GLib::Xml
 			&StateEngine::CDataEnd1,
 			&StateEngine::CDataEnd2,
 
-			&StateEngine::Entity,
+			&StateEngine::TextEntity,
+			&StateEngine::AttributeEntity,
+
 		};
 	};
 }
