@@ -1,5 +1,6 @@
 #pragma once
 
+#include "GLib/compat.h"
 #include "GLib/Win/Local.h"
 #include "GLib/Win/Process.h"
 #include "GLib/scope.h"
@@ -204,15 +205,14 @@ namespace GLib::Win::Symbols
 			auto const processPath = std::filesystem::path(FileSystem::PathOfProcessHandle(duplicate.get())).parent_path().u8string();
 			searchPath << processPath << ";";
 
-			std::string value = Win::Detail::EnvironmentVariable("_NT_SYMBOL_PATH");
-			if (!value.empty())
+			if (auto value = Compat::GetEnv("_NT_SYMBOL_PATH"))
 			{
-				searchPath << value << ";";
+				searchPath << *value << ";";
 			}
-			value = Win::Detail::EnvironmentVariable("PATH");
-			if (!value.empty())
+
+			if (auto value = Compat::GetEnv("PATH"))
 			{
-				searchPath << value << ";";
+				searchPath << *value << ";";
 			}
 
 			// when debugging processHandle and enumerateModules = true, get errorCode=0x8000000d : An illegal state change was requested

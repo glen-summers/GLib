@@ -12,7 +12,6 @@
 
 #include "TestUtils.h"
 
-
 // split up
 // clone hg tests in
 BOOST_AUTO_TEST_SUITE(WinTests)
@@ -77,21 +76,8 @@ BOOST_AUTO_TEST_SUITE(WinTests)
 	BOOST_AUTO_TEST_CASE(TestErrorCheck)
 	{
 		::SetLastError(ERROR_ACCESS_DENIED);
-		BOOST_CHECK_EXCEPTION_EX(GLib::Win::Util::AssertTrue(false, "test fail"),
-			GLib::Win::WinException, TestUtils::ExpectException, "test fail : Access is denied. (5)");
-	}
-
-	BOOST_AUTO_TEST_CASE(EnvironmentVariable)
-	{
-		const size_t UNLEN = 256;
-		wchar_t userName[UNLEN+1];
-		DWORD userNameLen = 256;
-		GLib::Win::Util::AssertTrue(::GetUserNameW(userName, &userNameLen), "GetUserNameW");
-
-		std::string result = GLib::Win::Detail::EnvironmentVariable("USERNAME");
-		BOOST_CHECK(result == GLib::Cvt::w2a(userName));
-
-		auto path = GLib::Win::Detail::EnvironmentVariable("PATH");
+		GLIB_CHECK_EXCEPTION(GLib::Win::Util::AssertTrue(false, "test fail"),
+			GLib::Win::WinException, "test fail : Access is denied. (5)");
 	}
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -14,16 +14,14 @@ namespace GLib::Win::FileSystem
 	// try again to use fs:path as return values?
 	namespace Detail
 	{
-		constexpr auto DefaultStackReserveSize = 256;
 		constexpr auto MaximumPathLength = 32768U;
-		using Buffer = GLib::Util::StackOrHeap<wchar_t, DefaultStackReserveSize>;
 	}
 
 	// return an iterator?
 	inline std::vector<std::string> LogicalDrives()
 	{
 		std::vector<std::string> drives;
-		Detail::Buffer s;
+		GLib::Util::WideCharBuffer s;
 
 		DWORD sizeWithFinalTerminator = ::GetLogicalDriveStringsW(0, nullptr);
 		s.EnsureSize(static_cast<size_t>(sizeWithFinalTerminator-1));
@@ -44,7 +42,7 @@ namespace GLib::Win::FileSystem
 	inline std::map<std::string, std::string> DriveMap()
 	{
 		std::map<std::string, std::string> result;
-		Detail::Buffer s;
+		GLib::Util::WideCharBuffer s;
 
 		for (const auto & logicalDrive : LogicalDrives())
 		{
@@ -61,7 +59,7 @@ namespace GLib::Win::FileSystem
 
 	inline std::string PathOfFileHandle(HANDLE fileHandle, DWORD flags)
 	{
-		Detail::Buffer s;
+		GLib::Util::WideCharBuffer s;
 		DWORD length = ::GetFinalPathNameByHandleW(fileHandle, nullptr, 0, flags);
 		Util::AssertTrue(length != 0, "GetFinalPathNameByHandleW failed");
 		s.EnsureSize(length);
@@ -89,7 +87,7 @@ namespace GLib::Win::FileSystem
 
 	inline std::string PathOfModule(HMODULE module)
 	{
-		Detail::Buffer s;
+		GLib::Util::WideCharBuffer s;
 
 		unsigned int length;
 		for (;;)
@@ -118,7 +116,7 @@ namespace GLib::Win::FileSystem
 
 	inline std::string PathOfProcessHandle(HANDLE process)
 	{
-		Detail::Buffer s;
+		GLib::Util::WideCharBuffer s;
 
 		DWORD requiredSize;
 		for (;;)

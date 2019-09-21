@@ -49,20 +49,6 @@ namespace GLib::Win
 
 		template<UINT ExitCode>
 		using TerminatorHolder = std::unique_ptr<void, Terminator<ExitCode>>;
-
-		// move?
-		inline std::string EnvironmentVariable(const std::string & name)
-		{
-			std::wstring w = Cvt::a2w(name);
-			Detail::Buffer s;
-			size_t size = ::GetEnvironmentVariableW(w.c_str(), s.Get(), static_cast<DWORD>(s.size()));
-			if (size >= s.size())
-			{
-				s.EnsureSize(size);
-				size = ::GetEnvironmentVariableW(w.c_str(), s.Get(), static_cast<DWORD>(s.size()));
-			}
-			return size == 0 ? "" : Cvt::w2a(std::wstring_view{s.Get(), size});
-		}
 	}
 
 	class Process

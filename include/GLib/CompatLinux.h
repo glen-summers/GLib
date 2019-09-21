@@ -3,6 +3,7 @@
 #include "GLib/stackorheap.h"
 
 #include <experimental/filesystem>
+#include <optional>
 
 #include <cxxabi.h>
 #include <string.h>
@@ -24,12 +25,32 @@ namespace GLib::Compat
 		gmtime_r(&t, &tm);
 	}
 
-	inline void StrError(const char * prefix)
+	[[noreturn]] inline void StrError(const char * prefix, int  error = errno)
 	{
 		constexpr auto ErrorBufferSize = 256;
 		std::array<char, ErrorBufferSize> err{};
-		char * msg = strerror_r(errno, err.data(), err.size());
+		char * msg = strerror_r(error, err.data(), err.size());
 		throw std::runtime_error(std::string(prefix)+ " : " + msg);
+	}
+
+	inline void SetEnv(const char * name, const char * value)
+	{
+		int err = ::setenv(name, value, 1);
+		if (err < 0)
+		{
+			StrError("_putenv_s failed", err);
+		}
+	}
+
+	inline std::optional<std::string> GetEnv(const char * name)
+	{
+		const char * value = ::getenv(name);
+		return value != nullptr ? std::optional<std::string>{value} : std::nullopt;
+	}
+
+	inline void UnsetEnv(const char * name)
+	{
+		::unsetenv(name);
 	}
 
 	inline std::string Unmangle(const std::string & name)
@@ -71,5 +92,10 @@ namespace GLib::Compat
 	inline std::string ProcessName()
 	{
 		return filesystem::path(ProcessPath()).filename().u8string();
+	}
+
+	inline void TzSet()
+	{
+		::tzset();
 	}
 }

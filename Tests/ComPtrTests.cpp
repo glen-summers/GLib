@@ -15,22 +15,22 @@ BOOST_AUTO_TEST_CASE(TestComErrorCheckWithErrorInfo)
 	p->SetDescription(const_cast<LPOLESTR>(L"hello"));
 	GLib::Win::CheckHr(::SetErrorInfo(0, ei.Get()), "SetErrorInfo");
 
-	BOOST_CHECK_EXCEPTION_EX(GLib::Win::CheckHr(E_OUTOFMEMORY, "fail"),
-		GLib::Win::ComException, TestUtils::ExpectException, "fail : hello (8007000E)");
+	GLIB_CHECK_EXCEPTION(GLib::Win::CheckHr(E_OUTOFMEMORY, "fail"),
+		GLib::Win::ComException, "fail : hello (8007000E)");
 }
 
 BOOST_AUTO_TEST_CASE(TestComErrorCheck)
 {
 	::SetErrorInfo(0, nullptr);
-	BOOST_CHECK_EXCEPTION_EX(GLib::Win::CheckHr(E_FAIL, "test E_FAIL"),
-		GLib::Win::ComException, TestUtils::ExpectException, "test E_FAIL : Unspecified error (80004005)");
+	GLIB_CHECK_EXCEPTION(GLib::Win::CheckHr(E_FAIL, "test E_FAIL"),
+		GLib::Win::ComException, "test E_FAIL : Unspecified error (80004005)");
 }
 
 BOOST_AUTO_TEST_CASE(TestComErrorCheck2)
 {
 	::SetErrorInfo(0, nullptr);
-	BOOST_CHECK_EXCEPTION_EX(GLib::Win::CheckHr(E_UNEXPECTED, "test E_UNEXPECTED"),
-		GLib::Win::ComException, TestUtils::ExpectException, "test E_UNEXPECTED : Catastrophic failure (8000FFFF)");
+	GLIB_CHECK_EXCEPTION(GLib::Win::CheckHr(E_UNEXPECTED, "test E_UNEXPECTED"),
+		GLib::Win::ComException, "test E_UNEXPECTED : Catastrophic failure (8000FFFF)");
 }
 
 BOOST_AUTO_TEST_CASE(UninitialisedComPtrHasZeroUseCount)
@@ -144,11 +144,11 @@ BOOST_AUTO_TEST_CASE(TestComCast)
 
 	BOOST_CHECK(true == static_cast<bool>(GLib::Win::ComCast<ITest1>(p12)));
 
-	BOOST_CHECK_EXCEPTION_EX(GLib::Win::ComCast<ITest2>(p12), GLib::Win::ComException,
-		TestUtils::ExpectException, "QueryInterface : No such interface supported (80004002)");
+	GLIB_CHECK_EXCEPTION(GLib::Win::ComCast<ITest2>(p12),
+		GLib::Win::ComException, "QueryInterface : No such interface supported (80004002)");
 
-	BOOST_CHECK_EXCEPTION_EX(GLib::Win::ComCast<ITest3>(p12), GLib::Win::ComException,
-		TestUtils::ExpectException, "QueryInterface : No such interface supported (80004002)");
+	GLIB_CHECK_EXCEPTION(GLib::Win::ComCast<ITest3>(p12),
+		GLib::Win::ComException, "QueryInterface : No such interface supported (80004002)");
 
 	BOOST_TEST(true == static_cast<bool>(GLib::Win::ComCast<ITest1Extended>(p12)));
 	BOOST_TEST(true == static_cast<bool>(GLib::Win::ComCast<ITest1ExtendedAlt>(p12)));

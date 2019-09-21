@@ -18,9 +18,6 @@ namespace GLib::IcuUtils
 {
 	namespace Detail
 	{
-		constexpr auto DefaultStackReserveSize = 256;
-		using Buffer = Util::StackOrHeap<char, DefaultStackReserveSize>;
-
 		inline void AssertNoError(UErrorCode error, const char * msg)
 		{
 			if (U_FAILURE(error) != FALSE)
@@ -117,7 +114,7 @@ namespace GLib::IcuUtils
 		Detail::AssertTrue(error == U_BUFFER_OVERFLOW_ERROR, "ucasemap_utf8ToLower");
 
 		error = U_ZERO_ERROR;
-		Detail::Buffer s;
+		Util::CharBuffer s;
 		s.EnsureSize(destLength);
 		::ucasemap_utf8ToLower(map.get(), s.Get(), destLength, value.c_str(), sourceLength, &error);
 		Detail::AssertNoError(error, "ucasemap_utf8ToLower");
@@ -134,7 +131,7 @@ namespace GLib::IcuUtils
 		Detail::AssertTrue(error == U_BUFFER_OVERFLOW_ERROR, "ucasemap_utf8ToUpper");
 
 		error = U_ZERO_ERROR;
-		Detail::Buffer s;
+		Util::CharBuffer s;
 		s.EnsureSize(destLength);
 		::ucasemap_utf8ToUpper(map.get(), s.Get(), destLength, value.c_str(), sourceLength, &error);
 		Detail::AssertNoError(error, "ucasemap_utf8ToUpper");
