@@ -1,8 +1,8 @@
 #pragma once
 
-#include "GLib/compat.h"
 #include "GLib/Win/Local.h"
 #include "GLib/Win/Process.h"
+#include "GLib/compat.h"
 #include "GLib/scope.h"
 
 #define _NO_CVCONST_H

@@ -62,9 +62,9 @@ std::string GetDateTime(time_t t)
 	return os.str();
 }
 
-HtmlReport::HtmlReport(const std::string & testName, const std::filesystem::path & htmlPath,
+HtmlReport::HtmlReport(std::string testName, const std::filesystem::path & htmlPath,
 	const std::map<std::filesystem::path, FileCoverageData> & fileCoverageData)
-	: testName(testName)
+	: testName(move(testName))
 	, time(GetDateTime(std::time(nullptr)))
 	, htmlPath(htmlPath)
 	, rootPaths(RootPaths(fileCoverageData))
@@ -136,6 +136,11 @@ void HtmlReport::GenerateRootIndex() const
 		totalCoverableLines += coverableLines;
 	}
 
+	if (totalCoverableLines == 0)
+	{
+		throw std::runtime_error("Zero coverable lines");
+	}
+
 	auto coveragePercent = static_cast<unsigned int>(totalCoveredLines*HundredPercent / totalCoverableLines);
 
 	GLib::Eval::Evaluator e;
@@ -176,6 +181,12 @@ void HtmlReport::GenerateIndices() const
 			totalCoveredLines += data.CoveredLines();
 			totalCoverableLines += data.CoverableLines();
 		}
+
+		if (totalCoverableLines == 0)
+		{
+			throw std::runtime_error("Zero coverable lines");
+		}
+
 		auto coveragePercent = static_cast<unsigned int>(totalCoveredLines*HundredPercent / totalCoverableLines);
 
 		for (const FileCoverageData & data : children)
@@ -236,7 +247,7 @@ void HtmlReport::GenerateSourceFile(std::filesystem::path & subPath, const FileC
 
 	std::vector<Line> lines;
 
-	for (auto sourceLine : GLib::Util::Splitter{source.str(), "\n"})
+	for (const auto & sourceLine : GLib::Util::Splitter{source.str(), "\n"})
 	{
 		auto lineNumber = static_cast<unsigned int>(lines.size()+1);
 		const char * style = "";

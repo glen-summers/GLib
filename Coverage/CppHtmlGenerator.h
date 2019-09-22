@@ -5,9 +5,9 @@
 #include "GLib/split.h"
 
 #include <cctype>
-#include <vector>
 #include <unordered_map>
 #include <unordered_set>
+#include <vector>
 
 enum class Style : char
 {
@@ -93,8 +93,8 @@ inline void Htmlify(const GLib::Cpp::Holder & code, std::ostream & out)
 		{ GLib::Cpp::State::SystemInclude, Style::String},
 	};
 
-	auto alphaNumUnd = [](unsigned char c){ return std::isalnum(c) || c == '_'; };
-	auto whitespace = [](unsigned char c){ return std::isspace(c); };
+	auto alphaNumUnd = [](unsigned char c) { return std::isalnum(c) != 0 || c == '_'; };
+	auto whitespace = [](unsigned char c) { return std::isspace(c) != 0; };
 
 	for (auto f : code)
 	{

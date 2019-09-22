@@ -24,9 +24,11 @@ namespace GLib::Html
 			: parent(parent), variable(move(variable)), enumeration(move(enumeration)), condition(condition)
 		{}
 
-		Node(Node * parent, std::string_view condition, bool)
+		Node(Node * parent, std::string_view condition, bool unused)
 			: parent(parent), condition(condition)
-		{}
+		{
+			(void)unused;
+		}
 
 		Node * Parent() const
 		{

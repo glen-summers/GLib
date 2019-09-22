@@ -108,7 +108,8 @@ namespace GLib::Html
 			{
 				case Xml::ElementType::Open:
 				{
-					std::string_view eachValue, ifValue;
+					std::string_view eachValue;
+					std::string_view ifValue;
 					for (auto attr : e.Attributes())
 					{
 						if (attr.name == Each)
@@ -254,7 +255,8 @@ namespace GLib::Html
 						if (manager.Get(prefix) == NameSpace)
 						{
 							node->AddFragment(p, a.name.data() - 1); // -1 minus space prefix
-							p = EndOf(a.value) + 1; // +1 trailing quote
+							p = EndOf(a.value);
+							++p; // +1 trailing quote
 						}
 					}
 				}
@@ -287,7 +289,7 @@ namespace GLib::Html
 				{
 					return;
 				}
-				else if (result !="true")
+				if (result !="true")
 				{
 					throw std::runtime_error("Expected boolean value, got: " + result);
 				}
