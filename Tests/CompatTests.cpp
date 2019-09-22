@@ -16,18 +16,22 @@ BOOST_AUTO_TEST_SUITE(CompatTests)
 
 BOOST_AUTO_TEST_CASE(LocalTimeZero)
 {
+	auto tz = GLib::Compat::GetEnv("TZ");
+	GLib::Compat::SetEnv("TZ", "GMST0GMDT-1,M3.3.0,M10.1.0");
+	GLib::Compat::TzSet();
+	SCOPE(_, [&]() noexcept
+	{
+		if (tz) GLib::Compat::SetEnv("TZ", tz->c_str());
+		else GLib::Compat::UnsetEnv("TZ");
+		GLib::Compat::TzSet();
+	});
+
 	tm tm {};
 	GLib::Compat::LocalTime(tm, 0);
 
 	BOOST_TEST(tm.tm_sec == 0);
 	BOOST_TEST(tm.tm_min == 0);
-
-#if defined(__linux__) && defined(__GNUG__)
-	BOOST_TEST(tm.tm_hour == 1); // used to be zero but changed??
-#else
 	BOOST_TEST(tm.tm_hour == 0);
-#endif
-
 	BOOST_TEST(tm.tm_mday == 1);
 	BOOST_TEST(tm.tm_mon == 0);
 	BOOST_TEST(tm.tm_year == 70);
@@ -43,9 +47,9 @@ BOOST_AUTO_TEST_CASE(LocalTimeSpecific)
 	GLib::Compat::TzSet();
 	SCOPE(_, [&]() noexcept
 	{
-			if (tz) GLib::Compat::SetEnv("TZ", tz->c_str());
-			else GLib::Compat::UnsetEnv("TZ");
-			GLib::Compat::TzSet();
+		if (tz) GLib::Compat::SetEnv("TZ", tz->c_str());
+		else GLib::Compat::UnsetEnv("TZ");
+		GLib::Compat::TzSet();
 	});
 
 	tm tm {};
