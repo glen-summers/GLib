@@ -86,14 +86,15 @@ BOOST_AUTO_TEST_CASE(StrError)
 {
 	GLIB_CHECK_RUNTIME_EXCEPTION(
 	{
-		errno = ENOENT;
-		GLib::Compat::StrError("error");
+		GLib::Compat::AssertTrue(false, "error", ENOENT);
 	}, "error : No such file or directory");
 
 	GLIB_CHECK_RUNTIME_EXCEPTION(
 	{
-		GLib::Compat::StrError("error", ESRCH);
+		GLib::Compat::AssertTrue(false, "error", ESRCH);
 	}, "error : No such process");
+
+	GLib::Compat::AssertTrue(true, "no error", 0);
 }
 
 BOOST_AUTO_TEST_CASE(Unmangle)
@@ -123,6 +124,10 @@ BOOST_AUTO_TEST_CASE(Env)
 
 	GLib::Compat::SetEnv(testVar, "Euro \xE2\x82\xAC");
 	BOOST_TEST("Euro \xE2\x82\xAC" == *GLib::Compat::GetEnv(testVar));
+
+	auto valueLongerThanDefaultBuffer = std::string(300, '-');
+	GLib::Compat::SetEnv(testVar, valueLongerThanDefaultBuffer.c_str());
+	BOOST_TEST(valueLongerThanDefaultBuffer == *GLib::Compat::GetEnv(testVar));
 
 	GLib::Compat::UnsetEnv(testVar);
 	BOOST_CHECK(false == GLib::Compat::GetEnv(testVar).has_value());

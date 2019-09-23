@@ -23,26 +23,24 @@ namespace GLib::Compat
 		gmtime_s(&tm, &t);
 	}
 
-	[[noreturn]] inline void StrError(const char * prefix, errno_t error = errno)
+	inline void AssertTrue(bool value, const char * prefix, errno_t error)
 	{
-		// wide?
-		constexpr auto ErrorBufferSize = 256;
-		std::array<char, ErrorBufferSize> err{};
-		char * msg;
-		strerror_s(msg = err.data(), err.size(), error);
-		throw std::runtime_error(std::string(prefix)+ " : " + msg);
+		if (!value)
+		{
+			constexpr auto ErrorBufferSize = 256;
+			std::array<char, ErrorBufferSize> err{};
+			char * msg;
+			strerror_s(msg = err.data(), err.size(), error);
+			throw std::runtime_error(std::string(prefix) + " : " + msg);
+		}
 	}
 
 	inline void SetEnv(const char * name, const char * value)
 	{
 		auto wideName = GLib::Cvt::a2w(name);
 		auto wideValue = GLib::Cvt::a2w(value);
-
 		errno_t err = ::_wputenv_s(wideName.c_str(), wideValue.c_str());
-		if (err != 0)
-		{
-			StrError("_putenv_s failed", err);
-		}
+		AssertTrue(err == 0, "_putenv_s", err);
 	}
 
 	inline std::optional<std::string> GetEnv(const char * name)
@@ -62,10 +60,7 @@ namespace GLib::Compat
 			tmp.EnsureSize(len);
 			err = ::_wgetenv_s(&len, tmp.Get(), tmp.size(), wideName.c_str());
 		}
-		if (err != 0)
-		{
-			StrError("getenv_s failed", err);
-		}
+		AssertTrue(err == 0, "getenv_s", err);
 		return Cvt::w2a({tmp.Get(), len-1});
 	}
 

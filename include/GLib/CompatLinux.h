@@ -15,31 +15,33 @@ namespace GLib::Compat
 {
 	namespace filesystem = std::experimental::filesystem;
 
+	inline void AssertTrue(bool value, const char * prefix, int error)
+	{
+		if (!value)
+		{
+			constexpr auto ErrorBufferSize = 256;
+			std::array<char, ErrorBufferSize> err{};
+			char * msg = ::strerror_r(error, err.data(), err.size());
+			throw std::runtime_error(std::string(prefix) + " : " + msg);
+		}
+	}
+
 	inline void LocalTime(tm & tm, const time_t & t)
 	{
-		localtime_r(&t, &tm);
+		auto result = ::localtime_r(&t, &tm);
+		AssertTrue(result != nullptr, "localtime_r", errno);
 	}
 
 	inline void GmTime(tm & tm, const time_t & t)
 	{
-		gmtime_r(&t, &tm);
-	}
-
-	[[noreturn]] inline void StrError(const char * prefix, int  error = errno)
-	{
-		constexpr auto ErrorBufferSize = 256;
-		std::array<char, ErrorBufferSize> err{};
-		char * msg = strerror_r(error, err.data(), err.size());
-		throw std::runtime_error(std::string(prefix)+ " : " + msg);
+		auto result = ::gmtime_r(&t, &tm);
+		AssertTrue(result != nullptr, "gmtime_r", errno);
 	}
 
 	inline void SetEnv(const char * name, const char * value)
 	{
-		int err = ::setenv(name, value, 1);
-		if (err < 0)
-		{
-			StrError("_putenv_s failed", err);
-		}
+		int result = ::setenv(name, value, 1);
+		AssertTrue(result != -1, "_putenv_s", errno);
 	}
 
 	inline std::optional<std::string> GetEnv(const char * name)
@@ -50,7 +52,8 @@ namespace GLib::Compat
 
 	inline void UnsetEnv(const char * name)
 	{
-		::unsetenv(name);
+		int result = ::unsetenv(name);
+		AssertTrue(result != -1, "unsetenv", errno);
 	}
 
 	inline std::string Unmangle(const std::string & name)
@@ -71,20 +74,14 @@ namespace GLib::Compat
 		s << "/proc/" << ::getpid() << "/exe";
 
 		struct stat sb;
-		auto ret = ::lstat(s.str().c_str(), &sb);
-		if (ret == -1) // errno?
-		{
-			StrError("lstat failed"); // test
-		}
+		auto result = ::lstat(s.str().c_str(), &sb);
+		AssertTrue(result != -1, "lstat", errno);
 
 		Util::StackOrHeap<char, 256> soh;
 		soh.EnsureSize(sb.st_size + 1);
 
 		int readBytes = ::readlink(s.str().c_str(), soh.Get(), soh.size());
-		if (readBytes < 0)
-		{
-			StrError("readlink failed"); // test
-		}
+		AssertTrue(readBytes != -1, "readlink", errno);
 		soh.Get()[readBytes] = '\0';
 		return soh.Get();
 	}

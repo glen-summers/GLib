@@ -45,10 +45,7 @@ namespace GLib
 				constexpr auto InitialBufferSize = 21;
 				Util::StackOrHeap<char, InitialBufferSize> s;
 				const int len = ::snprintf(nullptr, 0, f.c_str(), value); // NOLINT(cppcoreguidelines-pro-type-vararg,hicpp-vararg) by design
-				if (len < 0)
-				{
-					Compat::StrError("snprintf failed");
-				}
+				Compat::AssertTrue(len >= 0, "snprintf failed", errno);
 				s.EnsureSize(len + 1);
 				::snprintf(s.Get(), s.size(), f.c_str(), value); // NOLINT(cppcoreguidelines-pro-type-vararg,hicpp-vararg) by design
 
