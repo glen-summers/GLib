@@ -69,6 +69,7 @@ HtmlReport::HtmlReport(std::string testName, const std::filesystem::path & htmlP
 	, htmlPath(htmlPath)
 	, rootPaths(RootPaths(fileCoverageData))
 	, cssPath(Initialise(htmlPath))
+	, rootTemplate(LoadHtml(IDR_ROOTDIRECTORY))
 	, dirTemplate(LoadHtml(IDR_DIRECTORY))
 	, fileTemplate(LoadHtml(IDR_FILE))
 {
@@ -126,12 +127,17 @@ void HtmlReport::GenerateRootIndex() const
 
 		unsigned int coveredLines{};
 		unsigned int coverableLines{};
+		unsigned int minChildPercent{HundredPercent};
+
 		for (const FileCoverageData & data : children)
 		{
 			coveredLines += data.CoveredLines();
 			coverableLines += data.CoverableLines();
+
+			auto childPercent = static_cast<unsigned int>(HundredPercent * data.CoveredLines() / data.CoverableLines());
+			minChildPercent = std::min(minChildPercent, childPercent);
 		}
-		directories.emplace_back(name.u8string(), link.generic_u8string(), coveredLines, coverableLines);
+		directories.emplace_back(name.u8string(), link.generic_u8string(), coveredLines, coverableLines, minChildPercent);
 		totalCoveredLines += coveredLines;
 		totalCoverableLines += coverableLines;
 	}
@@ -146,8 +152,6 @@ void HtmlReport::GenerateRootIndex() const
 	GLib::Eval::Evaluator e;
 	e.Add("title", testName);
 	e.Add("time", time);
-	e.Add("isRoot", true);
-	e.Add("isChild", false); // todo !isRoot
 	e.Add("styleSheet", "./coverage.css");
 	e.Add("directories", directories);
 	e.Add("coveredLines", totalCoveredLines);
@@ -162,7 +166,7 @@ void HtmlReport::GenerateRootIndex() const
 		throw std::runtime_error("Unable to create output file : " + rootIndex.u8string());
 	}
 
-	GLib::Html::Generate(e, dirTemplate, out);
+	GLib::Html::Generate(e, rootTemplate, out);
 }
 
 void HtmlReport::GenerateIndices() const
@@ -176,6 +180,7 @@ void HtmlReport::GenerateIndices() const
 
 		unsigned int totalCoveredLines{};
 		unsigned int totalCoverableLines{};
+
 		for (const FileCoverageData & data : children)
 		{
 			totalCoveredLines += data.CoveredLines();
@@ -192,7 +197,7 @@ void HtmlReport::GenerateIndices() const
 		for (const FileCoverageData & data : children)
 		{
 			std::string text = data.Path().filename().u8string();
-			directories.emplace_back(text, text+".html", data.CoveredLines(), data.CoverableLines());
+			directories.emplace_back(text, text + ".html", data.CoveredLines(), data.CoverableLines(), 0);
 		}
 
 		auto path = htmlPath / subPath;
@@ -202,8 +207,6 @@ void HtmlReport::GenerateIndices() const
 		GLib::Eval::Evaluator e;
 		e.Add("title", testName);
 		e.Add("time", time);
-		e.Add("isRoot", false);
-		e.Add("isChild", true); // todo !isRoot
 		e.Add("index", (relativePath / "index.html").generic_u8string());
 		e.Add("subPath", subPath.generic_u8string());
 		e.Add("styleSheet", css);

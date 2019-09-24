@@ -15,7 +15,8 @@ class HtmlReport
 	const std::filesystem::path & htmlPath;
 	std::set<std::filesystem::path> rootPaths;
 	std::filesystem::path cssPath;
-	std::string dirTemplate; // store compiled Nodes(ren)
+	std::string rootTemplate; // store compiled Nodes(ren)
+	std::string dirTemplate;
 	std::string fileTemplate;
 	std::map<std::filesystem::path, std::list<FileCoverageData>> index;
 

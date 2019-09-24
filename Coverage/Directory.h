@@ -12,13 +12,15 @@ class Directory
 	std::string name, link;
 	unsigned int coveredLines;
 	unsigned int coverableLines;
+	unsigned int minCoveragePrecent;
 
 public:
-	Directory(std::string name, std::string link, unsigned int coveredLines, unsigned int coverableLines)
+	Directory(std::string name, std::string link, unsigned int coveredLines, unsigned int coverableLines, unsigned int minCoveragePrecent)
 		: name(move(name))
 		, link(move(link))
 		, coveredLines(coveredLines)
 		, coverableLines(coverableLines)
+		, minCoveragePrecent(minCoveragePrecent)
 	{}
 
 	std::string Name() const
@@ -49,6 +51,16 @@ public:
 	unsigned int CoverableLines() const
 	{
 		return coverableLines;
+	}
+
+	unsigned int MinCoveragePercent() const
+	{
+		return minCoveragePrecent;
+	}
+
+	enum CoverageLevel MinCoverageStyle() const
+	{
+		return CoverageLevel(minCoveragePrecent);
 	}
 };
 
@@ -85,6 +97,16 @@ struct GLib::Eval::Visitor<Directory>
 		if (propertyName == "coverageStyle")
 		{
 			return f(Value(dir.Style()));
+		}
+
+		if (propertyName == "minCoveragePercent")
+		{
+			return f(Value(dir.MinCoveragePercent()));
+		}
+
+		if (propertyName == "minCoverageStyle")
+		{
+			return f(Value(dir.MinCoverageStyle()));
 		}
 
 		throw std::runtime_error(std::string("Unknown property : '") + propertyName + '\'');

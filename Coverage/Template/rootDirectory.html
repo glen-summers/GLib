@@ -11,16 +11,12 @@
 		<table class="info">
 			<tr>
 				<td style="width:15%" class="headerItem">Current view:</td>
-				<td style="width:35%" class="headerValue">
-					<a href="./directory.html" gl:href="${index}">TopLevel</a>
-					<span gl:text=" - ${subPath}"> - SubPath</span>
-				</td>
+				<td style="width:35%" class="headerValue">TopLevel</td>
 				<td style="width:20%"></td>
 				<td style="width:10%" class="headerItem">Hit</td>
 				<td style="width:10%" class="headerItem">Total</td>
 				<td style="width:10%" class="headerItem">Coverage</td>
 			</tr>
-
 			<tr>
 				<td class="headerItem">Test:</td>
 				<td class="headerValue" gl:text="${title}">Title</td>
@@ -42,10 +38,11 @@
 
 		<table class="dirs">
 			<tr>
-				<td style="width:55%" class="dirsHeader">Source</td>
-				<td style="width:15%" class="dirsHeader">Coverage</td>
-				<td style="width:15%" class="dirsHeader">Percentage</td>
-				<td style="width:15%" class="dirsHeader">Covered lines</td>
+				<td style="width:52%" class="dirsHeader">Source</td>
+				<td style="width:12%" class="dirsHeader">Coverage</td>
+				<td style="width:12%" class="dirsHeader">Percentage</td>
+				<td style="width:12%" class="dirsHeader">Covered lines</td>
+				<td style="width:12%" class="dirsHeader">Mininum</td>
 			</tr>
 
 			<gl:block each="directory : ${directories}">
@@ -62,6 +59,13 @@
 
 					<td class="coverageNumber coverItem" gl:text="${directory.coveragePercent}&nbsp;%">65&nbsp;%</td>
 					<td class="coverageNumber coverItem" gl:text="${directory.coveredLines}&nbsp;/&nbsp;${directory.coverableLines}">123&nbsp;/&nbsp;234</td>
+
+					<td class="coverItem">
+						<div class="box">
+							<div class="bar amber" style="width:65%" gl:class="bar ${directory.minCoverageStyle}" gl:style="width:${directory.minCoveragePercent}px;">
+							</div>
+						</div>
+					</td>
 				</tr>
 			</gl:block>
 		</table>
