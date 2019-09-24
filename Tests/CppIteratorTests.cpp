@@ -546,4 +546,20 @@ BOOST_AUTO_TEST_CASE(Html3)
 	BOOST_TEST(expected == stm.str());
 }
 
+BOOST_AUTO_TEST_CASE(KeywordAndCommonType)
+{
+	std::string_view code = "auto v=std::vector{};";
+
+	std::ostringstream stm;
+	Htmlify(code, stm);
+
+	auto expected = "<span class=\"k\">auto</span>"\
+		"<span class=\"w\">\xC2\xB7</span>"\
+		"v="\
+		"std::<span class=\"t\">vector</span>"\
+		"{};";
+
+	TestUtils::Compare(stm.str(), expected);
+}
+
 BOOST_AUTO_TEST_SUITE_END()

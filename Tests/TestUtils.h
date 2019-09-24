@@ -21,54 +21,65 @@ namespace TestUtils
 	template <typename Iterator>
 	void Dump(std::ostream & s, Iterator begin, Iterator end, unsigned count)
 	{
-		if (begin == end)
+		s << '[';
+		if (begin != end)
 		{
-			return;
-		}
-
-		for (auto it = begin; it!=end && count != 0; ++it, --count)
-		{
-			switch (*it)
+			for (auto it = begin; it!=end && count != 0; ++it, --count)
 			{
-				// hex?
-				case 9:
-					s << "\\t";
-					break;
-				case 10:
-					s << "\\n";
-					break;
-				case 32:
-					s << "\\s";
-					break;
-				default:
-					s << *it;
-					break;
+				switch (*it)
+				{
+					// hex?
+					case 9:
+						s << "\\t";
+						break;
+					case 10:
+						s << "\\n";
+						break;
+					case 32:
+						s << "\\s";
+						break;
+					default:
+						s << *it;
+						break;
+				}
 			}
 		}
+		s << ']';
 	}
 
-	inline void Compare(const std::string & value, const std::string & expected, unsigned length = 30)
+	inline bool CompareStrings(const std::string & expected, const std::string & actual, unsigned length, std::ostringstream & msg)
 	{
-		auto ret = std::mismatch(value.begin(), value.end(), expected.begin(), expected.end());
-		std::ostringstream s;
+		auto ret = std::mismatch(expected.begin(), expected.end(), actual.begin(), actual.end());
 
-		if (ret.first != value.end())
+		bool result {};
+		if (ret.second != actual.end())
 		{
-			size_t pos = std::distance(value.begin(), ret.first);
-			s << "Difference at position: " << pos << " [";
-			Dump(s, ret.first, value.end(), length);
-			s << "]";
+			size_t pos = std::distance(actual.begin(), ret.second);
+			msg << "Difference at position: " << pos << "\n";
+			msg << "Expected: ";
+			Dump(msg, ret.first, expected.end(), length);
+			msg << '\n';
+
+			msg << "Actual  : ";
+			Dump(msg, actual.begin() + pos, actual.end(), length);
+			result = true;
 		}
-		else if (ret.second != expected.end())
+		else if (ret.first != expected.end())
 		{
-			s << "Expected data at end missing: [";
-			Dump(s, ret.second, expected.end(), length);
-			s << "]";
+			msg << "Expected data at end missing: ";
+			Dump(msg , ret.first, expected.end(), length);
+			result = true;
 		}
 
-		if (!s.str().empty())
+		return result;
+	}
+
+	inline void Compare(const std::string & expected, const std::string & actual, unsigned length = 30)
+	{
+		std::ostringstream stm;
+		if (CompareStrings(expected, actual, length, stm))
 		{
-			throw std::runtime_error(s.str());
+			throw std::runtime_error(stm.str());
 		}
 	}
 }

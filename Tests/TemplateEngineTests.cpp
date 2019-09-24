@@ -235,12 +235,45 @@ old
 		BOOST_TEST(stm.str() == expectedNo);
 	}
 
-	BOOST_AUTO_TEST_CASE(TestUtilsTests) // move
+	BOOST_AUTO_TEST_CASE(TestUtilsTest1) // move
 	{
-		TestUtils::Compare("1234", "1234");
-		GLIB_CHECK_RUNTIME_EXCEPTION({ TestUtils::Compare("1234", "12345", 30); }, "Expected data at end missing: [5]");
-		GLIB_CHECK_RUNTIME_EXCEPTION({ TestUtils::Compare("12345", "1234", 30); }, "Difference at position: 4 [5]");
-		GLIB_CHECK_RUNTIME_EXCEPTION({ TestUtils::Compare("\t\n ", "123", 30); }, "Difference at position: 0 [\\t\\n\\s]");
+		std::ostringstream s;
+		BOOST_CHECK(false == TestUtils::CompareStrings("1234", "1234", 30, s));
+	}
+
+	BOOST_AUTO_TEST_CASE(TestUtilsTest2)
+	{
+		std::ostringstream s;
+		BOOST_CHECK(true == TestUtils::CompareStrings("12345", "1234", 30, s));
+		BOOST_TEST("Expected data at end missing: [5]" == s.str());
+	}
+
+	BOOST_AUTO_TEST_CASE(TestUtilsTest3)
+	{
+		std::ostringstream s;
+		BOOST_CHECK(true == TestUtils::CompareStrings("1234", "12345", 30, s));
+
+		BOOST_TEST(R"(Difference at position: 4
+Expected: []
+Actual  : [5])" == s.str());
+	}
+
+	BOOST_AUTO_TEST_CASE(TestUtilsTest4)
+	{
+		std::ostringstream s;
+		BOOST_CHECK(true == TestUtils::CompareStrings("\t\n ", "123", 30, s));
+
+		BOOST_TEST(R"(Difference at position: 0
+Expected: [\t\n\s]
+Actual  : [123])" == s.str());
+	}
+
+	BOOST_AUTO_TEST_CASE(TestUtilsTest5)
+	{
+		GLIB_CHECK_RUNTIME_EXCEPTION({ TestUtils::Compare("1234", "12345", 30); },
+			R"(Difference at position: 4
+Expected: []
+Actual  : [5])");
 	}
 
 BOOST_AUTO_TEST_SUITE_END()
