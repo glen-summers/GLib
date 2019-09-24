@@ -12,9 +12,14 @@ std::string LogManager::Unmangle(const std::string & name)
 	return Compat::Unmangle(name);
 }
 
-void LogManager::SetLevel(GLib::Flog::Level level)
+GLib::Flog::Level LogManager::SetLevel(GLib::Flog::Level level)
 {
-	FileLogger::SetLogLevel(level);
+	return FileLogger::SetLogLevel(level);
+}
+
+size_t LogManager::SetMaxFileSize(size_t size)
+{
+	return FileLogger::SetMaxFileSize(size);
 }
 
 void LogManager::SetThreadName(const char * name)

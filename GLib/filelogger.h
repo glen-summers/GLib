@@ -17,7 +17,7 @@ class FileLogger
 	static constexpr int THREAD_ID_WIDTH = 5; // make dynamic
 	static constexpr int LEVEL_WIDTH = 8;
 	static constexpr int PREFIX_WIDTH = 16; // make dynamic
-	static constexpr size_t maxFileSize = 5 * 1024 * 1024;
+	static constexpr size_t DefaultMaxFileSize = 5 * 1024 * 1024;
 	static constexpr size_t ReserveDiskSpace = 10 * 1024 * 1024;
 
 	friend class GLib::Flog::Log;
@@ -27,7 +27,8 @@ class FileLogger
 	fs::path const path;
 	std::mutex streamMonitor;
 	StreamInfo streamInfo;
-	GLib::Flog::Level logLevel = GLib::Flog::Level::Info;//
+	GLib::Flog::Level logLevel = GLib::Flog::Level::Info; // config
+	size_t maxFileSize = DefaultMaxFileSize; // config
 	static thread_local LogState logState;
 
 public:
@@ -57,7 +58,8 @@ private:
 	// improve
 	static FileLogger & Instance();
 	static std::ostream & Stream();
-	static void SetLogLevel(GLib::Flog::Level level);
+	static GLib::Flog::Level SetLogLevel(GLib::Flog::Level level);
+	static size_t SetMaxFileSize(size_t size);
 	static std::ostream & TranslateLevel(std::ostream & stream, GLib::Flog::Level level);
 	static std::ostream & ThreadName(std::ostream & stream, const char * threadName);
 	static unsigned int GetDate();

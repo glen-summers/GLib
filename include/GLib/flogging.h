@@ -118,7 +118,8 @@ namespace GLib::Flog
 		static std::string Unmangle(const std::string & name);
 
 	public:
-		static void SetLevel(Level level);
+		static Level SetLevel(Level level);
+		static size_t SetMaxFileSize(size_t size);
 		static void SetThreadName(const char * name);
 		static std::string GetLogPath();
 

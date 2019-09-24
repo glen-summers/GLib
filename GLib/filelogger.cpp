@@ -249,10 +249,7 @@ void FileLogger::WriteFooter(std::ostream &writer)
 
 bool FileLogger::ResourcesAvailable(size_t newEntrySize) const
 {
-	// called after rollover check
-	// if newEntrySize large and just caused a rollover, and new+header > MaxFileSize then it will not get logged!
-	return streamInfo && (newEntrySize + streamInfo.Stream().tellp() <= maxFileSize)
-		&& GetFreeDiskSpace(path) - newEntrySize >= ReserveDiskSpace;
+	return streamInfo && GetFreeDiskSpace(path) - newEntrySize >= ReserveDiskSpace;
 }
 
 void FileLogger::CommitPendingScope()
@@ -312,9 +309,14 @@ std::ostream & FileLogger::Stream()
 	return Instance().logState.Stream();
 }
 
-void FileLogger::SetLogLevel(GLib::Flog::Level level)
+GLib::Flog::Level FileLogger::SetLogLevel(GLib::Flog::Level level)
 {
-	Instance().logLevel = level;
+	return std::exchange(Instance().logLevel, level); // atomic?
+}
+
+size_t FileLogger::SetMaxFileSize(size_t size)
+{
+	return std::exchange(Instance().maxFileSize, size); // atomic?
 }
 
 // use map, use config, set field width
@@ -364,7 +366,7 @@ unsigned FileLogger::GetDate()
 	return ((TmEpochYear + tm.tm_year) * ShiftTwoDecimals + tm.tm_mon + 1) * ShiftTwoDecimals + tm.tm_mday;
 }
 
-uintmax_t FileLogger::GetFreeDiskSpace(const fs::path& path)
+uintmax_t FileLogger::GetFreeDiskSpace(const fs::path & path)
 {
 	return space(path).available;
 }

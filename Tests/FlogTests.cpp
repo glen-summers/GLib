@@ -2,6 +2,7 @@
 
 #include "GLib/flogging.h"
 #include "GLib/formatter.h"
+#include "GLib/scope.h"
 
 #include "../GLib/DurationPrinter.h"
 
@@ -37,6 +38,44 @@ BOOST_AUTO_TEST_SUITE(FlogTests)
 		std::string contents((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
 		BOOST_TEST(contents.find(" : INFO     : FlogTests::Fred  : Hello") != std::string::npos);
 		BOOST_TEST(contents.find(" : INFO     : FlogTests::Fred  : Format: 1 , 2") != std::string::npos);
+	}
+
+	BOOST_AUTO_TEST_CASE(LogLevel)
+	{
+		auto log = GLib::Flog::LogManager::GetLog<Fred>();
+
+		auto currentLevel = GLib::Flog::LogManager::SetLevel(GLib::Flog::Level::Error);
+		SCOPE(_, [=]()
+		{
+				GLib::Flog::LogManager::SetLevel(currentLevel);
+		});
+
+		log.Info("info");
+		log.Error("error");
+
+		std::ifstream in(GLib::Flog::LogManager::GetLogPath());
+		std::string contents((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
+		BOOST_TEST(contents.find(" : INFO     : FlogTests::Fred  : info") == std::string::npos);
+		BOOST_TEST(contents.find(" : ERROR    : FlogTests::Fred  : error") != std::string::npos);
+	}
+
+	BOOST_AUTO_TEST_CASE(LogFileSize)
+	{
+		auto log = GLib::Flog::LogManager::GetLog<Fred>();
+
+		log.Info("Start");
+		auto path1 = GLib::Flog::LogManager::GetLogPath();
+		auto currentSize = GLib::Flog::LogManager::SetMaxFileSize(1024);
+		SCOPE(_, [=]()
+		{
+			GLib::Flog::LogManager::SetMaxFileSize(currentSize);
+		});
+
+		log.Info(std::string(100, 'x'));
+		BOOST_TEST(path1 == GLib::Flog::LogManager::GetLogPath());
+
+		log.Info(std::string(924, 'x'));
+		BOOST_TEST(path1 != GLib::Flog::LogManager::GetLogPath());
 	}
 
 	BOOST_AUTO_TEST_CASE(ProcessName)
