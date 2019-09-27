@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Address.h"
-#include "FileCoverageData.h"
 
 #include "GLib/Win/Debugger.h"
 
@@ -54,5 +53,5 @@ private:
 		std::string & className, std::string & functionName, std::string & nameSpace) const;
 
 	void CreateHtmlReport(const std::map<ULONG, Function> & indexToFunctionMap, const std::string & title) const;
-	static std::map<std::filesystem::path, FileCoverageData> ConvertFunctionDataToFileData(const std::map<ULONG, Function> & indexToFunctionMap);
+	CoverageData ConvertFunctionData(const std::map<ULONG, Function> & indexToFunctionMap) const;
 };

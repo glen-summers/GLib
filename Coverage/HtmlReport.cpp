@@ -62,18 +62,17 @@ std::string GetDateTime(time_t t)
 	return os.str();
 }
 
-HtmlReport::HtmlReport(std::string testName, const std::filesystem::path & htmlPath,
-	const std::map<std::filesystem::path, FileCoverageData> & fileCoverageData)
+HtmlReport::HtmlReport(std::string testName, const std::filesystem::path & htmlPath, const CoverageData & fileCoverage)
 	: testName(move(testName))
 	, time(GetDateTime(std::time(nullptr)))
 	, htmlPath(htmlPath)
-	, rootPaths(RootPaths(fileCoverageData))
+	, rootPaths(RootPaths(fileCoverage))
 	, cssPath(Initialise(htmlPath))
 	, rootTemplate(LoadHtml(IDR_ROOTDIRECTORY))
 	, dirTemplate(LoadHtml(IDR_DIRECTORY))
 	, fileTemplate(LoadHtml(IDR_FILE))
 {
-	for (const auto & fileDataPair : fileCoverageData)
+	for (const auto & fileDataPair : fileCoverage)
 	{
 		const FileCoverageData & data = fileDataPair.second;
 
@@ -102,7 +101,7 @@ std::filesystem::path HtmlReport::Initialise(const std::filesystem::path & path)
 	return std::move(cssPath);
 }
 
-std::set<std::filesystem::path> HtmlReport::RootPaths(const std::map<std::filesystem::path, FileCoverageData>& data)
+std::set<std::filesystem::path> HtmlReport::RootPaths(const CoverageData & data)
 {
 	std::set<std::filesystem::path> rootPaths;
 	for (const auto & fileNameDataPair : data)
@@ -117,6 +116,9 @@ void HtmlReport::GenerateRootIndex() const
 {
 	unsigned int totalCoveredLines{};
 	unsigned int totalCoverableLines{};
+	unsigned int totalCoveredFunctions{};
+	unsigned int totalCoverableFunctions{};
+
 	std::vector<Directory> directories;
 
 	for (const auto & pathChildrenPair : index)
@@ -129,6 +131,10 @@ void HtmlReport::GenerateRootIndex() const
 		unsigned int coverableLines{};
 		unsigned int minChildPercent{HundredPercent};
 
+		unsigned int coveredFunctions{};
+		unsigned int coverableFunctions{};
+		// minChildFunctionCover?
+
 		for (const FileCoverageData & data : children)
 		{
 			coveredLines += data.CoveredLines();
@@ -136,10 +142,18 @@ void HtmlReport::GenerateRootIndex() const
 
 			auto childPercent = static_cast<unsigned int>(HundredPercent * data.CoveredLines() / data.CoverableLines());
 			minChildPercent = std::min(minChildPercent, childPercent);
+
+			coveredFunctions += data.CoveredFunctions();
+			coverableFunctions += data.CoverableFunctions();
 		}
-		directories.emplace_back(name.u8string(), link.generic_u8string(), coveredLines, coverableLines, minChildPercent);
+
+		directories.emplace_back(name.u8string(), link.generic_u8string(), coveredLines, coverableLines, minChildPercent,
+			coveredFunctions, coverableFunctions);
+
 		totalCoveredLines += coveredLines;
 		totalCoverableLines += coverableLines;
+		totalCoveredFunctions += coveredFunctions;
+		totalCoverableFunctions += coverableFunctions;
 	}
 
 	if (totalCoverableLines == 0)
@@ -148,6 +162,7 @@ void HtmlReport::GenerateRootIndex() const
 	}
 
 	auto coveragePercent = static_cast<unsigned int>(totalCoveredLines*HundredPercent / totalCoverableLines);
+	auto coverageFunctionPercent = static_cast<unsigned int>(totalCoveredFunctions*HundredPercent / totalCoverableFunctions);
 
 	GLib::Eval::Evaluator e;
 	e.Add("title", testName);
@@ -159,6 +174,11 @@ void HtmlReport::GenerateRootIndex() const
 	e.Add("coveragePercent", coveragePercent);
 	e.Add("coverageStyle", CoverageLevel(coveragePercent));
 
+	e.Add("coveredFunctions", totalCoveredFunctions);
+	e.Add("coverableFunctions", totalCoverableFunctions);
+	e.Add("coverageFunctionsPercent", coverageFunctionPercent);
+	e.Add("coverageFunctionsStyle", CoverageLevel(coverageFunctionPercent));
+
 	auto rootIndex = htmlPath / "index.html";
 	std::ofstream out(rootIndex);
 	if (!out)
@@ -169,6 +189,7 @@ void HtmlReport::GenerateRootIndex() const
 	GLib::Html::Generate(e, rootTemplate, out);
 }
 
+// consolidate with GenerateRootIndex
 void HtmlReport::GenerateIndices() const
 {
 	for (const auto & pathChildrenPair : index)
@@ -178,6 +199,8 @@ void HtmlReport::GenerateIndices() const
 
 		std::vector<Directory> directories;
 
+		unsigned int totalCoveredFunctions{};
+		unsigned int totalCoverableFunctions{};
 		unsigned int totalCoveredLines{};
 		unsigned int totalCoverableLines{};
 
@@ -185,6 +208,8 @@ void HtmlReport::GenerateIndices() const
 		{
 			totalCoveredLines += data.CoveredLines();
 			totalCoverableLines += data.CoverableLines();
+			totalCoveredFunctions += data.CoveredFunctions();
+			totalCoverableFunctions += data.CoverableFunctions();
 		}
 
 		if (totalCoverableLines == 0)
@@ -193,11 +218,13 @@ void HtmlReport::GenerateIndices() const
 		}
 
 		auto coveragePercent = static_cast<unsigned int>(totalCoveredLines*HundredPercent / totalCoverableLines);
+		auto coverageFunctionPercent = static_cast<unsigned int>(totalCoveredFunctions*HundredPercent / totalCoverableFunctions);
 
 		for (const FileCoverageData & data : children)
 		{
 			std::string text = data.Path().filename().u8string();
-			directories.emplace_back(text, text + ".html", data.CoveredLines(), data.CoverableLines(), 0);
+			directories.emplace_back(text, text + ".html", data.CoveredLines(), data.CoverableLines(), 0,
+				data.CoveredFunctions(), data.CoverableFunctions());
 		}
 
 		auto path = htmlPath / subPath;
@@ -215,6 +242,11 @@ void HtmlReport::GenerateIndices() const
 		e.Add("coverableLines", totalCoverableLines);
 		e.Add("coveragePercent", coveragePercent);
 		e.Add("coverageStyle", CoverageLevel(coveragePercent));
+
+		e.Add("coveredFunctions", totalCoveredFunctions);
+		e.Add("coverableFunctions", totalCoverableFunctions);
+		e.Add("coverageFunctionsPercent", coverageFunctionPercent);
+		e.Add("coverageFunctionsStyle", CoverageLevel(coverageFunctionPercent));
 
 		auto pathIndex = path / "index.html";
 		std::ofstream out(pathIndex);
@@ -275,6 +307,7 @@ void HtmlReport::GenerateSourceFile(std::filesystem::path & subPath, const FileC
 	auto parent = subPath.parent_path();
 	auto css = (relativePath / "coverage.css").generic_u8string();
 	auto coveragePercent = static_cast<unsigned int>(data.CoveredLines()*HundredPercent / lc.size());
+	auto coverageFunctionPercent = static_cast<unsigned int>(data.CoveredFunctions()*HundredPercent / data.CoverableFunctions());
 
 	e.Add("title", subPath.generic_u8string());
 	e.Add("testName", testName);
@@ -283,9 +316,16 @@ void HtmlReport::GenerateSourceFile(std::filesystem::path & subPath, const FileC
 	e.Add("fileName", targetPath.filename().u8string());
 	e.Add("styleSheet", css);
 	e.Add("coverageStyle", CoverageLevel(coveragePercent));
+
 	e.Add("coveredLines", data.CoveredLines());
 	e.Add("coverableLines", lc.size());
 	e.Add("coveragePercent", coveragePercent);
+
+	e.Add("coveredFunctions", data.CoveredFunctions());
+	e.Add("coverableFunctions", data.CoverableFunctions());
+	e.Add("coverageFunctionsPercent", coverageFunctionPercent);
+	e.Add("coverageFunctionsStyle", CoverageLevel(coverageFunctionPercent));
+
 	e.Add("index", (relativePath / "index.html").generic_u8string());
 
 	e.AddCollection("lines", lines);

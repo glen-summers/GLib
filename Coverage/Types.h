@@ -3,6 +3,7 @@
 #include "GLib/NoCase.h"
 
 #include <map>
+#include <filesystem>
 #include <set>
 #include <string>
 
@@ -27,3 +28,6 @@ using Lines = std::map<unsigned int, bool>;
 using FileLines = CaseInsensitiveMap<wchar_t, Lines>;
 class Address;
 using Addresses = std::map<uint64_t, Address>;
+
+class FileCoverageData;
+using CoverageData = std::map<std::filesystem::path, FileCoverageData>;

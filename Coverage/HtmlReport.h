@@ -1,10 +1,8 @@
 #pragma once
 
-#include <filesystem>
+#include "Types.h"
+
 #include <list>
-#include <map>
-#include <set>
-#include <string>
 
 class FileCoverageData;
 
@@ -21,8 +19,7 @@ class HtmlReport
 	std::map<std::filesystem::path, std::list<FileCoverageData>> index;
 
 public:
-	HtmlReport(std::string testName, const std::filesystem::path & htmlPath,
-		const std::map<std::filesystem::path, FileCoverageData> & fileCoverageData);
+	HtmlReport(std::string testName, const std::filesystem::path & htmlPath, const CoverageData & coverage);
 
 private:
 	void GenerateRootIndex() const;
@@ -30,5 +27,5 @@ private:
 	void GenerateSourceFile(std::filesystem::path & subPath, const FileCoverageData & data) const;
 
 	static std::filesystem::path Initialise(const std::filesystem::path & path);
-	static std::set<std::filesystem::path> RootPaths(const std::map<std::filesystem::path, FileCoverageData> & data);
+	static std::set<std::filesystem::path> RootPaths(const CoverageData & data);
 };

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Function.h"
+
 #include <filesystem>
 #include <map>
 #include <utility>
@@ -9,6 +11,7 @@ class FileCoverageData
 	std::filesystem::path const path;
 	unsigned int coveredLines;
 	std::map<unsigned int, unsigned int> lineCoverage;
+	std::set<Function> functions;
 
 public:
 	FileCoverageData(std::filesystem::path path)
@@ -25,6 +28,11 @@ public:
 		}
 	}
 
+	void AddFunction(const Function & function)
+	{
+		functions.insert(function);
+	}
+
 	const std::filesystem::path & Path() const
 	{
 		return path;
@@ -38,6 +46,24 @@ public:
 	unsigned int CoverableLines() const
 	{
 		return static_cast<unsigned int>(lineCoverage.size());
+	}
+
+	unsigned int CoveredFunctions() const
+	{
+		unsigned int value{};
+		for (const auto & f : functions) // improve
+		{
+			if (f.CoveredLines() != 0)
+			{
+				++value;
+			}
+		}
+		return value;
+	}
+
+	unsigned int CoverableFunctions() const
+	{
+		return static_cast<unsigned int>(functions.size());
 	}
 
 	const std::map<unsigned int, unsigned int> & LineCoverage() const

@@ -13,14 +13,19 @@ class Directory
 	unsigned int coveredLines;
 	unsigned int coverableLines;
 	unsigned int minCoveragePrecent;
+	unsigned int coveredFunctions;
+	unsigned int coverableFunctions;
 
 public:
-	Directory(std::string name, std::string link, unsigned int coveredLines, unsigned int coverableLines, unsigned int minCoveragePrecent)
+	Directory(std::string name, std::string link, unsigned int coveredLines, unsigned int coverableLines, unsigned int minCoveragePrecent,
+		unsigned int coveredFunctions, unsigned int coverableFunctions)
 		: name(move(name))
 		, link(move(link))
 		, coveredLines(coveredLines)
 		, coverableLines(coverableLines)
 		, minCoveragePrecent(minCoveragePrecent)
+		, coveredFunctions(coveredFunctions)
+		, coverableFunctions(coverableFunctions)
 	{}
 
 	std::string Name() const
@@ -61,6 +66,21 @@ public:
 	enum CoverageLevel MinCoverageStyle() const
 	{
 		return CoverageLevel(minCoveragePrecent);
+	}
+
+	unsigned int CoveredFunctions() const
+	{
+		return coveredFunctions;
+	}
+
+	unsigned int CoverableFunctions() const
+	{
+		return coverableFunctions;
+	}
+
+	unsigned int CoveredFunctionsPercent() const
+	{
+		return HundredPercent * coveredFunctions / coverableFunctions;
 	}
 };
 
@@ -107,6 +127,21 @@ struct GLib::Eval::Visitor<Directory>
 		if (propertyName == "minCoverageStyle")
 		{
 			return f(Value(dir.MinCoverageStyle()));
+		}
+
+		if (propertyName == "coveredFunctions")
+		{
+			return f(Value(dir.CoveredFunctions()));
+		}
+
+		if (propertyName == "coverableFunctions")
+		{
+			return f(Value(dir.CoverableFunctions()));
+		}
+
+		if (propertyName == "coveredFunctionsPercent")
+		{
+			return f(Value(dir.CoveredFunctionsPercent()));
 		}
 
 		throw std::runtime_error(std::string("Unknown property : '") + propertyName + '\'');

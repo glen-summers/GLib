@@ -32,20 +32,22 @@
 			<tr>
 				<td class="headerItem">Time:</td>
 				<td class="headerValue" gl:text="${time}">19 Sep 2019, 14:42:43 (+0100)</td>
-				<td></td>
-				<td></td>
-				<td></td>
-				<td></td>
+				<td class="headerItem">Functions:</td>
+				<td class="coverageValue" gl:text="${coveredFunctions}">123</td>
+				<td class="coverageValue" gl:text="${coverableFunctions}">234</td>
+				<td class="green coverageValue" gl:class="${coverageFunctionsStyle} coverageValue" gl:text="${coverageFunctionsPercent}&nbsp;%">74&nbsp;%</td>
 			</tr>
 		</table>
 		<hr />
 
 		<table class="dirs">
 			<tr>
-				<td style="width:55%" class="dirsHeader">Source</td>
-				<td style="width:15%" class="dirsHeader">Coverage</td>
-				<td style="width:15%" class="dirsHeader">Percentage</td>
-				<td style="width:15%" class="dirsHeader">Covered lines</td>
+				<td style="width:50%" class="dirsHeader">Source</td>
+				<td style="width:12%" class="dirsHeader">Lines</td>
+				<td style="width:12%" class="dirsHeader"></td>
+				<td style="width:12%" class="dirsHeader"></td>
+				<td style="width:12%" class="dirsHeader">Functions</td>
+				<td style="width:12%" class="dirsHeader"></td>
 			</tr>
 
 			<gl:block each="directory : ${directories}">
@@ -62,6 +64,8 @@
 
 					<td class="coverageNumber coverItem" gl:text="${directory.coveragePercent}&nbsp;%">65&nbsp;%</td>
 					<td class="coverageNumber coverItem" gl:text="${directory.coveredLines}&nbsp;/&nbsp;${directory.coverableLines}">123&nbsp;/&nbsp;234</td>
+					<td class="coverageNumber coverItem" gl:text="${directory.coveredFunctionsPercent}&nbsp;%">65&nbsp;%</td>
+					<td class="coverageNumber coverItem" gl:text="${directory.coveredFunctions}&nbsp;/&nbsp;${directory.coverableFunctions}">123&nbsp;/&nbsp;234</td>
 				</tr>
 			</gl:block>
 		</table>

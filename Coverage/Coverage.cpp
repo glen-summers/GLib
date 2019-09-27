@@ -124,7 +124,7 @@ DWORD Coverage::OnException(DWORD processId, DWORD threadId, const EXCEPTION_DEB
 		const auto it = addresses.find(address);
 		if (it != addresses.end())
 		{
-			 const GLib::Win::Symbols::SymProcess & p = Symbols().GetProcess(processId);
+			const GLib::Win::Symbols::SymProcess & p = Symbols().GetProcess(processId);
 
 			Address & a = it->second;
 			p.Write(address, a.OldData());
@@ -138,10 +138,10 @@ DWORD Coverage::OnException(DWORD processId, DWORD threadId, const EXCEPTION_DEB
 
 			CONTEXT ctx {};
 			ctx.ContextFlags = CONTEXT_ALL; // NOLINT(hicpp-signed-bitwise) baad macro
-			 GLib::Win::Util::AssertTrue(::GetThreadContext(tit->second, &ctx), "GetThreadContext");
+			GLib::Win::Util::AssertTrue(::GetThreadContext(tit->second, &ctx), "GetThreadContext");
 #ifdef _WIN64
 			--ctx.Rip;
-#elif  _WIN32
+#elif _WIN32
 			--ctx.Eip;
 #endif
 			 GLib::Win::Util::AssertTrue(::SetThreadContext(tit->second, &ctx), "SetThreadContext");
@@ -319,17 +319,19 @@ void Coverage::CreateXmlReport(const std::map<ULONG, Function> & indexToFunction
 
 void Coverage::CreateHtmlReport(const std::map<ULONG, Function> & indexToFunctionMap, const std::string & title) const
 {
-	HtmlReport report(title, reportPath / "HtmlReport", ConvertFunctionDataToFileData(indexToFunctionMap));
+	CoverageData coverageData = ConvertFunctionData(indexToFunctionMap);
+	HtmlReport report(title, reportPath / "HtmlReport", coverageData);
 	(void)report; // class with no methods :(
 }
 
-std::map<std::filesystem::path, FileCoverageData> Coverage::ConvertFunctionDataToFileData(const std::map<ULONG, Function> & indexToFunctionMap)
+CoverageData Coverage::ConvertFunctionData(const std::map<ULONG, Function> & indexToFunctionMap) const
 {
 	CaseInsensitiveMap<wchar_t, std::multimap<unsigned int, Function>> fileNameToFunctionMap; // just use map<path..>?
 
 	for (const auto & it : indexToFunctionMap)
 	{
 		const Function & function = it.second;
+
 		for (const auto & fileLineIt : function.FileLines())
 		{
 			const std::wstring & fileName = fileLineIt.first;
@@ -339,25 +341,27 @@ std::map<std::filesystem::path, FileCoverageData> Coverage::ConvertFunctionDataT
 		}
 	}
 
-	std::map<std::filesystem::path, FileCoverageData> fileCoverageData;
+	CoverageData coverageData;
 
 	for (const auto & fd : fileNameToFunctionMap)
 	{
 		const std::filesystem::path & filePath = fd.first;
 		const std::multimap<unsigned, Function> & startLineToFunctionMap = fd.second;
 
-		auto fileIt = fileCoverageData.find(filePath);
-		if (fileIt == fileCoverageData.end())
+		auto fileIt = coverageData.find(filePath);
+		if (fileIt == coverageData.end())
 		{
-			fileIt = fileCoverageData.emplace(filePath, filePath).first;
+			fileIt = coverageData.emplace(filePath, filePath).first;
 		}
 
-		FileCoverageData & coverageData = fileIt->second;
+		FileCoverageData & fileCoverageData = fileIt->second;
 
 		for (const auto & it : startLineToFunctionMap)
 		{
 			const Function & function = it.second;
 			const FileLines & fileLines = function.FileLines();
+
+			fileCoverageData.AddFunction(function);
 
 			auto justFileNameIt = fileLines.find(filePath.wstring());
 			if (justFileNameIt == fileLines.end())
@@ -367,12 +371,12 @@ std::map<std::filesystem::path, FileCoverageData> Coverage::ConvertFunctionDataT
 
 			for (const auto & lineHitPair : justFileNameIt->second)
 			{
-				coverageData.AddLine(lineHitPair.first, lineHitPair.second);
+				fileCoverageData.AddLine(lineHitPair.first, lineHitPair.second);
 			}
 		}
 	}
 
-	return fileCoverageData;
+	return move(coverageData);
 }
 
 void Coverage::Delaminate(std::string & name)
