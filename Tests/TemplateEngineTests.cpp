@@ -105,6 +105,56 @@ BOOST_AUTO_TEST_CASE(SimpleProperty)
 		BOOST_TEST(stm.str() == expected);
 	}
 
+	BOOST_AUTO_TEST_CASE(ForEachAttr1)
+	{
+		const std::vector<User> users
+		{
+			{ "Fred", 42, { "FC00"} }, { "Jim", 43, { "FD00"} }, { "Sheila", 44, { "FE00"} }
+		};
+		Evaluator evaluator;
+		evaluator.AddCollection("users", users);
+
+		auto xml = R"(<xml xmlns:gl='glib'>
+<User gl:each="user : ${users}" name='${user.name}'/>
+</xml>)";
+
+		std::ostringstream stm;
+		Generate(evaluator, xml, stm);
+
+	auto expected= R"(<xml>
+<User name='Fred'/>
+<User name='Jim'/>
+<User name='Sheila'/>
+</xml>)";
+
+		BOOST_TEST(stm.str() == expected);
+	}
+
+	BOOST_AUTO_TEST_CASE(ForEachAttr2)
+	{
+		const std::vector<User> users
+		{
+			{ "Fred", 42, { "FC00"} }, { "Jim", 43, { "FD00"} }, { "Sheila", 44, { "FE00"} }
+		};
+		Evaluator evaluator;
+		evaluator.AddCollection("users", users);
+
+		auto xml = R"(<xml xmlns:gl='glib'>
+<User gl:each="user : ${users}" name='${user.name}'>${user.age}</User>
+</xml>)";
+
+		std::ostringstream stm;
+		Generate(evaluator, xml, stm);
+
+		auto expected= R"(<xml>
+<User name='Fred'>42</User>
+<User name='Jim'>43</User>
+<User name='Sheila'>44</User>
+</xml>)";
+
+		BOOST_TEST(stm.str() == expected);
+	}
+
 	BOOST_AUTO_TEST_CASE(ReplaceAttribute)
 	{
 		Evaluator evaluator;

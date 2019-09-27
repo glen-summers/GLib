@@ -13,6 +13,7 @@ namespace GLib::Html
 		std::string enumeration;
 		std::string_view condition;
 		std::list<Node> children; // use ostream for xml fragmemts, single optional child for the rest, polymorphic?
+		size_t const depth {};
 
 	public:
 		Node() = default;
@@ -20,8 +21,8 @@ namespace GLib::Html
 		Node(Node * parent, std::string_view value) : parent(parent), value(value)
 		{}
 
-		Node(Node * parent, std::string variable, std::string enumeration, std::string_view condition)
-			: parent(parent), variable(move(variable)), enumeration(move(enumeration)), condition(condition)
+		Node(Node * parent, std::string variable, std::string enumeration, std::string_view condition, size_t depth)
+			: parent(parent), variable(move(variable)), enumeration(move(enumeration)), condition(condition), depth(depth)
 		{}
 
 		Node(Node * parent, std::string_view condition, bool unused)
@@ -60,6 +61,11 @@ namespace GLib::Html
 			return children;
 		}
 
+		size_t Depth() const
+		{
+			return depth;
+		}
+
 		Node * AddFragment(const std::string_view & fragment={})
 		{
 			children.emplace_back(this, fragment);
@@ -71,9 +77,9 @@ namespace GLib::Html
 			return AddFragment({start, static_cast<size_t>(end - start) });
 		}
 
-		Node * AddEnumeration(const std::string & var, const std::string & e, const std::string_view & c)
+		Node * AddEnumeration(const std::string & var, const std::string & e, const std::string_view & c, size_t enumDepth)
 		{
-			children.emplace_back(this, var, e, c);
+			children.emplace_back(this, var, e, c, enumDepth);
 			return &children.back();
 		}
 
