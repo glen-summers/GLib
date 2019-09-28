@@ -56,12 +56,6 @@ namespace GLib::Html
 			{
 				const Xml::Element & e = *it;
 
-				/*if (e.Type() == Xml::ElementType::Close && current->Depth() == e.Depth())
-				{
-					current->AddFragment(e.OuterXml());
-					current = current->Parent();
-				}
-				else*/
 				if (e.NameSpace() == NameSpace && e.Name() == Block)
 				{
 					current = ProcessBlock(e, current);

@@ -39,8 +39,6 @@ namespace GLib::Xml
 		Utils::PtrPair attributeName;
 
 		const char * attributeValueStart {}; // can use just one start Ptr?
-		const char * elementTextStart {};
-		const char * commentStart {};
 
 		bool contentClosed {};
 		///////////
@@ -132,8 +130,6 @@ namespace GLib::Xml
 					IllegalCharacter(*ptr);
 				}
 				++ptr; // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic) todo use std::span
-				// should not use ptr below here as could now be end!
-				// would only happen with truncated xml but still fix
 
 				if (newState != oldState)
 				{
@@ -146,17 +142,15 @@ namespace GLib::Xml
 								break;
 							}
 
-							element = {Xml::ElementType::Text, Utils::ToStringView(elementTextStart, oldPtr)};
-							elementTextStart = nullptr;
+							element = {Xml::ElementType::Text, Utils::ToStringView(lastPtr, oldPtr)};
 							lastPtr = oldPtr;
 							return;
 						}
 
-						case Xml::State::Comment:
+						case Xml::State::CommentEnd:
 						{
-							element = {Xml::ElementType::Comment, Utils::ToStringView(commentStart, oldPtr)};
-							commentStart = nullptr;
-							lastPtr = oldPtr;
+							element = {Xml::ElementType::Comment, Utils::ToStringView(lastPtr, ptr)};
+							lastPtr = ptr;
 							return;
 						}
 
@@ -184,25 +178,18 @@ namespace GLib::Xml
 							break;
 						}
 
-						case Xml::State::AttributeValue:
-						{
-							if (newState == Xml::State::AttributeEntity) // hack
-							{
-								break;
-							}
-
-							manager->Push(Utils::ToStringView(attributeName), Utils::ToStringView(attributeValueStart, oldPtr).substr(1), elementStack.size());
-
-							// better test? currently writes ones per attr
-							attributes.second = ptr;
-							break;
-						}
-
 						default:;
 					}
 
 					switch (newState)
 					{
+						case Xml::State::AttributeEnd:
+						{
+							manager->Push(Utils::ToStringView(attributeName), Utils::ToStringView(attributeValueStart+1, oldPtr), elementStack.size());
+							attributes.second = ptr;
+							break;
+						}
+
 						case Xml::State::ElementName:
 						case Xml::State::ElementEndName:
 						{
@@ -245,21 +232,6 @@ namespace GLib::Xml
 								lastPtr = ptr;
 								return;
 							}
-							break;
-						}
-
-						case Xml::State::Text:
-						{
-							if (oldState != Xml::State::TextEntity)
-							{
-								elementTextStart = oldPtr;
-							}
-							break;
-						}
-
-						case Xml::State::Comment:
-						{
-							commentStart = ptr;
 							break;
 						}
 

@@ -275,7 +275,7 @@ BOOST_AUTO_TEST_CASE(CommentAtStart)
 
 	std::vector<Xml::Element> expected
 	{
-		{Xml::ElementType::Comment, " Comment "},
+		{Xml::ElementType::Comment, "<!-- Comment -->"},
 		{"Xml", Xml::ElementType::Empty, {}}
 	};
 	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), xml.begin(), xml.end());
@@ -289,8 +289,8 @@ BOOST_AUTO_TEST_CASE(TwoCommentsAtStartWouldBeAnExtravegance)
 
 	std::vector<Xml::Element> expected
 	{
-		{Xml::ElementType::Comment, " Comment "},
-		{Xml::ElementType::Comment, " Comment "},
+		{Xml::ElementType::Comment, "<!-- Comment -->"},
+		{Xml::ElementType::Comment, "\n<!-- Comment -->"},
 		{"Xml", Xml::ElementType::Empty, {}}
 	};
 	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), xml.begin(), xml.end());
@@ -304,7 +304,7 @@ BOOST_AUTO_TEST_CASE(CommentAtEnd)
 	std::vector<Xml::Element> expected
 	{
 		{"Xml", Xml::ElementType::Empty, {} },
-		{Xml::ElementType::Comment, " Comment "}
+		{Xml::ElementType::Comment, "\n<!-- Comment -->"}
 	};
 	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), xml.begin(), xml.end());
 }
@@ -320,11 +320,11 @@ BOOST_AUTO_TEST_CASE(AbundanceOfComments)
 
 	std::vector<Xml::Element> expected
 	{
-		Xml::Element{Xml::ElementType::Comment, " Comment1 "},
+		Xml::Element{Xml::ElementType::Comment, "<!-- Comment1 -->"},
 		Xml::Element{"Xml", Xml::ElementType::Open, {}},
-		Xml::Element{Xml::ElementType::Comment, " Comment2 "},
+		Xml::Element{Xml::ElementType::Comment, "\n<!-- Comment2 -->"},
 		Xml::Element{"Xml", Xml::ElementType::Close, {}},
-		Xml::Element{Xml::ElementType::Comment, " Comment3 "},
+		Xml::Element{Xml::ElementType::Comment, "\n<!-- Comment3 -->"},
 	};
 	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), xml.begin(), xml.end());
 }
