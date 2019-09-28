@@ -177,13 +177,16 @@ namespace GLib::Html
 		std::string_view ProcessElement(const Xml::Element & e, Node *& node, const Xml::NameSpaceManager & manager)
 		{
 			AttributeMap atMap;
-			bool replaced = false;
+			bool modified = false;
 			std::string_view text;
+			std::string_view iff;
 			std::string_view each;
+			
 			auto attr = e.Attributes().Value();
 			Xml::Attributes attributes { e.Attributes().Value(), nullptr };
 			bool pop{};
 
+			// handle duplicate attr names?
 			for (auto a : attributes)
 			{
 				if (!Xml::NameSpaceManager::IsDeclaration(a.name))
@@ -197,10 +200,15 @@ namespace GLib::Html
 			{
 				if (namespaceName.first == NameSpace)
 				{
-					// also if attr?
-					if (namespaceName.second == Each)
+					if (namespaceName.second == If)
+					{
+						iff = a.value;
+						modified = true;
+					}
+					else if (namespaceName.second == Each)
 					{
 						each = a.value;
+						modified = true;
 					}
 					else if (namespaceName.second == Text)
 					{
@@ -209,6 +217,7 @@ namespace GLib::Html
 							throw std::runtime_error("Misplaced Attribute");
 						}
 						text = a.value;
+						modified = true;
 					}
 					else
 					{
@@ -218,7 +227,7 @@ namespace GLib::Html
 							throw std::runtime_error(std::string("Attribute not found : '") + std::string(namespaceName.second) + "'");
 						}
 						existingIt->second.value = a.value;
-						replaced = true;
+						modified = true;
 					}
 				}
 			}
@@ -232,11 +241,16 @@ namespace GLib::Html
 					throw std::runtime_error("Error in each value : " + std::string(each));
 				}
 
-				node = node->AddEnumeration(m[1], m[2], {}, e.Depth());
+				node = node->AddEnumeration(m[1], m[2], iff, e.Depth());
+				pop = e.Type() == Xml::ElementType::Empty;
+			}
+			else if (!iff.empty())
+			{
+				node = node->AddEnumeration({}, {}, iff, e.Depth());
 				pop = e.Type() == Xml::ElementType::Empty;
 			}
 
-			if (replaced || !text.empty() || !each.empty())
+			if (modified)
 			{
 				node->AddFragment(e.OuterXml().data(), attr.data()-1);
 

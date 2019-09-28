@@ -40,10 +40,17 @@
 	<hr />
 
 	<table class="source">
-		<tr gl:each="line : ${lines}" class="cov" gl:class="${line.style}"><td><pre><code><span class="line" gl:text="[${line.number}]">[1]</span><span gl:text="${line.text}">auto foo = bar();</span></code></pre></td></tr>
+		<tr gl:each="line : ${lines}" class="cov" gl:class="${line.style}"><td><pre><code><span class="line" gl:text="[${line.number}]">[1]</span><span gl:text="${line.text}">covered code</span></code></pre></td></tr>
 
 		<gl:block if="false">
-			<tr class="ncov"><td><pre><code><span class="line">[2]</span>auto baz = bum();</code></pre></td></tr>
+			<tr class="ncov"><td><pre><code><span class="line">[2]</span>not covered code</code></pre></td></tr>
+			<tr><td><pre><code><span class="line">[3]</span>no code line</code></pre></td></tr>
+			<tr><td><pre><code><span class="line">[4]</span><span class="c">/*keyword   */</span><span class="k">	auto class template</span></code></pre></td></tr>
+			<tr><td><pre><code><span class="line">[5]</span><span class="c">/*type      */</span><span class="t">	int long vector</span></code></pre></td></tr>
+			<tr><td><pre><code><span class="line">[6]</span><span class="c">/*comment   */</span></code></pre></td></tr>
+			<tr><td><pre><code><span class="line">[7]</span><span class="c">/*whitespace*/</span><span class="w">	&#x00B7; &#x2192;</span></code></pre></td></tr>
+			<tr><td><pre><code><span class="line">[8]</span><span class="c">/*string    */</span><span class="s">	"value"</span></code></pre></td></tr>
+			<tr><td><pre><code><span class="line">[9]</span><span class="c">/*directive */</span><span class="d">	#include</span></code></pre></td></tr>
 		</gl:block>
 </table>
 	<hr />

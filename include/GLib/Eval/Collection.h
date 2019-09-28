@@ -28,7 +28,17 @@ namespace GLib::Eval
 	protected:
 		std::string ToString() const override
 		{
-			throw std::runtime_error("Not implemented");
+			std::ostringstream stm;
+			for (auto it = container.begin(), end = container.end();;)
+			{
+				stm << Utils::ToString(*it++);
+				if (it == end)
+				{
+					break;
+				}
+				stm << ",";
+			}
+			return stm.str();
 		}
 
 		void VisitProperty(const std::string & propertyName, const ValueVisitor & visitor) const override
@@ -36,6 +46,7 @@ namespace GLib::Eval
 			(void)propertyName;
 			(void)visitor;
 			throw std::runtime_error("Not implemented");
+			// size?
 		}
 
 		void ForEach(const ValueVisitor & f) const override

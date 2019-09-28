@@ -21,20 +21,34 @@ namespace GLib::Eval
 		std::unordered_map<std::string, const ValueBase &> localValues;
 
 	public:
-		template<typename ValueType> void Add(const std::string & name, ValueType value)
+		template<typename ValueType> void Set(const std::string & name, ValueType value)
 		{
-			if (!values.emplace(name, MakeValue(value)).second)
+			ValuePtr v = MakeValue(value);
+			auto it = values.find(name);
+
+			if (it == values.end())
 			{
-				throw std::runtime_error(std::string("Value already exists : ") + name);
+				values.emplace(name, move(v));
+			}
+			else
+			{
+				it->second = move(v);
 			}
 		}
 
 		// specialise add with IsCollection? allow value types?
-		template<typename Container> void AddCollection(const std::string & name, const Container & container)
+		template<typename Container> void SetCollection(const std::string & name, const Container & container)
 		{
-			if (!values.emplace(name, std::make_unique<Collection<Container>>(container)).second)
+			auto v = std::make_unique<Collection<Container>>(container);
+			auto it = values.find(name);
+
+			if (it == values.end())
 			{
-				throw std::runtime_error(std::string("Value already exists : ") + name);
+				values.emplace(name, move(v));
+			}
+			else
+			{
+				it->second = move(v);
 			}
 		}
 

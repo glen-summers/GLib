@@ -12,7 +12,7 @@ BOOST_AUTO_TEST_SUITE(EvaluatorTests)
 	{
 		GLib::Eval::Evaluator evaluator;
 		User user {"Zardoz", 999, {}};
-		evaluator.Add("user", user);
+		evaluator.Set("user", user);
 
 		std::string name = evaluator.Evaluate("user.name");
 		BOOST_TEST(name == "Zardoz");
@@ -24,7 +24,7 @@ BOOST_AUTO_TEST_SUITE(EvaluatorTests)
 	{
 		GLib::Eval::Evaluator evaluator;
 		Struct Struct { { "NestedValue" }};
-		evaluator.Add("struct", Struct);
+		evaluator.Set("struct", Struct);
 		std::string value = evaluator.Evaluate("struct.Nested");
 		BOOST_TEST(value == "NestedValue");
 	}
@@ -37,7 +37,7 @@ BOOST_AUTO_TEST_SUITE(EvaluatorTests)
 		{
 			{ "Fred", 42, { "FC00"} }, { "Jim", 43, { "FD00"} }, { "Sheila", 44, { "FE00"} }
 		};
-		evaluator.AddCollection("users", users);
+		evaluator.SetCollection("users", users);
 
 		std::vector<std::string> result;
 		evaluator.ForEach("users", [&](const GLib::Eval::ValueBase & user)
@@ -57,7 +57,7 @@ BOOST_AUTO_TEST_SUITE(EvaluatorTests)
 		GLib::Eval::Evaluator evaluator;
 
 		User user { "Fred", 42, { "Computing", "Busses" } };
-		evaluator.Add("user", user);
+		evaluator.Set("user", user);
 
 		std::vector<std::string> result;
 		std::ostringstream s;
@@ -74,7 +74,7 @@ BOOST_AUTO_TEST_SUITE(EvaluatorTests)
 		GLib::Eval::Evaluator evaluator;
 
 		const std::vector<int> integers { 1, 2, 3 };
-		evaluator.AddCollection("integers", integers);
+		evaluator.SetCollection("integers", integers);
 
 		std::vector<std::string> result;
 		evaluator.ForEach("integers", [&](const GLib::Eval::ValueBase & value) { result.push_back(value.ToString()); });
@@ -92,7 +92,7 @@ BOOST_AUTO_TEST_SUITE(EvaluatorTests)
 	BOOST_AUTO_TEST_CASE(RemoveValue)
 	{
 		GLib::Eval::Evaluator evaluator;
-		evaluator.Add("stringVal", "Hello");
+		evaluator.Set("stringVal", "Hello");
 		BOOST_TEST("Hello" == evaluator.Evaluate("stringVal"));
 		evaluator.Remove("stringVal");
 		GLIB_CHECK_RUNTIME_EXCEPTION({ (void)evaluator.Evaluate("stringVal"); }, "Value not found : stringVal");
@@ -104,38 +104,41 @@ BOOST_AUTO_TEST_SUITE(EvaluatorTests)
 		GLIB_CHECK_RUNTIME_EXCEPTION({ evaluator.Remove("nonexistent"); }, "Value not found : nonexistent");
 	}
 
-	BOOST_AUTO_TEST_CASE(AddTwiceThrows)
+	BOOST_AUTO_TEST_CASE(ResetValue)
 	{
-		User user {"Zardoz", 999, {"Domination", "MassiveHead"}};
+		User z {"Zardoz", 999, {"Domination", "MassiveHead"}};
+		User d {"Diablo", 666, {"Fire", "Brimstone"}};
 		GLib::Eval::Evaluator evaluator;
-		evaluator.Add("user", user);
-
-		GLIB_CHECK_RUNTIME_EXCEPTION({ evaluator.Add("user", user); }, "Value already exists : user");
+		evaluator.Set("user", z);
+		BOOST_TEST("Zardoz" == evaluator.Evaluate("user.name"));
+		evaluator.Set("user", d);
+		BOOST_TEST("Diablo" == evaluator.Evaluate("user.name"));
 	}
 
-	BOOST_AUTO_TEST_CASE(AddCollectionTwiceThrows)
+	BOOST_AUTO_TEST_CASE(ResetCollection)
 	{
 		GLib::Eval::Evaluator evaluator;
 		std::list<int> values {1,2,3};
-		evaluator.AddCollection("values", values);
+		evaluator.SetCollection("values", values);
+		BOOST_TEST("1,2,3" == evaluator.Evaluate("values")); // delim?
 
-		GLIB_CHECK_RUNTIME_EXCEPTION({ evaluator.AddCollection("values", values); }, "Value already exists : values");
+		evaluator.SetCollection("values", values = {4,5,6});
+		BOOST_TEST("4,5,6" == evaluator.Evaluate("values"));
 	}
 
 	BOOST_AUTO_TEST_CASE(CollectionUnimplementedMethods)
 	{
 		GLib::Eval::Evaluator evaluator;
-		const std::vector<int> values { 1, 2, 3 };
-		evaluator.AddCollection("value", values);
+		const std::vector<int> values { 1,2,3 };
+		evaluator.SetCollection("value", values);
 
-		GLIB_CHECK_RUNTIME_EXCEPTION({ (void)evaluator.Evaluate("value"); }, "Not implemented");
 		GLIB_CHECK_RUNTIME_EXCEPTION({ (void)evaluator.Evaluate("value.property"); }, "Not implemented");
 	}
 
 	BOOST_AUTO_TEST_CASE(ValueForEachThrows)
 	{
 		GLib::Eval::Evaluator evaluator;
-		evaluator.Add("value", 1234);
+		evaluator.Set("value", 1234);
 
 		GLIB_CHECK_RUNTIME_EXCEPTION({ evaluator.ForEach("value", [&](const GLib::Eval::ValueBase &) { }); },
 			"ForEach not defined for : int");
@@ -145,7 +148,7 @@ BOOST_AUTO_TEST_SUITE(EvaluatorTests)
 	{
 		GLib::Eval::Evaluator evaluator;
 		std::vector<int> ints { 1,2,3,4};
-		evaluator.Add("ints", ints);
+		evaluator.Set("ints", ints);
 
 		std::vector<std::string> result;
 		evaluator.ForEach("ints", [&](const GLib::Eval::ValueBase & value)
@@ -160,7 +163,7 @@ BOOST_AUTO_TEST_SUITE(EvaluatorTests)
 	{
 		GLib::Eval::Evaluator evaluator;
 		User user {"Zardoz", 999, {"Domination", "MassiveHead"}};
-		evaluator.Add("user", user);
+		evaluator.Set("user", user);
 
 		GLIB_CHECK_RUNTIME_EXCEPTION({ (void)evaluator.Evaluate("user.HasProperty"); },
 			"Unknown property : 'HasProperty'");
@@ -169,7 +172,7 @@ BOOST_AUTO_TEST_SUITE(EvaluatorTests)
 	BOOST_AUTO_TEST_CASE(UnknownVisitorThrows)
 	{
 		GLib::Eval::Evaluator evaluator;
-		evaluator.Add("HasNoVisitor", HasNoVisitor{});
+		evaluator.Set("HasNoVisitor", HasNoVisitor{});
 		GLIB_CHECK_RUNTIME_EXCEPTION({ (void)evaluator.Evaluate("HasNoVisitor.FuBar"); },
 			"No accessor defined for property: 'FuBar', type:'HasNoVisitor'");
 		;
@@ -178,7 +181,7 @@ BOOST_AUTO_TEST_SUITE(EvaluatorTests)
 	BOOST_AUTO_TEST_CASE(NoToStringThrows)
 	{
 		GLib::Eval::Evaluator evaluator;
-		evaluator.Add("HasNoToString", HasNoToString{});
+		evaluator.Set("HasNoToString", HasNoToString{});
 		GLIB_CHECK_RUNTIME_EXCEPTION({ (void)evaluator.Evaluate("HasNoToString"); },
 			"Cannot convert type to string : HasNoToString");
 	}
@@ -186,8 +189,8 @@ BOOST_AUTO_TEST_SUITE(EvaluatorTests)
 	BOOST_AUTO_TEST_CASE(Bool)
 	{
 		GLib::Eval::Evaluator evaluator;
-		evaluator.Add("valueTrue", true);
-		evaluator.Add("valueFalse", false);
+		evaluator.Set("valueTrue", true);
+		evaluator.Set("valueFalse", false);
 		BOOST_TEST("true" == evaluator.Evaluate("valueTrue"));
 		BOOST_TEST("false" == evaluator.Evaluate("valueFalse"));
 	}
