@@ -84,6 +84,18 @@ namespace TestUtils
 	}
 }
 
+namespace boost::test_tools::tt_detail
+{
+	template <typename K, typename V>
+	struct print_log_value<std::pair<K, V>>
+	{
+		inline void operator()(std::ostream & str, ::std::pair<K, V> const & item)
+		{
+			str << '{' << item.first << ',' << item.second << '}';
+		}
+	};
+}
+
 #define BOOST_CHECK_EXCEPTION_EX( S, E, P, C )\
 BOOST_CHECK_THROW_IMPL( S, E, P<E>( ex, C ), \
 ": validation on the raised exception through predicate \"" BOOST_STRINGIZE(P<E>) "\"", CHECK )

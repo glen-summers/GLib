@@ -6,9 +6,34 @@
 
 namespace GLib::Cpp
 {
+	std::ostream & operator<<(std::ostream & str, const State & s)
+	{
+		static constexpr std::array<std::string_view, (size_t)State::Count> stateNames
+		{
+			"Error",
+			"None",
+			"WhiteSpace",
+			"CommentStart",
+			"CommentLine",
+			"Continuation",
+			"CommentBlock",
+			"CommentAsterix",
+			"Directive",
+			"String",
+			"RawStringPrefix",
+			"RawString",
+			"Code",
+			"SystemInclude",
+			"CharacterLiteral",
+			"CharacterEscape"
+		};
+
+		return str << stateNames[static_cast<int>(s)];
+	}
+
 	std::ostream & operator<<(std::ostream & s, const Fragment & f)
 	{
-		return s << "State: " << static_cast<int>(f.first) << ", Value: \'" << f.second << '\'';
+		return s << "State: " << f.first << ", Value: \'" << f.second << '\'';
 	}
 }
 

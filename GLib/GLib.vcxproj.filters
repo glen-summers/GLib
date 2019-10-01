@@ -221,6 +221,9 @@
     <ClInclude Include="..\include\GLib\Html\Node.h">
       <Filter>Include Files\Html</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\GLib\ConsecutiveFind.h">
+      <Filter>Include Files\Util</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="filelogger.cpp">

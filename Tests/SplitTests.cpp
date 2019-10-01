@@ -3,6 +3,8 @@
 #include "GLib/split.h"
 #include "GLib/cvt.h"
 
+#include "GLib/ConsecutiveFind.h"
+
 #include "TestUtils.h"
 
 BOOST_AUTO_TEST_SUITE(SplitTests)
@@ -114,6 +116,37 @@ BOOST_AUTO_TEST_CASE(EmptyDeliminatorIsError)
 	std::vector<std::string> actual;
 
 	GLIB_CHECK_LOGIC_EXCEPTION({ GLib::Util::Split(value, std::back_inserter(actual), {}); }, "Delimiter is empty");
+}
+
+BOOST_AUTO_TEST_CASE(ConsecutiveFindTest)
+{
+	std::vector<int> values { 1,1,2,3,3,3};
+	std::vector<std::pair<int, size_t>> result, expected = {{1,2},{2,1},{3,3}};
+
+	for (auto it = values.begin(), end = values.end(), next = end; it!=end; it = next)
+	{
+		next = GLib::Util::ConsecutiveFind(it, end);
+		result.emplace_back(*it, std::distance(it, next));
+	}
+
+	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), result.begin(), result.end());
+}
+
+BOOST_AUTO_TEST_CASE(ConsecutiveFindPred)
+{
+	using Pair = std::pair<int, std::string>;
+	auto pred = [](const Pair & p1, const Pair & p2) { return p1.second != p2.second; };
+
+	std::vector<Pair> values {{1,"1"},{2,"1"},{3,"2"},{4,"3"},{5,"3"},{6,"3"}};
+	std::vector<std::pair<std::string, size_t>> result, expected = {{"1",2},{"2",1},{"3",3}};
+
+	for (auto it = values.begin(), end = values.end(), next = end; it!=end; it = next)
+	{
+		next = GLib::Util::ConsecutiveFind(it, end, pred);
+		result.emplace_back(it->second, std::distance(it, next));
+	}
+
+	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), result.begin(), result.end());
 }
 
 BOOST_AUTO_TEST_SUITE_END()
