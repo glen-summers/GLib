@@ -183,7 +183,6 @@
     <ClInclude Include="TestInterfaces.h" />
     <ClInclude Include="TestStructs.h" />
     <ClInclude Include="TestUtils.h" />
-    <ClInclude Include="wstringfix.h" />
     <ClInclude Include="XmlTestUtils.h" />
     <ClInclude Include="Xyzzy.h" />
   </ItemGroup>

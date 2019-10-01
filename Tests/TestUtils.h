@@ -94,6 +94,15 @@ namespace boost::test_tools::tt_detail
 			str << '{' << item.first << ',' << item.second << '}';
 		}
 	};
+
+	template <>
+	struct print_log_value<std::wstring>
+	{
+		inline void operator()(std::ostream & str, std::wstring const & item)
+		{
+			str << GLib::Cvt::w2a(item);
+		}
+	};
 }
 
 #define BOOST_CHECK_EXCEPTION_EX( S, E, P, C )\

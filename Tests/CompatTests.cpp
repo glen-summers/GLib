@@ -4,7 +4,6 @@
 #include "GLib/scope.h"
 
 #include "TestUtils.h"
-#include "wstringfix.h"
 
 struct UnmangleStruct
 {};
