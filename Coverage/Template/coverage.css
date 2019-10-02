@@ -129,6 +129,24 @@ tr.ncov {
 	background-color: #F7DEDE;
 }
 
+div.edge {
+	position: fixed;
+	top: 0;
+	bottom: 0;
+	right: 0;
+	width: 4px;
+	border-style: groove;
+	background-color: white;
+}
+
+div.cov {
+	background-color: lime;
+}
+
+div.ncov {
+	background-color: tomato;
+}
+
 table.source {
 	width: 100%;
 	border: none;

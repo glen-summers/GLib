@@ -3,6 +3,14 @@
 
 #include "GLib/Eval/Collection.h"
 
+enum class Quatrain : int { Fee, Fi, Fo, Fum };
+
+inline std::ostream & operator<<(std::ostream & s, Quatrain q)
+{
+	constexpr auto a = std::array<std::string_view, 4> { "Fee", "Fi", "Fo", "Fum"};
+	return s << a.at(static_cast<int>(q));
+}
+
 struct Struct
 {
 	struct NestedStruct

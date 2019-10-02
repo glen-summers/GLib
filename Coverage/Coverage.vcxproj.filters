@@ -16,6 +16,9 @@
     <Filter Include="Template">
       <UniqueIdentifier>{4c45144a-284f-440b-874c-ae738258fbdf}</UniqueIdentifier>
     </Filter>
+    <Filter Include="TemplateTypes">
+      <UniqueIdentifier>{b3e1ac35-c510-45e4-a782-42403b1fbd27}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -45,14 +48,23 @@
     <ClInclude Include="resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Directory.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="CoverageLevel.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="CppHtmlGenerator.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Directory.h">
+      <Filter>TemplateTypes</Filter>
+    </ClInclude>
+    <ClInclude Include="Line.h">
+      <Filter>TemplateTypes</Filter>
+    </ClInclude>
+    <ClInclude Include="Chunk.h">
+      <Filter>TemplateTypes</Filter>
+    </ClInclude>
+    <ClInclude Include="LineCover.h">
+      <Filter>TemplateTypes</Filter>
+    </ClInclude>
+    <ClInclude Include="CoverageLevel.h">
+      <Filter>TemplateTypes</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

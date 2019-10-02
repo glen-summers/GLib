@@ -8,6 +8,15 @@
 
 BOOST_AUTO_TEST_SUITE(EvaluatorTests)
 
+	BOOST_AUTO_TEST_CASE(AddEnum)
+	{
+		GLib::Eval::Evaluator evaluator;
+		evaluator.Set("feefee", Quatrain::Fee);
+		evaluator.Set("f00f00", Quatrain::Fo);
+		BOOST_TEST("Fee" == evaluator.Evaluate("feefee"));
+		BOOST_TEST("Fo" == evaluator.Evaluate("f00f00"));
+	}
+
 	BOOST_AUTO_TEST_CASE(AddStruct)
 	{
 		GLib::Eval::Evaluator evaluator;

@@ -144,6 +144,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Address.h" />
+    <ClInclude Include="Chunk.h" />
     <ClInclude Include="Coverage.h" />
     <ClInclude Include="CoverageLevel.h" />
     <ClInclude Include="CppHtmlGenerator.h" />
@@ -151,6 +152,8 @@
     <ClInclude Include="FileCoverageData.h" />
     <ClInclude Include="Function.h" />
     <ClInclude Include="HtmlReport.h" />
+    <ClInclude Include="Line.h" />
+    <ClInclude Include="LineCover.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="RootDirs.h" />

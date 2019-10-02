@@ -1,14 +1,17 @@
 #include "pch.h"
 
-#include "CppHtmlGenerator.h"
 #include "Directory.h"
+#include "Line.h"
+#include "Chunk.h"
+
+#include "CppHtmlGenerator.h"
 #include "FileCoverageData.h"
 #include "HtmlReport.h"
 #include "RootDirs.h"
 
 #include "resource.h"
 
-#include "GLib/Eval/Evaluator.h"
+#include "GLib/ConsecutiveFind.h"
 #include "GLib/Html/TemplateEngine.h"
 #include "GLib/Win/Resources.h"
 #include "GLib/Xml/Printer.h"
@@ -16,37 +19,6 @@
 
 #include <fstream>
 #include <set>
-
-struct Line
-{
-	std::string text;
-	std::string number;
-	const char * style;
-};
-
-template <>
-struct GLib::Eval::Visitor<Line>
-{
-	static void Visit(const Line & line, const std::string & propertyName, const ValueVisitor & f)
-	{
-		if (propertyName == "style")
-		{
-			return f(Value(line.style));
-		}
-
-		if (propertyName == "number")
-		{
-			return f(Value(line.number));
-		}
-
-		if (propertyName == "text")
-		{
-			return f(Value(line.text));
-		}
-
-		throw std::runtime_error(std::string("Unknown property : '") + propertyName + '\'');
-	}
-};
 
 std::string LoadHtml(unsigned int id)
 {
@@ -285,13 +257,13 @@ void HtmlReport::GenerateSourceFile(std::filesystem::path & subPath, const FileC
 	for (const auto & sourceLine : GLib::Util::Splitter{source.str(), "\n"})
 	{
 		auto lineNumber = static_cast<unsigned int>(lines.size()+1);
-		const char * style = "";
+		LineCover cover {};
 		auto it = lc.find(lineNumber);
 		if (it != lc.end())
 		{
-			style = it->second == 0 ? "ncov" : "cov";
+			cover = it->second == 0 ? LineCover::NotCovered : LineCover::Covered;
 		}
-		lines.push_back({sourceLine, {}, style});
+		lines.push_back({sourceLine, {}, cover});
 	}
 
 	auto maxLineNumberWidth = static_cast<unsigned int>(floor(log10(lines.size()))) + 1;
@@ -301,6 +273,22 @@ void HtmlReport::GenerateSourceFile(std::filesystem::path & subPath, const FileC
 		paddedLineNumber << std::setw(maxLineNumberWidth) << i + 1; // use a width format specifier in template?
 		lines[i].number = paddedLineNumber.str();
 	}
+
+	constexpr int EffectiveHeaderLines = 10;
+	constexpr int EffectiveFooterLines = 3;
+	auto ratio = static_cast<float>(HundredPercent) / (lines.size() + EffectiveHeaderLines + EffectiveFooterLines);
+
+	auto pred = [](const Line & l1, const Line & l2) { return l1.cover != l2.cover; };
+
+	std::vector<Chunk> chunks;
+	chunks.push_back({LineCover::None, EffectiveHeaderLines * ratio});
+	for (auto it = lines.begin(), end = lines.end(), next = end; it!=end; it = next)
+	{
+		next = GLib::Util::ConsecutiveFind(it, end, pred);
+		auto size = static_cast<float>(std::distance(it, next));
+		chunks.push_back({it->cover, size * ratio});
+	}
+	chunks.push_back({LineCover::None, EffectiveFooterLines * ratio});
 
 	GLib::Eval::Evaluator e;
 
@@ -329,6 +317,7 @@ void HtmlReport::GenerateSourceFile(std::filesystem::path & subPath, const FileC
 	e.Set("index", (relativePath / "index.html").generic_u8string());
 
 	e.SetCollection("lines", lines);
+	e.SetCollection("chunks", chunks);
 
 	create_directories(targetPath.parent_path());
 	std::ofstream out(targetPath.concat(L".html"));
