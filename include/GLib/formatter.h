@@ -251,7 +251,7 @@ namespace GLib
 			});
 		}
 
-		template<class T>
+		template<typename T>
 		static auto FormatImpl(std::ostream& os, const T& obj, const std::string & format, int unused)
 			-> decltype(Policy::Format(os, obj, format), void())
 		{

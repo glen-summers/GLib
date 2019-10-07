@@ -63,7 +63,7 @@ struct DeleteCounter
 	}
 };
 
-class ImplementsITest1 final : public GLib::Win::Unknown<ITest1>, public DeleteCounter<ImplementsITest1>
+class ImplementsITest1 final : public GLib::Win::Unknown<ImplementsITest1, ITest1>, public DeleteCounter<ImplementsITest1>
 {
 	GLIB_COM_RULE_OF_FIVE(ImplementsITest1)
 
@@ -76,7 +76,7 @@ public:
 	void ConcreteMethod() const { (void)*this; }
 };
 
-class ImplementsITest1AndITest2 final : public GLib::Win::Unknown<ITest1, ITest2>, public DeleteCounter<ImplementsITest1AndITest2>
+class ImplementsITest1AndITest2 final : public GLib::Win::Unknown<ImplementsITest1AndITest2, ITest1, ITest2>, public DeleteCounter<ImplementsITest1AndITest2>
 {
 	GLIB_COM_RULE_OF_FIVE(ImplementsITest1AndITest2)
 
@@ -94,9 +94,7 @@ class ImplementsITest1AndITest2 final : public GLib::Win::Unknown<ITest1, ITest2
 class ImplementsITest1ExtendedAndITest1ExtendedAlt;
 
 class ImplementsITest1ExtendedAndITest1ExtendedAlt final
-	: public GLib::Win::Unknown2<ImplementsITest1ExtendedAndITest1ExtendedAlt,
-				GLib::Win::TypeList<ITest1Extended, ITest1ExtendedAlt>,
-				GLib::Win::TypeList<ITest1, ITest1Extended, ITest1ExtendedAlt>>
+	: public GLib::Win::Unknown<ImplementsITest1ExtendedAndITest1ExtendedAlt, ITest1Extended, ITest1, ITest1ExtendedAlt>
 	, public DeleteCounter<ImplementsITest1ExtendedAndITest1ExtendedAlt>
 {
 	GLIB_COM_RULE_OF_FIVE(ImplementsITest1ExtendedAndITest1ExtendedAlt)

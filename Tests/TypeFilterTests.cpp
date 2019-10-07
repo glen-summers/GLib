@@ -1,6 +1,6 @@
 #include <boost/test/unit_test.hpp>
 
-#include "GLib/TypeFilter.h"
+#include "GLib/TypePredicates.h"
 
 #include <typeindex>
 
@@ -33,37 +33,10 @@ namespace Interfaces
 
 namespace Predicates
 {
-	template<class T1, class T2>
-	struct IsBaseOf : std::bool_constant<std::is_base_of<T1, T2>::value
-			&& !std::is_same<T1, T2>::value>
-	{};
-	
-	template<class T1, class T2> using IsDerivedFrom = IsBaseOf<T2, T1>;
-
-	template <typename T> using IsDerivedFromFoo = IsDerivedFrom<T, Interfaces::IFoo>;
-
-	template<class T, class... Types> struct IsBaseOfAny;
-
-	template<class T> struct IsBaseOfAny<T> : std::bool_constant<false>
-	{};
-
-	template<class T, class First, class... Rest>
-	struct IsBaseOfAny<T, First, Rest...>
-		: std::bool_constant<IsBaseOf<T, First>::value || IsBaseOfAny<T, Rest...>::value>
-	{};
-
-	template<class T, class... Types> struct HasNoInheritor;
-
-	template<class T> struct HasNoInheritor<T> : std::bool_constant<false>
-	{};
-
-	template<class T, class First, class... Rest>
-	struct HasNoInheritor<T, First, Rest...>
-		: std::bool_constant<!IsBaseOf<T, First>::value && !IsBaseOfAny<T, Rest...>::value>
-	{};
+	template <typename T> using IsDerivedFromFoo = GLib::TypePredicates::IsDerivedFrom<T, Interfaces::IFoo>;
 }
 
-namespace Util
+namespace Util // move
 {
 	template<typename First, typename... Rest> struct ToTypeId;
 
@@ -139,7 +112,7 @@ BOOST_AUTO_TEST_CASE(TestInterfaceFilter)
 
 BOOST_AUTO_TEST_CASE(TestSelfFilter)
 {
-	using Result = GLib::Util::SelfTypeFilter<Predicates::HasNoInheritor,
+	using Result = GLib::Util::SelfTypeFilter<GLib::TypePredicates::HasNoInheritor,
 		Interfaces::IFoo, Interfaces::IFoo2, Interfaces::IBar>::TupleType::Type;
 	std::list<std::type_index> expected { typeid(Interfaces::IFoo2),typeid(Interfaces::IBar) };
 

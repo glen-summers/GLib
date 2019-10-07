@@ -16,7 +16,7 @@ namespace GLib
 		}
 	};
 
-	template<class CharType> class NoCaseHash;
+	template<typename CharType> class NoCaseHash;
 
 	template<> class NoCaseHash<char>
 	{
@@ -35,7 +35,7 @@ namespace GLib
 		}
 	};
 
-	template<class CharType> struct NoCaseEquality;
+	template<typename CharType> struct NoCaseEquality;
 
 	template<>
 	struct NoCaseEquality<char>

@@ -66,6 +66,7 @@ namespace GLib::Util
 		template <typename Target, typename Source>
 		struct Flags
 		{
+			static_assert(std::is_integral<Target>::value && std::is_integral<Source>::value, "TODO: !is_integral");
 			static constexpr bool SameSign = std::is_signed<Target>::value == std::is_signed<Source>::value;
 			static constexpr bool SignedToUnsigned = std::is_signed<Source>::value && std::is_unsigned<Target>::value;
 			static constexpr bool UnsignedToSigned = std::is_unsigned<Source>::value && std::is_signed<Target>::value;

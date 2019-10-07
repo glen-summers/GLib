@@ -2,7 +2,7 @@
 
 namespace GLib::Util
 {
-	template<class InputIt, class T>
+	template<typename InputIt, typename T>
 	constexpr InputIt FindNot(InputIt first, InputIt last, const T & value)
 	{
 		while (first != last && *first == value) ++first;

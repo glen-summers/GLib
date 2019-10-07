@@ -4,7 +4,7 @@
 
 namespace GLib::Util
 {
-	template <typename T, class BufferType>
+	template <typename T, typename BufferType>
 	class GenericOutStream
 	{
 		std::basic_ostream<T> stream;
