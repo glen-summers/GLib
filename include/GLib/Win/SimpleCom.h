@@ -3,6 +3,11 @@
 #include "GLib/TypePredicates.h"
 #include "GLib/Win/ComPtr.h"
 
+#ifdef SIMPLECOM_LOG_QI_MISS
+#include "GLib/Win/DebugWrite.h"
+#include "GLib/Win/Uuid.h"
+#endif
+
 #include <atomic>
 
 #define WRAP(x) x // NOLINT(cppcoreguidelines-macro-usage)
@@ -39,7 +44,8 @@ namespace GLib::Win
 				return S_OK;
 			}
 #ifdef SIMPLECOM_LOG_QI_MISS
-			ComDiags::LogIid("QI miss", typeid(t).name(), iid);
+			// lookup iid name from registry
+			Debug::Write("QI miss {0} : {1}", typeid(T).name(), to_string(Util::Uuid(iid)));
 #else
 			(void)iid;
 #endif
@@ -60,8 +66,8 @@ namespace GLib::Win
 			return Qi<T, Second, Rest...>(t, iid, ppvObject);
 		}
 
-		template<typename Interfaces> struct Implements;
-		template<typename... Interfaces> struct Implements<GLib::Util::TypeList<Interfaces...>>
+		template<typename Interfaces> struct __declspec(novtable) Implements;
+		template<typename... Interfaces> struct __declspec(novtable) Implements<GLib::Util::TypeList<Interfaces...>>
 			: Interfaces...
 		{};
 	}
@@ -69,8 +75,6 @@ namespace GLib::Win
 	template<typename T, typename... Interfaces> class Unknown
 		: public Detail::Implements<typename GLib::Util::SelfTypeFilter<GLib::TypePredicates::HasNoInheritor, Interfaces...>::TupleType::Type>
 	{
-		template <typename> friend class ComPtrBase; // allows ComPtr to hold concrete class, avoid
-
 		std::atomic<ULONG> ref = 1;
 
 	public:

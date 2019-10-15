@@ -1,8 +1,7 @@
 #pragma once
 
+#include "GLib/Win/ComErrorCheck.h"
 #include "GLib/Win/WinException.h"
-
-#define COM_PTR_DEBUG // testing
 
 #ifdef COM_PTR_DEBUG
 #include "GLib/Win/DebugStream.h"
@@ -15,75 +14,82 @@
 
 namespace GLib::Win
 {
-	namespace Detail
+	template <typename T> class ComPtr;
+
+	template <typename Target, typename Source>
+	ComPtr<Target> ComCast(const Source & source)
 	{
-		template <typename T>
-		class Restricted : public T
+		ComPtr<Target> value;
+		if (source)
 		{
-		public:
-			Restricted() = delete;
-			Restricted(const Restricted &) = delete;
-			Restricted(Restricted &&) = delete;
-			Restricted & operator = (const Restricted &) = delete;
-			Restricted & operator = (Restricted &&) = delete;
-			~Restricted() = delete;
-
-		private:
-			ULONG STDMETHODCALLTYPE AddRef();
-			ULONG STDMETHODCALLTYPE Release();
-		};
-
-		template <typename T, typename enable = void>
-		struct CanRestrict
-		{
-			using Type = Restricted<T>;
-		};
-
-		template <typename T>
-		struct CanRestrict<T, typename std::enable_if<std::is_final<T>::value>::type>
-		{
-			using Type = T;
-		};
+			CheckHr(source->QueryInterface(&value), "QueryInterface");
+		}
+		return value;
 	}
-#define COM_PTR_FWD(x) template <> struct Util::Detail::CanRestrict<x> { using Type = x; }; // NOLINT(cppcoreguidelines-macro-usage) just remove this?
 
-	// avoid base
-	// rewrite and simplify
 	template <typename T>
-	class ComPtrBase
+	class ComPtr
 	{
-		T * p = nullptr;
+		template <typename> friend class ComPtr;
+
+		T * p {};
 
 	public:
-		ComPtrBase & operator = (const ComPtrBase &) = delete;
+		ComPtr() noexcept = default;
 
-	protected:
-		ComPtrBase() = default;
+		explicit ComPtr(std::nullptr_t) noexcept
+		{}
 
-		ComPtrBase(const ComPtrBase & other)
-			: p(other.p)
+		template <typename U> explicit ComPtr(U * u) noexcept
+			: p(InternalAddRef(u))
+		{}
+
+		template <typename U>
+		ComPtr(const ComPtr<U> & other) noexcept
+			: p(InternalAddRef(other.p))
+		{}
+
+		ComPtr(const ComPtr & other) noexcept
+			: p(InternalAddRef(other.p))
+		{}
+
+		template <typename U>
+		ComPtr(ComPtr<U> && right) noexcept
+			: p(std::exchange(right.p, nullptr))
+		{}
+
+		~ComPtr() noexcept
 		{
-			InternalAssign(other.p);
+			InternalRelease(std::exchange(p, nullptr));
 		}
 
-		ComPtrBase(ComPtrBase && right) noexcept
-			: p(right.p)
+		ComPtr & operator=(const ComPtr & right) noexcept
 		{
-			right.p = nullptr;
+			ComPtr tmp(right);
+			std::swap(tmp.p, p);
+			return *this;
 		}
 
-		~ComPtrBase() = default;
+		template <typename U>
+		ComPtr & operator=(const ComPtr<U> & right) noexcept
+		{
+			ComPtr tmp(right);
+			std::swap(tmp.p, p);
+			return *this;
+		}
+
+		ComPtr & operator=(ComPtr && right) noexcept
+		{
+			ComPtr tmp(std::move(right));
+			std::swap(tmp.p, p);
+			return *this;
+		}
 
 		template<typename U>
-		explicit ComPtrBase(ComPtrBase<U> && right)
-			: p(right.p)
+		ComPtr & operator=(ComPtr<U>&& right) noexcept
 		{
-			right.p = nullptr;
-		}
-
-		ComPtrBase & operator=(ComPtrBase && right) noexcept
-		{
-			Swap(std::move(right));
+			ComPtr tmp(std::move(right));
+			std::swap(tmp.p, p);
 			return *this;
 		}
 
@@ -92,206 +98,29 @@ namespace GLib::Win
 			return p;
 		}
 
-		// avoid
+		// remove? transfer
 		T * const * GetAddress() const noexcept
 		{
 			return &p;
 		}
 
-		void InternalAssign(T * other) noexcept
+		// restrict?
+		T * operator->() const noexcept
 		{
-			p = other;
-			if (p)
-			{
-				p->AddRef();
-			}
-		}
-
-		template<typename U>
-		void InternalAssign(const ComPtrBase<U>& other)
-		{
-			InternalAssign(other.p);
-		}
-
-		void InternalAttach(T * other) noexcept
-		{
-			p = other;
-		}
-
-		T * InternalDetach()
-		{
-			T * detached = p;
-			p = nullptr;
-			return detached;
-		}
-
-		void InternalRelease() const noexcept
-		{
-			// as this is currently only called from a destructor it cannot get the recursive Release call
-			// mentioned at https://msdn.microsoft.com/magazine/dn904668.aspx
-			if (p != nullptr)
-			{
-#ifndef COM_PTR_DEBUG
-				p->Release();
-#else
-				if (p->Release() == 0)
-				{
-					GLib::Win::Debug::Stream() << typeid(p).name() << " deleted" << std::endl;;
-				}
-#endif
-			}
-		}
-
-		void Swap(ComPtrBase & right) noexcept
-		{
-			std::swap(p, right.p);
-		}
-
-		template<typename U> friend class ComPtrBase;
-
-	public:
-		// diagnostics
-		unsigned int UseCount() const
-		{
-			if (p == nullptr)
-			{
-				return 0;
-			}
-			p->AddRef();
-			return p->Release();
-		}
-	};
-
-	template <typename T>
-	class ComPtr : public ComPtrBase<T>
-	{
-	public:
-		using BaseType = ComPtrBase<T>;
-
-		ComPtr() noexcept = default;
-
-		// implicit ptr ctor allows conversions, differs from shared_ptr definition, should be ok as non-com pointers will cause compile errors??
-		template <typename U>
-		explicit ComPtr(U * u)
-		{
-			BaseType::InternalAssign(u);
-		}
-
-		explicit ComPtr(std::nullptr_t) noexcept
-		{}
-
-		ComPtr(const ComPtr & other) noexcept
-		{
-			BaseType::InternalAssign(other);
-		}
-
-		template<typename U, typename = typename std::enable_if<std::is_convertible<U*, T*>::value, void>::type>
-		explicit ComPtr(const ComPtr<U> & other) noexcept
-		{
-			BaseType::InternalAssign(other);
-		}
-
-		ComPtr(ComPtr && right) noexcept
-			: BaseType(std::move(right))
-		{}
-
-		template<typename U, typename = typename std::enable_if<std::is_convertible<U*, T*>::value, void>::type>
-		explicit ComPtr(ComPtr<U> && right) noexcept
-			: BaseType(std::move(right))
-		{}
-
-		ComPtr & operator=(ComPtr && right) noexcept
-		{
-			ComPtr(std::move(right)).Swap(*this);
-			return *this;
-		}
-
-		template<typename U>
-		ComPtr & operator=(ComPtr<U>&& right) noexcept
-		{
-			ComPtr(std::move(right)).Swap(*this);
-			return *this;
-		}
-
-		~ComPtr() noexcept
-		{
-			BaseType::InternalRelease();
-		}
-
-		ComPtr & operator=(const ComPtr & right) noexcept
-		{
-			ComPtr(right).Swap(*this);
-			return *this;
-		}
-
-		template <typename U>
-		ComPtr & operator=(const ComPtr<U> & right) noexcept
-		{
-			ComPtr(right).Swap(*this);
-			return *this;
-		}
-
-		void Reset() noexcept
-		{
-			ComPtr().Swap(*this);
-		}
-
-		template<typename U>
-		void Reset(U * other)
-		{
-			ComPtr(other).Swap(*this);
-		}
-
-		void Swap(ComPtr & other) noexcept
-		{
-			BaseType::Swap(other);
-		}
-
-		using BaseType::Get;
-
-		// this works with undefined classes seems its evaluated at usage site when itf is defined
-		//	-> typename Detail::Restricted<T>* operator->() const noexcept
-
-		// but the following fails when compiling a header, assume its compiler specific as to when its evaluated
-		// current trick is to use COM_PTR_FWD to prevent is_final being evaluated
-		typename Detail::CanRestrict<T>::Type* operator->() const noexcept
-		{
-			assert(Get() != nullptr);
-			return static_cast<typename Detail::CanRestrict<T>::Type*>(BaseType::Get());
-		}
-
-		bool Unique() const noexcept
-		{
-			return BaseType::UseCount() == 1;
+			assert(p != nullptr);
+			return p;
 		}
 
 		explicit operator bool() const noexcept
 		{
-			return BaseType::Get() != nullptr;
+			return p != nullptr;
 		}
 
+		// remove? transfer
 		T** operator&() noexcept // NOLINT(google-runtime-operator) use transfer semantics
 		{
-			assert(Get() == nullptr);
-			return const_cast<T**>(BaseType::GetAddress());
-		}
-
-		HRESULT CreateInstance(const IID & iid) noexcept
-		{
-			assert(Get() == nullptr); // or just call reset?
-			return ::CoCreateInstance(iid, nullptr, CLSCTX_ALL, __uuidof(T), reinterpret_cast<void**>(operator&()));
-		}
-
-		template<typename U>
-		HRESULT Detach(U** target)
-		{
-			if (!target)
-			{
-				assert(false);
-				return E_POINTER;
-			}
-			*target = BaseType::InternalDetach();
-			return S_OK;
+			assert(p == nullptr);
+			return const_cast<T**>(GetAddress());
 		}
 
 		template<typename U>
@@ -300,41 +129,28 @@ namespace GLib::Win
 			return ComPtr(value, false);
 		}
 
-		bool operator==(const ComPtr & other) const
-		{
-			// consider Com Equality? consider template<typename U> compare
-			return other.Get() == Get();
-		}
-
-		bool operator!=(const ComPtr &other) const
-		{
-			return !(*this == other);
-		}
-
 	private:
 		ComPtr(T * other, bool ignored) noexcept
+			: p(other)
 		{
-			(void) ignored;
-			BaseType::InternalAttach(other);
+			(void)ignored;
+		}
+
+		template <typename T> static T * InternalAddRef(T * value) noexcept
+		{
+			return value ? value->AddRef(), value : value;
+		}
+
+		template <typename T> static void InternalRelease(T * value) noexcept
+		{
+			if (value && value->Release() == 0)
+			{
+#ifdef COM_PTR_DEBUG
+				Debug::Stream() << typeid(T).name() << " deleted" << std::endl;
+#endif
+			}
 		}
 	};
-
-	// wrl uses nothrow new and passes args supposedly to prevent leaks (and also to return out of mem HR)
-	// however c++ should not leak from well written ctors!? and badalloc should be caught and returned as an HR
-	// possible can make ctors private and friends of make to have better control over internal ref count?
-	//template <typename T, typename I, typename... Args>
-	//inline ComPtr<I> Make(Args&&... args)
-	//{
-	//	// static_assert(T is a SimpleCom::Unknown)? or override
-	//	T* t = new T(std::forward<Args>(args)...); // ref==0
-	//	return ComPtr<I>(static_cast<I*>(t)); // ret with +1 ref
-	//}
-
-	template <typename T, typename... Args>
-	ComPtr<T> MakeConcrete(Args&&... args)
-	{
-		return ComPtr<T>::Attach(new T(std::forward<Args>(args)...));
-	}
 
 	template <typename T, typename I, typename... Args>
 	ComPtr<I> Make(Args&&... args)
@@ -346,5 +162,11 @@ namespace GLib::Win
 	ComPtr<typename T::DefaultInterface> Make(Args&&... args)
 	{
 		return Make<T, typename T::DefaultInterface>(std::forward<Args>(args)...);
+	}
+
+	template <typename T1, typename T2>
+	inline bool operator==(const ComPtr<T1> & t1, const ComPtr<T2>& t2)
+	{
+		return ComCast<IUnknown>(t1) == ComCast<IUnknown>(t2);
 	}
 }

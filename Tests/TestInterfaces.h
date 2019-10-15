@@ -71,9 +71,6 @@ class ImplementsITest1 final : public GLib::Win::Unknown<ImplementsITest1, ITest
 	{
 		return S_OK;
 	}
-
-public:
-	void ConcreteMethod() const { (void)*this; }
 };
 
 class ImplementsITest1AndITest2 final : public GLib::Win::Unknown<ImplementsITest1AndITest2, ITest1, ITest2>, public DeleteCounter<ImplementsITest1AndITest2>

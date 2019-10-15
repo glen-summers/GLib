@@ -107,9 +107,6 @@
     <ClInclude Include="..\include\GLib\Win\ComPtr.h">
       <Filter>Include Files\Win</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\GLib\Win\ComUtil.h">
-      <Filter>Include Files\Win</Filter>
-    </ClInclude>
     <ClInclude Include="scope.h">
       <Filter>Header Files</Filter>
     </ClInclude>
