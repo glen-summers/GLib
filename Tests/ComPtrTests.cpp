@@ -33,7 +33,7 @@ BOOST_AUTO_TEST_SUITE(ComPtrTests)
 BOOST_AUTO_TEST_CASE(ComErrorCheckWithErrorInfo)
 {
 	GLib::Win::ComPtr<ICreateErrorInfo> p;
-	GLib::Win::CheckHr(::CreateErrorInfo(&p), "CreateErrorInfo");
+	GLib::Win::CheckHr(::CreateErrorInfo(p.GetAddress()), "CreateErrorInfo");
 	auto ei = GLib::Win::ComCast<IErrorInfo>(p);
 	p->SetDescription(const_cast<LPOLESTR>(L"hello"));
 	GLib::Win::CheckHr(::SetErrorInfo(0, ei.Get()), "SetErrorInfo");
@@ -180,26 +180,14 @@ BOOST_AUTO_TEST_CASE(CallMethod)
 	BOOST_TEST(S_OK == test->Test1Method());
 }
 
-BOOST_AUTO_TEST_CASE(QINoInterface)
-{
-	GLib::Win::ComPtr<ITest1> p(GLib::Win::Make<ImplementsITest1>());
-	GLib::Win::ComPtr<ITest2> p2;
-	HRESULT hr = p->QueryInterface(&p2);
-	BOOST_TEST(E_NOINTERFACE == hr);
-}
-
 BOOST_AUTO_TEST_CASE(QIOk)
 {
 	GLib::Win::ComPtr<ITest1> p1(GLib::Win::Make<ImplementsITest1AndITest2>());
-	GLib::Win::ComPtr<ITest1> p2;
-	HRESULT hr = p1->QueryInterface(&p2);
-	BOOST_TEST(S_OK == hr);
+	GLib::Win::ComPtr<ITest1> p2 = GLib::Win::ComCast<ITest1>(p1);
 	BOOST_TEST(2U == UseCount(p1));
 	BOOST_TEST(2U == UseCount(p2));
 
-	GLib::Win::ComPtr<IUnknown> pu;
-	hr = p2->QueryInterface(&pu);
-	BOOST_TEST(S_OK == hr);
+	GLib::Win::ComPtr<IUnknown> pu = GLib::Win::ComCast<IUnknown>(p2);
 	BOOST_TEST(pu.Get() == p2.Get());
 }
 
@@ -209,9 +197,7 @@ BOOST_AUTO_TEST_CASE(MultipleInheritance)
 	p12->Test1Method();
 	p12->Test1ExtendedMethod();
 
-	GLib::Win::ComPtr<ITest1ExtendedAlt> p13;
-	HRESULT hr = p12->QueryInterface(&p13);
-	BOOST_TEST(S_OK == hr);
+	GLib::Win::ComPtr<ITest1ExtendedAlt> p13 = GLib::Win::ComCast<ITest1ExtendedAlt>(p12);
 	p13->Test1Method();
 	p13->ITest1ExtendedMethodAlt();
 }

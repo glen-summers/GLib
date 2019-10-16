@@ -16,13 +16,48 @@ namespace GLib::Win
 {
 	template <typename T> class ComPtr;
 
+	namespace Detail
+	{
+		template <typename T> class Transfer
+		{
+			ComPtr<T> & ptr;
+			T * value;
+
+		public:
+			explicit Transfer(ComPtr<T> & ptr) : ptr(ptr), value()
+			{}
+
+			Transfer() = delete;
+			Transfer(const Transfer &) = delete;
+			Transfer(Transfer &&) = delete;
+			Transfer & operator=(const Transfer &) = delete;
+			Transfer & operator=(Transfer &&) = delete;
+
+			~Transfer()
+			{
+				auto p = ComPtr<T>::Attach(value);
+				std::swap(ptr, p);
+			}
+
+			operator T**()
+			{
+				return &value;
+			}
+
+			operator void**()
+			{
+				return reinterpret_cast<void**>(&value);
+			}
+		};
+	}
+
 	template <typename Target, typename Source>
 	ComPtr<Target> ComCast(const Source & source)
 	{
 		ComPtr<Target> value;
 		if (source)
 		{
-			CheckHr(source->QueryInterface(&value), "QueryInterface");
+			CheckHr(source->QueryInterface(__uuidof(Target), value.GetAddress()), "QueryInterface");
 		}
 		return value;
 	}
@@ -58,6 +93,10 @@ namespace GLib::Win
 			: p(std::exchange(right.p, nullptr))
 		{}
 
+		ComPtr(ComPtr && right) noexcept
+			: p(std::exchange(right.p, nullptr))
+		{}
+
 		~ComPtr() noexcept
 		{
 			InternalRelease(std::exchange(p, nullptr));
@@ -86,7 +125,7 @@ namespace GLib::Win
 		}
 
 		template<typename U>
-		ComPtr & operator=(ComPtr<U>&& right) noexcept
+		ComPtr & operator=(ComPtr<U> && right) noexcept
 		{
 			ComPtr tmp(std::move(right));
 			std::swap(tmp.p, p);
@@ -98,10 +137,9 @@ namespace GLib::Win
 			return p;
 		}
 
-		// remove? transfer
-		T * const * GetAddress() const noexcept
+		auto GetAddress() noexcept
 		{
-			return &p;
+			return Detail::Transfer<T>(*this);
 		}
 
 		// restrict?
@@ -114,13 +152,6 @@ namespace GLib::Win
 		explicit operator bool() const noexcept
 		{
 			return p != nullptr;
-		}
-
-		// remove? transfer
-		T** operator&() noexcept // NOLINT(google-runtime-operator) use transfer semantics
-		{
-			assert(p == nullptr);
-			return const_cast<T**>(GetAddress());
 		}
 
 		template<typename U>
@@ -153,19 +184,19 @@ namespace GLib::Win
 	};
 
 	template <typename T, typename I, typename... Args>
-	ComPtr<I> Make(Args&&... args)
+	ComPtr<I> Make(Args && ... args)
 	{
 		return ComPtr<I>::Attach(static_cast<I*>(new T(std::forward<Args>(args)...)));
 	}
 
 	template <typename T, typename... Args>
-	ComPtr<typename T::DefaultInterface> Make(Args&&... args)
+	ComPtr<typename T::DefaultInterface> Make(Args && ... args)
 	{
 		return Make<T, typename T::DefaultInterface>(std::forward<Args>(args)...);
 	}
 
 	template <typename T1, typename T2>
-	inline bool operator==(const ComPtr<T1> & t1, const ComPtr<T2>& t2)
+	inline bool operator==(const ComPtr<T1> & t1, const ComPtr<T2> & t2)
 	{
 		return ComCast<IUnknown>(t1) == ComCast<IUnknown>(t2);
 	}

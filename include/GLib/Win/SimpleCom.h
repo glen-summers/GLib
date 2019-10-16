@@ -82,11 +82,6 @@ namespace GLib::Win
 		using PtrType = ComPtr<DefaultInterface>;
 		GLIB_COM_RULE_OF_FIVE(Unknown)
 
-		ULONG ReferenceCount() const
-		{
-			return ref;
-		}
-
 		HRESULT STDMETHODCALLTYPE QueryInterface(const IID& id, void** ppvObject) override
 		{
 			if (ppvObject == nullptr)
