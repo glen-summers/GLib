@@ -16,6 +16,7 @@ class HtmlReport
 	std::string rootTemplate; // store compiled Nodes(ren)
 	std::string dirTemplate;
 	std::string fileTemplate;
+	std::string functionsTemplate;
 	std::map<std::filesystem::path, std::list<FileCoverageData>> index;
 
 public:

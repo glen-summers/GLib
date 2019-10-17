@@ -3,8 +3,6 @@
 
 	<PropertyGroup>
 		<Root>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)\..'))</Root>
-		<Nuget>https://dist.nuget.org/win-x86-commandline/v4.8.1/nuget.exe</Nuget>
-		<ReportGeneratorVersion>4.0.4</ReportGeneratorVersion>
 	</PropertyGroup>
 
 	<PropertyGroup>
@@ -28,7 +26,7 @@
 		<DebugTestExecutable>$(PlatformOut)\Debug\$(TestProject).exe</DebugTestExecutable>
 		<CoverageExecutable>$(OutputPath)\Coverage.exe</CoverageExecutable>
 		<Downloads>$(Out)\downloads</Downloads>
-		<ReportGenerator>$(Downloads)\ReportGenerator.$(ReportGeneratorVersion)\tools\net47\ReportGenerator.exe</ReportGenerator>
+
 		<CoverageInclude>$(Root)\</CoverageInclude>
 		<CoverageExclude>$(Root)\Tests\</CoverageExclude>
 	</PropertyGroup>
@@ -135,24 +133,16 @@
 		</Task>
 	</UsingTask>
 
-	<Target Name="DownloadTools" Condition="!Exists($(ReportGenerator))">
-		<MakeDir Directories="$(Downloads)"/>
-		<DownloadFile Condition="!Exists($(Nuget))" Address="$(Nuget)" FileName="$(Downloads)\nuget.exe" />
-		<Exec Command="nuget.exe install ReportGenerator -version $(ReportGeneratorVersion)" WorkingDirectory="$(Downloads)"/>
-	</Target>
+	<Target Name="DownloadTools"/>
 
 	<Target Name="Coverage" DependsOnTargets="Compile;DownloadTools">
 		<MSBuild Projects="$(MSBuildProjectFile)" Targets="CompileTests" Properties="Configuration=Debug"/>
 		<Exec Command="$(CoverageExecutable) $(DebugTestExecutable) $(Out) -i $(CoverageInclude) -x $(CoverageExclude)"/>
-		<Exec Command="$(ReportGenerator) -reports:$(Out)\coverage.xml -targetdir:$(Out)\CoverageReport -verbosity:Error -Reporttypes:HTML"/>
-		<!-- <Exec Command="start $(Out)\CoverageReport\index.htm"/> -->
 		<Exec Command="start $(Out)\HtmlReport\index.html"/>
 	</Target>
 
 	<Target Name="CoverageRelease" DependsOnTargets="Compile;DownloadTools">
 		<Exec Command="$(CoverageExecutable) $(TestExecutable) $(Out) -i $(CoverageInclude) -x $(CoverageExclude)"/>
-		<Exec Command="$(ReportGenerator) -reports:$(Out)\coverage.xml -targetdir:$(Out)\CoverageReport -verbosity:Error -Reporttypes:HTML"/>
-		<!-- <Exec Command="start $(Out)\CoverageReport\index.htm"/> -->
 		<Exec Command="start $(Out)\HtmlReport\index.html"/>
 	</Target>
 

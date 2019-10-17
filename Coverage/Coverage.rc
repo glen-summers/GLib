@@ -53,6 +53,7 @@ IDR_STYLESHEET              HTML                    "Template/coverage.css"
 IDR_ROOTDIRECTORY           HTML                    "Template/rootDirectory.html"
 IDR_DIRECTORY               HTML                    "Template/directory.html"
 IDR_FILE                    HTML                    "Template/file.html"
+IDR_FUNCTIONS               HTML                    "Template/functions.html"
 
 #endif    // English (United Kingdom) resources
 /////////////////////////////////////////////////////////////////////////////

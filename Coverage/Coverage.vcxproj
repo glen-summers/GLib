@@ -151,6 +151,7 @@
     <ClInclude Include="Directory.h" />
     <ClInclude Include="FileCoverageData.h" />
     <ClInclude Include="Function.h" />
+    <ClInclude Include="FunctionVisitor.h" />
     <ClInclude Include="HtmlReport.h" />
     <ClInclude Include="Line.h" />
     <ClInclude Include="LineCover.h" />
@@ -177,6 +178,7 @@
     <None Include="Template\coverage.css" />
     <None Include="Template\directory.html" />
     <None Include="Template\file.html" />
+    <None Include="Template\functions.html" />
     <None Include="Template\rootDirectory.html" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

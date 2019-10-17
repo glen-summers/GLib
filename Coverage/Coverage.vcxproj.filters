@@ -66,6 +66,9 @@
     <ClInclude Include="CoverageLevel.h">
       <Filter>TemplateTypes</Filter>
     </ClInclude>
+    <ClInclude Include="FunctionVisitor.h">
+      <Filter>TemplateTypes</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -97,6 +100,9 @@
       <Filter>Template</Filter>
     </None>
     <None Include="Template\rootDirectory.html">
+      <Filter>Template</Filter>
+    </None>
+    <None Include="Template\functions.html">
       <Filter>Template</Filter>
     </None>
   </ItemGroup>

@@ -40,7 +40,6 @@ public:
 private:
 	static WideStrings a2w(const Strings& strings);
 	void AddLine(const std::wstring & fileName, unsigned lineNumber, const GLib::Win::Symbols::SymProcess & process, DWORD64 address);
-	void CreateXmlReport(const std::map<ULONG, Function> & indexToFunction) const;
 
 	void OnCreateProcess(DWORD processId, DWORD threadId, const CREATE_PROCESS_DEBUG_INFO & info) override;
 	void OnExitProcess(DWORD processId, DWORD threadId, const EXIT_PROCESS_DEBUG_INFO& info) override;

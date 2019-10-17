@@ -33,6 +33,11 @@ public:
 		functions.insert(function);
 	}
 
+	const std::set<Function> & Functions() const
+	{
+		return functions;
+	}
+
 	const std::filesystem::path & Path() const
 	{
 		return path;

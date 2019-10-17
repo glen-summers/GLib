@@ -93,7 +93,7 @@ void Coverage::OnCreateProcess(DWORD processId, DWORD threadId, const CREATE_PRO
 void Coverage::OnExitProcess(DWORD processId, DWORD threadId, const EXIT_PROCESS_DEBUG_INFO& info)
 {
 	CreateReport(processId); // todo just cache data to memory, and do report at exit
-	
+
 	Debugger::OnExitProcess(processId, threadId, info);
 }
 
@@ -182,139 +182,7 @@ void Coverage::CreateReport(unsigned int processId)
 		it->second.Accumulate(address);
 	}
 
-	// just do both for now
-	CreateXmlReport(indexToFunction);
 	CreateHtmlReport(indexToFunction, executable);
-}
-
-// move
-void Coverage::CreateXmlReport(const std::map<ULONG, Function> & indexToFunction) const
-{
-	// merge templates here?
-	// std::set<Function> nameToFunction;
-	// for (const auto & p : indexToFunction)
-	// {
-	// 	const Function & function = p.second;
-	// 	const auto & it = nameToFunction.find(function);
-	// 	if (it == nameToFunction.end())
-	// 	{
-	// 		nameToFunction.insert(function);
-	// 	}
-	// 	else
-	// 	{
-	// 		it->Merge(p.second);
-	// 	}
-	// }
-
-	size_t allLines{};
-	size_t coveredLines{};
-	for (const auto & x : indexToFunction)
-	{
-		allLines += x.second.AllLines();
-		coveredLines += x.second.CoveredLines();
-	}
-
-	size_t fileId = 0;
-	std::map<std::wstring, size_t> files;
-	for (const auto & f : wideFiles)
-	{
-		files.emplace(f, fileId++);
-	}
-
-	GLib::Xml::Printer p;
-
-	p.PushDeclaration();
-	p.OpenElement("results");
-	p.OpenElement("modules");
-	p.OpenElement("module");
-	p.PushAttribute("name", std::filesystem::path(GLib::Cvt::a2w(executable)).filename().u8string());
-	p.PushAttribute("path", executable);
-
-	p.PushAttribute("id", "0"); // todo, hash of exe?
-
-	// report generator AVs without these, todo calculate them?
-	p.PushAttribute("block_coverage", "0");
-	p.PushAttribute("line_coverage", "0");
-	p.PushAttribute("blocks_covered", "0");
-	p.PushAttribute("blocks_not_covered", "0");
-
-	p.PushAttribute("lines_covered", coveredLines);
-	p.PushAttribute("lines_partially_covered", coveredLines); //?
-	p.PushAttribute("lines_not_covered", allLines - coveredLines);
-
-	p.OpenElement("functions");
-	size_t functionId{};
-	for (const auto & idFunctionPair : indexToFunction)
-	{
-		const Function & function = idFunctionPair.second;
-		p.OpenElement("function");
-		// id="3048656" name="TestCollision" namespace="Sat" type_name="" block_coverage="0.00" line_coverage="0.00" blocks_covered="0" blocks_not_covered="30" lines_covered="0" lines_partially_covered="0" lines_not_covered="20">
-		p.PushAttribute("id", functionId++);
-		p.PushAttribute("name", function.FunctionName());
-		p.PushAttribute("namespace", function.NameSpace());
-		p.PushAttribute("type_name", function.ClassName());
-
-		// todo calculate these
-		p.PushAttribute("block_coverage", "0");
-		p.PushAttribute("line_coverage", "0");
-		p.PushAttribute("blocks_covered", "0");
-		p.PushAttribute("blocks_not_covered", "0");
-
-		p.PushAttribute("lines_covered", function.CoveredLines());
-		// todo p.PushAttribute("lines_partially_covered", "0");
-		p.PushAttribute("lines_not_covered", function.AllLines() - function.CoveredLines());
-
-		p.OpenElement("ranges");
-
-		for (const auto & fileLines : function.FileLines())
-		{
-			// <range source_id = "23" covered = "yes" start_line = "27" start_column = "0" end_line = "27" end_column = "0" / >
-			const std::wstring & fileName = fileLines.first;
-			const auto & lines = fileLines.second;
-			const size_t sourceId = files.find(fileName)->second; // check
-
-			for (const auto & line : lines)
-			{
-				const unsigned lineNumber = line.first;
-				const bool covered = line.second;
-
-				p.OpenElement("range");
-				
-				p.PushAttribute("source_id", sourceId);
-				p.PushAttribute("covered", covered ? "yes" : "no");
-				p.PushAttribute("start_line", lineNumber);
-				// todo? p.PushAttribute("start_column", "0");
-				p.PushAttribute("end_line", lineNumber);
-				// todo ?p.PushAttribute("end_column", "0");
-				p.CloseElement(); // range
-			}
-		}
-		p.CloseElement(); // ranges
-		p.CloseElement(); // function
-	}
-	p.CloseElement(); // functions
-
-	p.OpenElement("source_files");
-
-	for (const auto & file : files)
-	{
-		p.OpenElement("source_file");
-		p.PushAttribute("id", file.second);
-		p.PushAttribute("path", GLib::Cvt::w2a(file.first));
-		// todo? https://stackoverflow.com/questions/13256446/compute-md5-hash-value-by-c-winapi
-		//p.PushAttribute("checksum_type", "MD5");
-		//p.PushAttribute("checksum", "blah");
-		p.CloseElement(); // source_file
-	}
-	p.Close();
-
-	create_directories(reportPath);
-	std::ofstream fs(reportPath / "Coverage.xml");
-	if(!fs)
-	{
-		throw std::runtime_error("Unable to create file");
-	}
-	fs << p.Xml();
 }
 
 void Coverage::CreateHtmlReport(const std::map<ULONG, Function> & indexToFunctionMap, const std::string & title) const
@@ -361,13 +229,13 @@ CoverageData Coverage::ConvertFunctionData(const std::map<ULONG, Function> & ind
 			const Function & function = it.second;
 			const FileLines & fileLines = function.FileLines();
 
-			fileCoverageData.AddFunction(function);
-
 			auto justFileNameIt = fileLines.find(filePath.wstring());
 			if (justFileNameIt == fileLines.end())
 			{
 				continue;
 			}
+
+			fileCoverageData.AddFunction(function);
 
 			for (const auto & lineHitPair : justFileNameIt->second)
 			{
@@ -393,7 +261,7 @@ void Coverage::Delaminate(std::string & name)
 }
 
 void Coverage::CleanupFunctionNames(const std::string & name, const std::string & typeName,
-	std::string & className, std::string & functionName, std::string & nameSpace) const
+	std::string & nameSpace, std::string & className, std::string & functionName) const
 {
 	className = typeName;
 	functionName = name;
@@ -437,7 +305,6 @@ void Coverage::CleanupFunctionNames(const std::string & name, const std::string 
 				nameSpace = functionName.substr(0, len - 2);
 				functionName.erase(0, len);
 			}
-			className = "<Functions>"; // avoid blank line in ReportGenerator
 		}
 	}
 }

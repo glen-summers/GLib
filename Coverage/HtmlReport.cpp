@@ -1,6 +1,7 @@
 #include "pch.h"
 
 #include "Directory.h"
+#include "FunctionVisitor.h"
 #include "Line.h"
 #include "Chunk.h"
 
@@ -43,6 +44,7 @@ HtmlReport::HtmlReport(std::string testName, const std::filesystem::path & htmlP
 	, rootTemplate(LoadHtml(IDR_ROOTDIRECTORY))
 	, dirTemplate(LoadHtml(IDR_DIRECTORY))
 	, fileTemplate(LoadHtml(IDR_FILE))
+	, functionsTemplate(LoadHtml(IDR_FUNCTIONS))
 {
 	for (const auto & fileDataPair : fileCoverage)
 	{
@@ -233,7 +235,7 @@ void HtmlReport::GenerateIndices() const
 
 void HtmlReport::GenerateSourceFile(std::filesystem::path & subPath, const FileCoverageData & data) const
 {
-	auto targetPath = (htmlPath / subPath);
+	const auto & targetPath = (htmlPath / subPath);
 	auto relativePath = std::filesystem::relative(htmlPath, targetPath.parent_path());
 
 	const std::filesystem::path & sourceFile = data.Path();
@@ -318,13 +320,28 @@ void HtmlReport::GenerateSourceFile(std::filesystem::path & subPath, const FileC
 
 	e.SetCollection("lines", lines);
 	e.SetCollection("chunks", chunks);
+	e.SetCollection("functions", data.Functions()); // consolidate templates
 
 	create_directories(targetPath.parent_path());
-	std::ofstream out(targetPath.concat(L".html"));
-	if(!out)
 	{
-		throw std::runtime_error("Unable to create file");
+		std::filesystem::path tmp = targetPath;
+		tmp += L".html";
+		std::ofstream out(tmp);
+		if(!out)
+		{
+			throw std::runtime_error("Unable to create file");
+		}
+		GLib::Html::Generate(e, fileTemplate, out);
 	}
 
-	GLib::Html::Generate(e, fileTemplate, out);
+	{
+		std::filesystem::path tmp = targetPath;
+		tmp += L".functions.html";
+		std::ofstream out(tmp);
+		if(!out)
+		{
+			throw std::runtime_error("Unable to create file");
+		}
+		GLib::Html::Generate(e, functionsTemplate, out);
+	}
 }
