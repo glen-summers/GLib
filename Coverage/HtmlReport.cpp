@@ -265,7 +265,7 @@ void HtmlReport::GenerateSourceFile(std::filesystem::path & subPath, const FileC
 		{
 			cover = it->second == 0 ? LineCover::NotCovered : LineCover::Covered;
 		}
-		lines.push_back({sourceLine, {}, cover});
+		lines.push_back({sourceLine, {}, {}, cover, {}});
 	}
 
 	auto maxLineNumberWidth = static_cast<unsigned int>(floor(log10(lines.size()))) + 1;
@@ -273,7 +273,8 @@ void HtmlReport::GenerateSourceFile(std::filesystem::path & subPath, const FileC
 	{
 		std::ostringstream paddedLineNumber;
 		paddedLineNumber << std::setw(maxLineNumberWidth) << i + 1; // use a width format specifier in template?
-		lines[i].number = paddedLineNumber.str();
+		lines[i].paddedNumber = paddedLineNumber.str();
+		lines[i].number = static_cast<unsigned int>(i + 1);
 	}
 
 	constexpr int EffectiveHeaderLines = 10;
@@ -320,7 +321,26 @@ void HtmlReport::GenerateSourceFile(std::filesystem::path & subPath, const FileC
 
 	e.SetCollection("lines", lines);
 	e.SetCollection("chunks", chunks);
-	e.SetCollection("functions", data.Functions()); // consolidate templates
+
+	std::set<Function> funcs;
+	for (const Function & f : data.Functions())
+	{
+		for (const auto & [file, l] : f.FileLines())
+		{
+			if (file == sourceFile)
+			{
+				if (!funcs.insert(f).second)
+				{
+					throw std::runtime_error("Duplicate function");
+				}
+
+				int lineWithLink = l.begin()->first - 2; // -1 one based to zero and -1 for function defn
+				lines[lineWithLink].hasLink = true;
+			}
+		}
+	}
+
+	e.SetCollection("functions", funcs);
 
 	create_directories(targetPath.parent_path());
 	{

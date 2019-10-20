@@ -7,8 +7,10 @@ enum class LineCover : int;
 struct Line
 {
 	std::string text;
-	std::string number;
+	unsigned int number;
+	std::string paddedNumber;
 	LineCover cover;
+	bool hasLink;
 };
 
 template <>
@@ -26,9 +28,24 @@ struct GLib::Eval::Visitor<Line>
 			return f(Value(line.number));
 		}
 
+		if (propertyName == "paddedNumber")
+		{
+			return f(Value(line.paddedNumber));
+		}
+
 		if (propertyName == "text")
 		{
 			return f(Value(line.text));
+		}
+
+		if (propertyName == "hasLink")
+		{
+			return f(Value(line.hasLink));
+		}
+
+		if (propertyName == "hasNoLink") // todo !${value}
+		{
+			return f(Value(!line.hasLink));
 		}
 
 		throw std::runtime_error(std::string("Unknown property : '") + propertyName + '\'');

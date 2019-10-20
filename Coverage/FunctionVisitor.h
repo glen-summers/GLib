@@ -12,7 +12,7 @@ struct GLib::Eval::Visitor<Function>
 	static void Visit(const Function & function, const std::string & propertyName, const ValueVisitor & f)
 	{
 		constexpr char separator[] = "::";
-		if (propertyName == "Name")
+		if (propertyName == "name")
 		{
 			std::ostringstream s;
 			if (!function.NameSpace().empty())
@@ -27,10 +27,27 @@ struct GLib::Eval::Visitor<Function>
 			return f(Value(s.str()));
 		}
 
+		if (propertyName == "line")
+		{
+			int line = -1;
+			for (const auto & [file, lines] : function.FileLines())
+			{
+				if (!lines.empty())
+				{
+					line = lines.begin()->first - 1; // -1 to include function defn
+					break;
+				}
+			}
+
+			return f(Value(line));
+		}
+
 		if (propertyName == "cover")
 		{
 			// improve
 			return f(Value(function.CoveredLines() !=0 ? LineCover::Covered : LineCover::NotCovered));
 		}
+
+		throw std::runtime_error(std::string("Unknown property : '") + propertyName + '\'');
 	}
 };

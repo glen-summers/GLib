@@ -47,22 +47,6 @@ public:
 		}
 	}
 
-	// called for e.g. class templates, merge with above? or just have the report generator do it?
-	// 1. Template expansions different T's
-	void Merge(const Function & other) const
-	{
-		for (const auto & fileLineIt : other.FileLines())
-		{
-			const std::map<unsigned int, bool> & lines = fileLineIt.second;
-			std::map<unsigned, bool> & pairs = fileLines[fileLineIt.first];
-
-			for (const auto & lineIt : lines) // map merge method?
-			{
-				pairs[lineIt.first] |= lineIt.second;
-			}
-		}
-	}
-
 	size_t CoveredLines() const
 	{
 		size_t total{};

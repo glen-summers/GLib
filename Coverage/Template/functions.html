@@ -42,10 +42,18 @@
 		<hr />
 
 		<table class="source" style="width: 60%; margin: auto;">
-			<tr gl:each="function : ${functions}" class="cov" gl:class="${function.cover}"><td><pre><code><span gl:text="${function.Name}">Function1</span></code></pre></td></tr>
+			<tr gl:each="function : ${functions}" class="cov" gl:class="${function.cover}">
+				<td>
+					<pre><code><a gl:text="${function.name}" gl:href="${fileName}.html#${function.line}" href="file.html#1">Function1</a></code></pre>
+				</td>
+			</tr>
 
 			<gl:block if="false">
-				<tr class="ncov"><td><pre><code><span>Function2</span></code></pre></td></tr>
+				<tr class="ncov">
+					<td>
+						<pre><code><a href="file.html#2">Function2</a></code></pre>
+					</td>
+				</tr>
 			</gl:block>
 		</table>
 
