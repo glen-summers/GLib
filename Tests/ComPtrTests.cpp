@@ -220,6 +220,14 @@ BOOST_AUTO_TEST_CASE(ComCast)
 	BOOST_TEST(true == static_cast<bool>(GLib::Win::ComCast<ITest1ExtendedAlt>(p12)));
 }
 
+BOOST_AUTO_TEST_CASE(QiMissInDebugOut)
+{
+	GLib::Win::ComPtr<ITest1Extended> p12 = GLib::Win::Make<ImplementsITest1ExtendedAndITest1ExtendedAlt>();
+	GLib::Win::ComPtr<IUnknown> unk;
+	HRESULT hr = p12->QueryInterface(__uuidof(IClassFactory), GetAddress(unk));
+	BOOST_TEST(hr == E_NOINTERFACE);
+}
+
 BOOST_AUTO_TEST_CASE(ComCastOkWithCastOverloadFix)
 {
 	GLib::Win::ComPtr<ITest1Extended> p12 = GLib::Win::Make<ImplementsITest1ExtendedAndITest1ExtendedAlt>();

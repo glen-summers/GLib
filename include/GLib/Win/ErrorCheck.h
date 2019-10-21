@@ -41,37 +41,37 @@ namespace GLib::Win::Util
 		class Checker
 		{
 		public:
-			template<typename T> static void AssertTrue(T value, const char * message)
+			template<typename T> static void AssertTrue(T value, const char * message, DWORD errorCode)
 			{
 				(void)value;
 				(void)message;
 				static_assert(false, "Invalid check parameter, only bool and BOOL allowed");
 			}
 
-			static void AssertTrue(bool result, const char * message)
+			static void AssertTrue(bool result, const char * message, DWORD errorCode)
 			{
 				if (!result)
 				{
-					Throw(message, ::GetLastError());
+					Throw(message, errorCode);
 				}
 			}
 
-			static void AssertTrue(BOOL result, const char * message)
+			static void AssertTrue(BOOL result, const char * message, DWORD errorCode)
 			{
-				AssertTrue(result != FALSE, message);
+				AssertTrue(result != FALSE, message, errorCode);
 			}
 
-			static void WarnAssertTrue(bool result, const char * message) noexcept
+			static void WarnAssertTrue(bool result, const char * message, DWORD errorCode) noexcept
 			{
 #ifdef _DEBUG // || defined(GLIB_DEBUG)
 				if (!result)
 				{
-					DWORD dwErr = ::GetLastError();
-					Debug::Stream() << "GLib warning: " << Detail::FormatErrorMessage(message, dwErr) << std::endl;
+					Debug::Stream() << "GLib warning: " << Detail::FormatErrorMessage(message, errorCode) << std::endl;
 				}
 #else
 				(void)result;
 				(void)message;
+				(void)errorCode;
 #endif
 			}
 
@@ -84,11 +84,21 @@ namespace GLib::Win::Util
 
 	template <typename T> void AssertTrue(T result, const char * message)
 	{
-		Detail::Checker::AssertTrue(result, message);
+		Detail::Checker::AssertTrue(result, message, ::GetLastError());
 	}
 
 	template <typename T> void WarnAssertTrue(T result, const char * message)
 	{
-		Detail::Checker::WarnAssertTrue(result, message);
+		Detail::Checker::WarnAssertTrue(result, message, ::GetLastError());
+	}
+
+	inline void AssertSuccess(DWORD errorCode, const char * message)
+	{
+		Detail::Checker::AssertTrue(errorCode == ERROR_SUCCESS, message, errorCode);
+	}
+
+	inline void WarnAssertSuccess(DWORD errorCode, const char * message)
+	{
+		Detail::Checker::WarnAssertTrue(errorCode == ERROR_SUCCESS, message, errorCode);
 	}
 }

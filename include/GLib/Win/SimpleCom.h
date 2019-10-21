@@ -6,6 +6,7 @@
 #ifdef SIMPLECOM_LOG_QI_MISS
 #include "GLib/Win/DebugWrite.h"
 #include "GLib/Win/Uuid.h"
+#include "GLib/Win/Registry.h"
 #endif
 
 #include <atomic>
@@ -44,8 +45,12 @@ namespace GLib::Win
 				return S_OK;
 			}
 #ifdef SIMPLECOM_LOG_QI_MISS
-			// lookup iid name from registry
-			Debug::Write("QI miss {0} : {1}", typeid(T).name(), to_string(Util::Uuid(iid)));
+			std::string itf = "Interface\\" + to_string(Util::Uuid(iid)), name;
+			if (RegistryKeys::ClassesRoot.KeyExists(itf))
+			{
+				name = RegistryKeys::ClassesRoot.OpenSubKey(itf).GetString("");
+			}
+			Debug::Write("QI miss {0} : {1} {2}", typeid(T).name(), itf, name);
 #else
 			(void)iid;
 #endif
