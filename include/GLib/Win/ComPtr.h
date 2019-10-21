@@ -10,14 +10,28 @@
 #include <objbase.h>
 #include <type_traits>
 
-#include "cassert"
-
 namespace GLib::Win
 {
 	template <typename T> class ComPtr;
 
 	namespace Detail
 	{
+		template <typename T>
+		class Restricted : public T
+		{
+		public:
+			Restricted() = delete;
+			Restricted(const Restricted &) = delete;
+			Restricted(Restricted &&) = delete;
+			Restricted & operator = (const Restricted &) = delete;
+			Restricted & operator = (Restricted &&) = delete;
+			~Restricted() = delete;
+
+		private:
+			ULONG STDMETHODCALLTYPE AddRef();
+			ULONG STDMETHODCALLTYPE Release();
+		};
+
 		template <typename T> class Transfer
 		{
 			ComPtr<T> & ptr;
@@ -51,13 +65,19 @@ namespace GLib::Win
 		};
 	}
 
+	template <typename T>
+	auto GetAddress(ComPtr<T> & value) noexcept
+	{
+		return Detail::Transfer<T>(value);
+	}
+
 	template <typename Target, typename Source>
 	ComPtr<Target> ComCast(const Source & source)
 	{
 		ComPtr<Target> value;
 		if (source)
 		{
-			CheckHr(source->QueryInterface(__uuidof(Target), value.GetAddress()), "QueryInterface");
+			CheckHr(source->QueryInterface(__uuidof(Target), GetAddress(value)), "QueryInterface");
 		}
 		return value;
 	}
@@ -65,7 +85,9 @@ namespace GLib::Win
 	template <typename T>
 	class ComPtr
 	{
-		template <typename> friend class ComPtr;
+		template<typename U> friend class ComPtr;
+		template<typename U> friend U * Get(ComPtr<U> & p) noexcept;
+		template<typename U> friend const U * Get(const ComPtr<U> & p) noexcept;
 
 		T * p {};
 
@@ -75,7 +97,8 @@ namespace GLib::Win
 		explicit ComPtr(std::nullptr_t) noexcept
 		{}
 
-		template <typename U> explicit ComPtr(U * u) noexcept
+		template <typename U>
+		explicit ComPtr(U * u) noexcept
 			: p(InternalAddRef(u))
 		{}
 
@@ -132,21 +155,13 @@ namespace GLib::Win
 			return *this;
 		}
 
-		T * Get() const noexcept
+		Detail::Restricted<T> * operator->() const
 		{
-			return p;
-		}
-
-		auto GetAddress() noexcept
-		{
-			return Detail::Transfer<T>(*this);
-		}
-
-		// restrict?
-		T * operator->() const noexcept
-		{
-			assert(p != nullptr);
-			return p;
+			if (*this)
+			{
+				return static_cast<typename Detail::Restricted<T>*>(p);
+			}
+			throw std::runtime_error("nullptr");
 		}
 
 		explicit operator bool() const noexcept
@@ -183,6 +198,16 @@ namespace GLib::Win
 		}
 	};
 
+	template <typename T> T * Get(ComPtr<T> & p) noexcept
+	{
+		return p.p;
+	}
+
+	template <typename T> const T * Get(const ComPtr<T> & p) noexcept
+	{
+		return p.p;
+	}
+
 	template <typename T, typename I, typename... Args>
 	ComPtr<I> Make(Args && ... args)
 	{
@@ -198,6 +223,6 @@ namespace GLib::Win
 	template <typename T1, typename T2>
 	inline bool operator==(const ComPtr<T1> & t1, const ComPtr<T2> & t2)
 	{
-		return ComCast<IUnknown>(t1) == ComCast<IUnknown>(t2);
+		return Get(ComCast<IUnknown>(t1)) == Get(ComCast<IUnknown>(t2));
 	}
 }

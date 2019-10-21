@@ -10,9 +10,10 @@
 
 namespace
 {
-	template <typename T> unsigned int UseCount(T & p)
+	template <typename T> unsigned int UseCount(const GLib::Win::ComPtr<T> & p)
 	{
-		return !p ? 0 : (p->AddRef(), p->Release());
+		auto & ptr = const_cast<GLib::Win::ComPtr<T> &>(p);
+		return !ptr ? 0 : (Get(ptr)->AddRef(), Get(ptr)->Release());
 	}
 }
 
@@ -21,9 +22,9 @@ namespace boost::test_tools::tt_detail
 	template <typename T>
 	struct print_log_value<GLib::Win::ComPtr<T>>
 	{
-		inline void operator()(std::ostream & str, GLib::Win::ComPtr<T> const & item)
+		inline void operator()(std::ostream & str, const GLib::Win::ComPtr<T> & item)
 		{
-			str << "ptr: " << item.Get() << ", Ref: " << UseCount(item);
+			str << "ptr: " << Get(item) << ", Ref: " << UseCount(item);
 		}
 	};
 }
@@ -33,10 +34,10 @@ BOOST_AUTO_TEST_SUITE(ComPtrTests)
 BOOST_AUTO_TEST_CASE(ComErrorCheckWithErrorInfo)
 {
 	GLib::Win::ComPtr<ICreateErrorInfo> p;
-	GLib::Win::CheckHr(::CreateErrorInfo(p.GetAddress()), "CreateErrorInfo");
+	GLib::Win::CheckHr(::CreateErrorInfo(GetAddress(p)), "CreateErrorInfo");
 	auto ei = GLib::Win::ComCast<IErrorInfo>(p);
 	p->SetDescription(const_cast<LPOLESTR>(L"hello"));
-	GLib::Win::CheckHr(::SetErrorInfo(0, ei.Get()), "SetErrorInfo");
+	GLib::Win::CheckHr(::SetErrorInfo(0, Get(ei)), "SetErrorInfo");
 
 	GLIB_CHECK_EXCEPTION(GLib::Win::CheckHr(E_OUTOFMEMORY, "fail"),
 		GLib::Win::ComException, "fail : hello (8007000E)");
@@ -61,7 +62,7 @@ BOOST_AUTO_TEST_CASE(UninitialisedComPtrHasZeroUseCount)
 	GLib::Win::ComPtr<ITest1> p;
 	BOOST_TEST(0U == UseCount(p));
 	BOOST_TEST(false == static_cast<bool>(p));
-	BOOST_TEST(nullptr == p.Get());
+	BOOST_TEST(nullptr == Get(p));
 }
 
 BOOST_AUTO_TEST_CASE(NullInitialisedComPtrHasZeroUseCount)
@@ -69,12 +70,12 @@ BOOST_AUTO_TEST_CASE(NullInitialisedComPtrHasZeroUseCount)
 	GLib::Win::ComPtr<ITest1> p1(nullptr);
 	BOOST_TEST(0U == UseCount(p1));
 	BOOST_TEST(false == static_cast<bool>(p1));
-	BOOST_TEST(nullptr == p1.Get());
+	BOOST_TEST(nullptr == Get(p1));
 
 	GLib::Win::ComPtr<ITest1> p2 = {};
 	BOOST_TEST(0U == UseCount(p2));
 	BOOST_TEST(false == static_cast<bool>(p2));
-	BOOST_TEST(nullptr == p2.Get());
+	BOOST_TEST(nullptr == Get(p2));
 }
 
 BOOST_AUTO_TEST_CASE(InitialisedComPtrHasOneUseCount)
@@ -82,7 +83,7 @@ BOOST_AUTO_TEST_CASE(InitialisedComPtrHasOneUseCount)
 	GLib::Win::ComPtr<ITest1> p1(GLib::Win::Make<ImplementsITest1>());
 
 	BOOST_TEST(1U == UseCount(p1));
-	BOOST_TEST(nullptr != p1.Get());
+	BOOST_TEST(nullptr != Get(p1));
 }
 
 BOOST_AUTO_TEST_CASE(CtorFromSameType)
@@ -103,7 +104,7 @@ BOOST_AUTO_TEST_CASE(CtorFromSameType)
 BOOST_AUTO_TEST_CASE(CtorFromRawValue)
 {
 	GLib::Win::ComPtr<ITest1> p1(GLib::Win::Make<ImplementsITest1>());
-	GLib::Win::ComPtr<ITest1> p2(p1.Get());
+	GLib::Win::ComPtr<ITest1> p2(Get(p1));
 	BOOST_TEST(2U == UseCount(p1));
 	BOOST_TEST(2U == UseCount(p2));
 }
@@ -160,7 +161,7 @@ BOOST_AUTO_TEST_CASE(SelfAssign)
 	GLib::Win::ComPtr<ITest1> p2(GLib::Win::Make<ImplementsITest1>());
 	p1 = p2;
 
-	BOOST_TEST(p1.Get() == p2.Get());
+	BOOST_TEST(Get(p1) == Get(p2));
 	BOOST_TEST(2U == UseCount(p1));
 	BOOST_TEST(2U == UseCount(p2));
 }
@@ -171,6 +172,7 @@ BOOST_AUTO_TEST_CASE(SelfAssignBug)
 	p1 = p1;
 
 	BOOST_TEST(p1);
+	BOOST_TEST(p1 == p1);
 	BOOST_TEST(1U == UseCount(p1));
 }
 
@@ -188,7 +190,7 @@ BOOST_AUTO_TEST_CASE(QIOk)
 	BOOST_TEST(2U == UseCount(p2));
 
 	GLib::Win::ComPtr<IUnknown> pu = GLib::Win::ComCast<IUnknown>(p2);
-	BOOST_TEST(pu.Get() == p2.Get());
+	BOOST_TEST(Get(pu) == Get(p2));
 }
 
 BOOST_AUTO_TEST_CASE(MultipleInheritance)
