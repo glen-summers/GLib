@@ -1,8 +1,8 @@
 # GLib
-This is currently a holdall for a series of C++ utilities created over a number of years and jobs to try and augment writing applications/services/utilities on Windows. The goals were low/no dependencies, testability, readability, and moderisation, target is C++17. Utf8 is used thoughout and coverted to Utf16 at Windows Api boundaries as per http://utf8everywhere.org/.
+This repository is a holdall for a collection C++ utilities created over a number of years to try and augment writing applications/services/utilities on Microsoft Windows. The goals were low dependencies, testability, readability, and modernisation, target is C++17. Utf8 is used throughout and converted to Utf16 at Windows Api boundaries as per http://utf8everywhere.org/.
 
 ## Utilities include:
-* Logging: FLog, a basic file [f]logging library
+* Logging: FLog, (yet another f-ing log library)
 * CheckedCast: bounds checked numeric value conversion
 * A basic compatibility layer to allow compilation on non-Windows systems, currently just Linux/GCC.
 * Utf8<->Utf16 conversion wrappers to convert around Windows api calls
@@ -20,38 +20,55 @@ This is currently a holdall for a series of C++ utilities created over a number 
 * Process Utilities
 * Windows Exceptions from Api/Com error codes
 * ComPtr type
-* Implement Com types with static TypeLists
+* Implement Com types with static TypeLists\TypeFilters
 * ComCast method to call QueryIterface for ComPtr's
+* Registry access
 * DebugStream: ostream based stream to write to OutputDebugStream
 * SymbolEngine: Used by Code coverage application to generate code coverage
-* Filesystem utilities: some handy windows file system calls returning std::filesystem::path types;
+* Filesystem utilities: some handy Windows file system calls returning std::filesystem::path types;
 * Debugger, CodeCoverage, Html Coverage report tool: Produces output code similar to LCOV, also adds C++ syntax highlighting source code output
 
 ## Testing
 Boost test is used, the project expects Boost to be present in a directory up the path from the repository in a directory [[(../)*]ExternalDependencies/boost_[Ver]_TEST].
-One of my other github utility repositories ./BoostModularBuild can be used to download and install boost test and dependencies via command line into an upstream ./ExternalDependencies/ directory, or if not present it will be installed to a temp directory in the GLib repository. This mechanism is used to allow automatic download and install of dependencies without administrator privileges, and for a single hive of source code repositories.
-TODO: add go deps command, to download BoostModularBuild and install boost test
+One of my other github utility repositories ./BoostModularBuild can be used to download and install boost test and dependencies via command line into an upstream ./ExternalDependencies/ directory, or if not present it will be installed to a temp directory. This mechanism is used to allow automatic download and install of dependencies without administrator privileges, and for a single hive of source code repositories.
 
 ## Build
-The build system allows multiple mechanisms, It can compile and run build targets for a VisualStudio solution or a from a mirrored cmake project. The cmake project also compiles on Linux/GCC for a basic compatibility test. The Visual Studio and cmake projects include a search facility to search up the directory tree to locate the ExternalDependencies directory.
-The Windows command-line build is from a go.cmd at root level which checks Visual studio requirements then forwards on to an custom MsBuild project
-From a windows prompt, build and run all tests for Windows Visual studio target:
+The build system allows multiple mechanisms, It can compile and run build targets for a VisualStudio solution and from a mirrored CMake project. The CMake project also compiles on Linux/GCC for a basic compatibility test. The Visual Studio and CMake projects include a search facility to search up the directory tree to locate the ExternalDependencies directory.
+The Windows command-line build is from a go.cmd at root level which checks Visual Studio requirements then forwards on to an custom MsBuild project
+
+### From a Windows prompt download BoostModularBuild which then downloads and aggregates Boost Test modules to an ExternalDependencies directory:
+
+	>go deps
+	...
+	C:\Users\Glen\source\ExternalDependencies\boost_1_69_0_test
+	Path Files     Size
+	---- -----     ----
+	      4113 37791006
+
+### Build and run all tests for Windows Visual Studio target:
 
 	>go
+	...
+	Test:
+	C:\Users\Glen\source\repos\github\GLib\out\x64\Release\Tests.exe
+	Running 261 test cases...
 
-Build and run all tests for Windows/Visual studio, Windows CMake, and Linux/GCC cmake
+### Build and run all tests for Windows/Visual Studio, Windows CMake and Linux/GCC.
 
 	>go all
 
-Build and run tests for Windows/Visual studio, generate coverage information and launch a Html coverage report via the build in GLib coverage tool.
+### Build and run tests for Windows/Visual Studio, generate coverage information and launch a Html coverage report via the built in GLib coverage tool.
 
 	>go coverage
 
-Build and run tests for Linux build, generate coverage information and launches a Html coverage report via LCOV.
+![index](docs/index.png "index")
+![file](docs/file.png "index")
+
+### Build and run tests for Linux build via wsl, generate coverage information and launches a Html coverage report via LCOV.
 
 	>go wslcoverage
 
-Delete all temporary files
+### Delete all build and temporary files
 
 	>go clean
 
@@ -59,45 +76,53 @@ Delete all temporary files
 	$./go.sh {build|coverage|clean}
 
 ## Code Examples
-### Logging: FLog, a basic file [f]logging library
-	struct Fred {};
+### Logging: FLog, (yet another f-ing log library)
 	auto log = GLib::Flog::LogManager::GetLog<Fred>();
-	log.Info("Hello");
-	log.Info("Format: {0} , {1}", 1, 2);
+	log.Info("Start");
+	{
+		GLib::Flog::ScopeLog scope1(log, GLib::Flog::Level::Info, "Scoop");
+		log.Info("Middle");
+		(void) scope1;
+	}
+	log.Info("End");
 
 #### Output:
 	------------------------------------------------
-	Opened      : 06 Oct 2019, 12:37:49 (+0100)
-	OpenedUtc   : 2019-10-06 11:37:49Z
+	Opened      : 24 Oct 2019, 17:03:05 (+0100)
+	OpenedUtc   : 2019-10-24 16:03:05Z
 	ProcessName : (64 bit) Tests.exe
 	FullPath    : C:\Users\Glen\source\repos\github\GLib\msvc\x64\Debug\Tests.exe
-	ProcessId   : 38840
-	ThreadId    : 18056
+	ProcessId   : 6868
+	ThreadId    : 14748
 	------------------------------------------------
-	06 Oct 2019, 12:37:49.833 : [ 18056 ] : INFO     : FlogTests::Fred  : Hello
-	06 Oct 2019, 12:37:49.836 : [ 18056 ] : INFO     : FlogTests::Fred  : Format: 1 , 2.
+	24 Oct 2019, 17:03:05.593 : [ 14748 ] : INFO     : FlogTests::Fred  : Start
+	24 Oct 2019, 17:03:05.594 : [ 14748 ] : INFO     : FlogTests::Fred  : ==> Scoop
+	24 Oct 2019, 17:03:05.594 : [ 14748 ] : INFO     : FlogTests::Fred  : Middle
+	24 Oct 2019, 17:03:05.595 : [ 14748 ] : INFO     : FlogTests::Fred  : <== Scoop 1.5ms
+	24 Oct 2019, 17:03:05.599 : [ 14748 ] : INFO     : FlogTests::Fred  : End
 	------------------------------------------------
-	Closed       06 Oct 2019, 12:37:49 (+0100)
+	Closed       24 Oct 2019, 17:03:05 (+0100)
 	------------------------------------------------
 
-### CheckedCast
+### Generic Utils
+#### CheckedCast
 	BOOST_TEST(1234u == checked_cast<unsigned int>(static_cast<short>(1234)));
 	BOOST_TEST(static_cast<unsigned int>(std::numeric_limits<short>::max()) == checked_cast<unsigned int>(std::numeric_limits<short>::max()));
 	BOOST_CHECK_EXCEPTION(checked_cast<unsigned int>(std::numeric_limits<short>::min()), Exception, IsUnderflow);
 
-### Utf8<->Utf16 conversion wrappers
+#### Utf8<->Utf16 conversion wrappers
 	std::string utf8Value = "\xE2\x82\xAC";
 	std::wstring utf16Value = L"\u20AC";
 
 	BOOST_TEST(utf16Value == GLib::Cvt::a2w(utf8Value));
 	BOOST_TEST(utf8Value == GLib::Cvt::w2a(utf16Value));
 
-### String split
+#### String split
 	GLib::Util::SplitterView s("a<->bc<->def<->ghijkl", "<->");
 	std::vector<std::string_view> expected { "a", "bc", "def", "ghijkl" };
 	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), s.begin(), s.end());
 
-### Scope macro
+#### Scope macro
 	BSTR description = nullptr;
 	pErrorInfo->GetDescription(&description);
 	SCOPE(_, [=] () noexcept
@@ -106,7 +131,7 @@ Delete all temporary files
 		pErrorInfo->Release();
 	});
 
-### StackOrHeap
+#### StackOrHeap
 	inline std::string PathOfFileHandle(HANDLE fileHandle, DWORD flags)
 	{
 		Util::StackOrHeap<wchar_t, DefaultStackReserveSize>
@@ -118,7 +143,7 @@ Delete all temporary files
 		return Cvt::w2a(std::wstring_view{s.Get(), length});
 	}
 
-### Evaluator
+#### Evaluator
 	struct User
 	{
 		std::string name;
@@ -159,7 +184,7 @@ Delete all temporary files
 		BOOST_TEST(age == "999");
 	}
 
-### TemplateEngine
+#### TemplateEngine
 	BOOST_AUTO_TEST_CASE(ForEach)
 	{
 		const std::vector<User> users
@@ -187,7 +212,7 @@ Delete all temporary files
 		BOOST_TEST(stm.str() == expected);
 	}
 
-### XmlStateEngine and iterator
+#### XmlStateEngine and iterator
 	BOOST_AUTO_TEST_CASE(Attributes)
 	{
 		Xml::Holder xml { R"(<root a='1' b='2' >
@@ -203,7 +228,7 @@ Delete all temporary files
 		BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), xml.begin(), xml.end());
 	}
 
-### Formatter
+#### Formatter
 	BOOST_AUTO_TEST_CASE(TestRepeatedInsert)
 	{
 		std::string s = Formatter::Format("{0} {0:%x}", 1234);
@@ -216,7 +241,9 @@ Delete all temporary files
 		BOOST_TEST("0X000004D2" ==s);
 	}
 
-### Windows handle smart pointers / Process Utilities
+### Windows Utilities
+
+#### Windows handle smart pointers / Process Utilities
 	BOOST_AUTO_TEST_CASE(TestProcess)
 	{
 		GLib::Win::Process p(R"(c:\windows\system32\cmd.exe)");
@@ -230,27 +257,27 @@ Delete all temporary files
 		BOOST_TEST(1U == p.ExitCode());
 	}
 
-### Windows Exceptions from Api/Com error codes
+#### Windows Exceptions from Api/Com error codes
 	BOOST_AUTO_TEST_CASE(TestErrorCheck)
 	{
 		::SetLastError(ERROR_ACCESS_DENIED);
 		GLIB_CHECK_EXCEPTION(GLib::Win::Util::AssertTrue(false, "test fail"), GLib::Win::WinException, "test fail : Access is denied. (5)");
 	}
 
-### ComPtr type / ComCast method to call QueryIterface for ComPtr's
+#### ComPtr type / ComCast method to call QueryIterface for ComPtr's
 	BOOST_AUTO_TEST_CASE(TestComErrorCheckWithErrorInfo)
 	{
 		GLib::Win::ComPtr<ICreateErrorInfo> p;
 		GLib::Win::CheckHr(::CreateErrorInfo(&p), "CreateErrorInfo");
 		auto ei = GLib::Win::ComCast<IErrorInfo>(p);
 		p->SetDescription(const_cast<LPOLESTR>(L"hello"));
-		GLib::Win::CheckHr(::SetErrorInfo(0, ei.Get()), "SetErrorInfo");
+		GLib::Win::CheckHr(::SetErrorInfo(0, Get(ei), "SetErrorInfo");
 
 		GLIB_CHECK_EXCEPTION(GLib::Win::CheckHr(E_OUTOFMEMORY, "fail"),
 		GLib::Win::ComException, "fail : hello (8007000E)");
 	}
 
-### Implement Com types with static TypeLists
+#### Implement Com types with static TypeLists
 	class ImplementsITest1AndITest2 final : public GLib::Win::Unknown<ITest1, ITest2>, public DeleteCounter<ImplementsITest1AndITest2>
 	{
 		GLIB_COM_RULE_OF_FIVE(ImplementsITest1AndITest2)
@@ -272,16 +299,16 @@ Delete all temporary files
 		GLib::Win::ComPtr<ITest1> p2;
 		HRESULT hr = p1->QueryInterface(&p2);
 		BOOST_TEST(S_OK == hr);
-		BOOST_TEST(2U == p1.UseCount());
-		BOOST_TEST(2U == p2.UseCount());
+		BOOST_TEST(2U == UseCount(p1));
+		BOOST_TEST(2U == UseCount(p2));
 
 		GLib::Win::ComPtr<IUnknown> pu;
 		hr = p2->QueryInterface(&pu);
 		BOOST_TEST(S_OK == hr);
-		BOOST_TEST(pu.Get() == p2.Get());
+		BOOST_TEST(Get(pu) == Get(p2));
 	}
 
-### DebugStream: ostream based stream to write to OutputDebugStream
+#### DebugStream: ostream based stream to write to OutputDebugStream
 	BOOST_AUTO_TEST_CASE(TestDebugStream)
 	{
 		GLib::Win::Debug::Stream() << "Hello!" << std::endl;
@@ -290,21 +317,60 @@ Delete all temporary files
 		GLib::Win::Debug::Write("Utf8 \xE2\x82\xAC");
 	}
 
-### SymbolEngine
+#### SymbolEngine
 	const GLib::Win::Symbols::SymProcess & process = Symbols().GetProcess(processId);
 	Symbols().Lines([&](PSRCCODEINFOW lineInfo)
 	{
 		AddLine(static_cast<const wchar_t *>(lineInfo->FileName), lineInfo->LineNumber, process, lineInfo->Address);
 	}, process.Handle().get(), info.lpBaseOfImage);
 
-### Filesystem utilities: some handy windows file system calls returning std::filesystem::path types
+#### Filesystem utilities: some handy Eindows file system calls returning std::filesystem::path types
 	inline std::vector<std::string> LogicalDrives();
+
 	inline std::map<std::string, std::string> DriveMap();
+
 	inline std::string PathOfFileHandle(HANDLE fileHandle, DWORD flags);
+
 	inline std::string NormalisePath(const std::string & path, const std::map<std::string, std::string> & driveMap);
+
 	inline std::string PathOfModule(HMODULE module);
+
 	inline std::string PathOfProcessHandle(HANDLE process);
+
 	inline Handle CreateAutoDeleteFile(const std::string & name);
 
-### Debugger/Code Coverage/Html Coverage report tool: Produces windows output code similar to LCOV output, also adds C++ syntax highlighting source code
-	>go coverage
+#### Registry Access
+
+	BOOST_AUTO_TEST_CASE(RegistryCreateKey)
+	{
+		auto & rootKey = RegistryKeys::CurrentUser;
+		constexpr const char TestKey[] = "Software\\CrapolaCppUnitTests";
+
+		auto key = rootKey.CreateSubKey(TestKey);
+		SCOPE(Delete, [&]()
+		{
+			rootKey.DeleteSubKey(TestKey);
+		});
+
+		BOOST_TEST(rootKey.KeyExists(TestKey));
+		key.SetInt32("Int32Value", 1234567890);
+		key.SetInt64("Int64Value", 12345678901234567890);
+		key.SetString("StringValue", "plugh");
+
+		BOOST_TEST(1234567890u == key.GetInt32("Int32Value"));
+		BOOST_TEST(12345678901234567890u == key.GetInt64("Int64Value"));
+		BOOST_TEST("plugh" == key.GetString("StringValue"));
+
+		BOOST_TEST(1234567890u == std::get<uint32_t>(key.Get("Int32Value")));
+		BOOST_TEST(12345678901234567890u == std::get<uint64_t>(key.Get("Int64Value")));
+		BOOST_TEST("plugh" == std::get<std::string>(key.Get("StringValue")));
+
+		rootKey.DeleteSubKey(TestKey);
+		BOOST_TEST(!rootKey.KeyExists(TestKey));
+	}
+
+### TODOs:
+* Generate C++ utility class documentation
+* Split Coverage executable to separate Repository
+* Merge Windows and LCOV code coverage to a single html report
+* Add the rest of the utilities
