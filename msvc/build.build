@@ -3,6 +3,13 @@
 
 	<PropertyGroup>
 		<Root>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)\..'))</Root>
+		<Nuget>https://dist.nuget.org/win-x86-commandline/v4.9.4/nuget.exe</Nuget>
+		<SevenZipNuget>7-Zip.CommandLine</SevenZipNuget>
+		<SevenZipVer>18.1.0</SevenZipVer>
+		<SevenZipPath>7-Zip.CommandLine.$(SevenZipVer)\tools\x64\7za.exe</SevenZipPath>
+
+		<BoostBuilderUrl>https://github.com/glen-summers/BoostModularBuild/tarball/v1.0</BoostBuilderUrl>
+		<BoostBuilderName>glen-summers-BoostModularBuild-c5050ff</BoostBuilderName>
 	</PropertyGroup>
 
 	<PropertyGroup>
@@ -52,6 +59,18 @@
 			</Directories>
 		</ItemGroup>
 		<RemoveDir Directories="@(Directories)" Condition="%(Files)=='0'" />
+	</Target>
+
+	<Target Name="Deps" DependsOnTargets="DownloadTools">
+		<PropertyGroup>
+			<BoostBuilderTar>$(Downloads)\BoostModularBuild.tar.gz</BoostBuilderTar>
+			<OutDir>$(Downloads)\Deps</OutDir>
+			<Go>$(Downloads)\Deps\$(BoostBuilderName)\go.cmd</Go>
+		</PropertyGroup>
+
+		<DownloadFile Condition="!Exists($(BoostBuilderTar))" Address="$(BoostBuilderUrl)" FileName="$(BoostBuilderTar)"/>
+		<Exec Condition="!Exists($(Go))" Command="$(SevenZip) x $(BoostBuilderTar) -so | $(SevenZip) x -aoa -si -ttar -o$(OutDir)"/>
+		<Exec Command="$(Go) build test $(Out)"/>
 	</Target>
 
 	<Target Name="Restore"/>
@@ -133,15 +152,24 @@
 		</Task>
 	</UsingTask>
 
-	<Target Name="DownloadTools"/>
+	<Target Name="DownloadTools">
+		<MakeDir Directories="$(Downloads)"/>
+		<DownloadFile Condition="!Exists($(Nuget))" Address="$(Nuget)" FileName="$(Downloads)\nuget.exe" />
 
-	<Target Name="Coverage" DependsOnTargets="Compile;DownloadTools">
+		<CreateProperty Value="$(Downloads)\$(SevenZipPath)">
+			<Output TaskParameter="Value" PropertyName="SevenZip"/>
+		</CreateProperty>
+		<Exec Condition="!Exists($(SevenZip))" Command="nuget.exe install $(SevenZipNuget) -version $(SevenZipVer)"
+			WorkingDirectory="$(Downloads)"/>
+	</Target>
+
+	<Target Name="Coverage" DependsOnTargets="Compile">
 		<MSBuild Projects="$(MSBuildProjectFile)" Targets="CompileTests" Properties="Configuration=Debug"/>
 		<Exec Command="$(CoverageExecutable) $(DebugTestExecutable) $(Out) -i $(CoverageInclude) -x $(CoverageExclude)"/>
 		<Exec Command="start $(Out)\HtmlReport\index.html"/>
 	</Target>
 
-	<Target Name="CoverageRelease" DependsOnTargets="Compile;DownloadTools">
+	<Target Name="CoverageRelease" DependsOnTargets="Compile">
 		<Exec Command="$(CoverageExecutable) $(TestExecutable) $(Out) -i $(CoverageInclude) -x $(CoverageExclude)"/>
 		<Exec Command="start $(Out)\HtmlReport\index.html"/>
 	</Target>
