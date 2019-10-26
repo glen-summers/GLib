@@ -18,7 +18,6 @@ namespace GLib::Win
 		};
 
 		using KeyHolder = std::unique_ptr<HKEY__, KeyCloser>;
-		using Buffer = GLib::Util::StackOrHeap<wchar_t, DefaultStackReserveSize>;
 
 		inline bool Found(LSTATUS result, const char * message)
 		{
@@ -46,7 +45,7 @@ namespace GLib::Win
 			LSTATUS result = ::RegGetValueW(key.get(), nullptr, valueName.c_str(), flags, nullptr, nullptr, &size);
 			Util::AssertSuccess(result, "RegGetValue");
 
-			Detail::Buffer data;
+			GLib::Util::WideCharBuffer data;
 			data.EnsureSize(size / sizeof(wchar_t));
 			result = ::RegGetValueW(key.get(), nullptr, valueName.c_str(), flags, nullptr, data.Get(), &size);
 			Util::AssertSuccess(result, "RegGetValue");

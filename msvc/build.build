@@ -19,6 +19,7 @@
 		<MinorVersion>0</MinorVersion>
 		<FileBuildNumber>0</FileBuildNumber>
 		<Configuration>Release</Configuration>
+		<CMakeConfiguration>RelWithDebInfo</CMakeConfiguration>
 		<Platform>x64</Platform>
 		<BuildInParallel>true</BuildInParallel>
 		<TestProject>Tests</TestProject>
@@ -115,18 +116,18 @@
 		<CTest>"$(CMakeRootDir)\CMake\bin\ctest.exe"</CTest>
 		<Ninja>"$(CMakeRootDir)\Ninja\ninja.exe"</Ninja>
 
-		<CMakeBuildDir>$(Out)\cmake\build\$(Platform)-$(Configuration)</CMakeBuildDir>
-		<CMakeInstallDir>$(Out)\cmake\install\$(Platform)-$(Configuration)</CMakeInstallDir>
+		<CMakeBuildDir>$(Out)\cmake\build\$(Platform)-$(CMakeConfiguration)</CMakeBuildDir>
+		<CMakeInstallDir>$(Out)\cmake\install\$(Platform)-$(CMakeConfiguration)</CMakeInstallDir>
 	</PropertyGroup>
 
 	<Target Name="CMake">
 		<MakeDir Directories="$(CMakeBuildDir)"/>
-		<Exec Command='$(CMake) -G "Ninja" -DCMAKE_INSTALL_PREFIX:PATH="$(CMakeInstallDir)" -DCMAKE_BUILD_TYPE="$(Configuration)" -DCMAKE_MAKE_PROGRAM=$(Ninja) $(Root)'
+		<Exec Command='$(CMake) -G "Ninja" -DCMAKE_INSTALL_PREFIX:PATH="$(CMakeInstallDir)" -DCMAKE_BUILD_TYPE="$(CMakeConfiguration)" -DCMAKE_MAKE_PROGRAM=$(Ninja) $(Root)'
 			WorkingDirectory="$(CMakeBuildDir)"/>
-		<Exec Command="$(CMake) --build $(CMakeBuildDir) --config $(Configuration) -- -v"/>
-		<!-- <Exec Command="set CTEST_OUTPUT_ON_FAILURE=1 &amp;&amp; $(CMake) - -build $(CMakeBuildDir) - -config $(Configuration) - -target test"/> -->
+		<Exec Command="$(CMake) --build $(CMakeBuildDir) --config $(CMakeConfiguration) -- -v"/>
+		<!-- <Exec Command="set CTEST_OUTPUT_ON_FAILURE=1 &amp;&amp; $(CMake) - -build $(CMakeBuildDir) - -config $(CMakeConfiguration) - -target test"/> -->
 		<Exec Command="set CTEST_OUTPUT_ON_FAILURE=1 &amp;&amp; $(CTest) -VV" WorkingDirectory="$(CMakeBuildDir)"/>
-		<Exec Command="$(CMake) --build $(CMakeBuildDir) --config $(Configuration) --target install"/>
+		<Exec Command="$(CMake) --build $(CMakeBuildDir) --config $(CMakeConfiguration) --target install"/>
 	</Target>
 
 	<Target Name="Wsl">

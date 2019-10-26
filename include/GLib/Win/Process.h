@@ -14,9 +14,6 @@ namespace GLib::Win
 {
 	namespace Detail
 	{
-		constexpr auto DefaultStackReserveSize = 256;
-		using Buffer = GLib::Util::StackOrHeap<wchar_t, DefaultStackReserveSize>;
-
 		inline const void * ToAddress(uint64_t value)
 		{
 			return reinterpret_cast<const void*>(value); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)

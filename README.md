@@ -324,7 +324,7 @@ The Windows command-line build is from a go.cmd at root level which checks Visua
 		AddLine(static_cast<const wchar_t *>(lineInfo->FileName), lineInfo->LineNumber, process, lineInfo->Address);
 	}, process.Handle().get(), info.lpBaseOfImage);
 
-#### Filesystem utilities: some handy Eindows file system calls returning std::filesystem::path types
+#### Filesystem utilities: some handy Windows file system calls
 	inline std::vector<std::string> LogicalDrives();
 
 	inline std::map<std::string, std::string> DriveMap();
@@ -367,6 +367,15 @@ The Windows command-line build is from a go.cmd at root level which checks Visua
 
 		rootKey.DeleteSubKey(TestKey);
 		BOOST_TEST(!rootKey.KeyExists(TestKey));
+	}
+
+	BOOST_AUTO_TEST_CASE(RegistryGet)
+	{
+		auto regValue = RegistryKeys::CurrentUser / "Environment" & "TEMP";
+
+		std::string envValue = *GLib::Compat::GetEnv("TEMP");
+		BOOST_TEST(std::holds_alternative<std::string>(regValue));
+		BOOST_TEST(envValue == std::get<std::string>(regValue));
 	}
 
 ### TODOs:

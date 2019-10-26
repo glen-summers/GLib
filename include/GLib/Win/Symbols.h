@@ -47,15 +47,17 @@ namespace GLib::Win::Symbols
 		ULONG typeIndex {};
 		enum SymTagEnum tag {};
 		std::string name;
+		DWORD64 displacement {};
 
 	public:
 		Symbol() = default;
 
-		Symbol(ULONG index, ULONG typeIndex, enum SymTagEnum tag, std::string name)
+		Symbol(ULONG index, ULONG typeIndex, enum SymTagEnum tag, std::string name, DWORD64 displacement)
 			: index(index)
 			, typeIndex(typeIndex)
 			, tag(tag)
 			, name(move(name))
+			, displacement(displacement)
 		{}
 
 		ULONG Index() const
@@ -97,13 +99,26 @@ namespace GLib::Win::Symbols
 		{
 			name = move(value);
 		}
+
+		DWORD64 Displacement() const
+		{
+			return displacement;
+		}
+	};
+
+	struct Line
+	{
+		unsigned int lineNumber;
+		std::string fileName;
+		uint64_t Address;
+		unsigned int displacement;
 	};
 
 	class SymProcess
 	{
 		Process process;
 		Detail::SymbolHandle symbolHandle;
-		uint64_t baseOfImage;
+		uint64_t baseOfImage{};
 
 	public:
 		SymProcess(Handle && handle, uint64_t baseOfImage)
@@ -111,6 +126,36 @@ namespace GLib::Win::Symbols
 			, symbolHandle(process.Handle().get())
 			, baseOfImage(baseOfImage)
 		{}
+
+		static SymProcess CurrentProcess()
+		{
+			return GetProcess(::GetCurrentProcess(), 0, true);
+		}
+
+		static SymProcess GetProcess(HANDLE handle, uint64_t baseOfImage, bool invasive)
+		{
+			auto duplicate = Detail::Duplicate(handle);
+
+			std::ostringstream searchPath;
+
+			auto const processPath = std::filesystem::path(FileSystem::PathOfProcessHandle(duplicate.get())).parent_path().u8string();
+			searchPath << processPath << ";";
+
+			// set sym opts, add exe to sym path, legacy code, still needed?
+			if (auto value = Compat::GetEnv("_NT_SYMBOL_PATH"))
+			{
+				searchPath << *value << ";";
+			}
+
+			if (auto value = Compat::GetEnv("PATH"))
+			{
+				searchPath << *value << ";";
+			}
+
+			// when debugging processHandle and enumerateModules = true, get errorCode=0x8000000d : An illegal state change was requested
+			Util::AssertTrue(::SymInitializeW(duplicate.get(), Cvt::a2w(searchPath.str()).c_str(), invasive ? TRUE : FALSE), "SymInitialize failed");
+			return { std::move(duplicate), baseOfImage};
+		}
 
 		const Handle & Handle() const
 		{
@@ -139,14 +184,28 @@ namespace GLib::Win::Symbols
 			WriteMemory(address, &value, sizeof(T), absolute);
 		}
 
+		// no throw?
 		Symbol GetSymbolFromAddress(uint64_t address) const
 		{
 			std::array<SYMBOL_INFOW, 2 + MAX_SYM_NAME * sizeof(wchar_t) / sizeof(SYMBOL_INFO)> buffer {};
 			auto const symbol = buffer.data();
 			symbol->SizeOfStruct = sizeof(SYMBOL_INFOW);
 			symbol->MaxNameLen = MAX_SYM_NAME;
-			Util::AssertTrue(::SymFromAddrW(process.Handle().get(), address, nullptr, symbol), "SymFromAddr");
-			return { symbol->Index, symbol->TypeIndex, static_cast<enum SymTagEnum>(symbol->Tag), Cvt::w2a(std::wstring_view{static_cast<const wchar_t *>(symbol->Name)}) };
+			DWORD64 displacement;
+			Util::AssertTrue(::SymFromAddrW(process.Handle().get(), address, &displacement, symbol), "SymFromAddr");
+			return { symbol->Index, symbol->TypeIndex, static_cast<enum SymTagEnum>(symbol->Tag),
+				Cvt::w2a(std::wstring_view{static_cast<const wchar_t *>(symbol->Name)}), displacement };
+		}
+
+		std::optional<Line> GetLineFromAddress(uint64_t address) const
+		{
+			IMAGEHLP_LINEW64 tmpLine{sizeof(IMAGEHLP_LINEW64)};
+			DWORD displacement;
+			if (!::SymGetLineFromAddrW64(process.Handle().get(), address, &displacement, &tmpLine))
+			{
+				return {};
+			}
+			return Line{ tmpLine.LineNumber, Cvt::w2a(tmpLine.FileName), tmpLine.Address, displacement };
 		}
 
 		bool TryGetClassParent(const Symbol & symbol, Symbol & result) const
@@ -188,42 +247,20 @@ namespace GLib::Win::Symbols
 		std::unordered_map<DWORD, SymProcess> handles;
 
 	public:
-#ifdef _DEBUG
 		Engine()
 		{
-			::SymSetOptions(::SymGetOptions() | SYMOPT_DEBUG);
+			::SymSetOptions(::SymGetOptions() | SYMOPT_DEBUG | SYMOPT_UNDNAME | SYMOPT_LOAD_LINES);
 		}
-#endif
 
 		SymProcess & AddProcess(DWORD processId, HANDLE processHandle, uint64_t baseOfImage, HANDLE imageFile, const std::string & imageName)
 		{
-			Handle duplicate = Detail::Duplicate(processHandle);
+			SymProcess sp = SymProcess::GetProcess(processHandle, baseOfImage, false);
 
-			// set sym opts, add exe to sym path, legacy code, still needed?
-			std::ostringstream searchPath;
-
-			auto const processPath = std::filesystem::path(FileSystem::PathOfProcessHandle(duplicate.get())).parent_path().u8string();
-			searchPath << processPath << ";";
-
-			if (auto value = Compat::GetEnv("_NT_SYMBOL_PATH"))
-			{
-				searchPath << *value << ";";
-			}
-
-			if (auto value = Compat::GetEnv("PATH"))
-			{
-				searchPath << *value << ";";
-			}
-
-			// when debugging processHandle and enumerateModules = true, get errorCode=0x8000000d : An illegal state change was requested
-			Util::AssertTrue(::SymInitializeW(duplicate.get(), Cvt::a2w(searchPath.str()).c_str(), FALSE),
-				"SymInitialize failed");
-
-			DWORD64 const loadBase = ::SymLoadModuleExW(duplicate.get(), imageFile, Cvt::a2w(imageName).c_str(), nullptr,
+			DWORD64 const loadBase = ::SymLoadModuleExW(sp.Handle().get(), imageFile, Cvt::a2w(imageName).c_str(), nullptr,
 				static_cast<DWORD64>(baseOfImage), 0, nullptr, 0);
 				Util::AssertTrue(0 != loadBase, "SymLoadModuleEx failed");
 
-			return handles.emplace(processId, SymProcess{ std::move(duplicate), baseOfImage }).first->second;
+			return handles.emplace(processId, std::move(sp)).first->second;
 		}
 
 		const SymProcess & GetProcess(DWORD processId) const

@@ -77,7 +77,7 @@ namespace GLib::Compat
 		auto result = ::lstat(s.str().c_str(), &sb);
 		AssertTrue(result != -1, "lstat", errno);
 
-		Util::StackOrHeap<char, GLib::Util::DefaultStackReserveSize> soh;
+		GLib::Util::CharBuffer soh;
 		soh.EnsureSize(sb.st_size + 1);
 
 		int readBytes = ::readlink(s.str().c_str(), soh.Get(), soh.size());

@@ -5,13 +5,34 @@
 #include "GLib/Win/DebugStream.h"
 #include "GLib/Win/DebugWrite.h"
 #include "GLib/Win/FileSystem.h"
+#include "GLib/Win/NativeExceptionPrinter.h"
 #include "GLib/Win/Process.h"
 #include "GLib/Win/Registry.h"
 #include "GLib/Win/Symbols.h"
 #include "GLib/Win/Uuid.h"
-#include "GLib/Xml/Printer.h"
 
 #include "TestUtils.h"
+
+namespace
+{
+	LONG WINAPI Filter(struct _EXCEPTION_POINTERS * exceptionInfo, std::ostream & s)
+	{
+		GLib::Win::Symbols::Print(exceptionInfo, s, 100);
+		return EXCEPTION_EXECUTE_HANDLER;
+	}
+
+	template <typename T>
+	void GetStackTrace(std::ostream & s, const T & value)
+	{
+		__try
+		{
+			throw value;
+		}
+		__except(Filter(GetExceptionInformation(), s))
+		{
+		}
+	}
+}
 
 using namespace GLib::Win;
 
@@ -148,5 +169,40 @@ BOOST_AUTO_TEST_SUITE(WinTests)
 		BOOST_TEST(!rootKey.KeyExists(TestKey));
 	}
 
+	BOOST_AUTO_TEST_CASE(PrintNativeException)
+	{
+		std::ostringstream s;
+		GetStackTrace(s, std::runtime_error("!"));
+		auto ss{s.str()};
+
+		BOOST_TEST(ss.find("Unhandled exception at") != std::string::npos);
+		BOOST_TEST(ss.find("(code: E06D7363) : C++ exception of type: 'class std::runtime_error'") != std::string::npos);
+		BOOST_TEST(ss.find("RaiseException") != std::string::npos);
+		BOOST_TEST(ss.find("CxxThrowException") != std::string::npos);
+		BOOST_TEST(ss.find("GetStackTrace") != std::string::npos);
+	}
+
+	BOOST_AUTO_TEST_CASE(PrintNativeException2)
+	{
+		std::ostringstream s;
+		GetStackTrace(s, 12345678);
+		auto ss{s.str()};
+
+		BOOST_TEST(ss.find("Unhandled exception at") != std::string::npos);
+		BOOST_TEST(ss.find("(code: E06D7363) : C++ exception of type: 'int'") != std::string::npos);
+		BOOST_TEST(ss.find("RaiseException") != std::string::npos);
+		BOOST_TEST(ss.find("CxxThrowException") != std::string::npos);
+		BOOST_TEST(ss.find("GetStackTrace") != std::string::npos);
+	}
+
+	BOOST_AUTO_TEST_CASE(ExceptionNullsOK)
+	{
+		GLib::Win::Symbols::Detail::GetContext(nullptr);
+
+		ULONG_PTR ar[]{0, 0};
+		std::string name{};
+		BOOST_CHECK(!GLib::Win::Symbols::Detail::GetCPlusPlusExceptionName(ar, name));
+		BOOST_CHECK(!GLib::Win::Symbols::Detail::GetCPlusPlusExceptionNameEx(ar, name));
+	}
 
 BOOST_AUTO_TEST_SUITE_END()
