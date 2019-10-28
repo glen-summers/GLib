@@ -160,26 +160,25 @@ void Coverage::CreateReport(unsigned int processId)
 
 	for (const auto & a : addresses)
 	{
-		GLib::Win::Symbols::Symbol symbol = process.GetSymbolFromAddress(a.first);
-		const Address & address = a.second;
-
-		auto it = indexToFunction.find(symbol.Index());
-		if (it == indexToFunction.end())
+		if (auto symbol = process.TryGetSymbolFromAddress(a.first))
 		{
-			GLib::Win::Symbols::Symbol parent;
-			process.TryGetClassParent(symbol, parent);
+			const Address & address = a.second;
 
-			// ok need to merge multiple hits from templates, but not overloads?
-			// store namespaceName+className+functionName+isTemplate
-			 // if not a template then generate additional inserts? template specialisations?
-			std::string nameSpace;
-			std::string typeName;
-			std::string functionName;
-			CleanupFunctionNames(symbol.Name(), parent.Name(), nameSpace, typeName, functionName);
-			it = indexToFunction.emplace(symbol.Index(), Function{ nameSpace, typeName, functionName }).first;
+			auto it = indexToFunction.find(symbol->Index());
+			if (it == indexToFunction.end())
+			{
+				GLib::Win::Symbols::Symbol parent;
+				process.TryGetClassParent(*symbol, parent);
+
+				std::string nameSpace;
+				std::string typeName;
+				std::string functionName;
+				CleanupFunctionNames(symbol->Name(), parent.Name(), nameSpace, typeName, functionName);
+				it = indexToFunction.emplace(symbol->Index(), Function{ nameSpace, typeName, functionName }).first;
+			}
+
+			it->second.Accumulate(address);
 		}
-
-		it->second.Accumulate(address);
 	}
 
 	CreateHtmlReport(indexToFunction, executable);

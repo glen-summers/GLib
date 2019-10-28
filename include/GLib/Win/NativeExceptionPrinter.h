@@ -94,10 +94,9 @@ namespace GLib::Win::Symbols
 					std::string mod = FileSystem::PathOfModule(module);
 					Formatter::Format(s, "{0,-30} + {1:%08X}\n", mod, static_cast<DWORD_PTR>(address) - reinterpret_cast<DWORD_PTR>(mb.AllocationBase));
 
-					try
+					if (auto symbol = sym.TryGetSymbolFromAddress(address))
 					{
-						auto symbol = sym.GetSymbolFromAddress(address);
-						const char * symName = symbol.Name().c_str();
+						const char * symName = symbol->Name().c_str();
 						char undecoratedName[512];
 
 						if (symName[0] == '?')
@@ -109,8 +108,8 @@ namespace GLib::Win::Symbols
 							}
 						}
 
-						Formatter::Format(s, "\t{0} + {1:%#x}\n", symbol.Name(), symbol.Displacement());
-						if (auto line = sym.GetLineFromAddress(address))
+						Formatter::Format(s, "\t{0} + {1:%#x}\n", symName, symbol->Displacement());
+						if (auto line = sym.TryGetLineFromAddress(address))
 						{
 							Formatter::Format(s, "\t{0}({1})", line->fileName, line->lineNumber);
 							if (line->displacement != 0)
@@ -119,10 +118,6 @@ namespace GLib::Win::Symbols
 							}
 							s << '\n';
 						}
-					}
-					catch (const std::exception & e)
-					{
-						Formatter::Format(s, "Error: {0}", e.what());
 					}
 				}
 				else

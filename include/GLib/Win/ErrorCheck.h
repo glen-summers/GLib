@@ -41,27 +41,41 @@ namespace GLib::Win::Util
 		class Checker
 		{
 		public:
-			template<typename T> static void AssertTrue(T value, const char * message, DWORD errorCode)
+			template<typename T> static bool AssertTrue(T value, const char * message, DWORD errorCode)
 			{
-				(void)value;
-				(void)message;
 				static_assert(false, "Invalid check parameter, only bool and BOOL allowed");
 			}
 
-			static void AssertTrue(bool result, const char * message, DWORD errorCode)
+			template<typename T> static bool WarnAssertTrue(T value, const char * message, DWORD errorCode)
+			{
+				static_assert(false, "Invalid check parameter, only bool and BOOL allowed");
+			}
+
+			template<typename T> static bool AssertSuccess(T value, const char * message)
+			{
+				static_assert(false, "Invalid check parameter, only DWORD allowed");
+			}
+
+			template<typename T> static bool WarnAssertSuccess(T value, const char * message)
+			{
+				static_assert(false, "Invalid check parameter, only DWORD and LSTATUS allowed");
+			}
+
+			static bool AssertTrue(bool result, const char * message, DWORD errorCode)
 			{
 				if (!result)
 				{
 					Throw(message, errorCode);
 				}
+				return result;
 			}
 
-			static void AssertTrue(BOOL result, const char * message, DWORD errorCode)
+			static bool AssertTrue(BOOL result, const char * message, DWORD errorCode)
 			{
-				AssertTrue(result != FALSE, message, errorCode);
+				return AssertTrue(result != FALSE, message, errorCode);
 			}
 
-			static void WarnAssertTrue(bool result, const char * message, DWORD errorCode) noexcept
+			static bool WarnAssertTrue(bool result, const char * message, DWORD errorCode) noexcept
 			{
 #ifdef _DEBUG // || defined(GLIB_DEBUG)
 				if (!result)
@@ -69,36 +83,55 @@ namespace GLib::Win::Util
 					Debug::Stream() << "GLib warning: " << Detail::FormatErrorMessage(message, errorCode) << std::endl;
 				}
 #else
-				(void)result;
-				(void)message;
-				(void)errorCode;
+				(void)message; (void)errorCode;
 #endif
+				return result;
 			}
 
-			static void WarnAssertTrue(BOOL result, const char * message) noexcept
+			static bool WarnAssertTrue(BOOL result, const char * message, DWORD errorCode) noexcept
 			{
-				WarnAssertTrue(result != FALSE, message);
+				return WarnAssertTrue(result != FALSE, message, errorCode);
+			}
+
+			static bool AssertSuccess(DWORD result, const char * message)
+			{
+				return AssertTrue(result == ERROR_SUCCESS, message, result);
+			}
+
+			static bool WarnAssertSuccess(DWORD result, const char * message) noexcept
+			{
+				return WarnAssertTrue(result == ERROR_SUCCESS, message, result);
+			}
+
+			static bool AssertSuccess(LSTATUS result, const char * message)
+			{
+				return AssertTrue(result == ERROR_SUCCESS, message, static_cast<DWORD>(result));
+			}
+
+			static bool WarnAssertSuccess(LSTATUS result, const char * message) noexcept
+			{
+				return WarnAssertTrue(result == ERROR_SUCCESS, message, static_cast<DWORD>(result));
 			}
 		};
 	}
 
-	template <typename T> void AssertTrue(T result, const char * message)
+	template <typename T> bool AssertTrue(T result, const char * message)
 	{
-		Detail::Checker::AssertTrue(result, message, ::GetLastError());
+		return Detail::Checker::AssertTrue(result, message, ::GetLastError());
 	}
 
-	template <typename T> void WarnAssertTrue(T result, const char * message)
+	template <typename T> bool WarnAssertTrue(T result, const char * message)
 	{
-		Detail::Checker::WarnAssertTrue(result, message, ::GetLastError());
+		return Detail::Checker::WarnAssertTrue(result, message, ::GetLastError());
 	}
 
-	inline void AssertSuccess(DWORD errorCode, const char * message)
+	template <typename T> bool AssertSuccess(T errorCode, const char * message)
 	{
-		Detail::Checker::AssertTrue(errorCode == ERROR_SUCCESS, message, errorCode);
+		return Detail::Checker::AssertSuccess(errorCode, message);
 	}
 
-	inline void WarnAssertSuccess(DWORD errorCode, const char * message)
+	template <typename T> bool WarnAssertSuccess(T errorCode, const char * message)
 	{
-		Detail::Checker::WarnAssertTrue(errorCode == ERROR_SUCCESS, message, errorCode);
+		return Detail::Checker::WarnAssertSuccess(errorCode, message);
 	}
 }

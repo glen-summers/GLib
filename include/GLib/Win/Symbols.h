@@ -184,28 +184,36 @@ namespace GLib::Win::Symbols
 			WriteMemory(address, &value, sizeof(T), absolute);
 		}
 
-		// no throw?
-		Symbol GetSymbolFromAddress(uint64_t address) const
+		std::optional<Symbol> TryGetSymbolFromAddress(uint64_t address) const
 		{
+			std::optional<Symbol> symbol;
+
 			std::array<SYMBOL_INFOW, 2 + MAX_SYM_NAME * sizeof(wchar_t) / sizeof(SYMBOL_INFO)> buffer {};
-			auto const symbol = buffer.data();
-			symbol->SizeOfStruct = sizeof(SYMBOL_INFOW);
-			symbol->MaxNameLen = MAX_SYM_NAME;
+			auto const symbuf = buffer.data();
+			symbuf->SizeOfStruct = sizeof(SYMBOL_INFOW);
+			symbuf->MaxNameLen = MAX_SYM_NAME;
 			DWORD64 displacement;
-			Util::AssertTrue(::SymFromAddrW(process.Handle().get(), address, &displacement, symbol), "SymFromAddr");
-			return { symbol->Index, symbol->TypeIndex, static_cast<enum SymTagEnum>(symbol->Tag),
-				Cvt::w2a(std::wstring_view{static_cast<const wchar_t *>(symbol->Name)}), displacement };
+			BOOL result = ::SymFromAddrW(process.Handle().get(), address, &displacement, symbuf);
+			if (Util::WarnAssertTrue(result, "SymFromAddrW"))
+			{
+				symbol = { symbuf->Index, symbuf->TypeIndex, static_cast<enum SymTagEnum>(symbuf->Tag),
+						Cvt::w2a(std::wstring_view{static_cast<const wchar_t *>(symbuf->Name)}), displacement };
+			}
+			return move(symbol);
 		}
 
-		std::optional<Line> GetLineFromAddress(uint64_t address) const
+		std::optional<Line> TryGetLineFromAddress(uint64_t address) const
 		{
+			std::optional<Line> line;
+
 			IMAGEHLP_LINEW64 tmpLine{sizeof(IMAGEHLP_LINEW64)};
 			DWORD displacement;
-			if (!::SymGetLineFromAddrW64(process.Handle().get(), address, &displacement, &tmpLine))
+			BOOL result = ::SymGetLineFromAddrW64(process.Handle().get(), address, &displacement, &tmpLine);
+			if (Util::WarnAssertTrue(result, "SymFromAddrW"))
 			{
-				return {};
+				line = { tmpLine.LineNumber, Cvt::w2a(tmpLine.FileName), tmpLine.Address, displacement };
 			}
-			return Line{ tmpLine.LineNumber, Cvt::w2a(tmpLine.FileName), tmpLine.Address, displacement };
+			return move(line);
 		}
 
 		bool TryGetClassParent(const Symbol & symbol, Symbol & result) const
