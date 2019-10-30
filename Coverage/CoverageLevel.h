@@ -9,6 +9,11 @@ enum class CoverageLevel : int
 
 constexpr unsigned int HundredPercent = 100;
 
+inline unsigned int Percentage(size_t value, size_t amount)
+{
+	return static_cast<unsigned int>(HundredPercent * value / amount);
+}
+
 inline std::ostream & operator << (std::ostream & s, enum CoverageLevel coverageLevel)
 {
 	switch (coverageLevel)

@@ -251,7 +251,7 @@ namespace GLib::Win
 			(void)processId;
 			(void)threadId;
 			(void)info;
-			return DBG_CONTINUE;
+			return DBG_EXCEPTION_NOT_HANDLED;
 		}
 
 		virtual void OnDebugString(DWORD processId, DWORD threadId, const OUTPUT_DEBUG_STRING_INFO & info)

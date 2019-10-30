@@ -12,7 +12,7 @@ namespace GLib::Eval
 	template <typename T, std::enable_if_t<std::is_class<T>::value>* = nullptr>
 	void VisitProperty(const T & value, const std::string & propertyName)
 	{
-		return Visitor<T>::Visit(propertyName, value);
+		Visitor<T>::Visit(propertyName, value);
 	}
 
 	class Evaluator

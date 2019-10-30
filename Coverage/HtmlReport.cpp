@@ -1,9 +1,9 @@
 #include "pch.h"
 
+#include "Chunk.h"
 #include "Directory.h"
 #include "FunctionVisitor.h"
 #include "Line.h"
-#include "Chunk.h"
 
 #include "CppHtmlGenerator.h"
 #include "FileCoverageData.h"
@@ -114,7 +114,7 @@ void HtmlReport::GenerateRootIndex() const
 			coveredLines += data.CoveredLines();
 			coverableLines += data.CoverableLines();
 
-			auto childPercent = static_cast<unsigned int>(HundredPercent * data.CoveredLines() / data.CoverableLines());
+			auto childPercent = Percentage(data.CoveredLines(), data.CoverableLines());
 			minChildPercent = std::min(minChildPercent, childPercent);
 
 			coveredFunctions += data.CoveredFunctions();
@@ -135,8 +135,8 @@ void HtmlReport::GenerateRootIndex() const
 		throw std::runtime_error("Zero coverable lines");
 	}
 
-	auto coveragePercent = static_cast<unsigned int>(totalCoveredLines*HundredPercent / totalCoverableLines);
-	auto coverageFunctionPercent = static_cast<unsigned int>(totalCoveredFunctions*HundredPercent / totalCoverableFunctions);
+	auto coveragePercent = Percentage(totalCoveredLines, totalCoverableLines);
+	auto coverageFunctionPercent = Percentage(totalCoveredFunctions, totalCoverableFunctions);
 
 	GLib::Eval::Evaluator e;
 	e.Set("title", testName);
@@ -191,8 +191,8 @@ void HtmlReport::GenerateIndices() const
 			throw std::runtime_error("Zero coverable lines");
 		}
 
-		auto coveragePercent = static_cast<unsigned int>(totalCoveredLines*HundredPercent / totalCoverableLines);
-		auto coverageFunctionPercent = static_cast<unsigned int>(totalCoveredFunctions*HundredPercent / totalCoverableFunctions);
+		auto coveragePercent = Percentage(totalCoveredLines, totalCoverableLines);
+		auto coverageFunctionPercent = Percentage(totalCoveredFunctions, totalCoverableFunctions);
 
 		for (const FileCoverageData & data : children)
 		{
@@ -279,7 +279,8 @@ void HtmlReport::GenerateSourceFile(std::filesystem::path & subPath, const FileC
 
 	constexpr int EffectiveHeaderLines = 10;
 	constexpr int EffectiveFooterLines = 3;
-	auto ratio = static_cast<float>(HundredPercent) / (lines.size() + EffectiveHeaderLines + EffectiveFooterLines);
+	auto effectiveLines = lines.size() + EffectiveHeaderLines + EffectiveFooterLines;
+	auto ratio = static_cast<float>(HundredPercent) / effectiveLines;
 
 	auto pred = [](const Line & l1, const Line & l2) { return l1.cover != l2.cover; };
 
@@ -297,8 +298,8 @@ void HtmlReport::GenerateSourceFile(std::filesystem::path & subPath, const FileC
 
 	auto parent = subPath.parent_path();
 	auto css = (relativePath / "coverage.css").generic_u8string();
-	auto coveragePercent = static_cast<unsigned int>(data.CoveredLines()*HundredPercent / lc.size());
-	auto coverageFunctionPercent = static_cast<unsigned int>(data.CoveredFunctions()*HundredPercent / data.CoverableFunctions());
+	auto coveragePercent = Percentage(data.CoveredLines(), lc.size());
+	auto coverageFunctionPercent = Percentage(data.CoveredFunctions(), data.CoverableFunctions());
 
 	e.Set("title", subPath.generic_u8string());
 	e.Set("testName", testName);
@@ -334,7 +335,11 @@ void HtmlReport::GenerateSourceFile(std::filesystem::path & subPath, const FileC
 					throw std::runtime_error("Duplicate function");
 				}
 
-				int lineWithLink = l.begin()->first - 2; // -1 one based to zero and -1 for function defn
+				unsigned int lineWithLink = l.begin()->first - 1; // -1 one based to zero
+				if (lineWithLink != 0)
+				{
+					--lineWithLink; // -1 for function defn
+				}
 				lines[lineWithLink].hasLink = true;
 			}
 		}

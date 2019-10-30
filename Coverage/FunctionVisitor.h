@@ -11,17 +11,16 @@ struct GLib::Eval::Visitor<Function>
 {
 	static void Visit(const Function & function, const std::string & propertyName, const ValueVisitor & f)
 	{
-		constexpr char separator[] = "::";
 		if (propertyName == "name")
 		{
 			std::ostringstream s;
 			if (!function.NameSpace().empty())
 			{
-				GLib::Xml::Utils::Escape(function.NameSpace(), s) << separator;
+				GLib::Xml::Utils::Escape(function.NameSpace(), s) << "::";
 			}
 			if (!function.ClassName().empty())
 			{
-				GLib::Xml::Utils::Escape(function.ClassName(), s) << separator;
+				GLib::Xml::Utils::Escape(function.ClassName(), s) << "::";
 			}
 			GLib::Xml::Utils::Escape(function.FunctionName(), s);
 			return f(Value(s.str()));
@@ -29,12 +28,13 @@ struct GLib::Eval::Visitor<Function>
 
 		if (propertyName == "line")
 		{
-			int line = -1;
+			unsigned int line = 0;
+			constexpr unsigned int offset = 1;
 			for (const auto & [file, lines] : function.FileLines())
 			{
 				if (!lines.empty())
 				{
-					line = lines.begin()->first - 1; // -1 to include function defn
+					line = lines.begin()->first - offset;
 					break;
 				}
 			}

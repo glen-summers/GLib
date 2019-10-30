@@ -114,8 +114,6 @@ void Coverage::OnExitThread(DWORD processId, DWORD threadId, const EXIT_THREAD_D
 
 DWORD Coverage::OnException(DWORD processId, DWORD threadId, const EXCEPTION_DEBUG_INFO& info)
 {
-	Debugger::OnException(processId, threadId, info);
-
 	const bool isBreakpoint = info.ExceptionRecord.ExceptionCode == EXCEPTION_BREAKPOINT;
 
 	if (info.dwFirstChance!=0 && isBreakpoint)
@@ -149,7 +147,7 @@ DWORD Coverage::OnException(DWORD processId, DWORD threadId, const EXCEPTION_DEB
 		return DBG_CONTINUE;
 	}
 
-	return DBG_EXCEPTION_NOT_HANDLED;
+	return Debugger::OnException(processId, threadId, info);
 }
 
 void Coverage::CreateReport(unsigned int processId)

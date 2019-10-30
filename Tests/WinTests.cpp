@@ -15,9 +15,9 @@
 
 namespace
 {
-	LONG WINAPI Filter(struct _EXCEPTION_POINTERS * exceptionInfo, std::ostream & s)
+	LONG WINAPI Filter(std::ostream & s, EXCEPTION_POINTERS * exceptionInfo)
 	{
-		GLib::Win::Symbols::Print(exceptionInfo, s, 100);
+		GLib::Win::Symbols::Print(s, exceptionInfo, 100);
 		return EXCEPTION_EXECUTE_HANDLER;
 	}
 
@@ -28,7 +28,7 @@ namespace
 		{
 			throw value;
 		}
-		__except(Filter(GetExceptionInformation(), s))
+		__except(Filter(s, GetExceptionInformation()))
 		{
 		}
 	}
@@ -193,16 +193,6 @@ BOOST_AUTO_TEST_SUITE(WinTests)
 		BOOST_TEST(ss.find("RaiseException") != std::string::npos);
 		BOOST_TEST(ss.find("CxxThrowException") != std::string::npos);
 		BOOST_TEST(ss.find("GetStackTrace") != std::string::npos);
-	}
-
-	BOOST_AUTO_TEST_CASE(ExceptionNullsOK)
-	{
-		GLib::Win::Symbols::Detail::GetContext(nullptr);
-
-		ULONG_PTR ar[]{0, 0};
-		std::string name{};
-		BOOST_CHECK(!GLib::Win::Symbols::Detail::GetCPlusPlusExceptionName(ar, name));
-		BOOST_CHECK(!GLib::Win::Symbols::Detail::GetCPlusPlusExceptionNameEx(ar, name));
 	}
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -257,7 +257,8 @@ namespace GLib::Win::Symbols
 	public:
 		Engine()
 		{
-			::SymSetOptions(::SymGetOptions() | SYMOPT_DEBUG | SYMOPT_UNDNAME | SYMOPT_LOAD_LINES);
+			auto flags = SYMOPT_DEBUG | static_cast<DWORD>(SYMOPT_UNDNAME) | static_cast<DWORD>(SYMOPT_LOAD_LINES);
+			::SymSetOptions(::SymGetOptions() | flags);
 		}
 
 		SymProcess & AddProcess(DWORD processId, HANDLE processHandle, uint64_t baseOfImage, HANDLE imageFile, const std::string & imageName)

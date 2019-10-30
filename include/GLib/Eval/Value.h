@@ -79,7 +79,7 @@ namespace GLib::Eval
 
 	template<typename Value> struct Visitor
 	{
-		static std::string Visit(const Value & value, const std::string & propertyName, const ValueVisitor & visitor)
+		static void Visit(const Value & value, const std::string & propertyName, const ValueVisitor & visitor)
 		{
 			(void)value;
 			(void)visitor;

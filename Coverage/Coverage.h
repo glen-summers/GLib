@@ -49,7 +49,7 @@ private:
 
 	static void Delaminate(std::string & name);
 	void CleanupFunctionNames(const std::string & name, const std::string & typeName,
-		std::string & className, std::string & functionName, std::string & nameSpace) const;
+	std::string & nameSpace, std::string & className, std::string & functionName) const;
 
 	void CreateHtmlReport(const std::map<ULONG, Function> & indexToFunctionMap, const std::string & title) const;
 	CoverageData ConvertFunctionData(const std::map<ULONG, Function> & indexToFunctionMap) const;

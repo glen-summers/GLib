@@ -185,7 +185,8 @@ namespace GLib::Xml
 					{
 						case Xml::State::AttributeEnd:
 						{
-							manager->Push(Utils::ToStringView(attributeName), Utils::ToStringView(attributeValueStart+1, oldPtr), elementStack.size());
+							auto tmp = attributeValueStart;
+							manager->Push(Utils::ToStringView(attributeName), Utils::ToStringView(++tmp, oldPtr), elementStack.size());
 							attributes.second = ptr;
 							break;
 						}

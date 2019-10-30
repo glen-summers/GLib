@@ -90,7 +90,9 @@ BOOST_AUTO_TEST_SUITE(FlogTests)
 
 		auto processName = GLib::Compat::ProcessName();
 		auto processPath= GLib::Compat::ProcessPath();
-		BOOST_TEST(contents.find("ProcessName : (64 bit) " + processName) != std::string::npos);
+		auto bitness = std::to_string(8 * sizeof (void*));
+
+		BOOST_TEST(contents.find("ProcessName : (" + bitness + " bit) " + processName) != std::string::npos);
 		BOOST_TEST(contents.find("FullPath    : " + processPath) != std::string::npos);
 	}
 
