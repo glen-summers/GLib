@@ -1,82 +1,99 @@
 #pragma once
 
 #include "GLib/formatter.h"
+#include "GLib/Span.h"
+
 #include "GLib/Win/Symbols.h"
-
-#include "GLib/flogging.h"
-
-#include <unordered_set>
 
 namespace GLib::Win::Symbols
 {
+	// http://members.gamedev.net/sicrane/articles/exception.html
+	// http://www.geoffchappell.com/studies/msvc/language/predefined/
+	// https://blogs.msdn.microsoft.com/oldnewthing/20100730-00/?p=13273
+
 	namespace Detail
 	{
-		inline CONTEXT GetContext(struct _EXCEPTION_POINTERS * exceptionInfo)
+		template <typename Function> auto NativeTryCatch(Function function) -> decltype(function())
 		{
-			CONTEXT context{};
 			__try
 			{
-				context = *(exceptionInfo->ContextRecord);
+				return function();
 			}
 			__except (EXCEPTION_EXECUTE_HANDLER)
-			{}
-			return context;
+			{
+				return {};
+			}
 		}
 
-		inline bool GetCPlusPlusExceptionName(const ULONG_PTR ei[], std::string & name)
+		inline CONTEXT GetContext(const EXCEPTION_POINTERS & exceptionInfo)
 		{
-			struct Log_vbase { virtual ~Log_vbase() = default; };
-
-			bool ret = false;
-			__try
+			return NativeTryCatch([&]()
 			{
-				const Log_vbase& q = *reinterpret_cast<Log_vbase*>(ei[1]);
-				const type_info& t = typeid(q);
+				return *(exceptionInfo.ContextRecord);
+			});
+		}
+
+		template <typename T1, typename T2> T1 Munge(T2 t2)
+		{
+			return reinterpret_cast<T1>(t2); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
+		}
+
+		struct Vbase
+		{
+			Vbase() = delete;
+			Vbase(const Vbase & other) = delete;
+			Vbase(Vbase && other) noexcept = delete;
+			Vbase & operator=(const Vbase & other) = delete;
+			Vbase & operator=(Vbase && other) noexcept = delete;
+			virtual ~Vbase() = delete;
+		};
+
+		inline bool GetCPlusPlusExceptionName(const Span<ULONG_PTR> & ei, std::string & name)
+		{
+			return NativeTryCatch([&]()
+			{
+				const Vbase & q = *Munge<Vbase *>(ei[1]);
+				const type_info & t = typeid(q);
 				name = t.name();
-				ret = true;
-			}
-			__except (EXCEPTION_EXECUTE_HANDLER)
-			{}
-			return ret;
+				return true;
+			});
 		}
 
-		inline bool GetCPlusPlusExceptionNameEx(const ULONG_PTR ei[], std::string & name)
+		inline bool GetCPlusPlusExceptionNameEx(const Span<ULONG_PTR> & ei, std::string & name)
 		{
-			bool ret = false;
-			__try
+			return NativeTryCatch([&]()
 			{
-				// http://members.gamedev.net/sicrane/articles/exception.html
-				// http://www.geoffchappell.com/studies/msvc/language/predefined/
-				// https://blogs.msdn.microsoft.com/oldnewthing/20100730-00/?p=13273
-				#if defined(_M_IX86)
+				constexpr auto instanceOffset64 = 3;
+				constexpr auto throwInfoIndex = 2;
+				constexpr auto catchableOffsetIndex = 3;
+				constexpr auto catchablesOffsetIndex = 1;
+				constexpr auto typeInfoOffsetIndex = 1;
+
+#if defined(_M_IX86)
 				ULONG_PTR hinstance = 0;
-				#elif defined(_M_X64)
-				ULONG_PTR hinstance = ei[3];
-				#endif
-				const DWORD * throwInfo = reinterpret_cast<const DWORD *>(ei[2]);
-				DWORD catchableOffset = throwInfo[3];
-				const DWORD * catchables = reinterpret_cast<const DWORD *>(hinstance + catchableOffset);
-				//DWORD nCatchables = catchables[0];
-				DWORD catchablesOffset = catchables[1];
-				const DWORD * catchablesTypes = reinterpret_cast<const DWORD *>(hinstance + catchablesOffset);
-				DWORD typeInfoOffset = catchablesTypes[1];
-				const type_info * catchablesType = reinterpret_cast<const type_info *>(hinstance + typeInfoOffset);
-				name = catchablesType->name();
-				ret = true;
-			}
-			__except (EXCEPTION_EXECUTE_HANDLER)
-			{}
-			return ret;
+#elif defined(_M_X64)
+				ULONG_PTR hinstance = ei[instanceOffset64];
+#elif
+#error unexpected target
+#endif
+
+				const auto throwInfo = GLib::MakeSpan<DWORD>(Munge<const DWORD *>(ei[throwInfoIndex]), catchableOffsetIndex+1);
+				const DWORD catchableOffset = throwInfo[catchableOffsetIndex];
+				const auto catchables = GLib::MakeSpan<DWORD>(Munge<const DWORD *>(hinstance + catchableOffset), catchablesOffsetIndex+1);
+				const DWORD catchablesOffset = catchables[catchablesOffsetIndex];
+				const auto catchablesTypes = GLib::MakeSpan<DWORD>(Munge<const DWORD *>(hinstance + catchablesOffset), typeInfoOffsetIndex+1);
+				const DWORD typeInfoOffset = catchablesTypes[typeInfoOffsetIndex];
+				name = Munge<const type_info *>(hinstance + typeInfoOffset)->name();
+				return true;
+			});
 		}
 
 		inline void WalkStack(std::ostream & s, const SymProcess & sym, DWORD machineType, STACKFRAME64 * frame, CONTEXT * context, unsigned int maxFrames)
 		{
-			HANDLE h = sym.Handle().get();
-
 			for (unsigned int frames = 0; frames < maxFrames; ++frames)
 			{
-				if (!::StackWalk64(machineType, h, ::GetCurrentThread(), frame, context, nullptr,
-					SymFunctionTableAccess64, SymGetModuleBase64, nullptr))
+				if (::StackWalk64(machineType, sym.Handle().get(), ::GetCurrentThread(), frame, context, nullptr,
+					SymFunctionTableAccess64, SymGetModuleBase64, nullptr) == FALSE)
 				{
 					break;
 				}
@@ -88,23 +105,24 @@ namespace GLib::Win::Symbols
 				}
 
 				MEMORY_BASIC_INFORMATION mb = {};
-				if (::VirtualQueryEx(h, reinterpret_cast<PVOID>(static_cast<DWORD_PTR>(address)), &mb, sizeof mb) != 0)
+				if (::VirtualQueryEx(sym.Handle().get(), Munge<PVOID>(address), &mb, sizeof mb) != 0)
 				{
-					HMODULE module = static_cast<HMODULE>(mb.AllocationBase);
+					auto module = static_cast<HMODULE>(mb.AllocationBase);
 					std::string mod = FileSystem::PathOfModule(module);
-					Formatter::Format(s, "{0,-30} + {1:%08X}\n", mod, static_cast<DWORD_PTR>(address) - reinterpret_cast<DWORD_PTR>(mb.AllocationBase));
+					Formatter::Format(s, "{0,-30} + {1:%08X}\n", mod, static_cast<DWORD_PTR>(address) - Munge<DWORD_PTR>(mb.AllocationBase));
 
 					if (auto symbol = sym.TryGetSymbolFromAddress(address))
 					{
 						const char * symName = symbol->Name().c_str();
-						char undecoratedName[512];
+						constexpr DWORD undecoratedNameSize{512};
+						std::array<char, undecoratedNameSize> undecoratedName{};
 
-						if (symName[0] == '?')
+						if (*symName == '?')
 						{
 							DWORD flags = UNDNAME_NAME_ONLY;
-							if (::UnDecorateSymbolName(symName, undecoratedName, sizeof(undecoratedName), flags) != 0)
+							if (::UnDecorateSymbolName(symName, undecoratedName.data(), undecoratedNameSize, flags) != 0)
 							{
-								symName = undecoratedName;
+								symName = undecoratedName.data();
 							}
 						}
 
@@ -122,36 +140,38 @@ namespace GLib::Win::Symbols
 				}
 				else
 				{
-					s << "Stack walk ending - bad address: " << reinterpret_cast<PVOID>(static_cast<DWORD_PTR>(address)) << "\n";
+					s << "Stack walk ending - bad address: " << Detail::Munge<PVOID>(address) << "\n";
 					break;
 				}
 			}
 		}
 	}
 
-	inline void Print(_EXCEPTION_POINTERS * exceptionInfo, std::ostream & s, unsigned int maxFrames)
+	inline void Print(std::ostream & s, const EXCEPTION_POINTERS * exceptionInfo, unsigned int maxFrames)
 	{
 		constexpr DWORD CPLUSPLUS_EXCEPTION_NUMBER = 0xe06d7363;
 
-		const _EXCEPTION_RECORD & er = *(exceptionInfo->ExceptionRecord);
+		const EXCEPTION_RECORD & er = *(exceptionInfo->ExceptionRecord);
 
 		Formatter::Format(s, "Unhandled exception at {0} (code: {1:%08X})", er.ExceptionAddress, er.ExceptionCode);
+
+		auto info = MakeSpan(static_cast<const ULONG_PTR *>(er.ExceptionInformation), EXCEPTION_MAXIMUM_PARAMETERS);
 
 		switch (er.ExceptionCode)
 		{
 			case STATUS_ACCESS_VIOLATION:
 			{
-				Formatter::Format(s, " : Access violation {0} address {1}\n", er.ExceptionInformation[0] == 0 ? "reading" : "writing", 
-					reinterpret_cast<void*>(er.ExceptionInformation[1]));
+				auto msg = static_cast<const char *>(info[0] == 0 ? "reading" : "writing");
+				Formatter::Format(s, " : Access violation {0} address {1}\n", msg, Detail::Munge<PVOID>(info[1]));
 				break;
 			}
 
 			case CPLUSPLUS_EXCEPTION_NUMBER:
 			{
 				std::string name("<unknown>");
-				if (!Detail::GetCPlusPlusExceptionName(er.ExceptionInformation, name))
+				if (!Detail::GetCPlusPlusExceptionName(info, name))
 				{
-					Detail::GetCPlusPlusExceptionNameEx(er.ExceptionInformation, name);
+					Detail::GetCPlusPlusExceptionNameEx(info, name);
 				}
 				Formatter::Format(s, " : C++ exception of type: '{0}'\n", name);
 			}
@@ -164,8 +184,11 @@ namespace GLib::Win::Symbols
 					s << "\tException parameters: ";
 					for (DWORD i = 0; i < er.NumberParameters; ++i)
 					{
-						if (i != 0) s << ", ";
-						Formatter::Format(s, "{0}", (void*)er.ExceptionInformation[i]);
+						if (i != 0)
+						{
+							s << ", ";
+						}
+						s << Detail::Munge<PVOID>(info[i]);
 					}
 					s << std::endl;
 				}
@@ -174,7 +197,7 @@ namespace GLib::Win::Symbols
 		}
 
 		STACKFRAME64 frame = {};
-		CONTEXT context = Detail::GetContext(exceptionInfo);
+		CONTEXT context = Detail::GetContext(*exceptionInfo);
 		DWORD machineType;
 
 #if defined(_M_IX86)

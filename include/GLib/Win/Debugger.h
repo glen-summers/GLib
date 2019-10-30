@@ -264,7 +264,7 @@ namespace GLib::Win
 			std::string message;
 			if (info.fUnicode != 0)
 			{
-				size_t size = info.nDebugStringLength / 2 - 1;
+				auto size = static_cast<size_t>(info.nDebugStringLength / 2) - 1;
 				std::vector<wchar_t> buffer(size); // soh?
 				mainProcess.ReadMemory<wchar_t>(address, &buffer[0], size);
 				message =  Cvt::w2a(std::wstring{ &buffer[0], size });

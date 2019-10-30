@@ -111,7 +111,7 @@ namespace GLib
 		};
 	};
 
-	template <typename T> Span<T> MakeSpan(T* value, size_t size)
+	template <typename T> Span<T> MakeSpan(const T * value, size_t size)
 	{
 		return Span<T>{value, static_cast<std::ptrdiff_t>(size)};
 	}

@@ -21,16 +21,25 @@ namespace
 		return EXCEPTION_EXECUTE_HANDLER;
 	}
 
-	template <typename T>
-	void GetStackTrace(std::ostream & s, const T & value)
+	template <typename Function>
+	void GetStackTrace(std::ostream & s, const Function & function)
 	{
 		__try
 		{
-			throw value;
+			function();
 		}
 		__except(Filter(s, GetExceptionInformation()))
 		{
 		}
+	}
+
+	template <typename Function>
+	std::string GetStackTrace(const Function & function)
+	{
+		std::ostringstream s;
+		GetStackTrace(s, function);
+		//std::cout << s.str();
+		return s.str();
 	}
 }
 
@@ -169,30 +178,40 @@ BOOST_AUTO_TEST_SUITE(WinTests)
 		BOOST_TEST(!rootKey.KeyExists(TestKey));
 	}
 
-	BOOST_AUTO_TEST_CASE(PrintNativeException)
+	BOOST_AUTO_TEST_CASE(PrintNativeException1)
 	{
-		std::ostringstream s;
-		GetStackTrace(s, std::runtime_error("!"));
-		auto ss{s.str()};
+		auto s = GetStackTrace([]() { throw std::runtime_error("!"); });
 
-		BOOST_TEST(ss.find("Unhandled exception at") != std::string::npos);
-		BOOST_TEST(ss.find("(code: E06D7363) : C++ exception of type: 'class std::runtime_error'") != std::string::npos);
-		BOOST_TEST(ss.find("RaiseException") != std::string::npos);
-		BOOST_TEST(ss.find("CxxThrowException") != std::string::npos);
-		BOOST_TEST(ss.find("GetStackTrace") != std::string::npos);
+		BOOST_TEST(s.find("Unhandled exception at") != std::string::npos);
+		BOOST_TEST(s.find("(code: E06D7363) : C++ exception of type: 'class std::runtime_error'") != std::string::npos);
+		BOOST_TEST(s.find("RaiseException") != std::string::npos);
+		BOOST_TEST(s.find("CxxThrowException") != std::string::npos);
+		BOOST_TEST(s.find("GetStackTrace") != std::string::npos);
+		BOOST_TEST(s.find("WinTests::PrintNativeException1") != std::string::npos);
 	}
 
 	BOOST_AUTO_TEST_CASE(PrintNativeException2)
 	{
-		std::ostringstream s;
-		GetStackTrace(s, 12345678);
-		auto ss{s.str()};
+		auto s = GetStackTrace([]() { throw 12345678; });
 
-		BOOST_TEST(ss.find("Unhandled exception at") != std::string::npos);
-		BOOST_TEST(ss.find("(code: E06D7363) : C++ exception of type: 'int'") != std::string::npos);
-		BOOST_TEST(ss.find("RaiseException") != std::string::npos);
-		BOOST_TEST(ss.find("CxxThrowException") != std::string::npos);
-		BOOST_TEST(ss.find("GetStackTrace") != std::string::npos);
+		BOOST_TEST(s.find("Unhandled exception at") != std::string::npos);
+		BOOST_TEST(s.find("(code: E06D7363) : C++ exception of type: 'int'") != std::string::npos);
+		BOOST_TEST(s.find("RaiseException") != std::string::npos);
+		BOOST_TEST(s.find("CxxThrowException") != std::string::npos);
+		BOOST_TEST(s.find("GetStackTrace") != std::string::npos);
+		BOOST_TEST(s.find("WinTests::PrintNativeException2") != std::string::npos);
+	}
+
+	BOOST_AUTO_TEST_CASE(PrintNativeException3)
+	{
+		const int * p = nullptr;
+		int result{};
+		auto s = GetStackTrace([&]() { result = *p++; });
+
+		BOOST_TEST(s.find("Unhandled exception at") != std::string::npos);
+		BOOST_TEST(s.find("(code: C0000005) : Access violation reading address 00000000") != std::string::npos);
+		BOOST_TEST(s.find("GetStackTrace") != std::string::npos);
+		BOOST_TEST(s.find("WinTests::PrintNativeException3") != std::string::npos);
 	}
 
 BOOST_AUTO_TEST_SUITE_END()
