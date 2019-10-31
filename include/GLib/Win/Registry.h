@@ -9,6 +9,9 @@ namespace GLib::Win
 
 	namespace Detail
 	{
+		inline static constexpr DWORD Read = KEY_READ; // NOLINT(hicpp-signed-bitwise)
+		inline static constexpr DWORD AllAccess = KEY_ALL_ACCESS; // NOLINT(hicpp-signed-bitwise)
+
 		struct KeyCloser
 		{
 			void operator()(HKEY key) const noexcept
@@ -19,14 +22,23 @@ namespace GLib::Win
 
 		using KeyHolder = std::unique_ptr<HKEY__, KeyCloser>;
 
+		template <typename T> BYTE * ToBytes(T * value)
+		{
+			return reinterpret_cast<BYTE *>(value); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast) arcane api
+		}
+
+		template <typename T> const BYTE * ToBytes(const T * value)
+		{
+			return reinterpret_cast<const BYTE *>(value); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast) arcane api
+		}
+
 		inline bool Found(LSTATUS result, const char * message)
 		{
 			if (result == ERROR_FILE_NOT_FOUND)
 			{
 				return false;
 			}
-			Util::AssertSuccess(result, message);
-			return true;
+			return Util::AssertSuccess(result, message);
 		}
 
 		inline void SetString(const KeyHolder & key, const std::string_view & name, const std::string_view & value, DWORD type)
@@ -34,14 +46,14 @@ namespace GLib::Win
 			auto wideName = Cvt::a2w(name);
 			auto wideValue = Cvt::a2w(value);
 			auto valueSize = static_cast<DWORD>((wideName.size() + 1) * sizeof(wchar_t));
-			auto valueBytes = reinterpret_cast<const BYTE*>(wideValue.c_str());
+			auto valueBytes = Detail::ToBytes(wideValue.c_str());
 			Util::AssertSuccess(::RegSetValueExW(key.get(), wideName.c_str(), 0, type, valueBytes, valueSize), "RegSetValueEx");
 		}
 
 		inline std::string GetString(const KeyHolder & key, const std::wstring & valueName)
 		{
 			DWORD size{};
-			DWORD flags = RRF_RT_REG_SZ | RRF_RT_REG_EXPAND_SZ;
+			DWORD flags = static_cast<DWORD>(RRF_RT_REG_SZ) | static_cast<DWORD>(RRF_RT_REG_EXPAND_SZ);
 			LSTATUS result = ::RegGetValueW(key.get(), nullptr, valueName.c_str(), flags, nullptr, nullptr, &size);
 			Util::AssertSuccess(result, "RegGetValue");
 
@@ -58,7 +70,7 @@ namespace GLib::Win
 			DWORD actualTypeCode{};
 			T value{};
 			DWORD bytes{sizeof(T)};
-			LSTATUS result = ::RegQueryValueExW(key.get(), valueName.c_str(), nullptr, &actualTypeCode, reinterpret_cast<LPBYTE>(&value), &bytes);
+			LSTATUS result = ::RegQueryValueExW(key.get(), valueName.c_str(), nullptr, &actualTypeCode, Detail::ToBytes(&value), &bytes);
 			Util::AssertSuccess(result, "RegQueryValueEx");
 			if (actualTypeCode != typeCode || bytes != sizeof(T))
 			{
@@ -72,16 +84,16 @@ namespace GLib::Win
 	{
 		Detail::KeyHolder key;
 
-		RegistryKey(Detail::KeyHolder && key)
+		RegistryKey(Detail::KeyHolder && key) noexcept
 			: key(move(key))
 		{}
 
 	public:
-		RegistryKey(HKEY key)
+		RegistryKey(HKEY key) noexcept
 			: RegistryKey(Detail::KeyHolder{key})
 		{}
 
-		bool KeyExists(const std::string_view & path) noexcept
+		bool KeyExists(const std::string_view & path)
 		{
 			HKEY resultKey{};
 			LSTATUS result = ::RegOpenKeyW(key.get(), Cvt::a2w(path).c_str(), &resultKey);
@@ -100,12 +112,12 @@ namespace GLib::Win
 
 		uint32_t GetInt32(const std::string_view & valueName) const
 		{
-			return Detail::GetScalar<uint32_t>(key, Cvt::a2w(valueName).c_str(), REG_DWORD);
+			return Detail::GetScalar<uint32_t>(key, Cvt::a2w(valueName), REG_DWORD);
 		}
 
 		uint64_t GetInt64(const std::string_view & valueName) const
 		{
-			return Detail::GetScalar<uint64_t>(key, Cvt::a2w(valueName).c_str(), REG_QWORD);
+			return Detail::GetScalar<uint64_t>(key, Cvt::a2w(valueName), REG_QWORD);
 		}
 
 		RegistryValue Get(const std::string_view & valueName) const
@@ -126,13 +138,15 @@ namespace GLib::Win
 
 				case REG_DWORD:
 				{
-					return Detail::GetScalar<uint32_t>(key, wideName.c_str(), REG_DWORD);
+					return Detail::GetScalar<uint32_t>(key, wideName, REG_DWORD);
 				}
 
 				case REG_QWORD:
 				{
-					return Detail::GetScalar<uint64_t>(key, wideName.c_str(), REG_QWORD);
+					return Detail::GetScalar<uint64_t>(key, wideName, REG_QWORD);
 				}
+
+				default:;
 			}
 			throw std::runtime_error("Unsupported type");
 		}
@@ -144,20 +158,20 @@ namespace GLib::Win
 
 		void SetInt32(const std::string_view & name, uint32_t value) const
 		{
-			LSTATUS result = ::RegSetValueExW(key.get(), Cvt::a2w(name).c_str(), 0, REG_DWORD, reinterpret_cast<const BYTE*>(&value), sizeof(value));
+			LSTATUS result = ::RegSetValueExW(key.get(), Cvt::a2w(name).c_str(), 0, REG_DWORD, Detail::ToBytes(&value), sizeof(value));
 			Util::AssertSuccess(result, "RegSetValueEx");
 		}
 
 		void SetInt64(const std::string_view & name, uint64_t value) const
 		{
-			LSTATUS result = ::RegSetValueExW(key.get(), Cvt::a2w(name).c_str(), 0, REG_QWORD, reinterpret_cast<const BYTE*>(&value), sizeof(value));
+			LSTATUS result = ::RegSetValueExW(key.get(), Cvt::a2w(name).c_str(), 0, REG_QWORD, Detail::ToBytes(&value), sizeof(value));
 			Util::AssertSuccess(result, "RegSetValueEx");
 		}
 
 		RegistryKey OpenSubKey(const std::string_view & path) const
 		{
 			HKEY subKey;
-			LSTATUS result = ::RegOpenKeyExW(key.get(), Cvt::a2w(path).c_str(), 0, KEY_READ, &subKey);
+			LSTATUS result = ::RegOpenKeyExW(key.get(), Cvt::a2w(path).c_str(), 0, Detail::Read, &subKey);
 			Util::AssertSuccess(result, "RegOpenKeyEx");
 			return {Detail::KeyHolder{subKey}};
 		}
@@ -166,7 +180,7 @@ namespace GLib::Win
 		{
 			HKEY subKey;
 			LSTATUS result = ::RegCreateKeyExW(key.get(), Cvt::a2w(path).c_str(), 0, nullptr, REG_OPTION_NON_VOLATILE,
-				KEY_ALL_ACCESS, nullptr, &subKey, nullptr);
+				Detail::AllAccess, nullptr, &subKey, nullptr);
 			Util::AssertSuccess(result, "RegCreateKeyEx");
 			return {Detail::KeyHolder{subKey}};
 		}
@@ -189,8 +203,8 @@ namespace GLib::Win
 
 	namespace RegistryKeys
 	{
-		static inline RegistryKey ClassesRoot = RegistryKey(HKEY_CLASSES_ROOT);
-		static inline RegistryKey CurrentUser = RegistryKey(HKEY_CURRENT_USER);
-		static inline RegistryKey LocalMachine = RegistryKey(HKEY_LOCAL_MACHINE);
+		inline static RegistryKey ClassesRoot = RegistryKey(HKEY_CLASSES_ROOT); // NOLINT(cppcoreguidelines-pro-type-cstyle-cast) baad macros
+		inline static RegistryKey CurrentUser = RegistryKey(HKEY_CURRENT_USER); // NOLINT(cppcoreguidelines-pro-type-cstyle-cast) baad macros
+		inline static RegistryKey LocalMachine = RegistryKey(HKEY_LOCAL_MACHINE); // NOLINT(cppcoreguidelines-pro-type-cstyle-cast) baad macros
 	}
 }

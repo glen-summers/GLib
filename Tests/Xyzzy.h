@@ -45,7 +45,7 @@ struct CopyCheck
 		return *this;
 	}
 
-	CopyCheck(CopyCheck&& other)
+	CopyCheck(CopyCheck&& other) noexcept
 		: copies(other.copies)
 		, moves(++other.moves)
 	{}

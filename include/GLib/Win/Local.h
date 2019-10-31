@@ -12,7 +12,6 @@ namespace GLib::Win
 		{
 			void operator()(HLOCAL p) const noexcept
 			{
-				assert(p != nullptr);
 				Util::WarnAssertTrue(::LocalFree(p) == nullptr, "LocalFree");
 			}
 		};
