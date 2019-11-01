@@ -152,7 +152,7 @@ BOOST_AUTO_TEST_SUITE(WinTests)
 
 	BOOST_AUTO_TEST_CASE(RegistryCreateKey)
 	{
-		auto & rootKey = RegistryKeys::CurrentUser;
+		const auto & rootKey = RegistryKeys::CurrentUser;
 		constexpr const char TestKey[] = "Software\\CrapolaCppUnitTests";
 
 		auto key = rootKey.CreateSubKey(TestKey);
@@ -168,7 +168,14 @@ BOOST_AUTO_TEST_SUITE(WinTests)
 
 		BOOST_TEST(1234567890u == key.GetInt32("Int32Value"));
 		BOOST_TEST(12345678901234567890u == key.GetInt64("Int64Value"));
+		BOOST_TEST(1234567890u == key.GetInt64("Int32Value"));
 		BOOST_TEST("plugh" == key.GetString("StringValue"));
+
+		GLIB_CHECK_RUNTIME_EXCEPTION(key.GetInt32("Int64Value"), "RegQueryValueEx : More data is available. (234)");
+		GLIB_CHECK_RUNTIME_EXCEPTION(key.GetInt32("StringValue"), "RegQueryValueEx : More data is available. (234)");
+		GLIB_CHECK_RUNTIME_EXCEPTION(key.GetInt64("StringValue"), "RegQueryValueEx : More data is available. (234)");
+		GLIB_CHECK_RUNTIME_EXCEPTION(key.GetString("Int32Value"), "RegGetValue : Data of this type is not supported. (1630)");
+		GLIB_CHECK_RUNTIME_EXCEPTION(key.GetString("Int64Value"), "RegGetValue : Data of this type is not supported. (1630)");
 
 		BOOST_TEST(1234567890u == std::get<uint32_t>(key.Get("Int32Value")));
 		BOOST_TEST(12345678901234567890u == std::get<uint64_t>(key.Get("Int64Value")));
