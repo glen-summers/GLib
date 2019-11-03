@@ -9,6 +9,8 @@
 
 #include <sstream>
 
+EXTERN_C IMAGE_DOS_HEADER __ImageBase;
+
 namespace GLib::Win::Util
 {
 	namespace Detail

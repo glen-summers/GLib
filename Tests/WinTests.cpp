@@ -10,8 +10,23 @@
 #include "GLib/Win/Registry.h"
 #include "GLib/Win/Symbols.h"
 #include "GLib/Win/Uuid.h"
+#include "GLib/Win/Variant.h"
+
+#include "GLib/Span.h"
 
 #include "TestUtils.h"
+
+namespace boost::test_tools::tt_detail
+{
+	template <>
+	struct print_log_value<GLib::Win::Variant>
+	{
+		inline void operator()(std::ostream & str, const GLib::Win::Variant & item)
+		{
+			str << item.Type();
+		}
+	};
+}
 
 namespace
 {
@@ -41,12 +56,58 @@ namespace
 		//std::cout << s.str();
 		return s.str();
 	}
+
+	std::filesystem::path GetTestApp()
+	{
+		std::string appName = "TestApp.exe", cmakeName="TestApp/"+appName;
+		auto p = std::filesystem::path(GLib::Win::Process::CurrentPath()).parent_path();
+		if (exists(p/appName))
+		{
+			p /= appName;
+		}
+		else if (exists(p.parent_path()/cmakeName))
+		{
+			p = p.parent_path() / cmakeName;
+		}
+		else
+		{
+			throw std::runtime_error(appName + " not found");
+		}
+		return std::move(p);
+	}
+
+	struct ComUninitialiser
+	{
+		void operator()(void*) const noexcept
+		{
+			::CoUninitialize();
+		}
+	};
+
+	enum class Apartment : unsigned long
+	{
+		Multithreaded = COINITBASE_MULTITHREADED,
+		Singlethreaded = COINIT_APARTMENTTHREADED
+	};
+
+	template <Apartment appartment> class ComInitialiser
+	{
+		std::unique_ptr<void, ComUninitialiser> com;
+
+	public:
+		ComInitialiser() : com{this}
+		{
+			GLib::Win::CheckHr(::CoInitializeEx(nullptr, static_cast<DWORD>(appartment)), "CoInitializeEx");
+		}
+	};
+
+	using Mta = ComInitialiser<Apartment::Multithreaded>;
+	using Sta = ComInitialiser<Apartment::Singlethreaded>;
 }
 
 using namespace GLib::Win;
 
 // split up
-// clone hg tests in
 BOOST_AUTO_TEST_SUITE(WinTests)
 
 	BOOST_AUTO_TEST_CASE(TestDriveInfo)
@@ -219,6 +280,46 @@ BOOST_AUTO_TEST_SUITE(WinTests)
 		BOOST_TEST(s.find("(code: C0000005) : Access violation reading address 00000000") != std::string::npos);
 		BOOST_TEST(s.find("GetStackTrace") != std::string::npos);
 		BOOST_TEST(s.find("WinTests::PrintNativeException3") != std::string::npos);
+	}
+
+	BOOST_AUTO_TEST_CASE(TestVariant)
+	{
+		Variant v0, v1{"v"}, v2{"v"}, v3{"v3"};
+
+		BOOST_TEST(VT_EMPTY == v0.Type());
+		BOOST_TEST(VT_BSTR == v1.Type());
+		BOOST_TEST(v1 == v2);
+		BOOST_TEST(v1 != v3);
+		BOOST_TEST("v" == v1.ToString());
+		BOOST_TEST("v" == v2.ToString());
+		BOOST_TEST("v3" == v3.ToString());
+
+		auto v4 = v1;
+		BOOST_TEST("v" == v4.ToString());
+		v4 = v3;
+		BOOST_TEST("v3" == v4.ToString());
+
+		auto v5 = std::move(v2);
+		BOOST_TEST("v" == v5.ToString());
+		BOOST_TEST(VT_EMPTY == v2.Type());
+
+		v5 = std::move(v3);
+		BOOST_TEST("v3" == v5.ToString());
+		BOOST_TEST(VT_EMPTY == v3.Type());
+	}
+
+	BOOST_AUTO_TEST_CASE(TestApp0)
+	{
+		Process p(GetTestApp().u8string(), "-exitTime 1", 0, SW_HIDE);
+		p.WaitForExit();
+		BOOST_CHECK(0ul == p.ExitCode());
+	}
+
+	BOOST_AUTO_TEST_CASE(TestApp1)
+	{
+		Process p(GetTestApp().u8string(), "-exitTime 5", 0, SW_SHOWNORMAL);
+		p.WaitForExit();
+		BOOST_CHECK(0ul == p.ExitCode());
 	}
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -17,7 +17,8 @@ WideStrings Coverage::a2w(const Strings& strings)
 	return wideStrings;
 }
 
-void Coverage::AddLine(const std::wstring & fileName, unsigned lineNumber, const GLib::Win::Symbols::SymProcess & process, DWORD64 address)
+void Coverage::AddLine(const std::wstring & fileName, unsigned lineNumber, const GLib::Win::Symbols::SymProcess & symProcess, DWORD64 address,
+	Process & process)
 {
 	// filter out unknown source lines, looks like these cause the out of memory exceptions in ReportGenerator
 	if (lineNumber == FooFoo || lineNumber == FeeFee)
@@ -51,15 +52,15 @@ void Coverage::AddLine(const std::wstring & fileName, unsigned lineNumber, const
 		wideFiles.insert(fileName);
 	}
 
-	auto it = addresses.find(address);
-	if (it == addresses.end())
+	auto it = process.addresses.find(address);
+	if (it == process.addresses.end())
 	{
-		const auto oldByte = process.Read<unsigned char>(address);
-		it = addresses.emplace(address, oldByte).first;
+		const auto oldByte = symProcess.Read<unsigned char>(address);
+		it = process.addresses.emplace(address, oldByte).first;
 	}
 	it->second.AddFileLine(fileName, lineNumber);
 
-	process.Write(address, debugBreakByte);
+	symProcess.Write(address, debugBreakByte);
 }
 
 void Coverage::OnCreateProcess(DWORD processId, DWORD threadId, const CREATE_PROCESS_DEBUG_INFO& info)
@@ -68,7 +69,11 @@ void Coverage::OnCreateProcess(DWORD processId, DWORD threadId, const CREATE_PRO
 
 	const GLib::Win::Symbols::SymProcess & process = Symbols().GetProcess(processId);
 
-	// todo, handle child processes, currently disabled via DEBUG_ONLY_THIS_PROCESS
+	auto it = processes.find(processId);
+	if (it == processes.end())
+	{
+		it = processes.emplace(processId, processId).first;
+	}
 
 	// timing check, 6s with a2w, 1s with no convert, unordered map 1.6s (needs tolower on string for hash)
 	//using Clock = std::chrono::high_resolution_clock;
@@ -76,7 +81,7 @@ void Coverage::OnCreateProcess(DWORD processId, DWORD threadId, const CREATE_PRO
 
 	Symbols().Lines([&](PSRCCODEINFOW lineInfo)
 	{
-		AddLine(static_cast<const wchar_t *>(lineInfo->FileName), lineInfo->LineNumber, process, lineInfo->Address);
+		AddLine(static_cast<const wchar_t *>(lineInfo->FileName), lineInfo->LineNumber, process, lineInfo->Address, it->second);
 	}, process.Handle().get(), info.lpBaseOfImage);
 
 	// use flog...
@@ -90,26 +95,56 @@ void Coverage::OnCreateProcess(DWORD processId, DWORD threadId, const CREATE_PRO
 	OnCreateThread(processId, threadId, threadInfo);
 }
 
+void Coverage::CaptureData(DWORD processId)
+{
+	const GLib::Win::Symbols::SymProcess & symProcess = Symbols().GetProcess(processId);
+	auto pit = processes.find(processId);
+	if (pit == processes.end())
+	{
+		throw std::runtime_error("Process not found");
+	}
+
+	Process & process = pit->second;
+
+	for (const auto & a : process.addresses)
+	{
+		if (auto symbol = symProcess.TryGetSymbolFromAddress(a.first))
+		{
+			const Address & address = a.second;
+
+			auto it = process.indexToFunction.find(symbol->Index());
+			if (it == process.indexToFunction.end())
+			{
+				GLib::Win::Symbols::Symbol parent;
+				symProcess.TryGetClassParent(*symbol, parent);
+
+				std::string nameSpace;
+				std::string typeName;
+				std::string functionName;
+				CleanupFunctionNames(symbol->Name(), parent.Name(), nameSpace, typeName, functionName);
+				it = process.indexToFunction.emplace(symbol->Index(), Function{ nameSpace, typeName, functionName }).first;
+			}
+
+			it->second.Accumulate(address);
+		}
+	}
+}
+
 void Coverage::OnExitProcess(DWORD processId, DWORD threadId, const EXIT_PROCESS_DEBUG_INFO& info)
 {
-	CreateReport(processId); // todo just cache data to memory, and do report at exit
-
+	CaptureData(processId);
 	Debugger::OnExitProcess(processId, threadId, info);
 }
 
 void Coverage::OnCreateThread(DWORD processId, DWORD threadId, const CREATE_THREAD_DEBUG_INFO& info)
 {
-	(void)processId;
-
-	threads.insert({ threadId, info.hThread });
+	processes.at(processId).threads.emplace(threadId, info.hThread);
 }
 
 void Coverage::OnExitThread(DWORD processId, DWORD threadId, const EXIT_THREAD_DEBUG_INFO& info)
 {
-	(void)processId;
 	(void)info;
-
-	threads.erase(threadId);
+	processes.at(processId).threads.erase(threadId);
 }
 
 DWORD Coverage::OnException(DWORD processId, DWORD threadId, const EXCEPTION_DEBUG_INFO& info)
@@ -119,8 +154,9 @@ DWORD Coverage::OnException(DWORD processId, DWORD threadId, const EXCEPTION_DEB
 	if (info.dwFirstChance!=0 && isBreakpoint)
 	{
 		const auto address = GLib::Win::Detail::ConvertAddress(info.ExceptionRecord.ExceptionAddress);
-		const auto it = addresses.find(address);
-		if (it != addresses.end())
+		auto & process = processes.at(processId);
+		const auto it = process.addresses.find(address);
+		if (it != process.addresses.end())
 		{
 			const GLib::Win::Symbols::SymProcess & p = Symbols().GetProcess(processId);
 
@@ -128,8 +164,8 @@ DWORD Coverage::OnException(DWORD processId, DWORD threadId, const EXCEPTION_DEB
 			p.Write(address, a.OldData());
 			a.Visit();
 
-			auto const tit = threads.find(threadId);
-			if (tit == threads.end())
+			auto const tit = process.threads.find(threadId);
+			if (tit == process.threads.end())
 			{
 				throw std::runtime_error("Thread not found");
 			}
@@ -150,59 +186,19 @@ DWORD Coverage::OnException(DWORD processId, DWORD threadId, const EXCEPTION_DEB
 	return Debugger::OnException(processId, threadId, info);
 }
 
-void Coverage::CreateReport(unsigned int processId)
-{
-	const GLib::Win::Symbols::SymProcess & process = Symbols().GetProcess(processId);
-
-	std::map<ULONG, Function> indexToFunction;
-
-	for (const auto & a : addresses)
-	{
-		if (auto symbol = process.TryGetSymbolFromAddress(a.first))
-		{
-			const Address & address = a.second;
-
-			auto it = indexToFunction.find(symbol->Index());
-			if (it == indexToFunction.end())
-			{
-				GLib::Win::Symbols::Symbol parent;
-				process.TryGetClassParent(*symbol, parent);
-
-				std::string nameSpace;
-				std::string typeName;
-				std::string functionName;
-				CleanupFunctionNames(symbol->Name(), parent.Name(), nameSpace, typeName, functionName);
-				it = indexToFunction.emplace(symbol->Index(), Function{ nameSpace, typeName, functionName }).first;
-			}
-
-			it->second.Accumulate(address);
-		}
-	}
-
-	CreateHtmlReport(indexToFunction, executable);
-}
-
-void Coverage::CreateHtmlReport(const std::map<ULONG, Function> & indexToFunctionMap, const std::string & title) const
-{
-	CoverageData coverageData = ConvertFunctionData(indexToFunctionMap);
-	HtmlReport report(title, reportPath / "HtmlReport", coverageData);
-	(void)report; // class with no methods :(
-}
-
-CoverageData Coverage::ConvertFunctionData(const std::map<ULONG, Function> & indexToFunctionMap) const
+CoverageData Coverage::GetCoverageData() const
 {
 	CaseInsensitiveMap<wchar_t, std::multimap<unsigned int, Function>> fileNameToFunctionMap; // just use map<path..>?
 
-	for (const auto & it : indexToFunctionMap)
+	for (const auto & [id, process] : processes)
 	{
-		const Function & function = it.second;
-
-		for (const auto & fileLineIt : function.FileLines())
+		for (const auto & [_, function] : process.indexToFunction)
 		{
-			const std::wstring & fileName = fileLineIt.first;
-			const std::map<unsigned, bool> & lineCoverage = fileLineIt.second;
-			unsigned int startLine = lineCoverage.begin()->first;
-			fileNameToFunctionMap[fileName].emplace(startLine, function);
+			for (const auto & [fileName, lineCoverage] : function.FileLines())
+			{
+				unsigned int startLine = lineCoverage.begin()->first;
+				fileNameToFunctionMap[fileName].emplace(startLine, function);
+			}
 		}
 	}
 

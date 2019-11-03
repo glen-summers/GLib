@@ -1,6 +1,8 @@
 #include "pch.h"
 
 #include "Coverage.h"
+#include "FileCoverageData.h"
+#include "HtmlReport.h"
 
 #include "GLib/Span.h"
 
@@ -12,32 +14,52 @@ int main(int argc, char *argv[])
 {
 	int errorCode = 0;
 
-	GLib::Span<char *> const args { argv+1, argc-1 };
+	GLib::Span<char *> const args { argv+1, static_cast<std::ptrdiff_t>(argc)-1 };
 
 	try
 	{
-		if (argc < 3)
+		const char desc[] {"Generates C++ HTML code coverage report"};
+		const char syntax[] {"Coverage <Executable> <Report> [-sub] [-i IncludePath]... [-x excludePath]..."};
+		const char detail[] {R"(
+Executable: Path to executeable
+Report    : Directory path for the generated report
+[-sub]    : Generates coverage for sub processes of main executable
+[-i]      : list of source code paths to include
+[-x]      : list of source code paths to exclude
+
+Examples:
+Coverage c:\Build\Main.exe C:\Report
+Coverage c:\Build\Main.exe C:\Report -i C:\MainCode C:\Utils\ -x C:\ExternalCode\
+)"};
+
+		if (argc - 1 < 2)
 		{
-			throw std::runtime_error("Coverage <Executable> <Report> [-i IncludePath]... [-x excludePath]...");
+			throw std::runtime_error(syntax);
 		}
 
 		auto it = args.begin();
 		auto end = args.end();
 		const auto executable = *it++;
-		const auto report = *it++;
+		const auto reportPath = *it++;
+		bool debugChildProcesses{};
 
 		Strings includes;
 		Strings excludes;
-		for (; it!=end; ++it)
+		while (it != end)
 		{
 			auto arg = *it++;
+			if (strcmp(arg, "-?") == 0)
+			{
+				std::cout << desc << detail;
+				return errorCode;
+			}
 			if (strcmp(arg, "-i") == 0)
 			{
 				if (it == end)
 				{
 					throw std::runtime_error("Missing include value");
 				}
-				includes.insert(*it);
+				includes.insert(*it++);
 			}
 			else if (strcmp(arg, "-x") == 0)
 			{
@@ -45,7 +67,11 @@ int main(int argc, char *argv[])
 				{
 					throw std::runtime_error("Missing exclude value");
 				}
-				excludes.insert(*it);
+				excludes.insert(*it++);
+			}
+			else if (strcmp(arg, "-sub") == 0)
+			{
+				debugChildProcesses = true;
 			}
 			else
 			{
@@ -53,12 +79,13 @@ int main(int argc, char *argv[])
 			}
 		}
 
-		Coverage dbg(executable, report, includes, excludes);
+		Coverage dbg(executable, debugChildProcesses, includes, excludes);
 		constexpr unsigned TimeoutMilliseconds = 1000; // just use INFINITE?
-		for(;dbg.ProcessEvents(TimeoutMilliseconds);)
-		{}
+		while(dbg.ProcessEvents(TimeoutMilliseconds));
 		std::cout << "Exited: Process exited with code: " << dbg.ExitCode() << std::endl;
 
+		HtmlReport report(executable, std::filesystem::path{reportPath}/ "HtmlReport", dbg.GetCoverageData());
+		(void)report;
 	}
 	catch (const std::exception & e)
 	{

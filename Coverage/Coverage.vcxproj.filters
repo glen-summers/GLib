@@ -69,6 +69,9 @@
     <ClInclude Include="FunctionVisitor.h">
       <Filter>TemplateTypes</Filter>
     </ClInclude>
+    <ClInclude Include="Process.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">

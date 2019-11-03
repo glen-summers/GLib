@@ -1,12 +1,11 @@
 #pragma once
 
 #include "Address.h"
+#include "Process.h"
 
 #include "GLib/Win/Debugger.h"
 
 #include <regex>
-
-class Function;
 
 class Coverage : public GLib::Win::Debugger
 {
@@ -17,29 +16,25 @@ class Coverage : public GLib::Win::Debugger
 	std::regex nameSpaceRegex{ R"(^(?:[A-Za-z_][A-Za-z_0-9]*::)*)" }; // +some extra unicode chars?
 
 	std::string executable;
-	std::filesystem::path reportPath;
 	WideStrings includes;
 	WideStrings excludes;
 
 	WideStrings wideFiles;
-	Addresses addresses;
-
-	std::map<unsigned int, HANDLE> threads;
+	Processes processes;
 
 public:
-	Coverage(const std::string & executable, const std::string & reportPath, const Strings & includes, const Strings & excludes)
-		: Debugger(executable)
+	Coverage(const std::string & executable, bool debugChildProcesses, const Strings & includes, const Strings & excludes)
+		: Debugger(executable, debugChildProcesses)
 		, executable(executable)
-		, reportPath(GLib::Cvt::a2w(reportPath))
 		, includes(a2w(includes))
 		, excludes(a2w(excludes))
 	{}
 
-	void CreateReport(unsigned int processId);
+	CoverageData GetCoverageData() const;
 
 private:
 	static WideStrings a2w(const Strings& strings);
-	void AddLine(const std::wstring & fileName, unsigned lineNumber, const GLib::Win::Symbols::SymProcess & process, DWORD64 address);
+	void AddLine(const std::wstring & fileName, unsigned lineNumber, const GLib::Win::Symbols::SymProcess & symProcess, DWORD64 address, Process & process);
 
 	void OnCreateProcess(DWORD processId, DWORD threadId, const CREATE_PROCESS_DEBUG_INFO & info) override;
 	void OnExitProcess(DWORD processId, DWORD threadId, const EXIT_PROCESS_DEBUG_INFO& info) override;
@@ -50,7 +45,5 @@ private:
 	static void Delaminate(std::string & name);
 	void CleanupFunctionNames(const std::string & name, const std::string & typeName,
 	std::string & nameSpace, std::string & className, std::string & functionName) const;
-
-	void CreateHtmlReport(const std::map<ULONG, Function> & indexToFunctionMap, const std::string & title) const;
-	CoverageData ConvertFunctionData(const std::map<ULONG, Function> & indexToFunctionMap) const;
+	void CaptureData(DWORD processId);
 };

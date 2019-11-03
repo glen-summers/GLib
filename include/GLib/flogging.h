@@ -73,7 +73,7 @@ namespace GLib::Flog
 		friend class ScopeLog;
 
 	private:
-		Log(std::string name) : name(std::move(name)) {}
+		Log(std::string name) noexcept : name(std::move(name)) {}
 
 		void Write(Level level, const char * message) const;
 		void ScopeStart(Level level, const char * scope, const char * stem) const;
@@ -123,13 +123,13 @@ namespace GLib::Flog
 		static void SetThreadName(const char * name);
 		static std::string GetLogPath();
 
-		static Log GetLog(const std::string & name)
+		static Log GetLog(const std::string & name) noexcept
 		{
 			return Log(name);
 		}
 
 		template <typename T>
-		static Log GetLog()
+		static Log GetLog() noexcept
 		{
 			return Log(Unmangle(typeid(T).name()));
 		}

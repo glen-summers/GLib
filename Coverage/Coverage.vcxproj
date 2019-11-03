@@ -156,6 +156,7 @@
     <ClInclude Include="Line.h" />
     <ClInclude Include="LineCover.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="Process.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="RootDirs.h" />
     <ClInclude Include="Types.h" />

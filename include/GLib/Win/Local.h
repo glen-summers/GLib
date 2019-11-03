@@ -6,7 +6,7 @@
 
 namespace GLib::Win
 {
-	namespace Detail
+	namespace LocalDetail
 	{
 		struct LocalFreer
 		{
@@ -45,7 +45,7 @@ namespace GLib::Win
 
 	template <typename T> class Local
 	{
-		using Ptr = std::unique_ptr<T, Detail::LocalFreer>;
+		using Ptr = std::unique_ptr<T, LocalDetail::LocalFreer>;
 		Ptr p;
 
 	public:
@@ -57,9 +57,9 @@ namespace GLib::Win
 			return p.get();
 		}
 
-		Detail::Transfer<T, Ptr> GetPtr()
+		LocalDetail::Transfer<T, Ptr> GetPtr()
 		{
-			return Detail::Transfer<T, Ptr>{static_cast<Ptr&>(p)};
+			return LocalDetail::Transfer<T, Ptr>{static_cast<Ptr&>(p)};
 		}
 	};
 }

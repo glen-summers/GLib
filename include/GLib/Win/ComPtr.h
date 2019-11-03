@@ -14,8 +14,10 @@ namespace GLib::Win
 {
 	template <typename T> class ComPtr;
 
-	namespace Detail
+	namespace ComPtrDetail
 	{
+		constexpr DWORD ContextAll = CLSCTX_ALL; // NOLINT(hicpp-signed-bitwise) baad macro
+
 		template <typename T>
 		class Restricted : public T
 		{
@@ -60,7 +62,7 @@ namespace GLib::Win
 
 			operator void**()
 			{
-				return reinterpret_cast<void**>(&value);
+				return reinterpret_cast<void**>(&value); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast) com is evil
 			}
 		};
 	}
@@ -68,7 +70,7 @@ namespace GLib::Win
 	template <typename T>
 	auto GetAddress(ComPtr<T> & value) noexcept
 	{
-		return Detail::Transfer<T>(value);
+		return ComPtrDetail::Transfer<T>(value);
 	}
 
 	template <typename Target, typename Source>
@@ -155,11 +157,11 @@ namespace GLib::Win
 			return *this;
 		}
 
-		Detail::Restricted<T> * operator->() const
+		ComPtrDetail::Restricted<T> * operator->() const
 		{
 			if (*this)
 			{
-				return static_cast<typename Detail::Restricted<T>*>(p);
+				return static_cast<typename ComPtrDetail::Restricted<T>*>(p);
 			}
 			throw std::runtime_error("nullptr");
 		}

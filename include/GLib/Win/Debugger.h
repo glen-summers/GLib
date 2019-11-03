@@ -1,6 +1,6 @@
 #pragma once
 
-#include "GLib/Win/DebugStream.h"
+#include "GLib/Win/DebugWrite.h"
 #include "GLib/Win/FileSystem.h"
 #include "GLib/Win/Process.h"
 #include "GLib/Win/Symbols.h"
@@ -35,14 +35,16 @@ namespace GLib::Win
 		std::map<std::string, std::string> driveMap;
 		Process mainProcess;
 		DWORD const debugProcessId;
+		bool const debugChildProcesses;
 		std::optional<DWORD> exitCode;
 		std::string pendingDebugOut;
 
 	public:
-		Debugger(const std::string & path)
+		Debugger(const std::string & path, bool debugChildProcesses)
 			: driveMap(FileSystem::DriveMap())
-			, mainProcess(path, DEBUG_ONLY_THIS_PROCESS) // option for DEBUG_PROCESS
+			, mainProcess(path, {}, debugChildProcesses ? DEBUG_PROCESS : DEBUG_ONLY_THIS_PROCESS)
 			, debugProcessId(mainProcess.Id())
+			, debugChildProcesses(debugChildProcesses)
 		{}
 
 		Debugger(const Debugger&) = delete;
@@ -54,6 +56,11 @@ namespace GLib::Win
 		const Symbols::Engine & Symbols() const
 		{
 			return symbols;
+		}
+
+		DWORD ProcessId() const
+		{
+			return debugProcessId;
 		}
 
 		DWORD ExitCode() const 
@@ -158,7 +165,8 @@ namespace GLib::Win
 			std::string const logicalName = FileSystem::PathOfFileHandle(info.hFile, VOLUME_NAME_NT);
 			std::string const name = FileSystem::NormalisePath(logicalName, driveMap);
 
-			// when using DEBUG_ONLY_THIS_PROCESS only get called here for main executable
+			GLib::Win::Debug::Write("Attach Process: {0}, Pid: {1}", name, processId);
+
 			const Symbols::SymProcess & process = symbols.AddProcess(processId, info.hProcess, Detail::ConvertAddress(info.lpBaseOfImage), info.hFile, name);
 
 			IMAGE_DOS_HEADER header {};

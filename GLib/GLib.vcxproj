@@ -189,6 +189,8 @@
     <ClInclude Include="..\include\GLib\Win\SimpleCom.h" />
     <ClInclude Include="..\include\GLib\Win\Symbols.h" />
     <ClInclude Include="..\include\GLib\Win\Uuid.h" />
+    <ClInclude Include="..\include\GLib\Win\Variant.h" />
+    <ClInclude Include="..\include\GLib\Win\Window.h" />
     <ClInclude Include="..\include\GLib\win\WinException.h" />
     <ClInclude Include="..\include\GLib\Xml\AttributeIterator.h" />
     <ClInclude Include="..\include\GLib\Xml\Attributes.h" />

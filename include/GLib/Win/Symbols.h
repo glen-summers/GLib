@@ -162,6 +162,11 @@ namespace GLib::Win::Symbols
 			return process.Handle();
 		}
 
+		DWORD Id() const
+		{
+			return process.Id();
+		}
+
 		void ReadMemory(uint64_t address, void * buffer, size_t size, bool fromBase = true) const
 		{
 			process.ReadMemory(fromBase ? baseOfImage + address : address, buffer, size);
@@ -284,7 +289,7 @@ namespace GLib::Win::Symbols
 
 		void RemoveProcess(DWORD processId)
 		{
-			if (handles.erase(processId)!=1)
+			if (handles.erase(processId) == 0)
 			{
 				throw std::runtime_error("Process not found");
 			}
@@ -300,7 +305,8 @@ namespace GLib::Win::Symbols
 		void Lines(std::function<void(PSRCCODEINFOW)> f, HANDLE process, void * base) const
 		{
 			(void) this;
-			Util::AssertTrue(::SymEnumLinesW(process, Detail::ConvertBase(base), nullptr, nullptr, EnumLines, &f), "SymEnumLines failed");
+			auto result = ::SymEnumLinesW(process, Detail::ConvertBase(base), nullptr, nullptr, EnumLines, &f);
+			Util::AssertTrue(result == TRUE || ::GetLastError() == ERROR_NOT_SUPPORTED, "SymEnumLines failed");
 		}
 
 		template <typename Inserter>
@@ -308,7 +314,7 @@ namespace GLib::Win::Symbols
 		{
 			(void) this;
 			std::function<void(HANDLE)> f = [&](HANDLE h) { *inserter++ = h; };
-			Util::AssertTrue(::SymEnumProcesses(EnumProcesses, &f), "SymEnumLines failed");
+			Util::AssertTrue(::SymEnumProcesses(EnumProcesses, &f), "SymEnumProcesses failed");
 		}
 
 	private:

@@ -9,4 +9,5 @@ add_subdirectory(Tests)
 
 if(WIN32)
 	add_subdirectory(Coverage)
+	add_subdirectory(TestApp)
 endif(WIN32)

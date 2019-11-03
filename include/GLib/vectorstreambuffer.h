@@ -23,10 +23,6 @@ namespace GLib::Util
 
 		std::basic_string_view<T> Get()
 		{
-			if (buffer.empty() || *buffer.rbegin() != T())
-			{
-				buffer.push_back(T());
-			}
 			return {buffer.data(), buffer.size()};
 		}
 

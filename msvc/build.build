@@ -36,7 +36,7 @@
 		<Downloads>$(Out)\downloads</Downloads>
 
 		<CoverageInclude>$(Root)\</CoverageInclude>
-		<CoverageExclude>$(Root)\Tests\</CoverageExclude>
+		<CoverageExclude>-x $(Root)\Tests\ -x $(Root)\TestApp\</CoverageExclude>
 	</PropertyGroup>
 
 	<Target Name="MakeTempDir">
@@ -170,12 +170,12 @@
 
 	<Target Name="Coverage" DependsOnTargets="Compile">
 		<MSBuild Projects="$(MSBuildProjectFile)" Targets="CompileTests" Properties="Configuration=Debug"/>
-		<Exec Command="$(CoverageExecutable) $(DebugTestExecutable) $(Out) -i $(CoverageInclude) -x $(CoverageExclude)"/>
+		<Exec Command="$(CoverageExecutable) $(DebugTestExecutable) $(Out) -i $(CoverageInclude) $(CoverageExclude) -sub"/>
 		<Exec Command="start $(Out)\HtmlReport\index.html"/>
 	</Target>
 
 	<Target Name="CoverageRelease" DependsOnTargets="Compile">
-		<Exec Command="$(CoverageExecutable) $(TestExecutable) $(Out) -i $(CoverageInclude) -x $(CoverageExclude)"/>
+		<Exec Command="$(CoverageExecutable) $(TestExecutable) $(Out) -i $(CoverageInclude) $(CoverageExclude) -sub"/>
 		<Exec Command="start $(Out)\HtmlReport\index.html"/>
 	</Target>
 
