@@ -1,6 +1,7 @@
 #pragma once
 
 #include "GLib/Win/ErrorCheck.h"
+#include "GLib/Win/Transfer.h"
 
 #include <cassert>
 
@@ -13,32 +14,6 @@ namespace GLib::Win
 			void operator()(HLOCAL p) const noexcept
 			{
 				Util::WarnAssertTrue(::LocalFree(p) == nullptr, "LocalFree");
-			}
-		};
-
-		template <typename T, typename LocalPtr> class Transfer
-		{
-			LocalPtr & local;
-			T * value;
-
-		public:
-			explicit Transfer(LocalPtr & local) : local(local), value()
-			{}
-
-			Transfer() = delete;
-			Transfer(const Transfer &) = delete;
-			Transfer(Transfer &&) = delete;
-			Transfer & operator=(const Transfer &) = delete;
-			Transfer & operator=(Transfer &&) = delete;
-
-			~Transfer()
-			{
-				local.reset(value);
-			}
-
-			T** Address()
-			{
-				return &value;
 			}
 		};
 	}
@@ -57,9 +32,15 @@ namespace GLib::Win
 			return p.get();
 		}
 
-		LocalDetail::Transfer<T, Ptr> GetPtr()
+		static Local Attach(T * value)
 		{
-			return LocalDetail::Transfer<T, Ptr>{static_cast<Ptr&>(p)};
+			return Local{value};
 		}
 	};
+
+	template <typename T>
+	auto GetAddress(Local<T> & value) noexcept
+	{
+		return Transfer<Local<T>, T*>(value);
+	}
 }

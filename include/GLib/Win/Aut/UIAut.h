@@ -1,41 +1,12 @@
 #pragma once
 
 #include <GLib/Win/ComPtr.h>
+#include <GLib/Win/Bstr.h>
 
 #include <uiautomation.h>
 
 namespace GLib::Win::Aut
 {
-	namespace Detail
-	{
-		class TransferBstr // move
-		{
-			BSTR bstr;
-			std::string & ref;
-
-		public:
-			TransferBstr(std::string & ref)
-				: bstr()
-				, ref(ref)
-			{}
-
-			TransferBstr(const TransferBstr & ref) = delete;
-			TransferBstr(TransferBstr && ref) = delete;
-			const TransferBstr& operator=(const TransferBstr &) = delete;
-			const TransferBstr& operator=(TransferBstr &&) = delete;
-			~TransferBstr()
-			{
-				ref = bstr ? Cvt::w2a(bstr) : "";
-				::SysFreeString(bstr);
-			}
-
-			BSTR * operator&()
-			{
-				return &bstr;
-			}
-		};
-	}
-
 	class UIElement
 	{
 		ComPtr<IUIAutomationElement> element;
@@ -58,16 +29,16 @@ namespace GLib::Win::Aut
 
 		std::string CurrentName() const
 		{
-			std::string value;
-			CheckHr(element->get_CurrentName(&Detail::TransferBstr(value)), "CurrentName");
-			return value;
+			Bstr bstr;
+			CheckHr(element->get_CurrentName(GetAddress(bstr)), "CurrentName");
+			return bstr.Value();
 		}
 
 		std::string CurrentClassName() const
 		{
-			std::string value;
-			CheckHr(element->get_CurrentClassName(&Detail::TransferBstr(value)), "CurrentClassName");
-			return value;
+			Bstr bstr;
+			CheckHr(element->get_CurrentClassName(GetAddress(bstr)), "CurrentClassName");
+			return bstr.Value();
 		}
 	};
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "GLib/Win/ComErrorCheck.h"
+#include "GLib/Win/Transfer.h"
 #include "GLib/Win/WinException.h"
 
 #ifdef COM_PTR_DEBUG
@@ -30,47 +31,15 @@ namespace GLib::Win
 			~Restricted() = delete;
 
 		private:
-			ULONG STDMETHODCALLTYPE AddRef();
-			ULONG STDMETHODCALLTYPE Release();
-		};
-
-		template <typename T> class Transfer
-		{
-			ComPtr<T> & ptr;
-			T * value;
-
-		public:
-			explicit Transfer(ComPtr<T> & ptr) : ptr(ptr), value()
-			{}
-
-			Transfer() = delete;
-			Transfer(const Transfer &) = delete;
-			Transfer(Transfer &&) = delete;
-			Transfer & operator=(const Transfer &) = delete;
-			Transfer & operator=(Transfer &&) = delete;
-
-			~Transfer()
-			{
-				auto p = ComPtr<T>::Attach(value);
-				std::swap(ptr, p);
-			}
-
-			operator T**()
-			{
-				return &value;
-			}
-
-			operator void**()
-			{
-				return reinterpret_cast<void**>(&value); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast) com is evil
-			}
+			ULONG STDMETHODCALLTYPE AddRef() final;
+			ULONG STDMETHODCALLTYPE Release() final;
 		};
 	}
 
 	template <typename T>
 	auto GetAddress(ComPtr<T> & value) noexcept
 	{
-		return ComPtrDetail::Transfer<T>(value);
+		return Transfer<ComPtr<T>, T*>(value);
 	}
 
 	template <typename Target, typename Source>
@@ -171,10 +140,9 @@ namespace GLib::Win
 			return p != nullptr;
 		}
 
-		template<typename U>
-		static ComPtr Attach(U * value)
+		static ComPtr Attach(T * value)
 		{
-			return ComPtr(value, false);
+			return ComPtr{value, {}};
 		}
 
 	private:

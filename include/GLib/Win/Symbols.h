@@ -241,7 +241,9 @@ namespace GLib::Win::Symbols
 			}
 
 			Local<WCHAR> name;
-			Util::AssertTrue(::SymGetTypeInfo(process.Handle().get(), baseOfImage, indexOfClassParent, TI_GET_SYMNAME, name.GetPtr().Address()), "SymGetTypeInfo");
+			Util::AssertTrue(::SymGetTypeInfo(process.Handle().get(), baseOfImage, indexOfClassParent, TI_GET_SYMNAME,
+				static_cast<void**>(GetAddress<WCHAR>(name))), "SymGetTypeInfo");
+
 			result.Index(indexOfClassParent);
 			result.TypeIndex(typeIndexOfClassParent);
 			result.Name(Cvt::w2a(std::wstring_view{name.Get()}));

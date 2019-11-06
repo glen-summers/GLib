@@ -171,6 +171,7 @@
     <ClInclude Include="..\include\GLib\TypeFilter.h" />
     <ClInclude Include="..\include\GLib\TypePredicates.h" />
     <ClInclude Include="..\include\GLib\vectorstreambuffer.h" />
+    <ClInclude Include="..\include\GLib\Win\Bstr.h" />
     <ClInclude Include="..\include\GLib\Win\ComErrorCheck.h" />
     <ClInclude Include="..\include\GLib\Win\ComException.h" />
     <ClInclude Include="..\include\GLib\Win\ComPtr.h" />
@@ -188,6 +189,7 @@
     <ClInclude Include="..\include\GLib\Win\Resources.h" />
     <ClInclude Include="..\include\GLib\Win\SimpleCom.h" />
     <ClInclude Include="..\include\GLib\Win\Symbols.h" />
+    <ClInclude Include="..\include\GLib\Win\Transfer.h" />
     <ClInclude Include="..\include\GLib\Win\Uuid.h" />
     <ClInclude Include="..\include\GLib\Win\Variant.h" />
     <ClInclude Include="..\include\GLib\Win\Window.h" />
