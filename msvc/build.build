@@ -109,6 +109,10 @@
 
 	<Target Name="Build" DependsOnTargets="Compile;Test"/>
 
+	<Target Name="BuildDebug">
+		<MSBuild Projects="$(MSBuildProjectFile)" Targets="Build" Properties="Configuration=Debug"/>
+	</Target>
+
 	<Target Name="BuildX86">
 		<MSBuild Condition="'$(Platform)'!='x86'" Projects="$(MSBuildProjectFile)" Targets="Build" Properties="Platform=x86"/>
 	</Target>

@@ -27,10 +27,16 @@ namespace GLib::Win
 			return const_cast<wchar_t *>(value); // NOLINT(cppcoreguidelines-pro-type-const-cast)
 		}
 
-		inline void Terminate(HANDLE process, UINT exitCode)
+		inline bool Terminate(HANDLE process, UINT terminationExitCode) noexcept
 		{
-			//if (exitCode == STILL_ACTIVE)?
-			Util::WarnAssertTrue(::TerminateProcess(process, exitCode), "TerminateProcess");
+			DWORD exitCode;
+			BOOL result = ::GetExitCodeProcess(process, &exitCode);
+			bool stillRunning = result != FALSE && exitCode == STILL_ACTIVE;
+			if (stillRunning)
+			{
+				Util::WarnAssertTrue(::TerminateProcess(process, terminationExitCode), "TerminateProcess");
+			}
+			return stillRunning;
 		}
 
 		template<UINT ExitCode>
@@ -91,7 +97,7 @@ namespace GLib::Win
 			return p;
 		}
 
-		void Terminate(unsigned int exitCode = 1) const
+		void Terminate(unsigned int exitCode = 1) const noexcept
 		{
 			Detail::Terminate(p.get(), exitCode);
 		}

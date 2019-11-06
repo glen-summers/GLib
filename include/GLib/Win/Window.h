@@ -3,9 +3,9 @@
 #include <windowsx.h>
 
 #include "GLib/formatter.h"
-
 #include "GLib/Win/ErrorCheck.h"
 
+#include <functional>
 #include <memory>
 
 namespace GLib::Win
@@ -73,9 +73,9 @@ namespace GLib::Win
 
 		inline void AssociateHandle(Window * value, HWND handle)
 		{
-			::SetLastError(0);
+			::SetLastError(ERROR_SUCCESS); // SetWindowLongPtr does not set last error on success
 			auto ret = ::SetWindowLongPtr(handle, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(value)); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast) required
-			Util::AssertTrue(ret != 0 || ::GetLastError() == 0, "SetWindowLongPtr");
+			Util::AssertTrue(ret != 0 || ::GetLastError() == ERROR_SUCCESS, "SetWindowLongPtr");
 		}
 
 		inline Window * FromHandle(HWND hWnd)
@@ -92,7 +92,64 @@ namespace GLib::Win
 			//MessageDebugWriteContext("Window create", handle.get(), param);
 			return move(handle);
 		}
+
+		inline std::wstring GetWindowText(HWND hWnd)
+		{
+			GLib::Util::WideCharBuffer s;
+			::SetLastError(ERROR_SUCCESS); // GetWindowTextLength does not set last error on success
+			size_t lengthWithoutTerminator = ::GetWindowTextLengthW(hWnd);
+			Util::AssertTrue(lengthWithoutTerminator != 0 || ::GetLastError() == 0, "GetWindowTextLength");
+			if (lengthWithoutTerminator != 0)
+			{
+				s.EnsureSize(lengthWithoutTerminator + 1);
+				lengthWithoutTerminator = ::GetWindowTextW(hWnd, s.Get(), static_cast<int>(s.size()));
+				Util::AssertTrue(lengthWithoutTerminator != 0 || ::GetLastError() == 0, "GetWindowText");
+			}
+			return s.Get();
+		}
 	}
+
+	class WindowFinder // move
+	{
+		using WindowEnumerator = std::function<bool(HWND)>;
+
+		static BOOL CALLBACK EnumWindowsCallback(HWND handle, LPARAM param) noexcept
+		{
+			return (*reinterpret_cast<const WindowEnumerator*>(param))(handle) ? TRUE : FALSE;
+			// set error when false
+		}
+
+	public:
+		static HWND Find(DWORD pid, const std::string & windowText)
+		{
+			HDESK desktop = ::GetThreadDesktop(::GetCurrentThreadId());
+			Util::AssertTrue(desktop != nullptr, "GetThreadDesktop");
+			auto wideWindowText = Cvt::a2w(windowText);
+
+			HWND ret{};
+			WindowEnumerator func = [&](HWND wnd) noexcept -> bool
+			{
+				DWORD windowPid;
+				::GetWindowThreadProcessId(wnd, &windowPid);
+
+				try
+				{
+					auto wt = Detail::GetWindowText(wnd);
+					if (windowPid == pid && wt == wideWindowText) // duplicate names?
+					{
+						ret = wnd;
+					}
+				}
+				catch(const std::exception &)
+				{}
+				return true;
+			};
+
+			BOOL result = ::EnumDesktopWindows(desktop, EnumWindowsCallback, reinterpret_cast<LPARAM>(&func));
+			Util::AssertTrue(result, "EnumDesktopWindows");
+			return ret;
+		}
+	};
 
 	// move
 	template <typename T> class PointT

@@ -2,6 +2,10 @@
 
 #include <Windows.h>
 
+#ifdef _DEBUG
+#define COM_PTR_DEBUG
+#endif
+
 #include "GLib/Win/DebugStream.h"
 #include "GLib/Win/DebugWrite.h"
 #include "GLib/Win/FileSystem.h"
@@ -11,6 +15,9 @@
 #include "GLib/Win/Symbols.h"
 #include "GLib/Win/Uuid.h"
 #include "GLib/Win/Variant.h"
+
+#include "GLib/Win/Aut/UIAut.h"
+#include "GLib/Win/Window.h"
 
 #include "GLib/Span.h"
 
@@ -76,6 +83,7 @@ namespace
 		return std::move(p);
 	}
 
+	// move
 	struct ComUninitialiser
 	{
 		void operator()(void*) const noexcept
@@ -103,8 +111,10 @@ namespace
 
 	using Mta = ComInitialiser<Apartment::Multithreaded>;
 	using Sta = ComInitialiser<Apartment::Singlethreaded>;
+	// move
 }
 
+using namespace std::chrono_literals;
 using namespace GLib::Win;
 
 // split up
@@ -311,14 +321,33 @@ BOOST_AUTO_TEST_SUITE(WinTests)
 	BOOST_AUTO_TEST_CASE(TestApp0)
 	{
 		Process p(GetTestApp().u8string(), "-exitTime 1", 0, SW_HIDE);
-		p.WaitForExit();
+		auto scopedTerminator(p.ScopedTerminator());
+		p.WaitForExit(5s);
+		scopedTerminator.release();
 		BOOST_CHECK(0ul == p.ExitCode());
 	}
 
 	BOOST_AUTO_TEST_CASE(TestApp1)
 	{
-		Process p(GetTestApp().u8string(), "-exitTime 5", 0, SW_SHOWNORMAL);
-		p.WaitForExit();
+		Mta mta;
+		Aut::UIAut aut; // causes leaks
+		Process p(GetTestApp().u8string(), "-exitTime 500", 0, SW_SHOWNORMAL);
+		auto scopedTerminator(p.ScopedTerminator());
+		p.WaitForInputIdle(5s);
+
+		HWND hw = WindowFinder::Find(p.Id(), "TestApp");
+		BOOST_TEST(hw != nullptr);
+		Aut::UIElement mainWindow = aut.ElementFromHandle(hw);
+
+		BOOST_TEST("TestApp" == mainWindow.CurrentName());
+		BOOST_CHECK(mainWindow.CurrentClassName().find("GTL:") == 0);
+
+		auto wp(mainWindow.GetCurrentPattern<IUIAutomationWindowPattern>(UIA_WindowPatternId));
+		CheckHr(wp->Close(), "Close");
+
+		p.WaitForExit(5s);
+		scopedTerminator.release();
+
 		BOOST_CHECK(0ul == p.ExitCode());
 	}
 
