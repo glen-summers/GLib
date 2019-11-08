@@ -242,6 +242,15 @@
     <ClInclude Include="..\include\GLib\Win\Transfer.h">
       <Filter>Include Files\Win</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\GLib\Win\ComUtils.h">
+      <Filter>Include Files\Win</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\GLib\Win\Painter.h">
+      <Filter>Include Files\Win</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\GLib\Win\WindowFinder.h">
+      <Filter>Include Files\Win</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="filelogger.cpp">

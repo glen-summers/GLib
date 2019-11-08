@@ -175,6 +175,7 @@
     <ClInclude Include="..\include\GLib\Win\ComErrorCheck.h" />
     <ClInclude Include="..\include\GLib\Win\ComException.h" />
     <ClInclude Include="..\include\GLib\Win\ComPtr.h" />
+    <ClInclude Include="..\include\GLib\Win\ComUtils.h" />
     <ClInclude Include="..\include\GLib\Win\Debugger.h" />
     <ClInclude Include="..\include\GLib\Win\DebugWrite.h" />
     <ClInclude Include="..\include\GLib\Win\DebugStream.h" />
@@ -184,6 +185,7 @@
     <ClInclude Include="..\include\GLib\Win\Handle.h" />
     <ClInclude Include="..\include\GLib\Win\Local.h" />
     <ClInclude Include="..\include\GLib\Win\NativeExceptionPrinter.h" />
+    <ClInclude Include="..\include\GLib\Win\Painter.h" />
     <ClInclude Include="..\include\GLib\win\Process.h" />
     <ClInclude Include="..\include\GLib\Win\Registry.h" />
     <ClInclude Include="..\include\GLib\Win\Resources.h" />
@@ -193,6 +195,7 @@
     <ClInclude Include="..\include\GLib\Win\Uuid.h" />
     <ClInclude Include="..\include\GLib\Win\Variant.h" />
     <ClInclude Include="..\include\GLib\Win\Window.h" />
+    <ClInclude Include="..\include\GLib\Win\WindowFinder.h" />
     <ClInclude Include="..\include\GLib\win\WinException.h" />
     <ClInclude Include="..\include\GLib\Xml\AttributeIterator.h" />
     <ClInclude Include="..\include\GLib\Xml\Attributes.h" />

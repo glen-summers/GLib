@@ -4,6 +4,7 @@
 
 #include "GLib/formatter.h"
 #include "GLib/Win/ErrorCheck.h"
+#include "GLib/Win/Painter.h"
 
 #include <functional>
 #include <memory>
@@ -92,133 +93,13 @@ namespace GLib::Win
 			//MessageDebugWriteContext("Window create", handle.get(), param);
 			return move(handle);
 		}
-
-		inline std::wstring GetWindowText(HWND hWnd)
-		{
-			GLib::Util::WideCharBuffer s;
-			::SetLastError(ERROR_SUCCESS); // GetWindowTextLength does not set last error on success
-			size_t lengthWithoutTerminator = ::GetWindowTextLengthW(hWnd);
-			Util::AssertTrue(lengthWithoutTerminator != 0 || ::GetLastError() == 0, "GetWindowTextLength");
-			if (lengthWithoutTerminator != 0)
-			{
-				s.EnsureSize(lengthWithoutTerminator + 1);
-				lengthWithoutTerminator = ::GetWindowTextW(hWnd, s.Get(), static_cast<int>(s.size()));
-				Util::AssertTrue(lengthWithoutTerminator != 0 || ::GetLastError() == 0, "GetWindowText");
-			}
-			return s.Get();
-		}
 	}
 
-	class WindowFinder // move
-	{
-		using WindowEnumerator = std::function<bool(HWND)>;
-
-		static BOOL CALLBACK EnumWindowsCallback(HWND handle, LPARAM param) noexcept
-		{
-			return (*reinterpret_cast<const WindowEnumerator*>(param))(handle) ? TRUE : FALSE;
-			// set error when false
-		}
-
-	public:
-		static HWND Find(DWORD pid, const std::string & windowText)
-		{
-			HDESK desktop = ::GetThreadDesktop(::GetCurrentThreadId());
-			Util::AssertTrue(desktop != nullptr, "GetThreadDesktop");
-			auto wideWindowText = Cvt::a2w(windowText);
-
-			HWND ret{};
-			WindowEnumerator func = [&](HWND wnd) noexcept -> bool
-			{
-				DWORD windowPid;
-				::GetWindowThreadProcessId(wnd, &windowPid);
-
-				try
-				{
-					auto wt = Detail::GetWindowText(wnd);
-					if (windowPid == pid && wt == wideWindowText) // duplicate names?
-					{
-						ret = wnd;
-					}
-				}
-				catch(const std::exception &)
-				{}
-				return true;
-			};
-
-			BOOL result = ::EnumDesktopWindows(desktop, EnumWindowsCallback, reinterpret_cast<LPARAM>(&func));
-			Util::AssertTrue(result, "EnumDesktopWindows");
-			return ret;
-		}
-	};
-
-	// move
-	template <typename T> class PointT
-	{
-		T x{};
-		T y{};
-
-	public:
-		PointT() = default;
-
-		PointT(T x, T y) : x(x), y(y)
-		{}
-
-		T X() const { return x; }
-		T Y() const { return y; }
-
-		bool operator==(const PointT & other) const
-		{
-			return x == other.x && y == other.y;
-		}
-
-		bool operator!=(const PointT & other) const
-		{
-			return !(*this == other);
-		}
-	};
-
-	using Point = PointT<int>;
-
-	// move
-	class Size
-	{
-		int x;
-		int y;
-
-	public:
-		Size()
-			: x(0), y(0)
-		{}
-
-		Size(int xSize, int ySize)
-			: x(xSize), y(ySize)
-		{}
-
-		int X() const { return x; }
-		int Y() const { return y; }
-
-		bool operator==(const Size & other) const
-		{
-			return x == other.x && y == other.y;
-		}
-
-		bool operator!=(const Size & other) const
-		{
-			return !(*this == other);
-		}
-
-		explicit operator const SIZE &() const { return reinterpret_cast<const SIZE &>(*this); }
-		explicit operator const POINT &() const { return reinterpret_cast<const POINT &>(*this); }
-
-		SIZE* operator &() { return reinterpret_cast<SIZE*>(this); }
-
-		Size operator/(int rhs) const
-		{
-			return Size(x / rhs, y / rhs);
-		}
-	};
-
 	enum class CloseResult { Allow, Prevent };
+
+	struct Size : SIZE {};
+	struct Point : POINT {};
+	struct Rect : RECT {};
 
 	class Window
 	{
@@ -244,9 +125,23 @@ namespace GLib::Win
 			return static_cast<int>(msg.wParam);
 		}
 
+		Size ClientSize() const
+		{
+			RECT rc;
+			Util::AssertTrue(::GetClientRect(handle.get(), &rc), "GetClientRect");
+			return {rc.right - rc.left, rc.bottom - rc.top};
+		}
+
 		bool Show(int cmd) const
 		{
 			return ::ShowWindow(handle.get(), cmd) != FALSE;
+		}
+
+		Painter GetPainter() const
+		{
+			PAINTSTRUCT ps{};
+			auto dc = ::BeginPaint(handle.get(), &ps);
+			return Painter{PaintInfo{ps, handle.get(), dc }};
 		}
 
 		void Destroy() const
@@ -415,6 +310,12 @@ namespace GLib::Win
 
 			return false;
 		}
+
+		protected:
+			HWND Handle()
+			{
+				return handle.get();
+			}
 
 	private:
 		static LRESULT APIENTRY WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) noexcept

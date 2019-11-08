@@ -5,7 +5,6 @@
 
 namespace GLib::Detail
 {
-	// use a UniquePtr?
 	template <typename Function>
 	class ScopedFunction
 	{

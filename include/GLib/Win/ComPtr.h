@@ -63,6 +63,11 @@ namespace GLib::Win
 		T * p {};
 
 	public:
+		T** operator&()
+		{
+			static_assert(false, "Use 'GetAddress(comPtrValue)'");
+		}
+
 		ComPtr() noexcept = default;
 
 		explicit ComPtr(std::nullptr_t) noexcept
@@ -94,6 +99,13 @@ namespace GLib::Win
 		~ComPtr() noexcept
 		{
 			InternalRelease(std::exchange(p, nullptr));
+		}
+
+		ComPtr & operator=(nullptr_t) noexcept
+		{
+			ComPtr tmp;
+			std::swap(tmp.p, p);
+			return *this;
 		}
 
 		ComPtr & operator=(const ComPtr & right) noexcept
