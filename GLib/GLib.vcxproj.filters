@@ -33,6 +33,9 @@
     <Filter Include="Include Files\Html">
       <UniqueIdentifier>{b866b8d8-3d8c-4511-9c2b-6e4d28e7d654}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Include Files\Win\Aut">
+      <UniqueIdentifier>{6e2f4462-d247-4256-a432-c0b1ca0f99df}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="targetver.h">
@@ -250,6 +253,12 @@
     </ClInclude>
     <ClInclude Include="..\include\GLib\Win\WindowFinder.h">
       <Filter>Include Files\Win</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\GLib\Win\D2d.h">
+      <Filter>Include Files\Win</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\GLib\Win\Aut\UIAut.h">
+      <Filter>Include Files\Win\Aut</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

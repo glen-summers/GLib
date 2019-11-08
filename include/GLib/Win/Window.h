@@ -170,13 +170,17 @@ namespace GLib::Win
 			Util::AssertTrue(::KillTimer(handle.get(), id), "KillTimer");
 		}
 
-	protected:
+		void Invalidate(bool erase) const
+		{
+			Util::AssertTrue(::InvalidateRect(Handle(), nullptr, erase ? TRUE : FALSE), "InvalidateRect");
+		}
+
 		virtual bool OnSize(const Size &) noexcept { return false; }
 		virtual bool OnGetMinMaxInfo(MINMAXINFO &) noexcept { return false; }
 		virtual bool OnCommand(int /*command*/) noexcept { return false; }
 		virtual CloseResult OnClose() noexcept { return CloseResult::Allow; }
-		virtual void OnDestroy() noexcept {}
-		virtual void OnNCDestroy() noexcept {}
+		virtual bool OnDestroy() noexcept { return false; }
+		virtual bool OnNCDestroy() noexcept { return false; }
 		virtual bool OnUser(WPARAM, LPARAM) noexcept { return false; }
 		virtual bool OnNotify(const NMHDR&) noexcept { return false; }
 		virtual bool OnChar(int) noexcept { return false; }
@@ -312,7 +316,7 @@ namespace GLib::Win
 		}
 
 		protected:
-			HWND Handle()
+			HWND Handle() const
 			{
 				return handle.get();
 			}

@@ -180,6 +180,11 @@ namespace GLib::Win
 		}
 	};
 
+	template <class T> bool operator==(const ComPtr<T> & p, nullptr_t) noexcept { return !p; }
+	template <class T> bool operator==(nullptr_t, const ComPtr<T> & p) noexcept { return !p; }
+	template <class T> bool operator!=(const ComPtr<T> & p, nullptr_t) noexcept { return !!p; }
+	template <class T> bool operator!=(nullptr_t, const ComPtr<T> & p) noexcept { return !!p; }
+
 	template <typename T> T * Get(ComPtr<T> & p) noexcept
 	{
 		return p.p;

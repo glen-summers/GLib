@@ -314,6 +314,12 @@ BOOST_AUTO_TEST_SUITE(WinTests)
 		BOOST_CHECK(mainWindow.CurrentClassName().find("GTL:") == 0);
 
 		auto wp(mainWindow.GetCurrentPattern<IUIAutomationWindowPattern>(UIA_WindowPatternId));
+
+		BOOL value;
+		CheckHr(wp->get_CurrentCanMaximize(&value), "get_CurrentCanMaximize");
+		BOOST_CHECK(value == TRUE);
+		CheckHr(wp->SetWindowVisualState(WindowVisualState::WindowVisualState_Maximized), "SetWindowVisualState");
+
 		CheckHr(wp->Close(), "Close");
 
 		p.WaitForExit(5s);

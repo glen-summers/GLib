@@ -62,6 +62,8 @@ BOOST_AUTO_TEST_CASE(UninitialisedComPtrHasZeroUseCount)
 	GLib::Win::ComPtr<ITest1> p;
 	BOOST_TEST(0U == UseCount(p));
 	BOOST_TEST(false == static_cast<bool>(p));
+	BOOST_TEST(nullptr == p);
+	BOOST_TEST(p == nullptr);
 	BOOST_TEST(nullptr == Get(p));
 }
 
@@ -83,6 +85,8 @@ BOOST_AUTO_TEST_CASE(InitialisedComPtrHasOneUseCount)
 	GLib::Win::ComPtr<ITest1> p1(GLib::Win::Make<ImplementsITest1>());
 
 	BOOST_TEST(1U == UseCount(p1));
+	BOOST_TEST(nullptr != p1);
+	BOOST_TEST(p1 != nullptr);
 	BOOST_TEST(nullptr != Get(p1));
 }
 
