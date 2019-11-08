@@ -46,7 +46,7 @@ namespace GLib
 				Util::StackOrHeap<char, InitialBufferSize> s;
 				const int len = ::snprintf(nullptr, 0, f.c_str(), value); // NOLINT(cppcoreguidelines-pro-type-vararg,hicpp-vararg) by design
 				Compat::AssertTrue(len >= 0, "snprintf failed", errno);
-				s.EnsureSize(len + 1);
+				s.EnsureSize(static_cast<size_t>(len) + 1);
 				::snprintf(s.Get(), s.size(), f.c_str(), value); // NOLINT(cppcoreguidelines-pro-type-vararg,hicpp-vararg) by design
 
 				stm << s.Get();
@@ -58,7 +58,7 @@ namespace GLib
 				std::string f = CheckFormat(defaultFormat, format);
 				// stream to wide to correctly convert locale symbols, is there a better better way? maybe when code convert gets fixed
 				std::wstringstream wideStream;
-				wideStream.imbue(stm.getloc());
+				(void)wideStream.imbue(stm.getloc());
 				wideStream << std::put_time(&value, Cvt::a2w(f).c_str());
 				stm << Cvt::w2a(wideStream.str());
 			}
@@ -70,7 +70,7 @@ namespace GLib
 				CheckFormatEmpty(format);
 				// stream to wide to correctly convert locale symbols, is there a better better way? maybe when code convert gets fixed
 				std::wstringstream wideStream;
-				wideStream.imbue(stm.getloc());
+				(void)wideStream.imbue(stm.getloc());
 				wideStream << std::showbase << std::put_money(value.value);
 				stm << Cvt::w2a(wideStream.str());
 			}
@@ -90,7 +90,7 @@ namespace GLib
 			template<>
 			inline void FormatPointer<sizeof(uint64_t)>(std::ostream & stm, void * const & value)
 			{
-				ToStringImpl("", stm, value, "%016x");
+				ToStringImpl("", stm, value, "%016llx");
 			}
 		}
 

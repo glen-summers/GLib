@@ -32,7 +32,7 @@ namespace GLib::Win
 				(void)icon;
 				(void)menu;
 				// hash+more
-				return Formatter::Format("GTL:{0}", proc);
+				return Formatter::Format("GTL:{0}", static_cast<void*>(proc));
 			}
 		};
 

@@ -36,7 +36,7 @@ BOOST_AUTO_TEST_SUITE(FormatterTests)
 
 BOOST_AUTO_TEST_CASE(BasicTest)
 {
-	std::string s = Formatter::Format("{0} {1} {2} {3}", 1, "2", std::string("3"), reinterpret_cast<void*>(4)); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
+	std::string s = Formatter::Format("{0} {1} {2} {3}", 1, "2", std::string("3"), reinterpret_cast<void*>(4));
 	if constexpr (sizeof(void*) == 8)
 	{
 		BOOST_TEST(s == "1 2 3 0000000000000004");
@@ -291,16 +291,18 @@ BOOST_AUTO_TEST_CASE(TestLongDoubleFormat)
 
 BOOST_AUTO_TEST_CASE(TestPointer)
 {
-	auto p = reinterpret_cast<void*>(0x12345); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
-
-	std::string s = Formatter::Format("{0}", p);
 	if constexpr (sizeof(void*)==8)
 	{
-		BOOST_TEST("0000000000012345" == s);
+		auto p = reinterpret_cast<void*>(0x123456789abcfdefULL);
+
+		std::string s = Formatter::Format("{0}", p);
+		BOOST_TEST("123456789abcfdef" == s);
 	}
 	else if constexpr (sizeof(void*) == 4)
 	{
-		BOOST_TEST("00012345" == s);
+		auto p = reinterpret_cast<void*>(0x1234abcdUL);
+		std::string s = Formatter::Format("{0}", p);
+		BOOST_TEST("1234abcd" == s);
 	}
 	else
 	{
