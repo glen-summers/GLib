@@ -175,28 +175,45 @@ namespace GLib::Win
 			Util::AssertTrue(::InvalidateRect(Handle(), nullptr, erase ? TRUE : FALSE), "InvalidateRect");
 		}
 
-		virtual bool OnSize(const Size &) noexcept { return false; }
-		virtual bool OnGetMinMaxInfo(MINMAXINFO &) noexcept { return false; }
-		virtual bool OnCommand(int /*command*/) noexcept { return false; }
-		virtual CloseResult OnClose() noexcept { return CloseResult::Allow; }
-		virtual bool OnDestroy() noexcept { return false; }
-		virtual bool OnNCDestroy() noexcept { return false; }
-		virtual bool OnUser(WPARAM, LPARAM) noexcept { return false; }
-		virtual bool OnNotify(const NMHDR&) noexcept { return false; }
-		virtual bool OnChar(int) noexcept { return false; }
-		virtual bool OnKeyDown(int) noexcept { return false; }
-		virtual bool OnLeftButtonDown(const Point & ) noexcept { return false; }
-		virtual bool OnLeftButtonUp(const Point & ) noexcept { return false; }
-		virtual bool OnContextMenu(const Point & ) noexcept { return false; }
-		virtual bool OnMouseMove(const Point &) noexcept { return false; }
-		virtual bool OnMouseWheel(const Point &, int /*delta*/) noexcept { return false; }
-		virtual bool OnCaptureChanged() noexcept { return false; }
-		virtual bool OnGetDlgCode(int /*key*/, const MSG&, LRESULT &) { return false; }
-		virtual bool OnPaint() noexcept { return false; }
-		virtual bool OnTimer() noexcept { return false; }
-		virtual bool OnEraseBackground() noexcept { return false; }
+		static void SetHandled(bool newValue = true)
+		{
+			SetHandled(newValue, true);
+		}
 
-		bool OnMessage(UINT message, WPARAM wParam, LPARAM lParam, LRESULT & result) noexcept
+		static bool GetHandled()
+		{
+			return SetHandled(false, false);
+		}
+
+	private:
+		static bool SetHandled(bool newValue, bool exchange)
+		{
+			static thread_local bool handled;
+			return exchange ? std::exchange(handled, newValue) : handled;
+		}
+
+		virtual void OnSize(const Size &) noexcept {}
+		virtual void OnGetMinMaxInfo(MINMAXINFO &) noexcept {}
+		virtual void OnCommand(int /*command*/) noexcept {}
+		virtual CloseResult OnClose() noexcept { return CloseResult::Allow; }
+		virtual void OnDestroy() noexcept {}
+		virtual void OnNCDestroy() noexcept {}
+		virtual void OnUser(WPARAM, LPARAM) noexcept {}
+		virtual void OnNotify(const NMHDR&) noexcept {}
+		virtual void OnChar(int) noexcept {}
+		virtual void OnKeyDown(int) noexcept {}
+		virtual void OnLeftButtonDown(const Point & ) noexcept {}
+		virtual void OnLeftButtonUp(const Point & ) noexcept {}
+		virtual void OnContextMenu(const Point & ) noexcept {}
+		virtual void OnMouseMove(const Point &) noexcept {}
+		virtual void OnMouseWheel(const Point &, int /*delta*/) noexcept {}
+		virtual void OnCaptureChanged() noexcept {}
+		virtual void OnGetDlgCode(int /*key*/, const MSG&, LRESULT &) {}
+		virtual void OnPaint() noexcept {}
+		virtual void OnTimer() noexcept {}
+		virtual void OnEraseBackground() noexcept {}
+
+		void OnMessage(UINT message, WPARAM wParam, LPARAM lParam, LRESULT & result) noexcept
 		{
 			switch (message)
 			{
@@ -207,12 +224,12 @@ namespace GLib::Win
 
 				case WM_ERASEBKGND:
 				{
-					bool handled = OnEraseBackground();
-					if (handled)
+					OnEraseBackground();
+					if (GetHandled() == false)
 					{
 						result = 1;
 					}
-					return handled;
+					return;
 				}
 
 				case WM_SIZE:
@@ -232,20 +249,23 @@ namespace GLib::Win
 
 				case WM_CLOSE:
 				{
-					return OnClose() == CloseResult::Prevent;
+					if (OnClose() == CloseResult::Prevent)
+					{
+						SetHandled();
+					}
+					return;
 				}
 
 				case WM_DESTROY:
 				{
-					OnDestroy();
-					return false;
+					return OnDestroy();
 				}
 
 				case WM_NCDESTROY:
 				{
 					OnNCDestroy();
 					handle.release(); // ??
-					return false;
+					return;
 				}
 
 				case WM_USER:
@@ -309,10 +329,11 @@ namespace GLib::Win
 					return OnTimer();
 				}
 
-				default:;
+				default:
+				{
+					SetHandled(false);
+				}
 			}
-
-			return false;
 		}
 
 		protected:
@@ -326,10 +347,18 @@ namespace GLib::Win
 		{
 			LRESULT result = 0;
 			Window * window = Detail::FromHandle(hWnd);
-			bool handled = window && window->OnMessage(message, wParam, lParam, result);
-			result = handled ? result : ::DefWindowProc(hWnd, message, wParam, lParam);
-			//MessageDebugWrite(FromHandle(hWnd), hWnd, message, wParam, lParam, result);
-			return result;
+
+			if (window)
+			{
+				auto oldValue = SetHandled(false, true);
+				window->OnMessage(message, wParam, lParam, result);
+				auto handled = SetHandled(oldValue, true);
+				if (handled)
+				{
+					return result;
+				}
+			}
+			return ::DefWindowProc(hWnd, message, wParam, lParam);
 		}
 	};
 }

@@ -28,7 +28,7 @@ public:
 	}
 
 protected:
-	bool OnPaint() noexcept override
+	void OnPaint() noexcept override
 	{
 		log.Info("OnPaint");
 		GLib::Win::Painter p = GetPainter();
@@ -38,30 +38,31 @@ protected:
 		renderer.Begin();
 		renderer.Clear(D2D1::ColorF::CornflowerBlue);
 		renderer.End();
-
-		return true;
 	}
 
-	bool OnSize(const GLib::Win::Size & size) noexcept override
+	void OnSize(const GLib::Win::Size & size) noexcept override
 	{
 		if (renderer.Resize(size))
 		{
 			Invalidate(false);
 		}
-		return true;
 	}
 
-	bool OnDestroy() noexcept override
+	GLib::Win::CloseResult OnClose() noexcept
+	{
+		log.Info("OnClose");
+		return GLib::Win::CloseResult::Allow;
+	}
+
+	void OnDestroy() noexcept override
 	{
 		log.Info("OnDestroy");
 		::PostQuitMessage(0);
-		return true;
 	}
 
-	bool OnTimer() noexcept override
+	void OnTimer() noexcept override
 	{
 		log.Info("Tick");
 		Destroy();
-		return true;
 	}
 };
