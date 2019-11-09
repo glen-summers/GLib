@@ -264,7 +264,6 @@ namespace GLib::Win
 
 		virtual void OnDebugString(DWORD processId, DWORD threadId, const OUTPUT_DEBUG_STRING_INFO & info)
 		{
-			(void)processId;
 			(void)threadId;
 
 			auto address = Detail::ConvertAddress(info.lpDebugStringData);
@@ -274,14 +273,14 @@ namespace GLib::Win
 			{
 				auto size = static_cast<size_t>(info.nDebugStringLength / 2) - 1;
 				std::vector<wchar_t> buffer(size); // soh?
-				mainProcess.ReadMemory<wchar_t>(address, &buffer[0], size);
+				symbols.GetProcess(processId).Process().ReadMemory<wchar_t>(address, &buffer[0], size);
 				message =  Cvt::w2a(std::wstring{ &buffer[0], size });
 			}
 			else
 			{
 				size_t size = info.nDebugStringLength - 1;
 				std::vector<char> buffer(size); // soh?
-				mainProcess.ReadMemory<char>(address, &buffer[0], size);
+				symbols.GetProcess(processId).Process().ReadMemory<char>(address, &buffer[0], size);
 				message =  std::string{ &buffer[0], size };
 			}
 

@@ -186,6 +186,7 @@
     <ClInclude Include="..\include\GLib\win\FormatErrorMessage.h" />
     <ClInclude Include="..\include\GLib\Win\Handle.h" />
     <ClInclude Include="..\include\GLib\Win\Local.h" />
+    <ClInclude Include="..\include\GLib\Win\MessageDebug.h" />
     <ClInclude Include="..\include\GLib\Win\NativeExceptionPrinter.h" />
     <ClInclude Include="..\include\GLib\Win\Painter.h" />
     <ClInclude Include="..\include\GLib\win\Process.h" />

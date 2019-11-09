@@ -157,14 +157,14 @@ namespace GLib::Win::Symbols
 			return { std::move(duplicate), baseOfImage};
 		}
 
-		const Handle & Handle() const
+		HANDLE Handle() const
 		{
-			return process.Handle();
+			return process.Handle().get();
 		}
 
-		DWORD Id() const
+		const Process & Process() const
 		{
-			return process.Id();
+			return process;
 		}
 
 		void ReadMemory(uint64_t address, void * buffer, size_t size, bool fromBase = true) const
@@ -272,7 +272,7 @@ namespace GLib::Win::Symbols
 		{
 			SymProcess sp = SymProcess::GetProcess(processHandle, baseOfImage, false);
 
-			DWORD64 const loadBase = ::SymLoadModuleExW(sp.Handle().get(), imageFile, Cvt::a2w(imageName).c_str(), nullptr,
+			DWORD64 const loadBase = ::SymLoadModuleExW(sp.Handle(), imageFile, Cvt::a2w(imageName).c_str(), nullptr,
 				static_cast<DWORD64>(baseOfImage), 0, nullptr, 0);
 				Util::AssertTrue(0 != loadBase, "SymLoadModuleEx failed");
 

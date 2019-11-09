@@ -18,6 +18,7 @@ BOOST_AUTO_TEST_CASE(EmptyElement)
 		{"xml", Xml::ElementType::Empty},
 	};
 	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), xml.begin(), xml.end());
+	BOOST_CHECK(xml.begin()->Attributes().empty());
 }
 
 BOOST_AUTO_TEST_CASE(ElementSpace)
@@ -559,6 +560,18 @@ BOOST_AUTO_TEST_CASE(AttributeIteratorEnum)
 	};
 
 	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), attr.begin(), attr.end());
+}
+
+BOOST_AUTO_TEST_CASE(AttributeIteratorInvalidChars)
+{
+	GLIB_CHECK_RUNTIME_EXCEPTION(for (auto a : Xml::Attributes{ "0='baad'"});, "Illegal character: '0' (0x30)");
+	GLIB_CHECK_RUNTIME_EXCEPTION(for (auto a : Xml::Attributes{ "baad=baad"});, "Illegal character: 'b' (0x62)");
+	GLIB_CHECK_RUNTIME_EXCEPTION(for (auto a : Xml::Attributes{ "baad='-<-'"});, "Illegal character: '<' (0x3c)");
+}
+
+BOOST_AUTO_TEST_CASE(AttributeIteratorEnd)
+{
+	GLIB_CHECK_RUNTIME_EXCEPTION(++Xml::Attributes{}.begin();, "++end");
 }
 
 // test comment, text, attributes with entities and combos

@@ -6,6 +6,10 @@
 #include "GLib/Win/ErrorCheck.h"
 #include "GLib/Win/Painter.h"
 
+#ifdef GLIB_DEBUG_MESSAGES
+#include "GLib/Win/MessageDebug.h"
+#endif
+
 #include <functional>
 #include <memory>
 
@@ -33,7 +37,7 @@ namespace GLib::Win
 				(void)icon;
 				(void)menu;
 				// hash+more
-				return Formatter::Format("GTL:{0}", static_cast<void*>(proc));
+				return Formatter::Format("GTL:{0}", static_cast<void*>(&proc));
 			}
 		};
 
@@ -90,8 +94,19 @@ namespace GLib::Win
 			Detail::WindowHandle handle(::CreateWindowExW(0, Cvt::a2w(className).c_str(), Cvt::a2w(title).c_str(), style, CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, nullptr, nullptr, Instance(), param));
 			Util::AssertTrue(!!handle, "CreateWindow");
 			AssociateHandle(param, handle.get());
-			//MessageDebugWriteContext("Window create", handle.get(), param);
+
+#ifdef GLIB_DEBUG_MESSAGES
+			GLib::Win::MessageDebug::Write("Window create", handle.get(), param);
+#endif
+
 			return move(handle);
+		}
+
+		inline HACCEL LoadAccel(int id)
+		{
+			HACCEL accel = ::LoadAcceleratorsW(Instance(), MAKEINTRESOURCEW(id));
+			Util::AssertTrue(accel != nullptr, "LoadAccelerators");
+			return accel;
 		}
 	}
 
@@ -104,19 +119,21 @@ namespace GLib::Win
 	class Window
 	{
 		Detail::WindowHandle handle;
-		HACCEL hAccel{};
+		HACCEL accel{};
 
 	public:
-		Window(int icon, int menu, const std::string & title)
+		Window(int icon, int menu, int accel, const std::string & title)
 			: handle{Detail::Create(WS_OVERLAPPEDWINDOW, icon, menu, title, WindowProc, this)}
+			, accel{Detail::LoadAccel(accel)}
 		{}
 
 		int PumpMessages() const
 		{
 			MSG msg = {};
-			while (::GetMessageW(&msg, nullptr, 0, 0))
+			while (::GetMessageW(&msg, nullptr, 0, 0) != FALSE) // returns -1 on error?
 			{
-				if (!::TranslateAcceleratorW(handle.get(), hAccel, &msg))
+				auto ret = ::TranslateAcceleratorW(handle.get(), accel, &msg); // no error if hAccel is null
+				if (ret == 0)
 				{
 					::TranslateMessage(&msg);
 					::DispatchMessageW(&msg);
@@ -142,6 +159,11 @@ namespace GLib::Win
 			PAINTSTRUCT ps{};
 			auto dc = ::BeginPaint(handle.get(), &ps);
 			return Painter{PaintInfo{ps, handle.get(), dc }};
+		}
+
+		void Close() const
+		{
+			Send(WM_CLOSE);
 		}
 
 		void Destroy() const
@@ -342,23 +364,39 @@ namespace GLib::Win
 				return handle.get();
 			}
 
+			static HINSTANCE Instance()
+			{
+				return reinterpret_cast<HINSTANCE>(&__ImageBase);
+			}
+
+			LRESULT Send(UINT msg, WPARAM wParam = {}, LPARAM lParam = {}) const
+			{
+				return ::SendMessageW(Handle(), msg, wParam, lParam);
+			}
+
 	private:
 		static LRESULT APIENTRY WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) noexcept
 		{
 			LRESULT result = 0;
 			Window * window = Detail::FromHandle(hWnd);
-
+			bool handled{};
 			if (window)
 			{
 				auto oldValue = SetHandled(false, true);
 				window->OnMessage(message, wParam, lParam, result);
-				auto handled = SetHandled(oldValue, true);
-				if (handled)
-				{
-					return result;
-				}
+				handled = SetHandled(oldValue, true);
 			}
-			return ::DefWindowProc(hWnd, message, wParam, lParam);
+
+			if (!handled)
+			{
+				result = ::DefWindowProc(hWnd, message, wParam, lParam);
+			}
+
+#ifdef GLIB_DEBUG_MESSAGES
+			MessageDebug::Write(Detail::FromHandle(hWnd), hWnd, message, wParam, lParam, result);
+#endif
+
+			return result;
 		}
 	};
 }

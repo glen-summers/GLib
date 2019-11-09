@@ -1,26 +1,29 @@
 #pragma once
 
+#include <Windows.h>
+#include <Commctrl.h>
+
 #include <GLib/Win/D2d.h>
 #include <GLib/Win/Painter.h>
 #include <GLib/Win/Window.h>
 
 #include <GLib/flogging.h>
 
-constexpr int IDI_ICON = 0;
-constexpr int IDC_MAIN = 0;
-constexpr int IDS_APP_TITLE = 1;
+#include "resource.h"
 
-class MainWindow : public GLib::Win::Window
+using namespace GLib::Win;
+
+class MainWindow : public Window
 {
 	inline static GLib::Flog::Log log = GLib::Flog::LogManager::GetLog<MainWindow>();
 
-	GLib::Win::D2d::Factory factory;
-	GLib::Win::D2d::Renderer renderer{factory};
+	D2d::Factory factory;
+	D2d::Renderer renderer{factory};
 	unsigned int const exitTimeSeconds;
 
 public:
-	MainWindow(HINSTANCE /*instance*/, const GLib::Win::Size & /*size*/, unsigned int exitTimeSeconds)
-		: GLib::Win::Window(IDI_ICON, IDC_MAIN, "TestApp")
+	MainWindow(HINSTANCE /*instance*/, const Size & /*size*/, unsigned int exitTimeSeconds)
+		: Window(0, IDR_MENU, IDR_ACCELERATOR, "TestApp")
 		, exitTimeSeconds(exitTimeSeconds)
 	{
 		log.Info("Ctor");
@@ -28,10 +31,29 @@ public:
 	}
 
 protected:
+	void OnCommand(int command) noexcept override
+	{
+		switch (command)
+		{
+			case ID_HELP_ABOUT:
+			{
+				int button;
+				WarnHr(::TaskDialog(Handle(), Instance(), L"About", L"Main", L"Sub", TDCBF_CLOSE_BUTTON, TD_INFORMATION_ICON, &button), "TaskDialog");
+				break;
+			}
+
+			case ID_FILE_EXIT:
+			{
+				Close();
+				break;
+			}
+		}
+	}
+
 	void OnPaint() noexcept override
 	{
 		log.Info("OnPaint");
-		GLib::Win::Painter p = GetPainter();
+		Painter p = GetPainter();
 		(void)p;
 
 		renderer.Verify(Handle(), ClientSize());
@@ -40,7 +62,7 @@ protected:
 		renderer.End();
 	}
 
-	void OnSize(const GLib::Win::Size & size) noexcept override
+	void OnSize(const Size & size) noexcept override
 	{
 		if (renderer.Resize(size))
 		{
@@ -48,10 +70,10 @@ protected:
 		}
 	}
 
-	GLib::Win::CloseResult OnClose() noexcept
+	CloseResult OnClose() noexcept
 	{
 		log.Info("OnClose");
-		return GLib::Win::CloseResult::Allow;
+		return CloseResult::Allow;
 	}
 
 	void OnDestroy() noexcept override

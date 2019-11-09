@@ -92,7 +92,7 @@ namespace GLib::Win::Symbols
 		{
 			for (unsigned int frames = 0; frames < maxFrames; ++frames)
 			{
-				if (::StackWalk64(machineType, sym.Handle().get(), ::GetCurrentThread(), frame, context, nullptr,
+				if (::StackWalk64(machineType, sym.Handle(), ::GetCurrentThread(), frame, context, nullptr,
 					SymFunctionTableAccess64, SymGetModuleBase64, nullptr) == FALSE)
 				{
 					break;
@@ -105,7 +105,7 @@ namespace GLib::Win::Symbols
 				}
 
 				MEMORY_BASIC_INFORMATION mb = {};
-				if (::VirtualQueryEx(sym.Handle().get(), Munge<PVOID>(address), &mb, sizeof mb) != 0)
+				if (::VirtualQueryEx(sym.Handle(), Munge<PVOID>(address), &mb, sizeof mb) != 0)
 				{
 					auto module = static_cast<HMODULE>(mb.AllocationBase);
 					std::string mod = FileSystem::PathOfModule(module);

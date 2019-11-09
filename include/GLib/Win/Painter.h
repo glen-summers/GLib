@@ -35,8 +35,8 @@ namespace GLib::Win
 		Detail::PaintHolder p;
 
 	public:
-		Painter(PaintInfo && info)
-			: info{std::move(info)}
+		Painter(const PaintInfo & info)
+			: info{info}
 			, p{&this->info, Detail::PaintEnder{}}
 		{}
 	};

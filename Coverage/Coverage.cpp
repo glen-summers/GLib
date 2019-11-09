@@ -82,7 +82,7 @@ void Coverage::OnCreateProcess(DWORD processId, DWORD threadId, const CREATE_PRO
 	Symbols().Lines([&](PSRCCODEINFOW lineInfo)
 	{
 		AddLine(static_cast<const wchar_t *>(lineInfo->FileName), lineInfo->LineNumber, process, lineInfo->Address, it->second);
-	}, process.Handle().get(), info.lpBaseOfImage);
+	}, process.Handle(), info.lpBaseOfImage);
 
 	// use flog...
 	// auto now = Clock::now();
