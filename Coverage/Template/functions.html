@@ -41,11 +41,19 @@
 		</table>
 		<hr />
 
-		<table class="source" style="width: 60%; margin: auto;">
+		<table class="source" style="width: 100%; margin: auto;">
+			<tr>
+				<td>Function</td>
+				<td>Line #</td>
+				<td>Line Coverage</td>
+			</tr>
+
 			<tr gl:each="function : ${functions}" class="cov" gl:class="${function.cover}">
 				<td>
-					<pre><code><a gl:text="${function.name}" gl:href="${fileName}.html#${function.line}" href="file.html#1">Function1</a></code></pre>
+					<a gl:text="${function.name}" gl:href="${fileName}.html#${function.line}" href="file.html#1">Function1</a>
 				</td>
+				<td gl:text="${function.line}">1234</td>
+				<td gl:text="${function.coveredLines} / ${function.coverableLines}">12 / 15</td>
 			</tr>
 
 			<gl:block if="false">
@@ -53,6 +61,8 @@
 					<td>
 						<pre><code><a href="file.html#2">Function2</a></code></pre>
 					</td>
+					<td>2334</td>
+					<td>13 / 16</td>
 				</tr>
 			</gl:block>
 		</table>

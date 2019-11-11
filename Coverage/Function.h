@@ -47,6 +47,20 @@ public:
 		}
 	}
 
+	void Accumulate(const Function & other) const
+	{
+		for (const auto & fileLineIt : other.FileLines())
+		{
+			const std::map<unsigned int, bool> & lines = fileLineIt.second;
+			std::map<unsigned, bool> & pairs = fileLines[fileLineIt.first];
+
+			for (const auto & lineIt : lines)
+			{
+				pairs[lineIt.first] |= lineIt.second;
+			}
+		}
+	}
+
 	size_t CoveredLines() const
 	{
 		size_t total{};
@@ -79,4 +93,3 @@ inline bool operator < (const Function & f1, const Function & f2)
 {
 	return std::tie(f1.NameSpace(), f1.ClassName(), f1.FunctionName()) < std::tie(f2.NameSpace(), f2.ClassName(), f2.FunctionName());
 }
-

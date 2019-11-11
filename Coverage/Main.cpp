@@ -75,7 +75,7 @@ Coverage c:\Build\Main.exe C:\Report -i C:\MainCode C:\Utils\ -x C:\ExternalCode
 			}
 			else
 			{
-				throw std::runtime_error("Unexpected: "s + *it); // NOLINT(cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers) bug in clang-tidy
+				throw std::runtime_error("Unexpected: "s + arg); // NOLINT(cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers) bug in clang-tidy
 			}
 		}
 

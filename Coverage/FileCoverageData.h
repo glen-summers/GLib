@@ -30,7 +30,15 @@ public:
 
 	void AddFunction(const Function & function)
 	{
-		functions.insert(function);
+		auto it = functions.find(function);
+		if (it != functions.end())
+		{
+			it->Accumulate(function);
+		}
+		else
+		{
+			functions.insert(function);
+		}
 	}
 
 	const std::set<Function> & Functions() const

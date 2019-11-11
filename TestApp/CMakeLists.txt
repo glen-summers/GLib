@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.14)
 include(../cmake/common.cmake)
 
 #todo pch
-set(SOURCES Main.cpp)
+set(SOURCES Main.cpp TestApp.rc)
 
 include_directories(../include)
 

@@ -151,6 +151,7 @@
     <ClInclude Include="Directory.h" />
     <ClInclude Include="FileCoverageData.h" />
     <ClInclude Include="Function.h" />
+    <ClInclude Include="FunctionCoverage.h" />
     <ClInclude Include="FunctionVisitor.h" />
     <ClInclude Include="HtmlReport.h" />
     <ClInclude Include="Line.h" />

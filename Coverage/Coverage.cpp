@@ -26,6 +26,11 @@ void Coverage::AddLine(const std::wstring & fileName, unsigned lineNumber, const
 		return;
 	}
 
+	if (fileName.find(L"predefined C++ types (compiler internal)") != std::string::npos) // move constant
+	{
+		return;
+	}
+
 	if (wideFiles.find(fileName) == wideFiles.end())
 	{
 		bool include = includes.empty();
@@ -240,17 +245,66 @@ CoverageData Coverage::GetCoverageData() const
 	return move(coverageData);
 }
 
-void Coverage::Delaminate(std::string & name)
+void Coverage::RemoveTemplateDefinitions(std::string & name)
 {
-	for (size_t pos = name.find("<lambda"); pos != std::string::npos; pos = name.find("<lambda", pos))
+	constexpr char leftDoubleAngleQuote1 = '\xC2';
+	constexpr char leftDoubleAngleQuote2 = '\xAB';
+	if (name.find('<') == std::string::npos)
 	{
-		name.erase(pos, 1);
-		pos = name.find('>', pos);
-		if (pos != std::string::npos)
-		{
-			name.erase(pos, 1);
-		}
+		return;
 	}
+
+	auto pos = name.find("operator<<");
+	if (pos!=std::string::npos)
+	{
+		name[pos+sizeof("operator<<")-3] = leftDoubleAngleQuote1;
+		name[pos+sizeof("operator<<")-2] = leftDoubleAngleQuote2;
+	}
+
+	std::ostringstream s;
+	size_t depth{};
+	char lastChar{};
+
+	for (auto c : name)
+	{
+		switch (c)
+		{
+			case '<':
+			{
+				if (depth++ == 0)
+				{
+					s.put(c);
+					s.put('T');
+				}
+				break;
+			}
+
+			case '>':
+			{
+				// skip ->
+				if (lastChar!= '-' && --depth == 0)
+				{
+					s.put(c);
+				}
+				break;
+			}
+
+			default:
+			{
+				if (depth == 0)
+				{
+					s.put(c);
+				}
+			}
+		}
+		lastChar = c;
+	}
+
+	if (depth != 0)
+	{
+		throw std::runtime_error("Unbalanced angle brackets : " + name);
+	}
+	name = s.str();
 }
 
 void Coverage::CleanupFunctionNames(const std::string & name, const std::string & typeName,
@@ -258,8 +312,9 @@ void Coverage::CleanupFunctionNames(const std::string & name, const std::string 
 {
 	className = typeName;
 	functionName = name;
-	Delaminate(className);
-	Delaminate(functionName);
+
+	RemoveTemplateDefinitions(className);
+	RemoveTemplateDefinitions(functionName);
 
 	std::smatch m;
 	if (!className.empty())

@@ -29,14 +29,14 @@ namespace GLib::Eval
 		std::string ToString() const override
 		{
 			std::ostringstream stm;
-			for (auto it = container.begin(), end = container.end();;)
+			auto it = container.begin(), end = container.end();
+			if (it != end)
 			{
 				stm << Utils::ToString(*it++);
-				if (it == end)
-				{
-					break;
-				}
-				stm << ",";
+			}
+			while (it != end)
+			{
+				stm << "," << Utils::ToString(*it++);
 			}
 			return stm.str();
 		}

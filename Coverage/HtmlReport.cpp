@@ -323,24 +323,28 @@ void HtmlReport::GenerateSourceFile(std::filesystem::path & subPath, const FileC
 	e.SetCollection("lines", lines);
 	e.SetCollection("chunks", chunks);
 
-	std::set<Function> funcs;
+	std::set<FunctionCoverage> funcs;
 	for (const Function & f : data.Functions())
 	{
 		for (const auto & [file, l] : f.FileLines())
 		{
 			if (file == sourceFile)
 			{
-				if (!funcs.insert(f).second)
+				unsigned int oneBasedLine = l.begin()->first;
+				const unsigned int functionOffset = 2;
+
+				unsigned int zeroBasedLine{};
+				if (oneBasedLine >= functionOffset)
+				{
+					zeroBasedLine = oneBasedLine - 1 - functionOffset;
+				}
+
+				lines[zeroBasedLine].hasLink = true;
+				if (!funcs.emplace(f.NameSpace(), f.ClassName(), f.FunctionName(), zeroBasedLine+1,
+					static_cast<unsigned int>(f.CoveredLines()), static_cast<unsigned int>(f.AllLines())).second)
 				{
 					throw std::runtime_error("Duplicate function");
 				}
-
-				unsigned int lineWithLink = l.begin()->first - 1; // -1 one based to zero
-				if (lineWithLink != 0)
-				{
-					--lineWithLink; // -1 for function defn
-				}
-				lines[lineWithLink].hasLink = true;
 			}
 		}
 	}

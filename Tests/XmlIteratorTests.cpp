@@ -564,9 +564,9 @@ BOOST_AUTO_TEST_CASE(AttributeIteratorEnum)
 
 BOOST_AUTO_TEST_CASE(AttributeIteratorInvalidChars)
 {
-	GLIB_CHECK_RUNTIME_EXCEPTION(for (auto a : Xml::Attributes{ "0='baad'"});, "Illegal character: '0' (0x30)");
-	GLIB_CHECK_RUNTIME_EXCEPTION(for (auto a : Xml::Attributes{ "baad=baad"});, "Illegal character: 'b' (0x62)");
-	GLIB_CHECK_RUNTIME_EXCEPTION(for (auto a : Xml::Attributes{ "baad='-<-'"});, "Illegal character: '<' (0x3c)");
+	GLIB_CHECK_RUNTIME_EXCEPTION(for (auto a : Xml::Attributes{ "0='baad'"}){(void)a;};, "Illegal character: '0' (0x30)");
+	GLIB_CHECK_RUNTIME_EXCEPTION(for (auto a : Xml::Attributes{ "baad=baad"}){(void)a;};, "Illegal character: 'b' (0x62)");
+	GLIB_CHECK_RUNTIME_EXCEPTION(for (auto a : Xml::Attributes{ "baad='-<-'"}){(void)a;};, "Illegal character: '<' (0x3c)");
 }
 
 BOOST_AUTO_TEST_CASE(AttributeIteratorEnd)

@@ -3,51 +3,46 @@
 #include "GLib/Eval/Value.h"
 #include "GLib/Xml/Utils.h"
 
-#include "Function.h"
-#include "LineCover.h"
+#include "FunctionCoverage.h"
 
 template <>
-struct GLib::Eval::Visitor<Function>
+struct GLib::Eval::Visitor<FunctionCoverage>
 {
-	static void Visit(const Function & function, const std::string & propertyName, const ValueVisitor & f)
+	static void Visit(const FunctionCoverage & fc, const std::string & propertyName, const ValueVisitor & f)
 	{
 		if (propertyName == "name")
 		{
 			std::ostringstream s;
-			if (!function.NameSpace().empty())
+			if (!fc.NameSpace().empty())
 			{
-				GLib::Xml::Utils::Escape(function.NameSpace(), s) << "::";
+				GLib::Xml::Utils::Escape(fc.NameSpace(), s) << "::";
 			}
-			if (!function.ClassName().empty())
+			if (!fc.ClassName().empty())
 			{
-				GLib::Xml::Utils::Escape(function.ClassName(), s) << "::";
+				GLib::Xml::Utils::Escape(fc.ClassName(), s) << "::";
 			}
-			GLib::Xml::Utils::Escape(function.FunctionName(), s);
+			GLib::Xml::Utils::Escape(fc.FunctionName(), s);
 			return f(Value(s.str()));
 		}
-
 		if (propertyName == "line")
 		{
-			unsigned int line = 0;
-			constexpr unsigned int offset = 1;
-			for (const auto & [file, lines] : function.FileLines())
-			{
-				if (!lines.empty())
-				{
-					line = lines.begin()->first - offset;
-					break;
-				}
-			}
-
-			return f(Value(line));
+			return f(Value(fc.Line()));
+		}
+		if (propertyName == "coveredLines")
+		{
+			return f(Value(fc.CoveredLines()));
+		}
+		if (propertyName == "coverableLines")
+		{
+			return f(Value(fc.CoverableLines()));
 		}
 
 		if (propertyName == "cover")
 		{
-			// improve
-			return f(Value(function.CoveredLines() !=0 ? LineCover::Covered : LineCover::NotCovered));
+			return f(Value(fc.CoveredLines() !=0 ? LineCover::Covered : LineCover::NotCovered));
 		}
 
 		throw std::runtime_error(std::string("Unknown property : '") + propertyName + '\'');
 	}
 };
+
