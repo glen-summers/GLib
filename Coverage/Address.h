@@ -7,9 +7,10 @@ class Address
 	unsigned char oldData;
 	FileLines fileLines; // use sparse container?
 	bool visited;
+	unsigned int symbolId;
 
 public:
-	explicit Address(unsigned char oldData) : oldData(oldData), visited()
+	explicit Address(unsigned char oldData, unsigned int symbolId) : oldData(oldData), visited(), symbolId(symbolId)
 	{}
 
 	unsigned char OldData() const
@@ -30,6 +31,11 @@ public:
 	void Visit()
 	{
 		visited = true;
+	}
+
+	unsigned int SymbolId() const
+	{
+		return symbolId;
 	}
 
 	// multiple lines can be returned for the same address

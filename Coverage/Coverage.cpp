@@ -60,9 +60,13 @@ void Coverage::AddLine(const std::wstring & fileName, unsigned lineNumber, const
 	auto it = process.addresses.find(address);
 	if (it == process.addresses.end())
 	{
+		unsigned int id = symProcess.GetSymbolIdFromAddress(address);
 		const auto oldByte = symProcess.Read<unsigned char>(address);
-		it = process.addresses.emplace(address, oldByte).first;
+		it = process.addresses.emplace(address, Address{oldByte, id}).first;
+		//log.Info("Pid: {1}, Address: {0:%x}", address, process.id);
 	}
+	//log.Info("Add Line:{0}, File:{1}", lineNumber, GLib::Cvt::w2a(fileName)); //tmp
+
 	it->second.AddFileLine(fileName, lineNumber);
 
 	symProcess.Write(address, debugBreakByte);
@@ -71,8 +75,10 @@ void Coverage::AddLine(const std::wstring & fileName, unsigned lineNumber, const
 void Coverage::OnCreateProcess(DWORD processId, DWORD threadId, const CREATE_PROCESS_DEBUG_INFO& info)
 {
 	Debugger::OnCreateProcess(processId, threadId, info);
-
 	const GLib::Win::Symbols::SymProcess & process = Symbols().GetProcess(processId);
+
+	log.Info("+Process Pid:{0}, Path:{1}", processId,
+		GLib::Win::FileSystem::PathOfProcessHandle(process.Process().Handle().get()));
 
 	auto it = processes.find(processId);
 	if (it == processes.end())
@@ -80,20 +86,13 @@ void Coverage::OnCreateProcess(DWORD processId, DWORD threadId, const CREATE_PRO
 		it = processes.emplace(processId, processId).first;
 	}
 
-	// timing check, 6s with a2w, 1s with no convert, unordered map 1.6s (needs tolower on string for hash)
-	//using Clock = std::chrono::high_resolution_clock;
-	//auto startValue = Clock::now();
-
-	Symbols().Lines([&](PSRCCODEINFOW lineInfo)
 	{
-		AddLine(static_cast<const wchar_t *>(lineInfo->FileName), lineInfo->LineNumber, process, lineInfo->Address, it->second);
-	}, process.Handle(), info.lpBaseOfImage);
-
-	// use flog...
-	// auto now = Clock::now();
-	// std::chrono::duration<double> elapsedSeconds = now - startValue;
-	// auto elapsed = elapsedSeconds.count();
-	// std::cout << "Symbol lines processed in " << elapsed << " s" << std::endl;
+		GLib::Flog::ScopeLog linesScope(log, GLib::Flog::Level::Info, "EnumLines");
+		Symbols().Lines([&](PSRCCODEINFOW lineInfo)
+		{
+			AddLine(static_cast<const wchar_t *>(lineInfo->FileName), lineInfo->LineNumber, process, lineInfo->Address, it->second);
+		}, process.Handle(), info.lpBaseOfImage);
+	}
 
 	CREATE_THREAD_DEBUG_INFO threadInfo {};
 	threadInfo.hThread = info.hThread;
@@ -111,27 +110,34 @@ void Coverage::CaptureData(DWORD processId)
 
 	Process & process = pit->second;
 
-	for (const auto & a : process.addresses)
+	for (const auto & [addrValue, address] : process.addresses)
 	{
-		if (auto symbol = symProcess.TryGetSymbolFromAddress(a.first))
+		auto symbolId = address.SymbolId();
+		auto symbol = symProcess.GetSymbolFromIndex(symbolId);
+
+		auto it = process.indexToFunction.find(symbolId);
+		if (it == process.indexToFunction.end())
 		{
-			const Address & address = a.second;
+			GLib::Win::Symbols::Symbol parent;
+			symProcess.TryGetClassParent(symbolId, parent);
 
-			auto it = process.indexToFunction.find(symbol->Index());
-			if (it == process.indexToFunction.end())
+			std::string nameSpace;
+			std::string typeName;
+			std::string functionName;
+			CleanupFunctionNames(symbol.Name(), parent.Name(), nameSpace, typeName, functionName);
+
+			auto ret = process.indexToFunction.emplace(symbol.Index(), Function{ symbol.Index(), nameSpace, typeName, functionName });
+			if (!ret.second)
 			{
-				GLib::Win::Symbols::Symbol parent;
-				symProcess.TryGetClassParent(*symbol, parent);
-
-				std::string nameSpace;
-				std::string typeName;
-				std::string functionName;
-				CleanupFunctionNames(symbol->Name(), parent.Name(), nameSpace, typeName, functionName);
-				it = process.indexToFunction.emplace(symbol->Index(), Function{ nameSpace, typeName, functionName }).first;
+				throw std::runtime_error(GLib::Formatter::Format("Duplicate function id:{0}, {1}:{2}:{3}",
+					symbol.Index(), nameSpace, typeName, functionName));
 			}
+			it = ret.first;
 
-			it->second.Accumulate(address);
+			log.Info("CaptureData Pid: {4}, Id:{0} N:{1} T:{2} F:{3}", symbol.Index(), nameSpace, typeName, functionName, processId); // tmp
 		}
+
+		it->second.Accumulate(address);
 	}
 }
 
@@ -139,6 +145,7 @@ void Coverage::OnExitProcess(DWORD processId, DWORD threadId, const EXIT_PROCESS
 {
 	CaptureData(processId);
 	Debugger::OnExitProcess(processId, threadId, info);
+	log.Info("-Process Pid:{0}, Exited code: {1} ({1:%x})\n", processId, info.dwExitCode);
 }
 
 void Coverage::OnCreateThread(DWORD processId, DWORD threadId, const CREATE_THREAD_DEBUG_INFO& info)
@@ -193,27 +200,28 @@ DWORD Coverage::OnException(DWORD processId, DWORD threadId, const EXCEPTION_DEB
 
 CoverageData Coverage::GetCoverageData() const
 {
-	CaseInsensitiveMap<wchar_t, std::multimap<unsigned int, Function>> fileNameToFunctionMap; // just use map<path..>?
+	CaseInsensitiveMap<wchar_t, Functions> fileNameToFunctionMap; // just use map id
 
-	for (const auto & [id, process] : processes)
+	for (const auto & [pid, process] : processes)
 	{
-		for (const auto & [_, function] : process.indexToFunction)
+		for (const auto & [id, function] : process.indexToFunction)
 		{
 			for (const auto & [fileName, lineCoverage] : function.FileLines())
 			{
-				unsigned int startLine = lineCoverage.begin()->first;
-				fileNameToFunctionMap[fileName].emplace(startLine, function);
+				// 1. if function has overlaps log info
+				// 1.1 currentlt need to iterate all existing functions for overlap, 1.2 use lookup
+				// 2. try and merge
+
+				//unsigned int startLine = lineCoverage.begin()->first;
+				fileNameToFunctionMap[fileName].emplace(id, function); // are function ids unique accross processes?
 			}
 		}
 	}
 
 	CoverageData coverageData;
 
-	for (const auto & fd : fileNameToFunctionMap)
+	for (const auto & [filePath, idToFunctionMap] : fileNameToFunctionMap)
 	{
-		const std::filesystem::path & filePath = fd.first;
-		const std::multimap<unsigned, Function> & startLineToFunctionMap = fd.second;
-
 		auto fileIt = coverageData.find(filePath);
 		if (fileIt == coverageData.end())
 		{
@@ -222,22 +230,42 @@ CoverageData Coverage::GetCoverageData() const
 
 		FileCoverageData & fileCoverageData = fileIt->second;
 
-		for (const auto & it : startLineToFunctionMap)
+		for (const auto & it : idToFunctionMap)
 		{
 			const Function & function = it.second;
 			const FileLines & fileLines = function.FileLines();
 
-			auto justFileNameIt = fileLines.find(filePath.wstring());
+			auto justFileNameIt = fileLines.find(filePath);
 			if (justFileNameIt == fileLines.end())
 			{
 				continue;
 			}
 
+			std::ostringstream s;
+			size_t count{};
+			for (const auto & [f, l] : function.FileLines())
+			{
+				count++;
+				s << GLib::Cvt::w2a(f) << " : ";
+				for (const auto & [ll, bb] : l)
+				{
+					s << ", (" << ll << ":" << bb << ')';
+				}
+			}
+			log.Info("GetCoverageData Id:{0} N:'{1}' T:'{2}' F:'{3}' '{4}'", function.Id(), function.NameSpace(), function.ClassName(), function.FunctionName(), s.str());
+			if (count != 1)
+			{
+				log.Info("GetCoverageData gt {0}", count);
+			}
+
+			// try here: if function line range overlaps
+			// need to keep list of ranges, and min\max line number in function
+
 			fileCoverageData.AddFunction(function);
 
-			for (const auto & lineHitPair : justFileNameIt->second)
+			for (const auto & [line, covered] : justFileNameIt->second)
 			{
-				fileCoverageData.AddLine(lineHitPair.first, lineHitPair.second);
+				fileCoverageData.AddLine(line, covered);
 			}
 		}
 	}

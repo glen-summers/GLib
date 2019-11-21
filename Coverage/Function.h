@@ -7,6 +7,7 @@
 
 class Function
 {
+	unsigned int id; // remove?
 	std::string nameSpace;
 	std::string className;
 	std::string functionName;
@@ -14,12 +15,14 @@ class Function
 	FileLines mutable fileLines;
 
 public:
-	Function(std::string nameSpace, std::string className, std::string functionName)
-		: nameSpace(std::move(nameSpace))
+	Function(unsigned int id, std::string nameSpace, std::string className, std::string functionName)
+		: id(id)
+		, nameSpace(std::move(nameSpace))
 		, className(std::move(className))
 		, functionName(std::move(functionName))
 	{}
 
+	unsigned int Id() const { return id; }
 	const std::string & NameSpace() const { return nameSpace; }
 	const std::string & ClassName() const { return className; }
 	const std::string & FunctionName() const { return functionName; }
@@ -47,7 +50,7 @@ public:
 		}
 	}
 
-	void Accumulate(const Function & other) const
+	/*void Accumulate(const Function & other) const
 	{
 		for (const auto & fileLineIt : other.FileLines())
 		{
@@ -59,7 +62,7 @@ public:
 				pairs[lineIt.first] |= lineIt.second;
 			}
 		}
-	}
+	}*/
 
 	size_t CoveredLines() const
 	{

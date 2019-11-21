@@ -5,6 +5,8 @@
 
 #include "GLib/Win/Debugger.h"
 
+#include "GLib/flogging.h"
+
 #include <regex>
 
 class Coverage : public GLib::Win::Debugger
@@ -21,6 +23,8 @@ class Coverage : public GLib::Win::Debugger
 
 	WideStrings wideFiles;
 	Processes processes;
+
+	inline static auto log = GLib::Flog::LogManager::GetLog<Coverage>();
 
 public:
 	Coverage(const std::string & executable, bool debugChildProcesses, const Strings & includes, const Strings & excludes)

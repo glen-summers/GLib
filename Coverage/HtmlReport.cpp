@@ -324,7 +324,7 @@ void HtmlReport::GenerateSourceFile(std::filesystem::path & subPath, const FileC
 	e.SetCollection("chunks", chunks);
 
 	std::set<FunctionCoverage> funcs;
-	for (const Function & f : data.Functions())
+	for (const auto & [id, f] : data.Functions())
 	{
 		for (const auto & [file, l] : f.FileLines())
 		{
@@ -339,8 +339,11 @@ void HtmlReport::GenerateSourceFile(std::filesystem::path & subPath, const FileC
 					zeroBasedLine = oneBasedLine - 1 - functionOffset;
 				}
 
+				// ok now have duplicate function names but different ids (inlined?), so see if there are source line number overlaps and merge
+				// unfortunately the functions dont have all the lines due to one shot breakpoints
+
 				lines[zeroBasedLine].hasLink = true;
-				if (!funcs.emplace(f.NameSpace(), f.ClassName(), f.FunctionName(), zeroBasedLine+1,
+				if (!funcs.emplace(id, f.NameSpace(), f.ClassName(), f.FunctionName(), zeroBasedLine+1,
 					static_cast<unsigned int>(f.CoveredLines()), static_cast<unsigned int>(f.AllLines())).second)
 				{
 					throw std::runtime_error("Duplicate function");

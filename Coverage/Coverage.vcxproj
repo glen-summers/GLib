@@ -183,6 +183,11 @@
     <None Include="Template\functions.html" />
     <None Include="Template\rootDirectory.html" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\GLib\GLib.vcxproj">
+      <Project>{ae9ccd38-5a24-4794-ac41-ba9bb82f8b13}</Project>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

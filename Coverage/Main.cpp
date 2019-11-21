@@ -82,14 +82,14 @@ Coverage c:\Build\Main.exe C:\Report -i C:\MainCode C:\Utils\ -x C:\ExternalCode
 		Coverage dbg(executable, debugChildProcesses, includes, excludes);
 		constexpr unsigned TimeoutMilliseconds = 1000; // just use INFINITE?
 		while(dbg.ProcessEvents(TimeoutMilliseconds));
-		std::cout << "Exited: Process exited with code: " << dbg.ExitCode() << std::endl;
 
 		HtmlReport report(executable, std::filesystem::path{reportPath}/ "HtmlReport", dbg.GetCoverageData());
 		(void)report;
 	}
 	catch (const std::exception & e)
 	{
-		std::cout << e.what() << std::endl;
+		std::cout << "\x1b[31m" << "\x1b[1m" << e.what() << "\x1b[m" << '\n'; // consts
+
 		errorCode = 1;
 	}
 	return errorCode;

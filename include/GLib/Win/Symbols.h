@@ -189,6 +189,29 @@ namespace GLib::Win::Symbols
 			WriteMemory(address, &value, sizeof(T), absolute);
 		}
 
+		Symbol GetSymbolFromIndex(DWORD index) const
+		{
+			std::array<SYMBOL_INFOW, 2 + MAX_SYM_NAME * sizeof(wchar_t) / sizeof(SYMBOL_INFO)> buffer {};
+			auto const symbuf = buffer.data();
+			symbuf->SizeOfStruct = sizeof(SYMBOL_INFOW);
+			symbuf->MaxNameLen = MAX_SYM_NAME;
+
+			BOOL result = ::SymFromIndexW(process.Handle().get(), baseOfImage, index, symbuf);
+			Util::AssertTrue(result, "SymFromIndexW");
+			return { symbuf->Index, symbuf->TypeIndex, static_cast<enum SymTagEnum>(symbuf->Tag), Cvt::w2a(std::wstring_view{static_cast<const wchar_t *>(symbuf->Name)}), 0 };
+		}
+
+		ULONG GetSymbolIdFromAddress(uint64_t address) const
+		{
+			SYMBOL_INFOW buffer {};
+			auto const symbuf = &buffer;
+			symbuf->SizeOfStruct = sizeof(SYMBOL_INFOW);
+			DWORD64 displacement;
+			BOOL result = ::SymFromAddrW(process.Handle().get(), address, &displacement, symbuf);
+			Util::AssertTrue(result, "SymFromAddrW");
+			return symbuf->Index;
+		}
+
 		std::optional<Symbol> TryGetSymbolFromAddress(uint64_t address) const
 		{
 			std::optional<Symbol> symbol;
@@ -221,7 +244,7 @@ namespace GLib::Win::Symbols
 			return move(line);
 		}
 
-		bool TryGetClassParent(const Symbol & symbol, Symbol & result) const
+		bool TryGetClassParent(LONG symbolId, Symbol & result) const
 		{
 			DWORD typeIndexOfClassParent;
 
@@ -229,7 +252,7 @@ namespace GLib::Win::Symbols
 			// and the result from TI_GET_CLASSPARENTID is "The type index of the class parent."
 			// so we then get TI_GET_SYMINDEX for indexOfClassParent
 			// but seems to get indexOfClassParent having the same value of typeIndexOfClassParent
-			if (::SymGetTypeInfo(process.Handle().get(), baseOfImage, symbol.TypeIndex(), TI_GET_CLASSPARENTID, &typeIndexOfClassParent) == FALSE)
+			if (::SymGetTypeInfo(process.Handle().get(), baseOfImage, symbolId, TI_GET_CLASSPARENTID, &typeIndexOfClassParent) == FALSE)
 			{
 				return false;
 			}

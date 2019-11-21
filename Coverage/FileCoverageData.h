@@ -6,12 +6,23 @@
 #include <map>
 #include <utility>
 
+using LineCoverage = std::map<unsigned int, unsigned int>;
+using Functions = std::map<unsigned int, Function>;
+/* use struct node_hash?
+{
+	std::size_t operator()(const Function & f) const
+	{
+		return std::hash<unsigned int>()(f.Id());
+	}
+}*/
+
 class FileCoverageData
 {
 	std::filesystem::path const path;
 	unsigned int coveredLines;
-	std::map<unsigned int, unsigned int> lineCoverage;
-	std::set<Function> functions;
+	LineCoverage lineCoverage;
+
+	Functions functions;
 
 public:
 	FileCoverageData(std::filesystem::path path)
@@ -30,18 +41,19 @@ public:
 
 	void AddFunction(const Function & function)
 	{
-		auto it = functions.find(function);
+		auto it = functions.find(function.Id());
 		if (it != functions.end())
 		{
-			it->Accumulate(function);
+			throw std::runtime_error("unexpected");
+			//it->Accumulate(function);
 		}
 		else
 		{
-			functions.insert(function);
+			functions.emplace(function.Id(), function);
 		}
 	}
 
-	const std::set<Function> & Functions() const
+	const Functions & Functions() const
 	{
 		return functions;
 	}
@@ -64,7 +76,7 @@ public:
 	unsigned int CoveredFunctions() const
 	{
 		unsigned int value{};
-		for (const auto & f : functions) // improve
+		for (const auto & [id, f] : functions) // improve
 		{
 			if (f.CoveredLines() != 0)
 			{
@@ -79,7 +91,7 @@ public:
 		return static_cast<unsigned int>(functions.size());
 	}
 
-	const std::map<unsigned int, unsigned int> & LineCoverage() const
+	const LineCoverage & LineCoverage() const
 	{
 		return lineCoverage;
 	}

@@ -218,6 +218,15 @@ void FileLogger::WriteHeader(std::ostream &writer)
 	std::tm gtm {};
 	GLib::Compat::GmTime(gtm, t);
 
+	std::string path = GLib::Compat::ProcessPath();
+	std::string cmd = GLib::Cvt::w2a(::GetCommandLineW());
+
+	size_t pos = cmd.find(path);
+	if (pos != std::string::npos)
+	{
+		cmd.erase(pos, path.size());
+	}
+
 	static constexpr bool is64BitProcess = sizeof(void*) == 8;
 	static constexpr int bits = is64BitProcess ? 64 : 32; // more?
 
@@ -225,7 +234,8 @@ void FileLogger::WriteHeader(std::ostream &writer)
 		<< "Opened      : " << std::put_time(&tm, "%d %b %Y, %H:%M:%S (%z)") << std::endl
 		<< "OpenedUtc   : " << std::put_time(&gtm, "%F %TZ") << std::endl
 		<< "ProcessName : (" << bits << " bit) " << GLib::Compat::ProcessName() << std::endl
-		<< "FullPath    : " << GLib::Compat::ProcessPath() << std::endl
+		<< "FullPath    : " << path << std::endl
+		<< "CmdLine     : " << cmd << std::endl
 		<< "ProcessId   : " << GLib::Compat::ProcessId() << std::endl
 		<< "ThreadId    : " << std::this_thread::get_id() << std::endl;
 	//Formatter::Format(writer, "UserName    : {0}\\{1}", Environment.UserDomainName, Environment.UserName);
