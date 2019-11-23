@@ -2,18 +2,22 @@
 
 #include "Types.h"
 
+#include "GLib/flogging.h"
+
 #include <list>
 
 class FileCoverageData;
 
 class HtmlReport
 {
+	inline static auto log = GLib::Flog::LogManager::GetLog<HtmlReport>();
+
 	std::string testName;
 	std::string time;
 	const std::filesystem::path & htmlPath;
 	std::set<std::filesystem::path> rootPaths;
 	std::filesystem::path cssPath;
-	std::string rootTemplate; // store compiled Nodes(ren)
+	std::string rootTemplate;
 	std::string dirTemplate;
 	std::string fileTemplate;
 	std::string functionsTemplate;

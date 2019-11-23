@@ -11,6 +11,8 @@
 
 class Coverage : public GLib::Win::Debugger
 {
+	inline static auto log = GLib::Flog::LogManager::GetLog<Coverage>();
+
 	static constexpr unsigned char debugBreakByte = 0xCC;
 	static constexpr unsigned int FooFoo = 0xf00f00;
 	static constexpr unsigned int FeeFee = 0xfeefee;
@@ -24,15 +26,24 @@ class Coverage : public GLib::Win::Debugger
 	WideStrings wideFiles;
 	Processes processes;
 
-	inline static auto log = GLib::Flog::LogManager::GetLog<Coverage>();
-
 public:
 	Coverage(const std::string & executable, bool debugChildProcesses, const Strings & includes, const Strings & excludes)
 		: Debugger(executable, debugChildProcesses)
 		, executable(executable)
 		, includes(a2w(includes))
 		, excludes(a2w(excludes))
-	{}
+	{
+		GLib::Flog::Detail::Stream() << std::boolalpha;
+		log.Info("Executable: {0}, DebugSubProcess: {1}", executable, debugChildProcesses);
+		for (auto i : includes)
+		{
+			log.Info("Include: {0}", i);
+		}
+		for (auto x : excludes)
+		{
+			log.Info("Exclude: {0}", x);
+		}
+	}
 
 	CoverageData GetCoverageData() const;
 

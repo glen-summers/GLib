@@ -4,17 +4,11 @@
 
 #include <filesystem>
 #include <map>
+#include <set>
 #include <utility>
 
 using LineCoverage = std::map<unsigned int, unsigned int>;
-using Functions = std::map<unsigned int, Function>;
-/* use struct node_hash?
-{
-	std::size_t operator()(const Function & f) const
-	{
-		return std::hash<unsigned int>()(f.Id());
-	}
-}*/
+using Functions = std::multiset<Function>;
 
 class FileCoverageData
 {
@@ -39,17 +33,26 @@ public:
 		}
 	}
 
-	void AddFunction(const Function & function)
+	void AddFunction(const Function & addedFunction)
 	{
-		auto it = functions.find(function.Id());
-		if (it != functions.end())
+		bool accumulated{};
+		auto lowerIt = functions.lower_bound(addedFunction);
+		if (lowerIt != functions.end())
 		{
-			throw std::runtime_error("unexpected");
-			//it->Accumulate(function);
+			auto upperIt = functions.upper_bound(addedFunction);
+			for (auto it = lowerIt; it != upperIt; ++it)
+			{
+				if (it->Merge(addedFunction, path))
+				{
+					accumulated = true;
+					break;
+				}
+			}
 		}
-		else
+
+		if (!accumulated)
 		{
-			functions.emplace(function.Id(), function);
+			functions.emplace(addedFunction);
 		}
 	}
 
@@ -76,7 +79,7 @@ public:
 	unsigned int CoveredFunctions() const
 	{
 		unsigned int value{};
-		for (const auto & [id, f] : functions) // improve
+		for (const auto & f : functions) // improve
 		{
 			if (f.CoveredLines() != 0)
 			{

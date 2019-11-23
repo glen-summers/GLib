@@ -8,9 +8,9 @@ namespace GLib::Util
 {
 	namespace Detail
 	{
-		template <typename CharType> const CharType * DeFaultDeliminator();
-		template <> inline const char * DeFaultDeliminator() { return ","; }
-		template <> inline const wchar_t * DeFaultDeliminator() { return L","; }
+		template <typename CharType> const CharType * DefaultDelimiter();
+		template <> inline const char * DefaultDelimiter() { return ","; }
+		template <> inline const wchar_t * DefaultDelimiter() { return L","; }
 
 		template <typename StringType>
 		class Splitter
@@ -20,7 +20,7 @@ namespace GLib::Util
 			StringType delimiter;
 
 		public:
-			Splitter(StringType value, const StringType & delimiter = DeFaultDeliminator<typename StringType::value_type>())
+			Splitter(StringType value, const StringType & delimiter = DefaultDelimiter<typename StringType::value_type>())
 				: value(move(value))
 				, delimiter(delimiter)
 			{
@@ -101,7 +101,7 @@ namespace GLib::Util
 	using SplitterView = Detail::Splitter<std::string_view>;
 
 	template <typename StringType, typename OutputIterator>
-	void Split(const StringType & value, OutputIterator it, const StringType & delimiter = Detail::DeFaultDeliminator<typename StringType::value_type>())
+	void Split(const StringType & value, OutputIterator it, const StringType & delimiter = Detail::DefaultDelimiter<typename StringType::value_type>())
 	{
 		Detail::Splitter<StringType> splitter { value, delimiter };
 		std::copy(splitter.begin(), splitter.end(), it);

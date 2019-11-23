@@ -46,6 +46,9 @@ HtmlReport::HtmlReport(std::string testName, const std::filesystem::path & htmlP
 	, fileTemplate(LoadHtml(IDR_FILE))
 	, functionsTemplate(LoadHtml(IDR_FUNCTIONS))
 {
+	GLib::Flog::ScopeLog scopeLog(log, GLib::Flog::Level::Info, "HtmlReport");
+	(void)scopeLog;
+
 	for (const auto & fileDataPair : fileCoverage)
 	{
 		const FileCoverageData & data = fileDataPair.second;
@@ -323,15 +326,15 @@ void HtmlReport::GenerateSourceFile(std::filesystem::path & subPath, const FileC
 	e.SetCollection("lines", lines);
 	e.SetCollection("chunks", chunks);
 
-	std::set<FunctionCoverage> funcs;
-	for (const auto & [id, f] : data.Functions())
+	std::multiset<FunctionCoverage> funcs;
+	for (const auto & f : data.Functions())
 	{
 		for (const auto & [file, l] : f.FileLines())
 		{
 			if (file == sourceFile)
 			{
 				unsigned int oneBasedLine = l.begin()->first;
-				const unsigned int functionOffset = 2;
+				const unsigned int functionOffset = 1; // 0 can causes out of range for debug globale delete, todo remove this and replace with jscript offset on navigate
 
 				unsigned int zeroBasedLine{};
 				if (oneBasedLine >= functionOffset)
@@ -339,15 +342,9 @@ void HtmlReport::GenerateSourceFile(std::filesystem::path & subPath, const FileC
 					zeroBasedLine = oneBasedLine - 1 - functionOffset;
 				}
 
-				// ok now have duplicate function names but different ids (inlined?), so see if there are source line number overlaps and merge
-				// unfortunately the functions dont have all the lines due to one shot breakpoints
-
 				lines[zeroBasedLine].hasLink = true;
-				if (!funcs.emplace(id, f.NameSpace(), f.ClassName(), f.FunctionName(), zeroBasedLine+1,
-					static_cast<unsigned int>(f.CoveredLines()), static_cast<unsigned int>(f.AllLines())).second)
-				{
-					throw std::runtime_error("Duplicate function");
-				}
+				funcs.emplace(f.NameSpace(), f.ClassName(), f.FunctionName(), zeroBasedLine+1, static_cast<unsigned int>(f.CoveredLines()),
+					static_cast<unsigned int>(f.AllLines()));
 			}
 		}
 	}

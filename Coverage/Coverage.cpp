@@ -63,9 +63,7 @@ void Coverage::AddLine(const std::wstring & fileName, unsigned lineNumber, const
 		unsigned int id = symProcess.GetSymbolIdFromAddress(address);
 		const auto oldByte = symProcess.Read<unsigned char>(address);
 		it = process.addresses.emplace(address, Address{oldByte, id}).first;
-		//log.Info("Pid: {1}, Address: {0:%x}", address, process.id);
 	}
-	//log.Info("Add Line:{0}, File:{1}", lineNumber, GLib::Cvt::w2a(fileName)); //tmp
 
 	it->second.AddFileLine(fileName, lineNumber);
 
@@ -86,28 +84,30 @@ void Coverage::OnCreateProcess(DWORD processId, DWORD threadId, const CREATE_PRO
 		it = processes.emplace(processId, processId).first;
 	}
 
-	{
-		GLib::Flog::ScopeLog linesScope(log, GLib::Flog::Level::Info, "EnumLines");
-		Symbols().Lines([&](PSRCCODEINFOW lineInfo)
-		{
-			AddLine(static_cast<const wchar_t *>(lineInfo->FileName), lineInfo->LineNumber, process, lineInfo->Address, it->second);
-		}, process.Handle(), info.lpBaseOfImage);
-	}
-
 	CREATE_THREAD_DEBUG_INFO threadInfo {};
 	threadInfo.hThread = info.hThread;
 	OnCreateThread(processId, threadId, threadInfo);
+
+	GLib::Flog::ScopeLog scopeLog(log, GLib::Flog::Level::Info, "EnumLines");
+	(void)scopeLog;
+
+	Symbols().Lines([&](PSRCCODEINFOW lineInfo)
+	{
+		AddLine(static_cast<const wchar_t *>(lineInfo->FileName), lineInfo->LineNumber, process, lineInfo->Address, it->second);
+	}, process.Handle(), info.lpBaseOfImage);
 }
 
 void Coverage::CaptureData(DWORD processId)
 {
+	GLib::Flog::ScopeLog scopeLog(log, GLib::Flog::Level::Info, "CaptureData");
+	(void)scopeLog;
+
 	const GLib::Win::Symbols::SymProcess & symProcess = Symbols().GetProcess(processId);
 	auto pit = processes.find(processId);
 	if (pit == processes.end())
 	{
 		throw std::runtime_error("Process not found");
 	}
-
 	Process & process = pit->second;
 
 	for (const auto & [addrValue, address] : process.addresses)
@@ -126,15 +126,13 @@ void Coverage::CaptureData(DWORD processId)
 			std::string functionName;
 			CleanupFunctionNames(symbol.Name(), parent.Name(), nameSpace, typeName, functionName);
 
-			auto ret = process.indexToFunction.emplace(symbol.Index(), Function{ symbol.Index(), nameSpace, typeName, functionName });
+			auto ret = process.indexToFunction.emplace(symbol.Index(), Function{ nameSpace, typeName, functionName });
 			if (!ret.second)
 			{
 				throw std::runtime_error(GLib::Formatter::Format("Duplicate function id:{0}, {1}:{2}:{3}",
 					symbol.Index(), nameSpace, typeName, functionName));
 			}
 			it = ret.first;
-
-			log.Info("CaptureData Pid: {4}, Id:{0} N:{1} T:{2} F:{3}", symbol.Index(), nameSpace, typeName, functionName, processId); // tmp
 		}
 
 		it->second.Accumulate(address);
@@ -145,7 +143,7 @@ void Coverage::OnExitProcess(DWORD processId, DWORD threadId, const EXIT_PROCESS
 {
 	CaptureData(processId);
 	Debugger::OnExitProcess(processId, threadId, info);
-	log.Info("-Process Pid:{0}, Exited code: {1} ({1:%x})\n", processId, info.dwExitCode);
+	log.Info("-Process Pid:{0}, Exited code: {1} ({1:%x})", processId, info.dwExitCode);
 }
 
 void Coverage::OnCreateThread(DWORD processId, DWORD threadId, const CREATE_THREAD_DEBUG_INFO& info)
@@ -200,7 +198,10 @@ DWORD Coverage::OnException(DWORD processId, DWORD threadId, const EXCEPTION_DEB
 
 CoverageData Coverage::GetCoverageData() const
 {
-	CaseInsensitiveMap<wchar_t, Functions> fileNameToFunctionMap; // just use map id
+	GLib::Flog::ScopeLog scopeLog(log, GLib::Flog::Level::Info, "GetCoverageData");
+	(void)scopeLog;
+
+	CaseInsensitiveMap<wchar_t, Functions> fileNameToFunctionMap;
 
 	for (const auto & [pid, process] : processes)
 	{
@@ -208,19 +209,14 @@ CoverageData Coverage::GetCoverageData() const
 		{
 			for (const auto & [fileName, lineCoverage] : function.FileLines())
 			{
-				// 1. if function has overlaps log info
-				// 1.1 currentlt need to iterate all existing functions for overlap, 1.2 use lookup
-				// 2. try and merge
-
-				//unsigned int startLine = lineCoverage.begin()->first;
-				fileNameToFunctionMap[fileName].emplace(id, function); // are function ids unique accross processes?
+				fileNameToFunctionMap[fileName].emplace(function);
 			}
 		}
 	}
 
 	CoverageData coverageData;
 
-	for (const auto & [filePath, idToFunctionMap] : fileNameToFunctionMap)
+	for (const auto & [filePath, functions] : fileNameToFunctionMap)
 	{
 		auto fileIt = coverageData.find(filePath);
 		if (fileIt == coverageData.end())
@@ -230,9 +226,8 @@ CoverageData Coverage::GetCoverageData() const
 
 		FileCoverageData & fileCoverageData = fileIt->second;
 
-		for (const auto & it : idToFunctionMap)
+		for (const auto & function : functions)
 		{
-			const Function & function = it.second;
 			const FileLines & fileLines = function.FileLines();
 
 			auto justFileNameIt = fileLines.find(filePath);
@@ -240,26 +235,6 @@ CoverageData Coverage::GetCoverageData() const
 			{
 				continue;
 			}
-
-			std::ostringstream s;
-			size_t count{};
-			for (const auto & [f, l] : function.FileLines())
-			{
-				count++;
-				s << GLib::Cvt::w2a(f) << " : ";
-				for (const auto & [ll, bb] : l)
-				{
-					s << ", (" << ll << ":" << bb << ')';
-				}
-			}
-			log.Info("GetCoverageData Id:{0} N:'{1}' T:'{2}' F:'{3}' '{4}'", function.Id(), function.NameSpace(), function.ClassName(), function.FunctionName(), s.str());
-			if (count != 1)
-			{
-				log.Info("GetCoverageData gt {0}", count);
-			}
-
-			// try here: if function line range overlaps
-			// need to keep list of ranges, and min\max line number in function
 
 			fileCoverageData.AddFunction(function);
 

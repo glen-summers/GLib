@@ -6,6 +6,8 @@
 
 #include "GLib/Span.h"
 
+#include "GLib/flogging.h"
+
 #include <iostream>
 
 using namespace std::string_literals;
@@ -78,6 +80,9 @@ Coverage c:\Build\Main.exe C:\Report -i C:\MainCode C:\Utils\ -x C:\ExternalCode
 				throw std::runtime_error("Unexpected: "s + arg); // NOLINT(cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers) bug in clang-tidy
 			}
 		}
+
+		const GLib::Flog::ScopeLog & scope = {GLib::Flog::LogManager::GetLog("Main"), GLib::Flog::Level::Info, "Total"};
+		(void)scope;
 
 		Coverage dbg(executable, debugChildProcesses, includes, excludes);
 		constexpr unsigned TimeoutMilliseconds = 1000; // just use INFINITE?

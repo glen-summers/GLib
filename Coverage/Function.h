@@ -7,7 +7,6 @@
 
 class Function
 {
-	unsigned int id; // remove?
 	std::string nameSpace;
 	std::string className;
 	std::string functionName;
@@ -15,14 +14,12 @@ class Function
 	FileLines mutable fileLines;
 
 public:
-	Function(unsigned int id, std::string nameSpace, std::string className, std::string functionName)
-		: id(id)
-		, nameSpace(std::move(nameSpace))
+	Function(std::string nameSpace, std::string className, std::string functionName)
+		: nameSpace(std::move(nameSpace))
 		, className(std::move(className))
 		, functionName(std::move(functionName))
 	{}
 
-	unsigned int Id() const { return id; }
 	const std::string & NameSpace() const { return nameSpace; }
 	const std::string & ClassName() const { return className; }
 	const std::string & FunctionName() const { return functionName; }
@@ -50,19 +47,48 @@ public:
 		}
 	}
 
-	/*void Accumulate(const Function & other) const
+	bool Merge(const Function & added, const std::filesystem::path & path) const
 	{
-		for (const auto & fileLineIt : other.FileLines())
-		{
-			const std::map<unsigned int, bool> & lines = fileLineIt.second;
-			std::map<unsigned, bool> & pairs = fileLines[fileLineIt.first];
+		auto addedIt = added.fileLines.find(path);
+		auto existingIt = fileLines.find(path);
 
-			for (const auto & lineIt : lines)
-			{
-				pairs[lineIt.first] |= lineIt.second;
-			}
+		if (existingIt == fileLines.end() || addedIt == added.fileLines.end())
+		{
+			return false;
 		}
-	}*/
+
+		bool merged{};
+		if (Overlap(existingIt->second, addedIt->second))
+		{
+			for (auto [line, covered] : addedIt->second)
+			{
+				existingIt->second[line] |= covered;
+			}
+			merged = true;
+		}
+
+		return merged;
+	}
+
+	static bool Overlap(const Lines & lines1, const Lines & lines2)
+	{
+		if (lines1.empty() || lines2.empty())
+		{
+			return false;
+		}
+
+		if (lines1.rbegin()->first < lines2.begin()->first)
+		{
+			return false;
+		}
+
+		if (lines2.rbegin()->first < lines1.begin()->first)
+		{
+			return false;
+		}
+
+		return true;
+	}
 
 	size_t CoveredLines() const
 	{
@@ -79,6 +105,31 @@ public:
 			}
 		}
 		return total;
+	}
+
+	static bool HaveOverlap(const Function & f1, const Function & f2)
+	{
+		auto first1 = f1.FileLines().begin(), last1 = f1.FileLines().end();
+		auto first2 = f2.FileLines().begin(), last2 = f2.FileLines().end();
+
+		// dumb version
+		while (first1 != last1 && first2 != last2)
+		{
+			if (*first1<*first2)
+			{
+				++first1;
+			}
+			else if (*first2<*first1)
+			{
+				++first2;
+			}
+			else
+			{
+				auto val = *first1;
+				++first1;
+				++first2;
+			}
+		}
 	}
 
 	size_t AllLines() const
