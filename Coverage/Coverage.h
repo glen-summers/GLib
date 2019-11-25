@@ -57,7 +57,6 @@ private:
 	void OnExitThread(DWORD processId, DWORD threadId, const EXIT_THREAD_DEBUG_INFO & info) override;
 	DWORD OnException(DWORD processId, DWORD threadId, const EXCEPTION_DEBUG_INFO & info) override;
 
-	static void RemoveTemplateDefinitions(std::string & name);
 	void CleanupFunctionNames(const std::string & name, const std::string & typeName,
 	std::string & nameSpace, std::string & className, std::string & functionName) const;
 	void CaptureData(DWORD processId);

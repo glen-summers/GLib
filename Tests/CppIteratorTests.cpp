@@ -1,6 +1,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include "../Coverage/CppHtmlGenerator.h"
+#include "../Coverage/SymbolNameUtils.h"
 
 #include "TestUtils.h"
 
@@ -585,6 +586,73 @@ BOOST_AUTO_TEST_CASE(KeywordAndCommonType)
 		"{};";
 
 	TestUtils::Compare(stm.str(), expected);
+}
+
+BOOST_AUTO_TEST_CASE(SymbolNameCleanup)
+{
+	std::string value = "NoCleanUp";
+	RemoveTemplateDefinitions(value);
+	BOOST_TEST("NoCleanUp" == value);
+
+	value = "Foo<T1,T2>::Bar<T3>";
+	RemoveTemplateDefinitions(value);
+	BOOST_TEST("Foo<T>::Bar<T>" == value);
+
+	value = "Foo<Bar, Baz>::Qux<Quux, Quuz>";
+	RemoveTemplateDefinitions(value);
+	BOOST_TEST("Foo<T>::Qux<T>" == value);
+
+	value = "Foo<Bar, Baz<Qux<Quux, Quuz>>>::Corge";
+	RemoveTemplateDefinitions(value);
+	BOOST_TEST("Foo<T>::Corge" == value);
+}
+
+BOOST_AUTO_TEST_CASE(SymbolNamePreOps)
+{
+	std::string value = "Foo<Bar>::operator->";
+	RemoveTemplateDefinitions(value);
+	BOOST_TEST("Foo<T>::operator->" == value);
+
+	value = "operator> Foo<Bar>";
+	RemoveTemplateDefinitions(value);
+	BOOST_TEST("operator> Foo<T>" == value);
+
+	value = "operator>> Foo<Bar>";
+	RemoveTemplateDefinitions(value);
+	BOOST_TEST("operator>> Foo<T>" == value);
+
+	value = "operator< Foo<Bar>";
+	RemoveTemplateDefinitions(value);
+	BOOST_TEST("operator< Foo<T>" == value);
+
+	value = "operator<< Foo<Bar>";
+	RemoveTemplateDefinitions(value);
+	BOOST_TEST("operator<< Foo<T>" == value);
+}
+
+BOOST_AUTO_TEST_CASE(SymbolNamePostOps)
+{
+  std::string value = "Foo<Bar> operator>";
+	RemoveTemplateDefinitions(value);
+	BOOST_TEST("Foo<T> operator>" == value);
+
+	value = "Foo<Bar> operator>>";
+	RemoveTemplateDefinitions(value);
+	BOOST_TEST("Foo<T> operator>>" == value);
+
+	value = "Foo<Bar> operator<";
+	RemoveTemplateDefinitions(value);
+	BOOST_TEST("Foo<T> operator<" == value);
+
+	value = "Foo<Bar> operator<<";
+	RemoveTemplateDefinitions(value);
+	BOOST_TEST("Foo<T> operator<<" == value);
+}
+
+BOOST_AUTO_TEST_CASE(SymbolNameError)
+{
+	std::string value = ">foo<";
+	GLIB_CHECK_RUNTIME_EXCEPTION({RemoveTemplateDefinitions(value);}, "Unable to parse symbol: >foo<");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

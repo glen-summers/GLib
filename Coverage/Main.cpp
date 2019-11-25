@@ -88,7 +88,7 @@ Coverage c:\Build\Main.exe C:\Report -i C:\MainCode C:\Utils\ -x C:\ExternalCode
 		constexpr unsigned TimeoutMilliseconds = 1000; // just use INFINITE?
 		while(dbg.ProcessEvents(TimeoutMilliseconds));
 
-		HtmlReport report(executable, std::filesystem::path{reportPath}/ "HtmlReport", dbg.GetCoverageData());
+		HtmlReport report(executable, reportPath, dbg.GetCoverageData());
 		(void)report;
 	}
 	catch (const std::exception & e)

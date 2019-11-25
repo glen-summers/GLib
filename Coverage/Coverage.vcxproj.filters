@@ -75,6 +75,9 @@
     <ClInclude Include="FunctionCoverage.h">
       <Filter>TemplateTypes</Filter>
     </ClInclude>
+    <ClInclude Include="SymbolNameUtils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">

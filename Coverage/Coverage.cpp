@@ -5,8 +5,7 @@
 #include "FileCoverageData.h"
 #include "Function.h"
 #include "HtmlReport.h"
-
-#include "GLib/Xml/Printer.h"
+#include "SymbolNameUtils.h"
 
 #include <fstream>
 
@@ -246,68 +245,6 @@ CoverageData Coverage::GetCoverageData() const
 	}
 
 	return move(coverageData);
-}
-
-void Coverage::RemoveTemplateDefinitions(std::string & name)
-{
-	constexpr char leftDoubleAngleQuote1 = '\xC2';
-	constexpr char leftDoubleAngleQuote2 = '\xAB';
-	if (name.find('<') == std::string::npos)
-	{
-		return;
-	}
-
-	auto pos = name.find("operator<<");
-	if (pos!=std::string::npos)
-	{
-		name[pos+sizeof("operator<<")-3] = leftDoubleAngleQuote1;
-		name[pos+sizeof("operator<<")-2] = leftDoubleAngleQuote2;
-	}
-
-	std::ostringstream s;
-	size_t depth{};
-	char lastChar{};
-
-	for (auto c : name)
-	{
-		switch (c)
-		{
-			case '<':
-			{
-				if (depth++ == 0)
-				{
-					s.put(c);
-					s.put('T');
-				}
-				break;
-			}
-
-			case '>':
-			{
-				// skip ->
-				if (lastChar!= '-' && --depth == 0)
-				{
-					s.put(c);
-				}
-				break;
-			}
-
-			default:
-			{
-				if (depth == 0)
-				{
-					s.put(c);
-				}
-			}
-		}
-		lastChar = c;
-	}
-
-	if (depth != 0)
-	{
-		throw std::runtime_error("Unbalanced angle brackets : " + name);
-	}
-	name = s.str();
 }
 
 void Coverage::CleanupFunctionNames(const std::string & name, const std::string & typeName,

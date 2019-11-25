@@ -160,6 +160,7 @@
     <ClInclude Include="Process.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="RootDirs.h" />
+    <ClInclude Include="SymbolNameUtils.h" />
     <ClInclude Include="Types.h" />
   </ItemGroup>
   <ItemGroup>
