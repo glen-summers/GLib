@@ -15,7 +15,7 @@ thread_local LogState FileLogger::logState;
 
 FileLogger::FileLogger()
 	: baseFileName(GLib::Compat::ProcessName() + "_" + std::to_string(GLib::Compat::ProcessId()))
-	, path(fs::temp_directory_path() / "glogfiles")
+	, path(GLib::Compat::filesystem::temp_directory_path() / "glogfiles")
 {
 	create_directories(path);
 }
@@ -61,7 +61,7 @@ StreamInfo FileLogger::GetStream() const
 	// 	Compat::LocalTime(tm, t);
 	// 	s << "_" << std::put_time(&tm, "%Y-%m-%d");
 	// }
-	fs::path logFileName = path / (s.str() + ".log"); // combine, check trailing etc.
+	GLib::Compat::filesystem::path logFileName = path / (s.str() + ".log"); // combine, check trailing etc.
 	const unsigned int date = GetDate();
 
 	const int MaxTries = 1000;
@@ -103,7 +103,7 @@ StreamInfo FileLogger::GetStream() const
 			//::GetSystemTimeAsFileTime(&ft);
 			//::SetFileTime(GetImpl(m_stream), &ft, NULL, NULL); // filesystem ver? nope
 
-			return StreamInfo { move(newStreamWriter), logFileName.u8string(), date };
+			return StreamInfo { move(newStreamWriter), logFileName, date };
 		}
 		catch (...) // specific
 		{
@@ -175,12 +175,12 @@ void FileLogger::HandleFileRollover(size_t newEntrySize)
 {
 	if (streamInfo)
 	{
-		std::string oldFile = streamInfo.FileName();
+		auto oldPath = streamInfo.Path();
 		const auto size = streamInfo.Stream().tellp();
 		if (newEntrySize + size >= maxFileSize || streamInfo.Date() != GetDate())
 		{
 			CloseStream();
-			//RenameOldFile(oldFile);
+			//RenameOldFile(oldPath);
 		}
 	}
 }
@@ -208,7 +208,7 @@ void FileLogger::CloseStream() noexcept
 	}
 }
 
-void FileLogger::WriteHeader(std::ostream &writer)
+void FileLogger::WriteHeader(std::ostream & writer)
 {
 	writer << HeaderFooterSeparator << std::endl;
 
@@ -218,8 +218,9 @@ void FileLogger::WriteHeader(std::ostream &writer)
 	std::tm gtm {};
 	GLib::Compat::GmTime(gtm, t);
 
+	std::string name = GLib::Compat::ProcessName();
 	std::string path = GLib::Compat::ProcessPath();
-	std::string cmd = GLib::Cvt::w2a(::GetCommandLineW());
+	std::string cmd = GLib::Compat::CommandLine();
 
 	size_t pos = cmd.find(path);
 	if (pos != std::string::npos)
@@ -233,7 +234,7 @@ void FileLogger::WriteHeader(std::ostream &writer)
 	writer
 		<< "Opened      : " << std::put_time(&tm, "%d %b %Y, %H:%M:%S (%z)") << std::endl
 		<< "OpenedUtc   : " << std::put_time(&gtm, "%F %TZ") << std::endl
-		<< "ProcessName : (" << bits << " bit) " << GLib::Compat::ProcessName() << std::endl
+		<< "ProcessName : (" << bits << " bit) " << name << std::endl
 		<< "FullPath    : " << path << std::endl
 		<< "CmdLine     : " << cmd << std::endl
 		<< "ProcessId   : " << GLib::Compat::ProcessId() << std::endl
@@ -376,7 +377,7 @@ unsigned FileLogger::GetDate()
 	return ((TmEpochYear + tm.tm_year) * ShiftTwoDecimals + tm.tm_mon + 1) * ShiftTwoDecimals + tm.tm_mday;
 }
 
-uintmax_t FileLogger::GetFreeDiskSpace(const fs::path & path)
+uintmax_t FileLogger::GetFreeDiskSpace(const GLib::Compat::filesystem::path & path)
 {
 	return space(path).available;
 }

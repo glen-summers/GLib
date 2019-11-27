@@ -8,8 +8,6 @@
 
 #include <mutex>
 
-namespace fs = GLib::Compat::filesystem;
-
 class FileLogger
 {
 	static constexpr const char * HeaderFooterSeparator = "------------------------------------------------";
@@ -24,7 +22,7 @@ class FileLogger
 	friend class GLib::Flog::LogManager;
 
 	std::string const baseFileName;
-	fs::path const path;
+	GLib::Compat::filesystem::path const path;
 	std::mutex streamMonitor;
 	StreamInfo streamInfo;
 	GLib::Flog::Level logLevel = GLib::Flog::Level::Info; // config
@@ -63,7 +61,7 @@ private:
 	static std::ostream & TranslateLevel(std::ostream & stream, GLib::Flog::Level level);
 	static std::ostream & ThreadName(std::ostream & stream, const char * threadName);
 	static unsigned int GetDate();
-	static uintmax_t GetFreeDiskSpace(const fs::path & path);
+	static uintmax_t GetFreeDiskSpace(const GLib::Compat::filesystem::path & path);
 
 	static void CommitPendingScope();
 	static void ScopeStart(GLib::Flog::Level level, const char * prefix, const char * scope, const char * stem);

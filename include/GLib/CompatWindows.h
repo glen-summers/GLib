@@ -96,6 +96,11 @@ namespace GLib::Compat
 		return filesystem::path(ProcessPath()).filename().u8string();
 	}
 
+	inline std::string CommandLine()
+	{
+		return GLib::Cvt::w2a(::GetCommandLineW());
+	}
+
 	inline void TzSet()
 	{
 		::_tzset();

@@ -1,17 +1,19 @@
 #pragma once
 
+#include "GLib/compat.h"
+
 #include <fstream>
 
 class StreamInfo
 {
 	std::ofstream mutable stream;
-	std::string fileName;
+	GLib::Compat::filesystem::path path;
 	unsigned int date {};
 
 public:
-	StreamInfo(std::ofstream stream, std::string fileName, unsigned int date)
+	StreamInfo(std::ofstream stream, GLib::Compat::filesystem::path path, unsigned int date)
 		: stream(std::move(stream))
-		, fileName(std::move(fileName))
+		, path(std::move(path))
 		, date(date)
 	{}
 
@@ -22,9 +24,9 @@ public:
 		return stream;
 	}
 
-	const std::string & FileName() const
+	const GLib::Compat::filesystem::path & Path() const
 	{
-		return fileName;
+		return path;
 	}
 
 	unsigned int Date() const

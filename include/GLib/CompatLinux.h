@@ -1,13 +1,13 @@
 #pragma once
 
-#include "GLib/stackorheap.h"
-
+#include <algorithm>
 #include <experimental/filesystem>
+#include <fstream>
 #include <optional>
+#include <sstream>
 
 #include <cxxabi.h>
 #include <string.h>
-#include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
 
@@ -70,20 +70,21 @@ namespace GLib::Compat
 
 	inline std::string ProcessPath()
 	{
-		std::ostringstream s;
-		s << "/proc/" << ::getpid() << "/exe";
+		return filesystem::read_symlink("/proc/self/exe").u8string();
+	}
 
-		struct stat sb;
-		auto result = ::lstat(s.str().c_str(), &sb);
-		AssertTrue(result != -1, "lstat", errno);
-
-		GLib::Util::CharBuffer soh;
-		soh.EnsureSize(sb.st_size + 1);
-
-		int readBytes = ::readlink(s.str().c_str(), soh.Get(), soh.size());
-		AssertTrue(readBytes != -1, "readlink", errno);
-		soh.Get()[readBytes] = '\0';
-		return soh.Get();
+	inline std::string CommandLine()
+	{
+		std::ifstream t("/proc/self/cmdline", std::ios::binary);
+		if (!t)
+		{
+			throw std::runtime_error("Cmdline read failed");
+		}
+		std::stringstream ss;
+		ss << t.rdbuf();
+		std::string r{ss.str()};
+		std::replace(r.begin(), r.end(), '\0', ' ');
+		return move(r);
 	}
 
 	inline std::string ProcessName()

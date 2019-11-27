@@ -28,7 +28,7 @@ void LogManager::SetThreadName(const char * name)
 	FileLogger::logState.ThreadName(name);
 }
 
-std::string LogManager::GetLogPath()
+GLib::Compat::filesystem::path LogManager::GetLogPath()
 {
-	return FileLogger::Instance().streamInfo.FileName();
+	return FileLogger::Instance().streamInfo.Path();
 }

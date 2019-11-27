@@ -9,6 +9,8 @@ include_directories(../include)
 
 add_executable(Coverage ${SOURCES})
 
+target_link_libraries(Coverage GLib)
+
 install(TARGETS Coverage
 	RUNTIME DESTINATION bin
 	CONFIGURATIONS ${CMAKE_CONFIGURATION_TYPES}
