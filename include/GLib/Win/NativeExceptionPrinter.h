@@ -88,46 +88,49 @@ namespace GLib::Win::Symbols
 			});
 		}
 
-		inline void WalkStack(std::ostream & s, const SymProcess & sym, DWORD machineType, STACKFRAME64 * frame, CONTEXT * context, unsigned int maxFrames)
+		inline void UnDecorate(std::string & symbolName)
 		{
-			for (unsigned int frames = 0; frames < maxFrames; ++frames)
+			constexpr DWORD undecoratedNameSize = 512;
+			std::array<char, undecoratedNameSize> undecoratedName{};
+			DWORD flags = UNDNAME_NAME_ONLY;
+
+			if (!symbolName.empty() && *symbolName.begin() == '?' && ::UnDecorateSymbolName(symbolName.c_str(), undecoratedName.data(), undecoratedNameSize, flags) != 0)
 			{
-				if (::StackWalk64(machineType, sym.Handle(), ::GetCurrentThread(), frame, context, nullptr,
-					SymFunctionTableAccess64, SymGetModuleBase64, nullptr) == FALSE)
+				symbolName = undecoratedName.data();
+			}
+		}
+
+		inline void Trace(std::ostream & s, const SymProcess & process, const Symbol & symbol, DWORD64 address)
+		{
+			auto name = symbol.Name();
+			UnDecorate(name);
+			Formatter::Format(s, "\t{0} + 0x{1:%X}\n", name, symbol.Displacement());
+			if (auto line = process.TryGetLineFromAddress(address))
+			{
+				Formatter::Format(s, "\t{0}({1})", line->fileName, line->lineNumber);
+				if (line->displacement != 0)
 				{
-					break;
+					s << " + " << line->displacement << " byte(s)";
 				}
+				s << '\n';
+			}
+		}
 
-				DWORD64 address = frame->AddrPC.Offset;
-				if (address == frame->AddrReturn.Offset)
+		inline void InlineTrace(std::ostream & s, const SymProcess & process, DWORD64 address, DWORD inlineTrace)
+		{
+			DWORD inlineContext{};
+			DWORD inlineFrameIndex{};
+
+			if (::SymQueryInlineTrace(process.Handle(), address, 0, address, address, &inlineContext, &inlineFrameIndex) == TRUE)
+			{
+				for (DWORD i = inlineContext; i < inlineContext + inlineTrace; ++i)
 				{
-					break;
-				}
-
-				MEMORY_BASIC_INFORMATION mb = {};
-				if (::VirtualQueryEx(sym.Handle(), Munge<PVOID>(address), &mb, sizeof mb) != 0)
-				{
-					auto module = static_cast<HMODULE>(mb.AllocationBase);
-					std::string mod = FileSystem::PathOfModule(module);
-					Formatter::Format(s, "{0,-30} + {1:%08X}\n", mod, static_cast<DWORD_PTR>(address) - Munge<DWORD_PTR>(mb.AllocationBase));
-
-					if (auto symbol = sym.TryGetSymbolFromAddress(address))
+					if (auto symbol = process.TryGetSymbolFromInlineContext(address, i))
 					{
-						const char * symName = symbol->Name().c_str();
-						constexpr DWORD undecoratedNameSize{512};
-						std::array<char, undecoratedNameSize> undecoratedName{};
-
-						if (*symName == '?')
-						{
-							DWORD flags = UNDNAME_NAME_ONLY;
-							if (::UnDecorateSymbolName(symName, undecoratedName.data(), undecoratedNameSize, flags) != 0)
-							{
-								symName = undecoratedName.data();
-							}
-						}
-
-						Formatter::Format(s, "\t{0} + {1:%#x}\n", symName, symbol->Displacement());
-						if (auto line = sym.TryGetLineFromAddress(address))
+						auto name = symbol->Name();
+						UnDecorate(name);
+						Formatter::Format(s, "\tinline context {0} + 0x{1:%x}\n", name, symbol->Displacement());
+						if (auto line = process.TryGetLineFromInlineContext(address, i))
 						{
 							Formatter::Format(s, "\t{0}({1})", line->fileName, line->lineNumber);
 							if (line->displacement != 0)
@@ -138,10 +141,42 @@ namespace GLib::Win::Symbols
 						}
 					}
 				}
-				else
+			}
+		}
+
+		inline void WalkStack(std::ostream & s, const SymProcess & process, DWORD machineType, STACKFRAME64 * frame, CONTEXT * context, unsigned int maxFrames)
+		{
+			for (unsigned int frames = 0; frames < maxFrames; ++frames)
+			{
+				if (::StackWalk64(machineType, process.Handle(), ::GetCurrentThread(), frame, context, nullptr,
+					SymFunctionTableAccess64, SymGetModuleBase64, nullptr) == FALSE)
 				{
-					s << "Stack walk ending - bad address: " << Detail::Munge<PVOID>(address) << "\n";
+					s << "StackWalk64: " <<  ::GetLastError() << '\n';
 					break;
+				}
+
+				DWORD64 address = frame->AddrPC.Offset;
+				if (address == frame->AddrReturn.Offset)
+				{
+					break;
+				}
+
+				MEMORY_BASIC_INFORMATION mb{};
+				if (::VirtualQueryEx(process.Handle(), Munge<PVOID>(address), &mb, sizeof mb) != 0)
+				{
+					auto module = static_cast<HMODULE>(mb.AllocationBase);
+					std::string moduleName = FileSystem::PathOfModule(module);
+					Formatter::Format(s, "{0,-30} + 0x{1:%08X}\n", moduleName, static_cast<DWORD_PTR>(address) - Munge<DWORD_PTR>(mb.AllocationBase));
+				}
+
+				DWORD inlineTrace = ::SymAddrIncludeInlineTrace(process.Handle(), address);
+				if (inlineTrace != 0)
+				{
+					InlineTrace(s, process, address, inlineTrace);
+				}
+				else if (auto symbol = process.TryGetSymbolFromAddress(address))
+				{
+					Trace(s, process, *symbol, address);
 				}
 			}
 		}

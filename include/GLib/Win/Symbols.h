@@ -90,7 +90,7 @@ namespace GLib::Win::Symbols
 			tag = value;
 		}
 
-		const std::string & Name()
+		const std::string & Name() const
 		{
 			return name;
 		}

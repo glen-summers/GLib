@@ -163,7 +163,7 @@ namespace GLib::Win
 	private:
 		static Win::Handle Create(const std::string & app, const std::string & cmd, DWORD creationFlags, WORD show, const std::string & desktop)
 		{
-			return Create(Cvt::a2w(app), Cvt::a2w("fake.exe " + cmd), creationFlags, show, Cvt::a2w(desktop));
+			return Create(Cvt::a2w(app), Cvt::a2w(app + " " + cmd), creationFlags, show, Cvt::a2w(desktop));
 		}
 
 		static Win::Handle Create(const std::wstring & app, const std::wstring & cmd, DWORD creationFlags, WORD show, const std::wstring & desktop)
