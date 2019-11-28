@@ -23,7 +23,7 @@ namespace GLib::Win
 		{
 			void operator()(HWND hWnd) const noexcept
 			{
-				Util::WarnAssertTrue(::DestroyWindow(hWnd), "DestroyWindow failed");
+				Util::WarnAssertTrue(::DestroyWindow(hWnd), "DestroyWindow");
 			}
 		};
 
@@ -55,7 +55,7 @@ namespace GLib::Win
 			BOOL exists = ::GetClassInfoExW(instance, className.c_str(), &wcex);
 			if (exists == 0)
 			{
-				Util::AssertTrue(::GetLastError() == ERROR_CLASS_DOES_NOT_EXIST, "GetClassInfoEx failed");
+				Util::AssertTrue(::GetLastError() == ERROR_CLASS_DOES_NOT_EXIST, "GetClassInfoExW");
 
 				WNDCLASSEXW wc =
 				{
@@ -71,7 +71,7 @@ namespace GLib::Win
 					// hIconSm etc.
 				};
 
-				Util::AssertTrue(::RegisterClassExW(&wc) != 0, "RegisterClass");
+				Util::AssertTrue(::RegisterClassExW(&wc) != 0, "RegisterClassExW");
 			}
 			return Cvt::w2a(className);
 		}
@@ -92,7 +92,7 @@ namespace GLib::Win
 		{
 			std::string className = RegisterClass(icon, menu, proc);
 			Detail::WindowHandle handle(::CreateWindowExW(0, Cvt::a2w(className).c_str(), Cvt::a2w(title).c_str(), style, CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, nullptr, nullptr, Instance(), param));
-			Util::AssertTrue(!!handle, "CreateWindow");
+			Util::AssertTrue(!!handle, "CreateWindowExW");
 			AssociateHandle(param, handle.get());
 
 #ifdef GLIB_DEBUG_MESSAGES
@@ -105,7 +105,7 @@ namespace GLib::Win
 		inline HACCEL LoadAccel(int id)
 		{
 			HACCEL accel = ::LoadAcceleratorsW(Instance(), MAKEINTRESOURCEW(id));
-			Util::AssertTrue(accel != nullptr, "LoadAccelerators");
+			Util::AssertTrue(accel != nullptr, "LoadAcceleratorsW");
 			return accel;
 		}
 	}
@@ -174,7 +174,7 @@ namespace GLib::Win
 		int MessageBox(const std::string & message, const std::string & caption, UINT type = MB_OK) const
 		{
 			int result = ::MessageBoxW(handle.get(), Cvt::a2w(message).c_str(), Cvt::a2w(caption).c_str(), type);
-			Util::AssertTrue(result != 0, "MessageBox failed");
+			Util::AssertTrue(result != 0, "MessageBoxW");
 			return result;
 		}
 

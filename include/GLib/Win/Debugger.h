@@ -153,7 +153,7 @@ namespace GLib::Win
 				}
 			}
 
-			Util::AssertTrue(::ContinueDebugEvent(debugEvent.dwProcessId, debugEvent.dwThreadId, continueStatus), "ContinueDebugEvent failed");
+			Util::AssertTrue(::ContinueDebugEvent(debugEvent.dwProcessId, debugEvent.dwThreadId, continueStatus), "ContinueDebugEvent");
 			return true;
 		}
 

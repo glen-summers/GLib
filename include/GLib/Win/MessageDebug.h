@@ -12,7 +12,7 @@ namespace GLib::Win
 			for (;;)
 			{
 				unsigned int lengthNoNull = ::GetClassNameW(hWnd, s.Get(), static_cast<int>(s.size()));
-				Util::AssertTrue(lengthNoNull != 0, "GetClassName");
+				Util::AssertTrue(lengthNoNull != 0, "GetClassNameW");
 				if (lengthNoNull < s.size() - 1)
 				{
 					break;

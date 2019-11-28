@@ -14,12 +14,12 @@ namespace GLib::Win
 			GLib::Util::WideCharBuffer s;
 			::SetLastError(ERROR_SUCCESS); // GetWindowTextLength does not set last error on success
 			size_t lengthWithoutTerminator = ::GetWindowTextLengthW(hWnd);
-			Util::AssertTrue(lengthWithoutTerminator != 0 || ::GetLastError() == 0, "GetWindowTextLength");
+			Util::AssertTrue(lengthWithoutTerminator != 0 || ::GetLastError() == 0, "GetWindowTextLengthW");
 			if (lengthWithoutTerminator != 0)
 			{
 				s.EnsureSize(lengthWithoutTerminator + 1);
 				lengthWithoutTerminator = ::GetWindowTextW(hWnd, s.Get(), static_cast<int>(s.size()));
-				Util::AssertTrue(lengthWithoutTerminator != 0 || ::GetLastError() == 0, "GetWindowText");
+				Util::AssertTrue(lengthWithoutTerminator != 0 || ::GetLastError() == 0, "GetWindowTextW");
 			}
 			return s.Get();
 		}

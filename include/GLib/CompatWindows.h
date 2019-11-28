@@ -40,7 +40,7 @@ namespace GLib::Compat
 		auto wideName = GLib::Cvt::a2w(name);
 		auto wideValue = GLib::Cvt::a2w(value);
 		errno_t err = ::_wputenv_s(wideName.c_str(), wideValue.c_str());
-		AssertTrue(err == 0, "_putenv_s", err);
+		AssertTrue(err == 0, "_wputenv_s", err);
 	}
 
 	inline std::optional<std::string> GetEnv(const char * name)
@@ -60,7 +60,7 @@ namespace GLib::Compat
 			tmp.EnsureSize(len);
 			err = ::_wgetenv_s(&len, tmp.Get(), tmp.size(), wideName.c_str());
 		}
-		AssertTrue(err == 0, "getenv_s", err);
+		AssertTrue(err == 0, "_wgetenv_s", err);
 		return Cvt::w2a({tmp.Get(), len-1});
 	}
 

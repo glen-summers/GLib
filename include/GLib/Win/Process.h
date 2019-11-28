@@ -177,7 +177,7 @@ namespace GLib::Win
 			PROCESS_INFORMATION pi = {};
 			wchar_t * writableCmd = cmd.empty() ? nullptr : Detail::ToPseudoWritableString(cmd.c_str());
 			Util::AssertTrue(::CreateProcessW(app.c_str(), writableCmd, nullptr, nullptr, FALSE, creationFlags,
-				nullptr, nullptr, &sui, &pi), "CreateProcess");
+				nullptr, nullptr, &sui, &pi), "CreateProcessW");
 			Win::Handle p(pi.hProcess);
 			Win::Handle t(pi.hThread);
 			(void)t;

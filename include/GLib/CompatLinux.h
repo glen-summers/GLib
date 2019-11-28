@@ -41,7 +41,7 @@ namespace GLib::Compat
 	inline void SetEnv(const char * name, const char * value)
 	{
 		int result = ::setenv(name, value, 1);
-		AssertTrue(result != -1, "_putenv_s", errno);
+		AssertTrue(result != -1, "setenv", errno);
 	}
 
 	inline std::optional<std::string> GetEnv(const char * name)

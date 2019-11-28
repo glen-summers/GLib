@@ -26,7 +26,7 @@ namespace GLib::Win::FileSystem
 		DWORD sizeWithFinalTerminator = ::GetLogicalDriveStringsW(0, nullptr);
 		s.EnsureSize(static_cast<size_t>(sizeWithFinalTerminator-1));
 		auto size = ::GetLogicalDriveStringsW(static_cast<DWORD>(s.size()), s.Get());
-		Util::AssertTrue(size != 0 && size < sizeWithFinalTerminator, "GetLogicalDriveStrings failed");
+		Util::AssertTrue(size != 0 && size < sizeWithFinalTerminator, "GetLogicalDriveStringsW");
 
 		std::wstring_view pp { s.Get(), size};
 		const wchar_t nul = u'\0';
@@ -61,10 +61,10 @@ namespace GLib::Win::FileSystem
 	{
 		GLib::Util::WideCharBuffer s;
 		DWORD length = ::GetFinalPathNameByHandleW(fileHandle, nullptr, 0, flags);
-		Util::AssertTrue(length != 0, "GetFinalPathNameByHandleW failed");
+		Util::AssertTrue(length != 0, "GetFinalPathNameByHandleW");
 		s.EnsureSize(length);
 		length = ::GetFinalPathNameByHandleW(fileHandle, s.Get(), static_cast<DWORD>(s.size()), flags);
-		Util::AssertTrue(length != 0 && length < s.size(), "GetFinalPathNameByHandleW failed");
+		Util::AssertTrue(length != 0 && length < s.size(), "GetFinalPathNameByHandleW");
 		return Cvt::w2a(std::wstring_view{s.Get(), length});
 	}
 
@@ -94,7 +94,7 @@ namespace GLib::Win::FileSystem
 		{
 			// this could return prefix "\\?\"
 			unsigned int len = ::GetModuleFileNameW(module, s.Get(), static_cast<unsigned int>(s.size()));
-			Util::AssertTrue(len != 0, "GetModuleFileName failed");
+			Util::AssertTrue(len != 0, "GetModuleFileNameW");
 			if (len < s.size())
 			{
 				length = len + 1;
@@ -109,7 +109,7 @@ namespace GLib::Win::FileSystem
 
 		s.EnsureSize(length);
 		length = ::GetModuleFileNameW(module, s.Get(), static_cast<unsigned int>(s.size()));
-		Util::AssertTrue(length != 0 && length < s.size(), "GetModuleFileName failed");
+		Util::AssertTrue(length != 0 && length < s.size(), "GetModuleFileNameW");
 
 		return Cvt::w2a(std::wstring_view{s.Get(), length});
 	}
@@ -145,7 +145,7 @@ namespace GLib::Win::FileSystem
 	{
 		HANDLE h = ::CreateFileW(Cvt::a2w(name).c_str(), GENERIC_READ | GENERIC_WRITE, 0, nullptr, CREATE_ALWAYS, // NOLINT(hicpp-signed-bitwise) baad macro
 			FILE_ATTRIBUTE_TEMPORARY | FILE_FLAG_DELETE_ON_CLOSE, nullptr); // NOLINT(hicpp-signed-bitwise) baad macro
-		Util::AssertTrue(h != nullptr, "CreateFile failed");
+		Util::AssertTrue(h != nullptr, "CreateFileW");
 		return Handle(h);
 	}
 }
