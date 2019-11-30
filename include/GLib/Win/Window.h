@@ -19,6 +19,16 @@ namespace GLib::Win
 
 	namespace Detail
 	{
+		template <typename T1, typename T2> T1 Munge(T2 t2)
+		{
+			return reinterpret_cast<T1>(t2); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast) many windows casts from LPARAMs etc.
+		}
+
+		inline HINSTANCE Instance()
+		{
+			return Detail::Munge<HINSTANCE>(&__ImageBase);
+		}
+
 		struct WindowDestroyer
 		{
 			void operator()(HWND hWnd) const noexcept
@@ -41,11 +51,6 @@ namespace GLib::Win
 			}
 		};
 
-		inline HINSTANCE Instance()
-		{
-			return reinterpret_cast<HINSTANCE>(&__ImageBase); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast) required
-		}
-
 		inline std::string RegisterClass(int icon, int menu, WNDPROC proc)
 		{
 			std::wstring className = Cvt::a2w(ClassInfoStore::Register(icon, menu, proc));
@@ -63,9 +68,9 @@ namespace GLib::Win
 					CS_HREDRAW | CS_VREDRAW /*CS_DBLCLKS*/,
 					static_cast<WNDPROC>(proc),
 					0, 0, instance,
-					::LoadIconW(instance, MAKEINTRESOURCE(icon)),
+					::LoadIconW(instance, MAKEINTRESOURCEW(icon)),
 					::LoadCursorW(nullptr, IDC_ARROW),
-					reinterpret_cast<HBRUSH>(COLOR_WINDOW + 1), // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast) required
+					Detail::Munge<HBRUSH>(size_t{COLOR_WINDOW} + 1),
 					MAKEINTRESOURCEW(menu),
 					className.c_str()
 					// hIconSm etc.
@@ -79,13 +84,13 @@ namespace GLib::Win
 		inline void AssociateHandle(Window * value, HWND handle)
 		{
 			::SetLastError(ERROR_SUCCESS); // SetWindowLongPtr does not set last error on success
-			auto ret = ::SetWindowLongPtr(handle, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(value)); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast) required
+			auto ret = ::SetWindowLongPtr(handle, GWLP_USERDATA, Detail::Munge<LONG_PTR>(value));
 			Util::AssertTrue(ret != 0 || ::GetLastError() == ERROR_SUCCESS, "SetWindowLongPtr");
 		}
 
 		inline Window * FromHandle(HWND hWnd)
 		{
-			return reinterpret_cast<Window*>(::GetWindowLongPtr(hWnd, GWLP_USERDATA)); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast) required
+			return Detail::Munge<Window*>(::GetWindowLongPtr(hWnd, GWLP_USERDATA));
 		}
 
 		inline WindowHandle Create(DWORD style, int icon, int menu, const std::string & title, WNDPROC proc, Window * param)
@@ -247,7 +252,7 @@ namespace GLib::Win
 				case WM_ERASEBKGND:
 				{
 					OnEraseBackground();
-					if (GetHandled() == false)
+					if (!GetHandled())
 					{
 						result = 1;
 					}
@@ -261,7 +266,7 @@ namespace GLib::Win
 
 				case WM_GETMINMAXINFO:
 				{
-					return OnGetMinMaxInfo(*reinterpret_cast<MINMAXINFO *>(lParam));
+					return OnGetMinMaxInfo(*Detail::Munge<MINMAXINFO *>(lParam));
 				}
 
 				case WM_COMMAND:
@@ -286,7 +291,7 @@ namespace GLib::Win
 				case WM_NCDESTROY:
 				{
 					OnNCDestroy();
-					handle.release(); // ??
+					(void)handle.release();
 					return;
 				}
 
@@ -297,7 +302,7 @@ namespace GLib::Win
 
 				case WM_NOTIFY:
 				{
-					return OnNotify(*reinterpret_cast<const NMHDR*>(lParam));
+					return OnNotify(*Detail::Munge<const NMHDR*>(lParam));
 				}
 
 				case WM_CHAR:
@@ -343,7 +348,7 @@ namespace GLib::Win
 
 				case WM_GETDLGCODE:
 				{
-					return OnGetDlgCode(static_cast<int>(wParam), *reinterpret_cast<MSG*>(lParam), result);
+					return OnGetDlgCode(static_cast<int>(wParam), *Detail::Munge<MSG*>(lParam), result);
 				}
 
 				case WM_TIMER:
@@ -366,7 +371,7 @@ namespace GLib::Win
 
 			static HINSTANCE Instance()
 			{
-				return reinterpret_cast<HINSTANCE>(&__ImageBase);
+				return Detail::Instance();
 			}
 
 			LRESULT Send(UINT msg, WPARAM wParam = {}, LPARAM lParam = {}) const
@@ -380,7 +385,7 @@ namespace GLib::Win
 			LRESULT result = 0;
 			Window * window = Detail::FromHandle(hWnd);
 			bool handled{};
-			if (window)
+			if (window != nullptr)
 			{
 				auto oldValue = SetHandled(false, true);
 				window->OnMessage(message, wParam, lParam, result);

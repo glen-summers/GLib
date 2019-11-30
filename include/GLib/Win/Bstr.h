@@ -1,7 +1,7 @@
 #pragma once
 
-#include "GLib/cvt.h"
 #include "GLib/Win/Transfer.h"
+#include "GLib/cvt.h"
 
 #include <utility>
 
@@ -55,7 +55,7 @@ namespace GLib::Win
 		}
 	};
 
-	auto GetAddress(Bstr & value) noexcept
+	inline auto GetAddress(Bstr & value) noexcept
 	{
 		return Transfer<Bstr, BSTR>(value);
 	}

@@ -1,9 +1,10 @@
 #pragma once
 
+#include "FunctionCoverage.h"
+#include "LineCover.h"
+
 #include "GLib/Eval/Value.h"
 #include "GLib/Xml/Utils.h"
-
-#include "FunctionCoverage.h"
 
 template <>
 struct GLib::Eval::Visitor<FunctionCoverage>

@@ -19,7 +19,7 @@ namespace GLib::Win
 			::VariantInit(&v);
 			v.vt = VT_BSTR;
 			v.bstrVal = ::SysAllocString(Cvt::a2w(value).c_str());
-			if (!v.bstrVal)
+			if (v.bstrVal == nullptr)
 			{
 				throw std::runtime_error("SysAllocString");
 			}
@@ -92,7 +92,7 @@ namespace GLib::Win
 
 		bool operator == (const Variant & other) const noexcept
 		{
-			return ::VarCmp(const_cast<VARIANT *>(&v), const_cast<VARIANT *>(&other.v), 0) == VARCMP_EQ;
+			return ::VarCmp(const_cast<VARIANT *>(&v), const_cast<VARIANT *>(&other.v), 0) == VARCMP_EQ; // NOLINT(cppcoreguidelines-pro-type-const-cast)
 		}
 
 		bool operator != (const Variant & other) const noexcept

@@ -35,11 +35,11 @@ public:
 	{
 		GLib::Flog::Detail::Stream() << std::boolalpha;
 		log.Info("Executable: {0}, DebugSubProcess: {1}", executable, debugChildProcesses);
-		for (auto i : includes)
+		for (const auto & i : includes)
 		{
 			log.Info("Include: {0}", i);
 		}
-		for (auto x : excludes)
+		for (const auto & x : excludes)
 		{
 			log.Info("Exclude: {0}", x);
 		}

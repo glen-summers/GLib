@@ -1,8 +1,8 @@
 #pragma once
 
-#include "GLib/Eval/Value.h"
-
 #include "CoverageLevel.h"
+
+#include "GLib/Eval/Value.h"
 
 #include <string>
 #include <utility>

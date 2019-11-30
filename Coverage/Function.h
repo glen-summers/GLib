@@ -107,31 +107,6 @@ public:
 		return total;
 	}
 
-	static bool HaveOverlap(const Function & f1, const Function & f2)
-	{
-		auto first1 = f1.FileLines().begin(), last1 = f1.FileLines().end();
-		auto first2 = f2.FileLines().begin(), last2 = f2.FileLines().end();
-
-		// dumb version
-		while (first1 != last1 && first2 != last2)
-		{
-			if (*first1<*first2)
-			{
-				++first1;
-			}
-			else if (*first2<*first1)
-			{
-				++first2;
-			}
-			else
-			{
-				auto val = *first1;
-				++first1;
-				++first2;
-			}
-		}
-	}
-
 	size_t AllLines() const
 	{
 		size_t total{};

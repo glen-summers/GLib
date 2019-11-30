@@ -63,11 +63,6 @@ namespace GLib::Win
 		T * p {};
 
 	public:
-		T** operator&()
-		{
-			static_assert(false, "Use 'GetAddress(comPtrValue)'");
-		}
-
 		ComPtr() noexcept = default;
 
 		explicit ComPtr(std::nullptr_t) noexcept

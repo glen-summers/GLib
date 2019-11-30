@@ -1,7 +1,7 @@
 #pragma once
 
-#include <GLib/Win/ComPtr.h>
 #include <GLib/Win/Bstr.h>
+#include <GLib/Win/ComPtr.h>
 
 #include <uiautomation.h>
 
@@ -12,7 +12,7 @@ namespace GLib::Win::Aut
 		ComPtr<IUIAutomationElement> element;
 
 	public:
-		UIElement(const ComPtr<IUIAutomationElement> & element) : element(element)
+		UIElement(ComPtr<IUIAutomationElement> element) : element(std::move(element))
 		{}
 
 		template <typename T>

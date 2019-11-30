@@ -32,7 +32,7 @@ namespace GLib::Win
 		static BOOL CALLBACK EnumWindowsCallback(HWND handle, LPARAM param) noexcept
 		{
 			// todo setlasterror when return false
-			return (*reinterpret_cast<const WindowEnumerator*>(param))(handle) ? TRUE : FALSE;
+			return (*reinterpret_cast<const WindowEnumerator*>(param))(handle) ? TRUE : FALSE; // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast) required
 		}
 
 	public:
@@ -61,7 +61,7 @@ namespace GLib::Win
 				return true;
 			};
 
-			BOOL result = ::EnumDesktopWindows(desktop, EnumWindowsCallback, reinterpret_cast<LPARAM>(&func));
+			BOOL result = ::EnumDesktopWindows(desktop, EnumWindowsCallback, reinterpret_cast<LPARAM>(&func)); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
 			Util::AssertTrue(result, "EnumDesktopWindows");
 			return ret;
 		}

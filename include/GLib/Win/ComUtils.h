@@ -8,8 +8,9 @@ namespace GLib::Win
 	{
 		struct ComUninitialiser
 		{
-			void operator()(void*) const noexcept
+			void operator()(void * unused) const noexcept
 			{
+				(void)unused;
 				::CoUninitialize();
 			}
 		};

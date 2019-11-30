@@ -20,9 +20,9 @@ int main(int argc, char *argv[])
 
 	try
 	{
-		const char desc[] {"Generates C++ HTML code coverage report"};
-		const char syntax[] {"Coverage <Executable> <Report> [-sub] [-i IncludePath]... [-x excludePath]..."};
-		const char detail[] {R"(
+		auto desc {"Generates C++ HTML code coverage report"};
+		auto syntax {"Coverage <Executable> <Report> [-sub] [-i IncludePath]... [-x excludePath]..."};
+		auto detail {R"(
 Executable: Path to executeable
 Report    : Directory path for the generated report
 [-sub]    : Generates coverage for sub processes of main executable
@@ -86,7 +86,8 @@ Coverage c:\Build\Main.exe C:\Report -i C:\MainCode C:\Utils\ -x C:\ExternalCode
 
 		Coverage dbg(executable, debugChildProcesses, includes, excludes);
 		constexpr unsigned TimeoutMilliseconds = 1000; // just use INFINITE?
-		while(dbg.ProcessEvents(TimeoutMilliseconds));
+		while(dbg.ProcessEvents(TimeoutMilliseconds))
+		{}
 
 		HtmlReport report(executable, reportPath, dbg.GetCoverageData());
 		(void)report;

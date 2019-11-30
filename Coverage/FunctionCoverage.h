@@ -1,5 +1,8 @@
 #pragma once
 
+#include <string>
+#include <tuple>
+
 class FunctionCoverage
 {
 	std::string nameSpace;

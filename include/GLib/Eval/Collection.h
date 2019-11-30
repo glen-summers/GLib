@@ -29,7 +29,8 @@ namespace GLib::Eval
 		std::string ToString() const override
 		{
 			std::ostringstream stm;
-			auto it = container.begin(), end = container.end();
+			auto it = container.begin();
+			auto end = container.end();
 			if (it != end)
 			{
 				stm << Utils::ToString(*it++);
