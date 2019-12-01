@@ -1,6 +1,6 @@
 #pragma once
 
-#include "GLib/Eval/Value.h"
+#include <GLib/Eval/Value.h>
 
 namespace GLib::Eval
 {

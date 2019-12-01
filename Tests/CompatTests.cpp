@@ -1,7 +1,8 @@
-#include <boost/test/unit_test.hpp>
 
-#include "GLib/compat.h"
-#include "GLib/scope.h"
+#include <GLib/compat.h>
+#include <GLib/scope.h>
+
+#include <boost/test/unit_test.hpp>
 
 #include "TestUtils.h"
 

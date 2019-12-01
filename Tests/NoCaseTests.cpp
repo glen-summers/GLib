@@ -1,6 +1,7 @@
-#include <boost/test/unit_test.hpp>
 
-#include "GLib/NoCase.h"
+#include <GLib/NoCase.h>
+
+#include <boost/test/unit_test.hpp>
 
 #include <set>
 #include <unordered_set>

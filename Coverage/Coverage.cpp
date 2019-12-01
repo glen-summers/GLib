@@ -56,14 +56,13 @@ void Coverage::AddLine(const std::wstring & fileName, unsigned lineNumber, const
 		wideFiles.insert(fileName);
 	}
 
-	auto it = process.addresses.find(address);
-	if (it == process.addresses.end())
+	auto it = process.Addresses().find(address);
+	if (it == process.Addresses().end())
 	{
 		unsigned int id = symProcess.GetSymbolIdFromAddress(address);
 		const auto oldByte = symProcess.Read<unsigned char>(address);
-		it = process.addresses.emplace(address, Address{oldByte, id}).first;
+		it = process.AddAddress(address, Address{oldByte, id});
 	}
-
 	it->second.AddFileLine(fileName, lineNumber);
 
 	symProcess.Write(address, debugBreakByte);
@@ -109,13 +108,13 @@ void Coverage::CaptureData(DWORD processId)
 	}
 	Process & process = pit->second;
 
-	for (const auto & [addrValue, address] : process.addresses)
+	for (const auto & [addrValue, address] : process.Addresses())
 	{
 		auto symbolId = address.SymbolId();
 		auto symbol = symProcess.GetSymbolFromIndex(symbolId);
 
-		auto it = process.indexToFunction.find(symbolId);
-		if (it == process.indexToFunction.end())
+		auto it = process.IndexToFunction().find(symbolId);
+		if (it == process.IndexToFunction().end())
 		{
 			GLib::Win::Symbols::Symbol parent;
 			symProcess.TryGetClassParent(symbolId, parent);
@@ -124,16 +123,8 @@ void Coverage::CaptureData(DWORD processId)
 			std::string typeName;
 			std::string functionName;
 			CleanupFunctionNames(symbol.Name(), parent.Name(), nameSpace, typeName, functionName);
-
-			auto ret = process.indexToFunction.emplace(symbol.Index(), Function{ nameSpace, typeName, functionName });
-			if (!ret.second)
-			{
-				throw std::runtime_error(GLib::Formatter::Format("Duplicate function id:{0}, {1}:{2}:{3}",
-					symbol.Index(), nameSpace, typeName, functionName));
-			}
-			it = ret.first;
+			it = process.AddFunction(symbol.Index(), nameSpace, typeName, functionName);
 		}
-
 		it->second.Accumulate(address);
 	}
 }
@@ -147,13 +138,13 @@ void Coverage::OnExitProcess(DWORD processId, DWORD threadId, const EXIT_PROCESS
 
 void Coverage::OnCreateThread(DWORD processId, DWORD threadId, const CREATE_THREAD_DEBUG_INFO& info)
 {
-	processes.at(processId).threads.emplace(threadId, info.hThread);
+	processes.at(processId).AddThread(threadId, info.hThread);
 }
 
 void Coverage::OnExitThread(DWORD processId, DWORD threadId, const EXIT_THREAD_DEBUG_INFO& info)
 {
 	(void)info;
-	processes.at(processId).threads.erase(threadId);
+	processes.at(processId).RemoveThread(threadId);
 }
 
 DWORD Coverage::OnException(DWORD processId, DWORD threadId, const EXCEPTION_DEBUG_INFO& info)
@@ -162,32 +153,29 @@ DWORD Coverage::OnException(DWORD processId, DWORD threadId, const EXCEPTION_DEB
 
 	if (info.dwFirstChance!=0 && isBreakpoint)
 	{
-		const auto address = GLib::Win::Detail::ConvertAddress(info.ExceptionRecord.ExceptionAddress);
+		const uint64_t address = GLib::Win::Detail::ConvertAddress(info.ExceptionRecord.ExceptionAddress);
 		auto & process = processes.at(processId);
-		const auto it = process.addresses.find(address);
-		if (it != process.addresses.end())
+
+		auto it = process.Addresses().find(address);
+		if (it != process.Addresses().end())
 		{
 			const GLib::Win::Symbols::SymProcess & p = Symbols().GetProcess(processId);
 
-			Address & a = it->second;
+			const Address & a = it->second;
 			p.Write(address, a.OldData());
 			a.Visit();
 
-			auto const tit = process.threads.find(threadId);
-			if (tit == process.threads.end())
-			{
-				throw std::runtime_error("Thread not found");
-			}
+			HANDLE threadHandle = process.FindThread(threadId);
 
 			CONTEXT ctx {};
 			ctx.ContextFlags = CONTEXT_ALL; // NOLINT(hicpp-signed-bitwise) baad macro
-			GLib::Win::Util::AssertTrue(::GetThreadContext(tit->second, &ctx), "GetThreadContext");
+			GLib::Win::Util::AssertTrue(::GetThreadContext(threadHandle, &ctx), "GetThreadContext");
 #ifdef _WIN64
 			--ctx.Rip;
 #elif _WIN32
 			--ctx.Eip;
 #endif
-			 GLib::Win::Util::AssertTrue(::SetThreadContext(tit->second, &ctx), "SetThreadContext");
+			 GLib::Win::Util::AssertTrue(::SetThreadContext(threadHandle, &ctx), "SetThreadContext");
 		}
 		return DBG_CONTINUE;
 	}
@@ -204,7 +192,7 @@ CoverageData Coverage::GetCoverageData() const
 
 	for (const auto & [pid, process] : processes)
 	{
-		for (const auto & [id, function] : process.indexToFunction)
+		for (const auto & [id, function] : process.IndexToFunction())
 		{
 			for (const auto & [fileName, lineCoverage] : function.FileLines())
 			{

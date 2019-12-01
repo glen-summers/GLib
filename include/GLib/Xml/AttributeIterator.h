@@ -1,8 +1,8 @@
 #pragma once
 
-#include "GLib/Xml/NameSpaceManager.h"
-#include "GLib/Xml/StateEngine.h"
-#include "GLib/Xml/Utils.h"
+#include <GLib/Xml/NameSpaceManager.h>
+#include <GLib/Xml/StateEngine.h>
+#include <GLib/Xml/Utils.h>
 
 #include <sstream>
 #include <stdexcept>

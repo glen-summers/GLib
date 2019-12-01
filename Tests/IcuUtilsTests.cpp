@@ -1,6 +1,7 @@
-#include <boost/test/unit_test.hpp>
 
-#include "GLib/IcuUtils.h"
+#include <GLib/IcuUtils.h>
+
+#include <boost/test/unit_test.hpp>
 
 BOOST_AUTO_TEST_SUITE(IcuUtilsTests)
 

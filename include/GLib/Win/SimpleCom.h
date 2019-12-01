@@ -1,13 +1,14 @@
 #pragma once
 
-#include "GLib/TypePredicates.h"
-#include "GLib/Win/ComPtr.h"
+#include <GLib/Win/ComPtr.h>
 
 #ifdef SIMPLECOM_LOG_QI_MISS
-#include "GLib/Win/DebugWrite.h"
-#include "GLib/Win/Uuid.h"
-#include "GLib/Win/Registry.h"
+#include <GLib/Win/DebugWrite.h>
+#include <GLib/Win/Uuid.h>
+#include <GLib/Win/Registry.h>
 #endif
+
+#include <GLib/TypePredicates.h>
 
 #include <atomic>
 

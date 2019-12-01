@@ -1,7 +1,7 @@
 #pragma once
 
-#include "GLib/Win/ComErrorCheck.h"
-#include "GLib/formatter.h"
+#include <GLib/Win/ComErrorCheck.h>
+#include <GLib/formatter.h>
 
 #include <rpc.h>
 #pragma comment(lib, "Rpcrt4.lib")

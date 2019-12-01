@@ -3,11 +3,11 @@
 #include "Function.h"
 
 #include <filesystem>
-#include <map>
 #include <set>
+#include <unordered_map>
 #include <utility>
 
-using LineCoverage = std::map<unsigned int, unsigned int>;
+using LineCoverage = std::unordered_map<unsigned int, unsigned int>;
 using Functions = std::multiset<Function>;
 
 class FileCoverageData

@@ -1,11 +1,11 @@
 #pragma once
 
-#include "GLib/Win/ComErrorCheck.h"
-#include "GLib/Win/Transfer.h"
-#include "GLib/Win/WinException.h"
+#include <GLib/Win/ComErrorCheck.h>
+#include <GLib/Win/Transfer.h>
+#include <GLib/Win/WinException.h>
 
 #ifdef COM_PTR_DEBUG
-#include "GLib/Win/DebugStream.h"
+#include <GLib/Win/DebugStream.h>
 #endif
 
 #include <objbase.h>

@@ -1,10 +1,10 @@
 #pragma once
 
-#include "GLib/Win/ErrorCheck.h"
-#include "GLib/Win/Handle.h"
+#include <GLib/Win/ErrorCheck.h>
+#include <GLib/Win/Handle.h>
 
-#include "GLib/IcuUtils.h"
-#include "GLib/stackorheap.h"
+#include <GLib/IcuUtils.h>
+#include <GLib/stackorheap.h>
 
 #include <map>
 #include <vector>

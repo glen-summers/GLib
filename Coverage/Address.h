@@ -5,9 +5,10 @@
 class Address
 {
 	unsigned char oldData;
-	FileLines fileLines; // use sparse container?
-	bool visited;
 	unsigned int symbolId;
+
+	mutable FileLines fileLines; // use sparse container?
+	mutable bool visited;
 
 public:
 	explicit Address(unsigned char oldData, unsigned int symbolId) : oldData(oldData), visited(), symbolId(symbolId)
@@ -28,7 +29,7 @@ public:
 		return visited;
 	}
 
-	void Visit()
+	void Visit() const
 	{
 		visited = true;
 	}
@@ -41,7 +42,7 @@ public:
 	// multiple lines can be returned for the same address
 	// 0. not seen multiple files returned but code is defensive just in case
 	// 1. release build of {return atomicType++;} returns 3 lines for same address
-	void AddFileLine(const std::wstring & fileName, unsigned int lineNumber)
+	void AddFileLine(const std::wstring & fileName, unsigned int lineNumber) const
 	{
 		fileLines[fileName].emplace(lineNumber, false);
 	}

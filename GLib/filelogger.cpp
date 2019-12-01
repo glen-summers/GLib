@@ -5,8 +5,7 @@
 #include "DurationPrinter.h"
 #include "Manipulator.h"
 
-#include "GLib/compat.h"
-#include "GLib/flogging.h"
+#include <GLib/compat.h>
 
 #include <sstream>
 #include <thread>

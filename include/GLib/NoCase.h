@@ -1,7 +1,7 @@
 #pragma once
 #include <string>
 
-#include "GLib/IcuUtils.h"
+#include <GLib/IcuUtils.h>
 
 namespace GLib
 {

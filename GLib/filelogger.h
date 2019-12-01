@@ -4,7 +4,7 @@
 #include "logstate.h"
 #include "streaminfo.h"
 
-#include "GLib/flogging.h"
+#include <GLib/flogging.h>
 
 #include <mutex>
 

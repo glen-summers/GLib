@@ -1,10 +1,10 @@
 #pragma once
 
-#include "GLib/Win/FormatErrorMessage.h"
-#include "GLib/Win/WinException.h"
+#include <GLib/Win/FormatErrorMessage.h>
+#include <GLib/Win/WinException.h>
 
 #ifdef _DEBUG // || defined(GLIB_DEBUG)
-#include "GLib/Win/DebugStream.h"
+#include <GLib/Win/DebugStream.h>
 #endif
 
 #include <sstream>

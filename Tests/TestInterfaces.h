@@ -1,6 +1,6 @@
 #pragma once
 
-#include "GLib/Win/SimpleCom.h"
+#include <GLib/Win/SimpleCom.h>
 
 MIDL_INTERFACE("26FA5481-DA4F-45A8-8F83-F099E951C6E2")
 ITest1 : IUnknown

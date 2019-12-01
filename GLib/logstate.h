@@ -1,8 +1,9 @@
 #pragma once
 
-#include "GLib/genericoutstream.h"
-#include "GLib/vectorstreambuffer.h"
 #include "scope.h"
+
+#include <GLib/genericoutstream.h>
+#include <GLib/vectorstreambuffer.h>
 
 #include <stack>
 

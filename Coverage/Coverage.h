@@ -3,9 +3,8 @@
 #include "Address.h"
 #include "Process.h"
 
-#include "GLib/Win/Debugger.h"
-
-#include "GLib/flogging.h"
+#include <GLib/Win/Debugger.h>
+#include <GLib/flogging.h>
 
 #include <regex>
 

@@ -4,19 +4,16 @@
 #include "FileCoverageData.h"
 #include "HtmlReport.h"
 
-#include "GLib/Span.h"
-
-#include "GLib/flogging.h"
+#include <GLib/Span.h>
+#include <GLib/flogging.h>
 
 #include <iostream>
 
 using namespace std::string_literals;
 
-int main(int argc, char *argv[])
+int main(int argc, char *argv[]) // NOLINT(bugprone-exception-escape) use of cout in catch
 {
 	int errorCode = 0;
-
-	GLib::Span<char *> const args { argv+1, static_cast<std::ptrdiff_t>(argc)-1 };
 
 	try
 	{
@@ -38,6 +35,8 @@ Coverage c:\Build\Main.exe C:\Report -i C:\MainCode C:\Utils\ -x C:\ExternalCode
 		{
 			throw std::runtime_error(syntax);
 		}
+
+		GLib::Span<char *> const args { argv+1, static_cast<std::ptrdiff_t>(argc)-1 };
 
 		auto it = args.begin();
 		auto end = args.end();
@@ -94,7 +93,7 @@ Coverage c:\Build\Main.exe C:\Report -i C:\MainCode C:\Utils\ -x C:\ExternalCode
 	}
 	catch (const std::exception & e)
 	{
-		std::cout << "\x1b[31m" << "\x1b[1m" << e.what() << "\x1b[m" << '\n'; // consts
+		std::cout << "\x1b[31m" << "\x1b[1m" << e.what() << "\x1b[m" << '\n';
 
 		errorCode = 1;
 	}

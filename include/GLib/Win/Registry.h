@@ -1,7 +1,7 @@
 #pragma once
 
-#include "GLib/stackorheap.h"
-#include "GLib/Win/ErrorCheck.h"
+#include <GLib/Win/ErrorCheck.h>
+#include <GLib/stackorheap.h>
 
 namespace GLib::Win
 {

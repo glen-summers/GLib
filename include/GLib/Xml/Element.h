@@ -1,6 +1,6 @@
 #pragma once
 
-#include "GLib/Xml/Attributes.h"
+#include <GLib/Xml/Attributes.h>
 
 namespace GLib::Xml
 {

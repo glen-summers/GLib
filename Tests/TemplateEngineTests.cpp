@@ -1,7 +1,7 @@
 
-#include <boost/test/unit_test.hpp>
+#include <GLib/Html/TemplateEngine.h>
 
-#include "GLib/Html/TemplateEngine.h"
+#include <boost/test/unit_test.hpp>
 
 #include "TestStructs.h"
 #include "TestUtils.h"

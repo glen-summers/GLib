@@ -1,6 +1,7 @@
-#include <boost/test/unit_test.hpp>
 
-#include "GLib/Xml/Printer.h"
+#include <GLib/Xml/Printer.h>
+
+#include <boost/test/unit_test.hpp>
 
 #include "TestUtils.h"
 #include "XmlTestUtils.h"

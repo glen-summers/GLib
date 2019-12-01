@@ -1,12 +1,13 @@
 #pragma once
 
-#include "GLib/Win/ComException.h"
-#include "GLib/Win/FormatErrorMessage.h"
-#include "GLib/scope.h"
+#include <GLib/Win/ComException.h>
+#include <GLib/Win/FormatErrorMessage.h>
 
 #ifdef _DEBUG // || defined(GLIB_DEBUG)
-#include "GLib/Win/DebugStream.h"
+#include <GLib/Win/DebugStream.h>
 #endif
+
+#include <GLib/scope.h>
 
 #include <sstream>
 

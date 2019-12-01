@@ -1,6 +1,6 @@
 #pragma once
 
-#include "GLib/Win/DebugWrite.h"
+#include <GLib/Win/DebugWrite.h>
 
 namespace GLib::Win
 {
@@ -61,7 +61,7 @@ namespace GLib::Win
 					sourceName, className, hWnd, hdr.hwndFrom, hdr.idFrom, hdr.code);
 				return;
 			}
-	
+
 			Debug::Write("Msg: {0,-6} {1,-24} : {2,-20} {3,-20} Hw:{4} : W:{5} L:{6} -> {7}",
 				message, msgName, sourceName, className, hWnd, wParam, lParam, lresult);
 		}
@@ -70,7 +70,8 @@ namespace GLib::Win
 		// http ://blog.airesoft.co.uk/2009/11/wm_messages/
 		static const auto & MessageStrings()
 		{
-			static auto msgs = std::array<const char *, 1024>
+			constexpr unsigned int Messages = 1024;
+			static auto msgs = std::array<const char *, Messages>
 			{
 				"WM_NULL",
 				"WM_CREATE",

@@ -1,6 +1,7 @@
-#include <boost/test/unit_test.hpp>
 
-#include "GLib/checked_cast.h"
+#include <GLib/checked_cast.h>
+
+#include <boost/test/unit_test.hpp>
 
 using namespace GLib::Util;
 

@@ -1,9 +1,11 @@
+
+
+#include <GLib/split.h>
+
+#include <GLib/ConsecutiveFind.h>
+#include <GLib/cvt.h>
+
 #include <boost/test/unit_test.hpp>
-
-#include "GLib/split.h"
-#include "GLib/cvt.h"
-
-#include "GLib/ConsecutiveFind.h"
 
 #include "TestUtils.h"
 

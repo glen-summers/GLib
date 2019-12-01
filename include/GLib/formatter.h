@@ -1,8 +1,8 @@
 #ifndef FORMATTER_H
 #define FORMATTER_H
 
-#include "GLib/Span.h"
-#include "GLib/printfformatpolicy.h"
+#include <GLib/Span.h>
+#include <GLib/printfformatpolicy.h>
 
 #include <array>
 #include <functional>

@@ -1,7 +1,7 @@
 
-#include <boost/test/unit_test.hpp>
+#include <GLib/Eval/Evaluator.h>
 
-#include "GLib/Eval/Evaluator.h"
+#include <boost/test/unit_test.hpp>
 
 #include "TestStructs.h"
 #include "TestUtils.h"

@@ -1,26 +1,27 @@
-#include <boost/test/unit_test.hpp>
-
-#include <Windows.h>
 
 #ifdef _DEBUG
 #define COM_PTR_DEBUG
 #endif
 
-#include "GLib/Win/Aut/UIAut.h"
-#include "GLib/Win/ComUtils.h"
-#include "GLib/Win/DebugStream.h"
-#include "GLib/Win/DebugWrite.h"
-#include "GLib/Win/FileSystem.h"
-#include "GLib/Win/NativeExceptionPrinter.h"
-#include "GLib/Win/Process.h"
-#include "GLib/Win/Registry.h"
-#include "GLib/Win/Symbols.h"
-#include "GLib/Win/Uuid.h"
-#include "GLib/Win/Variant.h"
-#include "GLib/Win/Window.h"
-#include "GLib/Win/WindowFinder.h"
+#include <Windows.h>
 
-#include "GLib/Span.h"
+#include <GLib/Win/Aut/UIAut.h>
+#include <GLib/Win/ComUtils.h>
+#include <GLib/Win/DebugStream.h>
+#include <GLib/Win/DebugWrite.h>
+#include <GLib/Win/FileSystem.h>
+#include <GLib/Win/NativeExceptionPrinter.h>
+#include <GLib/Win/Process.h>
+#include <GLib/Win/Registry.h>
+#include <GLib/Win/Symbols.h>
+#include <GLib/Win/Uuid.h>
+#include <GLib/Win/Variant.h>
+#include <GLib/Win/Window.h>
+#include <GLib/Win/WindowFinder.h>
+
+#include <GLib/Span.h>
+
+#include <boost/test/unit_test.hpp>
 
 #include "TestUtils.h"
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "GLib/Win/ComErrorCheck.h"
+#include <GLib/Win/ComErrorCheck.h>
 
 namespace GLib::Win
 {

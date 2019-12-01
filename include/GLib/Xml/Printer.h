@@ -1,10 +1,10 @@
 #pragma once
 
+#include <GLib/Xml/Utils.h>
+
 #include <array>
 #include <sstream>
 #include <stack>
-
-#include "GLib/Xml/Utils.h"
 
 namespace GLib::Xml
 {

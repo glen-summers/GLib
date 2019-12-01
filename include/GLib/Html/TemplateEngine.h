@@ -2,10 +2,9 @@
 
 #include "Node.h"
 
-#include "GLib/Eval/Evaluator.h"
-#include "GLib/Xml/Iterator.h"
-
-#include "GLib/PairHash.h"
+#include <GLib/Eval/Evaluator.h>
+#include <GLib/PairHash.h>
+#include <GLib/Xml/Iterator.h>
 
 #include <ostream>
 #include <regex>

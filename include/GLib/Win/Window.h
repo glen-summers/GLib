@@ -2,13 +2,14 @@
 
 #include <windowsx.h>
 
-#include "GLib/formatter.h"
-#include "GLib/Win/ErrorCheck.h"
-#include "GLib/Win/Painter.h"
+#include <GLib/Win/ErrorCheck.h>
+#include <GLib/Win/Painter.h>
 
 #ifdef GLIB_DEBUG_MESSAGES
-#include "GLib/Win/MessageDebug.h"
+#include <GLib/Win/MessageDebug.h>
 #endif
+
+#include <GLib/formatter.h>
 
 #include <functional>
 #include <memory>
@@ -17,11 +18,49 @@ namespace GLib::Win
 {
 	class Window;
 
+	struct Size : SIZE {};
+	struct Point : POINT {};
+	struct Rect : RECT {};
+
 	namespace Detail
 	{
 		template <typename T1, typename T2> T1 Munge(T2 t2)
 		{
 			return reinterpret_cast<T1>(t2); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast) many windows casts from LPARAMs etc.
+		}
+
+		constexpr unsigned int HRedraw = CS_HREDRAW;
+		constexpr unsigned int VRedraw = CS_VREDRAW;
+		constexpr unsigned int OverlappedWindow = WS_OVERLAPPEDWINDOW; // NOLINT(hicpp-signed-bitwise)
+
+		inline auto MakeIntResource(int id)
+		{
+			return MAKEINTRESOURCEW(id); // NOLINT(cppcoreguidelines-pro-type-cstyle-cast) bad macro
+		}
+
+		inline WORD LoWord(WPARAM param)
+		{
+			return LOWORD(param);  // NOLINT(hicpp-signed-bitwise)
+		}
+
+		inline WORD HiWord(WPARAM param)
+		{
+			return HIWORD(param);  // NOLINT(hicpp-signed-bitwise)
+		}
+
+		inline Point PointFromParam(LPARAM param)
+		{
+			return { GET_X_LPARAM(param), GET_Y_LPARAM(param) }; // NOLINT(hicpp-signed-bitwise)
+		}
+
+		inline short WheelData(WPARAM param)
+		{
+			return GET_WHEEL_DELTA_WPARAM(param); // NOLINT(hicpp-signed-bitwise)
+		}
+
+		inline Size SizeFromParam(LPARAM param)
+		{
+			return { LoWord(param), HiWord(param) };
 		}
 
 		inline HINSTANCE Instance()
@@ -65,13 +104,13 @@ namespace GLib::Win
 				WNDCLASSEXW wc =
 				{
 					sizeof(WNDCLASSEXW),
-					CS_HREDRAW | CS_VREDRAW /*CS_DBLCLKS*/,
+					HRedraw | VRedraw,
 					static_cast<WNDPROC>(proc),
 					0, 0, instance,
-					::LoadIconW(instance, MAKEINTRESOURCEW(icon)),
-					::LoadCursorW(nullptr, IDC_ARROW),
+					::LoadIconW(instance, MakeIntResource(icon)),
+					::LoadCursorW(nullptr, IDC_ARROW), // NOLINT(cppcoreguidelines-pro-type-cstyle-cast) baad macro
 					Detail::Munge<HBRUSH>(size_t{COLOR_WINDOW} + 1),
-					MAKEINTRESOURCEW(menu),
+					MakeIntResource(menu),
 					className.c_str()
 					// hIconSm etc.
 				};
@@ -109,17 +148,13 @@ namespace GLib::Win
 
 		inline HACCEL LoadAccel(int id)
 		{
-			HACCEL accel = ::LoadAcceleratorsW(Instance(), MAKEINTRESOURCEW(id));
+			HACCEL accel = ::LoadAcceleratorsW(Instance(), MakeIntResource(id));
 			Util::AssertTrue(accel != nullptr, "LoadAcceleratorsW");
 			return accel;
 		}
 	}
 
 	enum class CloseResult { Allow, Prevent };
-
-	struct Size : SIZE {};
-	struct Point : POINT {};
-	struct Rect : RECT {};
 
 	class Window
 	{
@@ -128,7 +163,7 @@ namespace GLib::Win
 
 	public:
 		Window(int icon, int menu, int accel, const std::string & title)
-			: handle{Detail::Create(WS_OVERLAPPEDWINDOW, icon, menu, title, WindowProc, this)}
+			: handle{Detail::Create(Detail::OverlappedWindow, icon, menu, title, WindowProc, this)}
 			, accel{Detail::LoadAccel(accel)}
 		{}
 
@@ -219,23 +254,23 @@ namespace GLib::Win
 			return exchange ? std::exchange(handled, newValue) : handled;
 		}
 
-		virtual void OnSize(const Size &) noexcept {}
-		virtual void OnGetMinMaxInfo(MINMAXINFO &) noexcept {}
+		virtual void OnSize(const Size & /**/) noexcept {}
+		virtual void OnGetMinMaxInfo(MINMAXINFO & /**/) noexcept {}
 		virtual void OnCommand(int /*command*/) noexcept {}
 		virtual CloseResult OnClose() noexcept { return CloseResult::Allow; }
 		virtual void OnDestroy() noexcept {}
 		virtual void OnNCDestroy() noexcept {}
-		virtual void OnUser(WPARAM, LPARAM) noexcept {}
-		virtual void OnNotify(const NMHDR&) noexcept {}
-		virtual void OnChar(int) noexcept {}
-		virtual void OnKeyDown(int) noexcept {}
-		virtual void OnLeftButtonDown(const Point & ) noexcept {}
-		virtual void OnLeftButtonUp(const Point & ) noexcept {}
-		virtual void OnContextMenu(const Point & ) noexcept {}
-		virtual void OnMouseMove(const Point &) noexcept {}
-		virtual void OnMouseWheel(const Point &, int /*delta*/) noexcept {}
+		virtual void OnUser(WPARAM /*w*/, LPARAM /*p*/) noexcept {}
+		virtual void OnNotify(const NMHDR & /*hdr*/) noexcept {}
+		virtual void OnChar(int /*char*/) noexcept {}
+		virtual void OnKeyDown(int /*key*/) noexcept {}
+		virtual void OnLeftButtonDown(const Point & /**/) noexcept {}
+		virtual void OnLeftButtonUp(const Point & /**/) noexcept {}
+		virtual void OnContextMenu(const Point & /**/) noexcept {}
+		virtual void OnMouseMove(const Point & /**/) noexcept {}
+		virtual void OnMouseWheel(const Point & /**/, int /*delta*/) noexcept {}
 		virtual void OnCaptureChanged() noexcept {}
-		virtual void OnGetDlgCode(int /*key*/, const MSG&, LRESULT &) {}
+		virtual void OnGetDlgCode(int /*key*/, const MSG & /**/, LRESULT & /**/) {}
 		virtual void OnPaint() noexcept {}
 		virtual void OnTimer() noexcept {}
 		virtual void OnEraseBackground() noexcept {}
@@ -261,7 +296,7 @@ namespace GLib::Win
 
 				case WM_SIZE:
 				{
-					return OnSize({ LOWORD(lParam), HIWORD(lParam) });
+					return OnSize(Detail::SizeFromParam(lParam));
 				}
 
 				case WM_GETMINMAXINFO:
@@ -271,7 +306,7 @@ namespace GLib::Win
 
 				case WM_COMMAND:
 				{
-					return OnCommand(LOWORD(wParam));
+					return OnCommand(Detail::LoWord(wParam));
 				}
 
 				case WM_CLOSE:
@@ -317,28 +352,28 @@ namespace GLib::Win
 
 				case WM_LBUTTONDOWN:
 				{
-					return OnLeftButtonDown({ GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) });
+					return OnLeftButtonDown(Detail::PointFromParam(lParam));
 				}
 
 				case WM_LBUTTONUP:
 				{
-					return OnLeftButtonUp({ GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) });
+					return OnLeftButtonUp(Detail::PointFromParam(lParam));
 				}
 
 				case WM_CONTEXTMENU:
 				{
-					return OnContextMenu({ GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) });
+					return OnContextMenu(Detail::PointFromParam(lParam));
 				}
 
 				case WM_MOUSEMOVE:
 				{
-					return OnMouseMove({ GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) });
+					return OnMouseMove(Detail::PointFromParam(lParam));
 				}
 
 				case WM_MOUSEWHEEL:
 				{
 					//WORD keys = GET_KEYSTATE_WPARAM(wParam);
-					return OnMouseWheel({ GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) }, GET_WHEEL_DELTA_WPARAM(wParam));
+					return OnMouseWheel(Detail::PointFromParam(lParam), Detail::WheelData(wParam));
 				}
 
 				case WM_CAPTURECHANGED:

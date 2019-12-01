@@ -2,7 +2,7 @@
 
 #include "Types.h"
 
-#include "GLib/flogging.h"
+#include <GLib/flogging.h>
 
 #include <list>
 
@@ -24,7 +24,7 @@ class HtmlReport
 	std::map<std::filesystem::path, std::list<FileCoverageData>> index;
 
 public:
-	HtmlReport(std::string testName, const std::filesystem::path & htmlPath, const CoverageData & coverage);
+	HtmlReport(std::string testName, const std::filesystem::path & htmlPath, const CoverageData & coverageData);
 
 private:
 	void GenerateRootIndex() const;

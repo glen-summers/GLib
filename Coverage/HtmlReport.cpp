@@ -12,11 +12,11 @@
 
 #include "resource.h"
 
-#include "GLib/ConsecutiveFind.h"
-#include "GLib/Html/TemplateEngine.h"
-#include "GLib/Win/Resources.h"
-#include "GLib/Xml/Printer.h"
-#include "GLib/formatter.h"
+#include <GLib/ConsecutiveFind.h>
+#include <GLib/Html/TemplateEngine.h>
+#include <GLib/Win/Resources.h>
+#include <GLib/Xml/Printer.h>
+#include <GLib/formatter.h>
 
 #include <fstream>
 #include <set>
@@ -35,11 +35,11 @@ std::string GetDateTime(time_t t)
 	return os.str();
 }
 
-HtmlReport::HtmlReport(std::string testName, const std::filesystem::path & htmlPath, const CoverageData & fileCoverage)
+HtmlReport::HtmlReport(std::string testName, const std::filesystem::path & htmlPath, const CoverageData & coverageData)
 	: testName(move(testName))
 	, time(GetDateTime(std::time(nullptr)))
 	, htmlPath(htmlPath)
-	, rootPaths(RootPaths(fileCoverage))
+	, rootPaths(RootPaths(coverageData))
 	, cssPath(Initialise(htmlPath))
 	, rootTemplate(LoadHtml(IDR_ROOTDIRECTORY))
 	, dirTemplate(LoadHtml(IDR_DIRECTORY))
@@ -49,7 +49,7 @@ HtmlReport::HtmlReport(std::string testName, const std::filesystem::path & htmlP
 	GLib::Flog::ScopeLog scopeLog(log, GLib::Flog::Level::Info, "HtmlReport");
 	(void)scopeLog;
 
-	for (const auto & fileDataPair : fileCoverage)
+	for (const auto & fileDataPair : coverageData)
 	{
 		const FileCoverageData & data = fileDataPair.second;
 
@@ -98,11 +98,9 @@ void HtmlReport::GenerateRootIndex() const
 
 	std::vector<Directory> directories;
 
-	for (const auto & pathChildrenPair : index)
+	for (const auto & [name, children]: index)
 	{
-		const auto& name = pathChildrenPair.first;
-		const auto& link = name / "index.html";
-		const auto& children = pathChildrenPair.second;
+		const auto & link = name / "index.html";
 
 		unsigned int coveredLines{};
 		unsigned int coverableLines{};

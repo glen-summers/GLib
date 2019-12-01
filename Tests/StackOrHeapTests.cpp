@@ -1,6 +1,7 @@
-#include <boost/test/unit_test.hpp>
 
-#include "GLib/stackorheap.h"
+#include <GLib/stackorheap.h>
+
+#include <boost/test/unit_test.hpp>
 
 namespace
 {

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "GLib/Win/Transfer.h"
-#include "GLib/cvt.h"
+#include <GLib/Win/Transfer.h>
+#include <GLib/cvt.h>
 
 #include <utility>
 

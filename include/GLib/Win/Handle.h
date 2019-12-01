@@ -1,6 +1,6 @@
 #pragma once
 
-#include "GLib/Win/ErrorCheck.h"
+#include <GLib/Win/ErrorCheck.h>
 
 #include <cassert>
 #include <memory>

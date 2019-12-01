@@ -1,6 +1,6 @@
 #pragma once
 
-#include "GLib/Win/WinException.h"
+#include <GLib/Win/WinException.h>
 
 namespace GLib::Win
 {

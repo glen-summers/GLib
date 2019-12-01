@@ -1,6 +1,7 @@
-#include <boost/test/unit_test.hpp>
 
-#include "GLib/TypePredicates.h"
+#include <GLib/TypePredicates.h>
+
+#include <boost/test/unit_test.hpp>
 
 #include <typeindex>
 

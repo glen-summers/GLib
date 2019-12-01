@@ -3,8 +3,8 @@
 #include "FunctionCoverage.h"
 #include "LineCover.h"
 
-#include "GLib/Eval/Value.h"
-#include "GLib/Xml/Utils.h"
+#include <GLib/Eval/Value.h>
+#include <GLib/Xml/Utils.h>
 
 template <>
 struct GLib::Eval::Visitor<FunctionCoverage>

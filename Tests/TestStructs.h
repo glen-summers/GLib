@@ -1,7 +1,8 @@
 #pragma once
-#include <string>
 
-#include "GLib/Eval/Collection.h"
+#include <GLib/Eval/Collection.h>
+
+#include <string>
 
 enum class Quatrain : int { Fee, Fi, Fo, Fum };
 

@@ -1,9 +1,9 @@
 #pragma once
 
-#include "GLib/formatter.h"
-#include "GLib/Span.h"
+#include <GLib/Win/Symbols.h>
 
-#include "GLib/Win/Symbols.h"
+#include <GLib/Span.h>
+#include <GLib/formatter.h>
 
 namespace GLib::Win::Symbols
 {

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "GLib/Eval/Collection.h"
-#include "GLib/split.h"
+#include <GLib/Eval/Collection.h>
+#include <GLib/split.h>
 
 #include <functional>
 #include <stdexcept>

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "GLib/Win/ErrorCheck.h"
-#include "GLib/Win/Transfer.h"
+#include <GLib/Win/ErrorCheck.h>
+#include <GLib/Win/Transfer.h>
 
 #include <cassert>
 

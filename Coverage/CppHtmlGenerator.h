@@ -1,8 +1,8 @@
 #pragma once
 
-#include "GLib/Cpp/Iterator.h"
-#include "GLib/Xml/Utils.h"
-#include "GLib/split.h"
+#include <GLib/Cpp/Iterator.h>
+#include <GLib/Xml/Utils.h>
+#include <GLib/split.h>
 
 #include <cctype>
 #include <unordered_map>

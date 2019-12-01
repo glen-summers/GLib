@@ -35,14 +35,11 @@ public:
 	void Accumulate(const Address & address) const
 	{
 		bool const visited = address.Visited();
-		for (const auto & fileLineIt : address.FileLines())
+		for (const auto & [file, addressLines] : address.FileLines())
 		{
-			const std::map<unsigned int, bool> & lines = fileLineIt.second;
-			std::map<unsigned, bool> & pairs = fileLines[fileLineIt.first];
-
-			for (const auto & lineIt : lines) // map merge method?
+			for (const auto & lineIt : addressLines) // map merge method?
 			{
-				pairs[lineIt.first] |= visited;
+				fileLines[file][lineIt.first] |= visited;
 			}
 		}
 	}

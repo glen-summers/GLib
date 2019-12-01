@@ -1,6 +1,6 @@
 #pragma once
 
-#include "GLib/Win/ComErrorCheck.h"
+#include <GLib/Win/ComErrorCheck.h>
 
 namespace GLib::Win
 {
@@ -13,16 +13,23 @@ namespace GLib::Win
 			return v;
 		}
 
+		inline VARTYPE Vt(const VARIANT & v) { return v.vt; } // NOLINT(cppcoreguidelines-pro-type-union-access) legacy code
+		inline VARTYPE & Vt(VARIANT & v) { return v.vt; } // NOLINT(cppcoreguidelines-pro-type-union-access) legacy code
+
+		inline BSTR & Bstr(VARIANT & v) { return v.bstrVal; } // NOLINT(cppcoreguidelines-pro-type-union-access) legacy code
+
 		inline VARIANT Create(const std::string & value)
 		{
-			VARIANT v;
-			::VariantInit(&v);
-			v.vt = VT_BSTR;
-			v.bstrVal = ::SysAllocString(Cvt::a2w(value).c_str());
-			if (v.bstrVal == nullptr)
+			auto bstr = ::SysAllocString(Cvt::a2w(value).c_str());
+			if (bstr == nullptr)
 			{
 				throw std::runtime_error("SysAllocString");
 			}
+
+			VARIANT v;
+			::VariantInit(&v);
+			Vt(v) = VT_BSTR;
+			Bstr(v) = ::SysAllocString(Cvt::a2w(value).c_str());
 			return v;
 		}
 
@@ -67,14 +74,14 @@ namespace GLib::Win
 
 		VARTYPE Type() const
 		{
-			return v.vt;
+			return Detail::Vt(v);
 		}
 
 		std::string ToString() const
 		{
 			VARIANT tmp{};
 			GLib::Win::CheckHr(::VariantChangeType(&tmp, &v, 0, VT_BSTR), "VariantChangeType");
-			return Cvt::w2a(V_BSTR(&tmp));
+			return Cvt::w2a(Detail::Bstr(tmp));
 		}
 
 		Variant & operator = (const Variant & other)
@@ -92,7 +99,7 @@ namespace GLib::Win
 
 		bool operator == (const Variant & other) const noexcept
 		{
-			return ::VarCmp(const_cast<VARIANT *>(&v), const_cast<VARIANT *>(&other.v), 0) == VARCMP_EQ; // NOLINT(cppcoreguidelines-pro-type-const-cast)
+			return ::VarCmp(const_cast<VARIANT *>(&v), const_cast<VARIANT *>(&other.v), 0) == VARCMP_EQ; // NOLINT(cppcoreguidelines-pro-type-const-cast) no const api
 		}
 
 		bool operator != (const Variant & other) const noexcept

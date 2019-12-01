@@ -1,6 +1,6 @@
 #pragma once
 
-#include "GLib/TypeFilter.h"
+#include <GLib/TypeFilter.h>
 
 namespace GLib::TypePredicates
 {
