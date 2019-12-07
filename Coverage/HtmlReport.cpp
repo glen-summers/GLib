@@ -81,9 +81,9 @@ std::filesystem::path HtmlReport::Initialise(const std::filesystem::path & path)
 std::set<std::filesystem::path> HtmlReport::RootPaths(const CoverageData & data)
 {
 	std::set<std::filesystem::path> rootPaths;
-	for (const auto & fileNameDataPair : data)
+	for (const auto & [path,_] : data)
 	{
-		rootPaths.insert(std::filesystem::path(fileNameDataPair.first).parent_path());
+		rootPaths.insert(path.parent_path());
 	}
 	RootDirectories(rootPaths);
 	return rootPaths;

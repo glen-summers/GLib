@@ -1,5 +1,7 @@
 #pragma once
 
+#include <utility>
+
 namespace GLib::Win
 {
 	template <typename Wrapped, typename Raw>

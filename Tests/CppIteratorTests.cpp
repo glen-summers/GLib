@@ -5,33 +5,11 @@
 
 #include "TestUtils.h"
 
+#include <filesystem>
+#include <fstream>
+
 namespace GLib::Cpp
 {
-	std::ostream & operator<<(std::ostream & str, const State & s)
-	{
-		static constexpr std::array<std::string_view, (size_t)State::Count> stateNames
-		{
-			"Error",
-			"None",
-			"WhiteSpace",
-			"CommentStart",
-			"CommentLine",
-			"Continuation",
-			"CommentBlock",
-			"CommentAsterix",
-			"Directive",
-			"String",
-			"RawStringPrefix",
-			"RawString",
-			"Code",
-			"SystemInclude",
-			"CharacterLiteral",
-			"CharacterEscape"
-		};
-
-		return str << stateNames[static_cast<int>(s)];
-	}
-
 	std::ostream & operator<<(std::ostream & s, const Fragment & f)
 	{
 		return s << "State: " << f.first << ", Value: \'" << f.second << '\'';
@@ -87,11 +65,11 @@ BOOST_AUTO_TEST_CASE(Code1)
 
 BOOST_AUTO_TEST_CASE(CommentBlock)
 {
-	Holder code = { R"(/**/)" };
+	Holder code = { R"(/***/)" };
 
 	std::vector<Fragment> expected
 	{
-		{ State::CommentBlock, { "/**/" }}
+		{ State::CommentBlock, { "/***/" }}
 	};
 
 	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), code.begin(), code.end());
@@ -304,28 +282,28 @@ BOOST_AUTO_TEST_CASE(RawStringPrefixTooLong)
 {
 	std::string_view  code = R"(R"12345678901234567(content)12345678901234567")";
 
-	GLIB_CHECK_RUNTIME_EXCEPTION(Parse(code), "Illegal character: '7' (0x37) at line 1 state 0");
+	GLIB_CHECK_RUNTIME_EXCEPTION(Parse(code), "Illegal character: '7' (0x37) at line: 1, state: RawStringPrefix");
 }
 
 BOOST_AUTO_TEST_CASE(RawStringPrefixErrorSpace)
 {
 	std::string_view  code = R"(R" (content) ")";
 
-	GLIB_CHECK_RUNTIME_EXCEPTION(Parse(code), "Illegal character: ' ' (0x20) at line 1 state 0");
+	GLIB_CHECK_RUNTIME_EXCEPTION(Parse(code), "Illegal character: ' ' (0x20) at line: 1, state: RawStringPrefix");
 }
 
 BOOST_AUTO_TEST_CASE(RawStringPrefixErrorCloseParenthesis)
 {
 	std::string_view code = R"--(R")(content)(")--";
 
-	GLIB_CHECK_RUNTIME_EXCEPTION(Parse(code), "Illegal character: ')' (0x29) at line 1 state 0");
+	GLIB_CHECK_RUNTIME_EXCEPTION(Parse(code), "Illegal character: ')' (0x29) at line: 1, state: RawStringPrefix");
 }
 
 BOOST_AUTO_TEST_CASE(RawStringPrefixBackslash)
 {
 	std::string_view code = R"--(R"\(content)\")--";
 
-	GLIB_CHECK_RUNTIME_EXCEPTION(Parse(code) , "Illegal character: '\\' (0x5c) at line 1 state 0");
+	GLIB_CHECK_RUNTIME_EXCEPTION(Parse(code) , "Illegal character: '\\' (0x5c) at line: 1, state: RawStringPrefix");
 }
 
 BOOST_AUTO_TEST_CASE(RawStringNewLine)
@@ -470,7 +448,7 @@ BOOST_AUTO_TEST_CASE(CharacterEscapeError)
 {
 	std::string_view code = "'\\\n;";
 
-	GLIB_CHECK_RUNTIME_EXCEPTION(Parse(code), "Illegal character: '\n' (0xa) at line 1 state 0");
+	GLIB_CHECK_RUNTIME_EXCEPTION(Parse(code), "Illegal character: (0xa) at line: 1, state: CharacterEscape");
 }
 
 BOOST_AUTO_TEST_CASE(Guard)
@@ -498,13 +476,6 @@ BOOST_AUTO_TEST_CASE(Guard)
 	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), code.begin(), code.end());
 }
 
-BOOST_AUTO_TEST_CASE(ContinueError)
-{
-	std::string_view code = R"(# include \x)";
-
-	GLIB_CHECK_RUNTIME_EXCEPTION(Parse(code), "Illegal character: 'x' (0x78) at line 1 state 0");
-}
-
 BOOST_AUTO_TEST_CASE(DirectiveContinue)
 {
 	Holder code = { R"(#include \
@@ -525,7 +496,21 @@ BOOST_AUTO_TEST_CASE(TerminationError)
 {
 	std::string_view code = R"("stringNotClosed)";
 
-	GLIB_CHECK_RUNTIME_EXCEPTION(Parse(code), "Termination error, State: 9");
+	GLIB_CHECK_RUNTIME_EXCEPTION(Parse(code), "Termination error, State: String, StartLine: 1");
+}
+
+BOOST_AUTO_TEST_CASE(DirectiveNotContinue)
+{
+	auto code = Holder{R"(# define foo \ //)"};
+
+	std::vector<Fragment> expected
+	{
+		{ State::Directive, "# define foo " },
+		{ State::Directive, "\\ " },
+		{ State::CommentLine, "//" },
+	};
+
+	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), code.begin(), code.end());
 }
 
 BOOST_AUTO_TEST_CASE(Html)
@@ -654,5 +639,31 @@ BOOST_AUTO_TEST_CASE(SymbolNameError)
 	std::string value = ">foo<";
 	GLIB_CHECK_RUNTIME_EXCEPTION({RemoveTemplateDefinitions(value);}, "Unable to parse symbol: >foo<");
 }
+
+void ScanFile(const std::filesystem::path & p)
+{
+	std::ifstream t(p);
+	if (!t)
+	{
+		std::cout << "read failed  : " + p.u8string() << '\n';
+	}
+
+	try
+	{
+		std::stringstream ss;
+		ss << t.rdbuf();
+		Parse(Holder{ss.str()});
+	}
+	catch (const std::runtime_error & e)
+	{
+		std::cout << "Parse failed : " << p.u8string() << " -- " << e.what() << '\n';
+	}
+}
+
+/* TODO : Illegal character: (0xa) at line: 1368, state: CharacterEscape
+BOOST_AUTO_TEST_CASE(Icu)
+{
+	ScanFile(R"--(C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\um\icu.h)--");
+}*/
 
 BOOST_AUTO_TEST_SUITE_END()

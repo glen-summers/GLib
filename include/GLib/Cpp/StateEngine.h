@@ -6,7 +6,7 @@
 
 namespace GLib::Cpp
 {
-	enum class State : int
+	enum class State : unsigned int
 	{
 		Error,
 		None,							// /:CommentStart, #:Directive, R":RawStringPrefix, ":String, ':CharacterLiteral, WS:WhiteSpace, Else:Code
@@ -56,7 +56,6 @@ namespace GLib::Cpp
 		mutable std::string rawStringPrefix;
 		mutable size_t matchCount {};
 		mutable State continuationState {};
-		mutable bool mustContinue {};
 
 	public:
 		explicit StateEngine(State state = State::None)
@@ -98,7 +97,7 @@ namespace GLib::Cpp
 			}
 		}
 
-		void SetContinue(State newState, bool must) const
+		void SetContinue(State newState) const
 		{
 			// for this to work need to unset continue states when they are invalidated
 			/*if (continuationState != State::Error)
@@ -106,7 +105,6 @@ namespace GLib::Cpp
 				throw std::logic_error("Continue state already set");
 			}*/
 			continuationState = newState;
-			mustContinue = must;
 		}
 
 		State Continue() const
@@ -124,7 +122,7 @@ namespace GLib::Cpp
 		{
 			if (c == ForwardSlash)
 			{
-				SetContinue(state, false);
+				SetContinue(state);
 				return State::CommentStart;
 			}
 
@@ -155,7 +153,7 @@ namespace GLib::Cpp
 		{
 			if (c == ForwardSlash)
 			{
-				SetContinue(state, false);
+				SetContinue(state);
 				return State::CommentStart;
 			}
 
@@ -204,7 +202,7 @@ namespace GLib::Cpp
 		{
 			if (c == BackSlash)
 			{
-				SetContinue(state, false);
+				SetContinue(state);
 				return State::Continuation;
 			}
 			if (c == NewLine)
@@ -214,18 +212,9 @@ namespace GLib::Cpp
 			return state;
 		}
 
-		State Continuation(char c) const
+		State Continuation(char /*c*/) const
 		{
-			if (c == NewLine)
-			{
-				return Continue();
-			}
-
-			if (!mustContinue)
-			{
-				return Continue();
-			}
-			return State::Error;
+			return Continue();
 		}
 
 		State CommentBlock(char c) const
@@ -243,7 +232,11 @@ namespace GLib::Cpp
 			{
 				return State::None;
 			}
-			return State::CommentBlock;
+			if (c != Asterix)
+			{
+				return State::CommentBlock;
+			}
+			return state;
 		}
 
 		State Directive(char c) const
@@ -255,19 +248,19 @@ namespace GLib::Cpp
 
 			if (c == ForwardSlash)
 			{
-				SetContinue(state, false);
+				SetContinue(state);
 				return State::CommentStart;
 			}
 
 			if (c == BackSlash)
 			{
-				SetContinue(state, true);
+				SetContinue(state);
 				return State::Continuation;
 			}
 
 			if (c == DoubleQuote)
 			{
-				SetContinue(state, false);
+				SetContinue(state);
 				return State::String;
 			}
 
@@ -288,7 +281,7 @@ namespace GLib::Cpp
 
 			if (c == BackSlash)
 			{
-				SetContinue(state, false);
+				SetContinue(state);
 				return State::Continuation;
 			}
 
@@ -356,7 +349,7 @@ namespace GLib::Cpp
 
 			if (c == ForwardSlash)
 			{
-				SetContinue(state, false);
+				SetContinue(state);
 				return State::CommentStart;
 			}
 
@@ -365,7 +358,7 @@ namespace GLib::Cpp
 				if (lastChar == 'R')
 				{
 					rawStringPrefix.clear();
-					SetContinue(state, false);
+					SetContinue(state);
 					return State::RawStringPrefix;
 				}
 				return State::String;

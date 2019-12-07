@@ -539,7 +539,6 @@ namespace GLib::Xml
 
 			&StateEngine::TextEntity,
 			&StateEngine::AttributeEntity,
-
 		};
 	};
 }

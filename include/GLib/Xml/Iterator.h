@@ -24,6 +24,7 @@ namespace GLib::Xml
 	class Iterator
 	{
 		friend class AttributeIterator;
+		static constexpr char MinPrintable = 0x20;
 
 		StateEngine engine;
 
@@ -94,7 +95,13 @@ namespace GLib::Xml
 		[[noreturn]] void IllegalCharacter(char c) const
 		{
 			std::ostringstream s;
-			s << "Illegal character: '" << *ptr << "' (0x" << std::hex << static_cast<unsigned>(c) << ')';
+			s << "Illegal character: ";
+			if (c >= MinPrintable)
+			{
+				s << '\'' << c << "' ";
+			}
+
+			s << "(0x" << std::hex << static_cast<unsigned>(c) << std::dec << ")"; // +lineNumber?
 			throw std::runtime_error(s.str());
 		}
 

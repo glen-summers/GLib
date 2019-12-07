@@ -52,6 +52,11 @@ void Coverage::AddLine(const std::wstring & fileName, unsigned lineNumber, const
 			return;
 		}
 
+		if (!std::filesystem::path(fileName).is_absolute())
+		{
+			return;
+		}
+
 		// functional change to symbol api or compiler change? file names as of 28jan 2019 are all lower case
 		wideFiles.insert(fileName);
 	}

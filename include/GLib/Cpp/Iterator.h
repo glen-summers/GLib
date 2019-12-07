@@ -7,16 +7,44 @@
 
 namespace GLib::Cpp
 {
+	inline std::ostream & operator<<(std::ostream & str, State s)
+	{
+		static constexpr std::array<std::string_view, static_cast<unsigned int>(State::Count)> stateNames
+		{
+			"Error",
+			"None",
+			"WhiteSpace",
+			"CommentStart",
+			"CommentLine",
+			"Continuation",
+			"CommentBlock",
+			"CommentAsterix",
+			"Directive",
+			"String",
+			"RawStringPrefix",
+			"RawString",
+			"Code",
+			"SystemInclude",
+			"CharacterLiteral",
+			"CharacterEscape"
+		};
+
+		return str << stateNames.at(static_cast<unsigned int>(s));
+	}
+
 	using Fragment = std::pair<State, std::string_view>;
 
 	class Iterator
 	{
+		static constexpr char MinPrintable = 0x20;
+
 		StateEngine engine;
 
 		const char * ptr {};
 		const char * end {};
 		const char * lastPtr {};
 		unsigned lineNumber {1};
+		unsigned startLineNumber {};
 
 		Fragment fragment;
 
@@ -64,11 +92,23 @@ namespace GLib::Cpp
 			}
 
 	private:
-		[[noreturn]] static void IllegalCharacter(char c, unsigned int lineNumber, State state)
+		[[noreturn]] static void IllegalCharacter(char c, unsigned int lineNumber, State state, unsigned int startLine)
 		{
 			std::ostringstream s;
-			s << "Illegal character: '" << c << "' (0x" << std::hex << static_cast<unsigned>(c)
-				<< ") at line " << std::dec << lineNumber << " state " << static_cast<int>(state);
+			s << "Illegal character: ";
+			if (c >= MinPrintable)
+			{
+				s << '\'' << c << "' ";
+			}
+
+			s << "(0x" << std::hex << static_cast<unsigned>(c) << std::dec << ") at line: " << lineNumber
+				<< ", state: " << state;
+
+			if (startLine != lineNumber)
+			{
+				s << ", StartLine: " << startLine;
+			}
+
 			throw std::runtime_error(s.str());
 		}
 
@@ -93,7 +133,7 @@ namespace GLib::Cpp
 				if (endState != State::None && endState!=State::WhiteSpace)
 				{
 					std::ostringstream s;
-					s << "Termination error, State: " << static_cast<int>(endState);
+					s << "Termination error, State: " << endState << ", StartLine: " << startLineNumber;
 					throw std::runtime_error(s.str());
 				}
 			}
@@ -123,9 +163,9 @@ namespace GLib::Cpp
 					newState = engine.Push(c);
 					if (newState == State::Error)
 					{
-						IllegalCharacter(c, lineNumber, newState);
+						IllegalCharacter(c, lineNumber, oldState, startLineNumber);
 					}
-					if (c== '\n')
+					if (c == '\n')
 					{
 						++lineNumber;
 					}
@@ -133,6 +173,7 @@ namespace GLib::Cpp
 					{
 						continue;
 					}
+					startLineNumber = lineNumber;
 				}
 				else
 				{
