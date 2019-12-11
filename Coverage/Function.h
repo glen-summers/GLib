@@ -37,9 +37,9 @@ public:
 		bool const visited = address.Visited();
 		for (const auto & [file, addressLines] : address.FileLines())
 		{
-			for (const auto & lineIt : addressLines) // map merge method?
+			for (const auto & [line,_] : addressLines) // map merge method?
 			{
-				fileLines[file][lineIt.first] |= visited;
+				fileLines[file][line] |= visited;
 			}
 		}
 	}
@@ -90,12 +90,12 @@ public:
 	size_t CoveredLines() const
 	{
 		size_t total{};
-		for (const auto & x : fileLines)
+		for (const auto & [_1, lines] : fileLines)
 		{
-			for (const auto & y : x.second)
+			for (const auto & [_2, isCovered] : lines)
 			{
 				// improve? keep tally?
-				if (y.second)
+				if (isCovered)
 				{
 					++total;
 				}
@@ -107,9 +107,9 @@ public:
 	size_t AllLines() const
 	{
 		size_t total{};
-		for (const auto & x : fileLines)
+		for (const auto & [_, lines] : fileLines)
 		{
-			total += x.second.size();
+			total += lines.size();
 		}
 		return total;
 	}

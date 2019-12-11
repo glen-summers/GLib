@@ -71,11 +71,8 @@ namespace GLib::Win::FileSystem
 	inline std::string NormalisePath(const std::string & path, const std::map<std::string, std::string> & driveMap)
 	{
 		// todo: network drives
-		for (const auto & drive : driveMap)
+		for (const auto & [deviceName, logicalName] : driveMap)
 		{
-			const auto& deviceName = drive.first;
-			const auto& logicalName = drive.second;
-
 			size_t compareSize = logicalName.size();
 			if (IcuUtils::CompareNoCase(path.c_str(), compareSize, logicalName.c_str(), compareSize) == IcuUtils::CompareResult::Equal)
 			{

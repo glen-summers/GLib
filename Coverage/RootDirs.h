@@ -45,7 +45,7 @@ inline void RootDirectories(std::set<std::filesystem::path> & paths)
 	}
 }
 
-inline std::filesystem::path Reduce(const std::filesystem::path & path, const std::set<std::filesystem::path> & paths)
+inline std::tuple<std::filesystem::path, std::filesystem::path> Reduce(const std::filesystem::path & path, const std::set<std::filesystem::path> & paths)
 {
 	for (const auto & p : paths)
 	{
@@ -53,7 +53,7 @@ inline std::filesystem::path Reduce(const std::filesystem::path & path, const st
 		auto rel = relative(path, p);
 		if (!rel.empty())
 		{
-			return rel;
+			return {p, rel};
 		}
 	}
 	throw std::runtime_error("Path not reduced");

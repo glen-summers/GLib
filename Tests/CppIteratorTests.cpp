@@ -5,7 +5,8 @@
 
 #include "TestUtils.h"
 
-#include <filesystem>
+#include "GLib/compat.h"
+
 #include <fstream>
 
 namespace GLib::Cpp
@@ -640,7 +641,7 @@ BOOST_AUTO_TEST_CASE(SymbolNameError)
 	GLIB_CHECK_RUNTIME_EXCEPTION({RemoveTemplateDefinitions(value);}, "Unable to parse symbol: >foo<");
 }
 
-void ScanFile(const std::filesystem::path & p)
+void ScanFile(const GLib::Compat::filesystem::path & p)
 {
 	std::ifstream t(p);
 	if (!t)
@@ -660,8 +661,8 @@ void ScanFile(const std::filesystem::path & p)
 	}
 }
 
-/* TODO : Illegal character: (0xa) at line: 1368, state: CharacterEscape
-BOOST_AUTO_TEST_CASE(Icu)
+// TODO : Illegal character: (0xa) at line: 1368, state: CharacterEscape
+/*BOOST_AUTO_TEST_CASE(Icu)
 {
 	ScanFile(R"--(C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\um\icu.h)--");
 }*/

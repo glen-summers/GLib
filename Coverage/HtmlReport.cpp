@@ -49,13 +49,27 @@ HtmlReport::HtmlReport(std::string testName, const std::filesystem::path & htmlP
 	GLib::Flog::ScopeLog scopeLog(log, GLib::Flog::Level::Info, "HtmlReport");
 	(void)scopeLog;
 
-	for (const auto & fileDataPair : coverageData)
+	Strings drives;
+	for (const auto & rootPath : rootPaths)
 	{
-		const FileCoverageData & data = fileDataPair.second;
+		if (!rootPath.is_absolute() && !rootPath.has_root_name())
+		{
+			throw std::runtime_error("Unexpected path: " + rootPath.u8string());
+		}
+		drives.insert(rootPath.root_name().u8string());
+	}
+	bool multipleDrives = drives.size() > 1;
 
-		auto subPath = Reduce(data.Path(), rootPaths);
+	for (const auto & [_, data] : coverageData)
+	{
+		auto [rootPath, subPath] = Reduce(data.Path(), rootPaths);
+
+		if (multipleDrives)
+		{
+			auto drive = rootPath.root_name().u8string().substr(0, 1);
+			subPath = std::filesystem::path{drive} / subPath;
+		}
 		GenerateSourceFile(subPath, data);
-
 		index[subPath.parent_path()].push_back(data);
 	}
 	GenerateRootIndex();
@@ -167,11 +181,8 @@ void HtmlReport::GenerateRootIndex() const
 // consolidate with GenerateRootIndex
 void HtmlReport::GenerateIndices() const
 {
-	for (const auto & pathChildrenPair : index)
+	for (const auto & [subPath, children] : index)
 	{
-		const auto& subPath = pathChildrenPair.first;
-		const auto& children = pathChildrenPair.second;
-
 		std::vector<Directory> directories;
 
 		unsigned int totalCoveredFunctions{};
@@ -205,6 +216,9 @@ void HtmlReport::GenerateIndices() const
 		auto path = htmlPath / subPath;
 		auto relativePath = std::filesystem::relative(htmlPath, path);
 		auto css = (relativePath / "coverage.css").generic_u8string();
+
+		// in case no files generated, also todo, create error stub files
+		create_directories(path);
 
 		GLib::Eval::Evaluator e;
 		e.Set("title", testName);
@@ -243,21 +257,34 @@ void HtmlReport::GenerateSourceFile(std::filesystem::path & subPath, const FileC
 	std::ifstream in(sourceFile);
 	if (!in)
 	{
-		throw std::runtime_error("Unable to open input file : " + sourceFile.u8string());
+		log.Warning("Unable to open input file : {0}", sourceFile.u8string());
+		// generate error file
+		return;
 	}
 
 	const auto & lc = data.LineCoverage();
 
-	std::ostringstream source;
+	std::string source;
 	{
 		std::stringstream buffer;
 		buffer << in.rdbuf();
-		Htmlify(std::string_view{buffer.str()}, source);
+
+		try
+		{
+			std::stringstream tmp;
+			Htmlify(std::string_view{buffer.str()}, tmp);
+			source = tmp.str();
+		}
+		catch (const std::exception & e)
+		{
+			log.Warning("Failed to parse source file '{0}' : {1}", sourceFile.u8string(), e.what());
+			source = buffer.str();
+		}
 	}
 
 	std::vector<Line> lines;
 
-	for (const auto & sourceLine : GLib::Util::Splitter{source.str(), "\n"})
+	for (const auto & sourceLine : GLib::Util::Splitter{source, "\n"})
 	{
 		auto lineNumber = static_cast<unsigned int>(lines.size()+1);
 		LineCover cover {};

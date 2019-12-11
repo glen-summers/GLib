@@ -35,13 +35,13 @@ namespace GLib::Xml::Utils
 		{
 			std::string_view replacement;
 			size_t pos = std::string::npos;
-			for (const auto & e : entities)
+			for (const auto & [escaped, unescaped] : entities)
 			{
-				size_t const find = value.find(e.second, startPos);
+				size_t const find = value.find(unescaped, startPos);
 				if (find != std::string::npos && find < pos)
 				{
 					pos = find;
-					replacement = e.first;
+					replacement = escaped;
 				}
 			}
 			if (pos == std::string::npos)

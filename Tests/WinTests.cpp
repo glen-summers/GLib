@@ -37,6 +37,9 @@ namespace boost::test_tools::tt_detail
 	};
 }
 
+using namespace std::chrono_literals;
+using namespace GLib::Win;
+
 namespace
 {
 	LONG WINAPI Filter(std::ostream & s, EXCEPTION_POINTERS * exceptionInfo)
@@ -84,10 +87,10 @@ namespace
 		}
 		return std::move(p);
 	}
-}
 
-using namespace std::chrono_literals;
-using namespace GLib::Win;
+
+	auto defaultTimeout = 10s;
+}
 
 // split up
 BOOST_AUTO_TEST_SUITE(WinTests)
@@ -294,7 +297,7 @@ BOOST_AUTO_TEST_SUITE(WinTests)
 	{
 		Process p(GetTestApp().u8string(), "-exitTime 1", 0, SW_HIDE);
 		auto scopedTerminator(p.ScopedTerminator());
-		p.WaitForExit(5s);
+		p.WaitForExit(defaultTimeout);
 		scopedTerminator.release();
 		BOOST_CHECK(0ul == p.ExitCode());
 	}
@@ -305,7 +308,7 @@ BOOST_AUTO_TEST_SUITE(WinTests)
 		Aut::UIAut aut; // causes leaks
 		Process p(GetTestApp().u8string(), "-exitTime 500", 0, SW_SHOWNORMAL);
 		auto scopedTerminator(p.ScopedTerminator());
-		p.WaitForInputIdle(5s);
+		p.WaitForInputIdle(defaultTimeout);
 
 		HWND hw = WindowFinder::Find(p.Id(), "TestApp");
 		BOOST_TEST(hw != nullptr);
@@ -323,7 +326,7 @@ BOOST_AUTO_TEST_SUITE(WinTests)
 
 		CheckHr(wp->Close(), "Close");
 
-		p.WaitForExit(5s);
+		p.WaitForExit(defaultTimeout);
 		scopedTerminator.release();
 
 		BOOST_CHECK(0ul == p.ExitCode());

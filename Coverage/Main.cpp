@@ -93,6 +93,7 @@ Coverage c:\Build\Main.exe C:\Report -i C:\MainCode C:\Utils\ -x C:\ExternalCode
 	}
 	catch (const std::exception & e)
 	{
+		GLib::Flog::LogManager::GetLog("Main").Error(e.what());
 		std::cout << "\x1b[31m" << "\x1b[1m" << e.what() << "\x1b[m" << '\n';
 
 		errorCode = 1;
