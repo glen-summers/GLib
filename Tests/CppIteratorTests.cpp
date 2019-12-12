@@ -344,8 +344,7 @@ int main() // main
 
 	std::vector<Fragment> expected
 	{
-		{ State::Directive, { "#include " }},
-		{ State::SystemInclude, { "<iostream>" }},
+		{ State::Directive, { "#include <iostream>" }},
 		{ State::WhiteSpace, { "\n\n" }},
 		{ State::Code, { "int" }},
 		{ State::WhiteSpace, { " " }},
@@ -395,8 +394,8 @@ BOOST_AUTO_TEST_CASE(SystemInclude)
 
 	std::vector<Fragment> expected
 	{
-		{ State::Directive, { "#include " }},
-		{ State::SystemInclude, { "<experimental/filesystem>" }},
+		{ State::Directive, { "#include <experimental" }},
+		{ State::Directive, { "/filesystem>" }},
 	};
 
 	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), code.begin(), code.end());
@@ -480,14 +479,13 @@ BOOST_AUTO_TEST_CASE(Guard)
 BOOST_AUTO_TEST_CASE(DirectiveContinue)
 {
 	Holder code = { R"(#include \
-"foo";)" };
+"foo")" };
 
 	std::vector<Fragment> expected
 	{
 		{ State::Directive, "#include " },
-		{ State::Directive, "\\\n" },
-		{ State::String, R"("foo")" },
-		{ State::Code, ";" },
+		{ State::Directive, R"(\
+"foo")"},
 	};
 
 	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), code.begin(), code.end());
@@ -533,7 +531,7 @@ BOOST_AUTO_TEST_CASE(Html2)
 	std::ostringstream stm;
 	Htmlify(code, stm);
 
-	auto expected = "<span class=\"d\">#include\xC2\xB7</span><span class=\"s\">&quot;foo.h&quot;</span>";
+	auto expected = "<span class=\"d\">#include\xC2\xB7&quot;foo.h&quot;</span>";
 
 	BOOST_TEST(expected == stm.str());
 }
@@ -641,12 +639,24 @@ BOOST_AUTO_TEST_CASE(SymbolNameError)
 	GLIB_CHECK_RUNTIME_EXCEPTION({RemoveTemplateDefinitions(value);}, "Unable to parse symbol: >foo<");
 }
 
-void ScanFile(const GLib::Compat::filesystem::path & p)
+BOOST_AUTO_TEST_CASE(UnterminatedBug)
+{
+	std::string_view code = R"(//\)"; // test conpilers have no error
+	std::ostringstream stm;
+	GLIB_CHECK_RUNTIME_EXCEPTION({Htmlify(code, stm);}, "Termination error, State: CommentLine, StartLine: 1");
+}
+
+//**/#define BULK_TEST
+#ifdef BULK_TEST
+namespace fs = GLib::Compat::filesystem;
+
+void ScanFile(const fs::path & p, std::ostream & s)
 {
 	std::ifstream t(p);
 	if (!t)
 	{
 		std::cout << "read failed  : " + p.u8string() << '\n';
+		return;
 	}
 
 	try
@@ -657,14 +667,42 @@ void ScanFile(const GLib::Compat::filesystem::path & p)
 	}
 	catch (const std::runtime_error & e)
 	{
-		std::cout << "Parse failed : " << p.u8string() << " -- " << e.what() << '\n';
+		s << p.u8string() << " : " << e.what() << '\n';
 	}
 }
 
-// TODO : Illegal character: (0xa) at line: 1368, state: CharacterEscape
-/*BOOST_AUTO_TEST_CASE(Icu)
+BOOST_AUTO_TEST_CASE(BulkTest)
 {
-	ScanFile(R"--(C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\um\icu.h)--");
-}*/
+	auto paths =
+	{
+#if defined(__linux__) && defined(__GNUG__)
+		"/usr/include"
+#elif defined(_WIN32) && defined(_MSC_VER)
+		R"--(C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.24.28314\include)--",
+		R"--(C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.24.28314\crt)--",
+		R"--(C:\Users\Glen\source\ExternalDependencies\boost_1_69_0_test\boost)--"
+#else
+#error unknown
+#endif
+	};
+
+	std::ostringstream s;
+	for (auto p : paths)
+	{
+		size_t count{};
+		for (const auto & de : fs::recursive_directory_iterator(p))
+		{
+			if (is_regular_file(de.path()) && de.path().extension() != ".asm")
+			{
+				ScanFile(de.path(), s);
+				++count;
+			}
+		}
+		std::cout << "BulkTest: " << p << ", Count: " << count << '\n';
+	}
+
+	BOOST_TEST("" == s.str());
+}
+#endif
 
 BOOST_AUTO_TEST_SUITE_END()

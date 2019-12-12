@@ -16,12 +16,11 @@ namespace GLib::Cpp
 		Continuation,			// NL: <return continue state>, else if /:self? !\:CommentLine?
 		CommentBlock,			// *:CommentAsterix
 		CommentAsterix,		// /:None, Else:CommentBlock
-		Directive,				// NL:None, /:CommentStart, \:Continuation, ":String, <:SystemInclude  *sets return state*
+		Directive,				// NL:None, /:CommentStart, \:Continuation, *sets return state*
 		String,						// ":None, \:Continuation  *sets return state*
 		RawStringPrefix,	// (: RawString
 		RawString,				// ): None  not continue state?
 		Code,							// WS:Whitespace, ":String, R":RawStringPrefix, ':CharacterLiteral  *sets return state*
-		SystemInclude,		// >:Directive
 		CharacterLiteral, // ':None, \:CharacterEscape
 		CharacterEscape, // \:CharacterLiteral, ':CharacterLiteral, else Error?
 
@@ -258,17 +257,6 @@ namespace GLib::Cpp
 				return State::Continuation;
 			}
 
-			if (c == DoubleQuote)
-			{
-				SetContinue(state);
-				return State::String;
-			}
-
-			if (c == OpenAngleBracket)
-			{
-				return State::SystemInclude;
-			}
-
 			return state;
 		}
 
@@ -372,15 +360,6 @@ namespace GLib::Cpp
 			return state;
 		}
 
-		State SystemInclude(char c) const
-		{
-			if (c == CloseAngleBracket)
-			{
-				return State::Directive;
-			}
-			return state;
-		}
-
 		State CharacterLiteral(char c) const
 		{
 			if (c == SingleQuote)
@@ -421,7 +400,6 @@ namespace GLib::Cpp
 			&StateEngine::RawStringPrefix,
 			&StateEngine::RawString,
 			&StateEngine::Code,
-			&StateEngine::SystemInclude,
 			&StateEngine::CharacterLiteral,
 			&StateEngine::CharacterEscape,
 		};

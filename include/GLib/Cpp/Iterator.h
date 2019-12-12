@@ -24,7 +24,6 @@ namespace GLib::Cpp
 			"RawStringPrefix",
 			"RawString",
 			"Code",
-			"SystemInclude",
 			"CharacterLiteral",
 			"CharacterEscape"
 		};
@@ -215,15 +214,6 @@ namespace GLib::Cpp
 					case State::Code:
 					{
 						if (Set(oldState, ptr-1)) // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic) todo use std::span
-						{
-							return;
-						}
-						break;
-					}
-
-					case State::SystemInclude:
-					{
-						if (Set(oldState, ptr)) // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic) todo use std::span
 						{
 							return;
 						}
