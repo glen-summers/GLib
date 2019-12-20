@@ -25,7 +25,6 @@ namespace GLib::Cpp
 			"RawString",
 			"Code",
 			"CharacterLiteral",
-			"CharacterEscape"
 		};
 
 		return str << stateNames.at(static_cast<unsigned int>(s));

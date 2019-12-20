@@ -100,8 +100,7 @@ continue
 
 	std::vector<Fragment> expected
 	{
-		{ State::CommentLine, { "// hello" }},
-		{ State::CommentLine, { "\\\ncontinue\n" }},
+		{ State::CommentLine, { "// hello\\\ncontinue\n" }},
 		{ State::CommentBlock, { "/* block */" }},
 		{ State::WhiteSpace, { " " }},
 		{ State::CommentBlock, { "/* another block */" }},
@@ -117,8 +116,7 @@ BOOST_AUTO_TEST_CASE(CommentLineNotContinue)
 
 	std::vector<Fragment> expected
 	{
-		{ State::CommentLine, { "// hello " }},
-		{ State::CommentLine, { "\\ not continuation" }},
+		{ State::CommentLine, { "// hello \\ not continuation" }},
 	};
 
 	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), code.begin(), code.end());
@@ -130,8 +128,7 @@ BOOST_AUTO_TEST_CASE(CommentLineNotContinueEnd)
 
 	std::vector<Fragment> expected
 	{
-		{ State::CommentLine, { "// hello not continuation " }},
-		{ State::CommentLine, { "\\/" }},
+		{ State::CommentLine, { "// hello not continuation \\/" }},
 	};
 
 	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), code.begin(), code.end());
@@ -204,20 +201,46 @@ BOOST_AUTO_TEST_CASE(StringFromStateCode)
 	std::vector<Fragment> expected
 	{
 		{ State::Code, { ";" }},
-		{ State::String, { "\"hello\"" }},
+		{ State::String, { R"("hello")" }},
 		{ State::Code, { ";" }},
 	};
 
 	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), code.begin(), code.end());
 }
 
-BOOST_AUTO_TEST_CASE(String2)
+BOOST_AUTO_TEST_CASE(StringContinue)
 {
-	Holder code = { R"("\x00 \\")" };
+	Holder code = { R"--("abc\
+def")--" };
 
 	std::vector<Fragment> expected
 	{
-		{ State::String, { R"("\x00 \\")" }}
+		{ State::String, { R"--("abc\
+def")--" }}
+	};
+
+	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), code.begin(), code.end());
+}
+
+BOOST_AUTO_TEST_CASE(StringNotContinue)
+{
+	Holder code = { R"--("\\abc\\")--" };
+
+	std::vector<Fragment> expected
+	{
+		{ State::String, { R"--("\\abc\\")--" }}
+	};
+
+	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), code.begin(), code.end());
+}
+
+BOOST_AUTO_TEST_CASE(StringWithQuotes)
+{
+	Holder code = { R"--("\"abc\"")--" };
+
+	std::vector<Fragment> expected
+	{
+		{ State::String, { R"--("\"abc\"")--" }}
 	};
 
 	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), code.begin(), code.end());
@@ -403,15 +426,33 @@ BOOST_AUTO_TEST_CASE(SystemInclude)
 
 BOOST_AUTO_TEST_CASE(CharacterLiteral)
 {
-	Holder code = { R"(auto char='\"';)" };
+	Holder code = { R"(auto char1='"';
+auto char2='\"';
+auto char3='\\';
+)" };
 
 	std::vector<Fragment> expected
 	{
 		{ State::Code, { "auto" }},
 		{ State::WhiteSpace, { " " }},
-		{ State::Code, { "char=" }},
+		{ State::Code, { "char1=" }},
+		{ State::CharacterLiteral, { R"('"')" }},
+		{ State::Code, { ";" }},
+		{ State::WhiteSpace, { "\n" }},
+
+		{ State::Code, { "auto" }},
+		{ State::WhiteSpace, { " " }},
+		{ State::Code, { "char2=" }},
 		{ State::CharacterLiteral, { R"('\"')" }},
 		{ State::Code, { ";" }},
+		{ State::WhiteSpace, { "\n" }},
+
+		{ State::Code, { "auto" }},
+		{ State::WhiteSpace, { " " }},
+		{ State::Code, { "char3=" }},
+		{ State::CharacterLiteral, { R"('\\')" }},
+		{ State::Code, { ";" }},
+		{ State::WhiteSpace, { "\n" }},
 	};
 
 	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), code.begin(), code.end());
@@ -444,11 +485,16 @@ BOOST_AUTO_TEST_CASE(CharacterLiteralFromStateWhitespace)
 	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), code.begin(), code.end());
 }
 
-BOOST_AUTO_TEST_CASE(CharacterEscapeError)
+BOOST_AUTO_TEST_CASE(NotCharacterLiteral)
 {
-	std::string_view code = "'\\\n;";
+	Holder code = { R"(0xFFFF'FFFFU;)" };
 
-	GLIB_CHECK_RUNTIME_EXCEPTION(Parse(code), "Illegal character: (0xa) at line: 1, state: CharacterEscape");
+	std::vector<Fragment> expected
+	{
+		{ State::Code, { "0xFFFF'FFFFU;" }},
+	};
+
+	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), code.begin(), code.end());
 }
 
 BOOST_AUTO_TEST_CASE(Guard)
@@ -483,9 +529,7 @@ BOOST_AUTO_TEST_CASE(DirectiveContinue)
 
 	std::vector<Fragment> expected
 	{
-		{ State::Directive, "#include " },
-		{ State::Directive, R"(\
-"foo")"},
+		{ State::Directive, "#include \\\n\"foo\""},
 	};
 
 	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), code.begin(), code.end());
@@ -504,8 +548,7 @@ BOOST_AUTO_TEST_CASE(DirectiveNotContinue)
 
 	std::vector<Fragment> expected
 	{
-		{ State::Directive, "# define foo " },
-		{ State::Directive, "\\ " },
+		{ State::Directive, "# define foo \\ " },
 		{ State::CommentLine, "//" },
 	};
 
@@ -646,7 +689,7 @@ BOOST_AUTO_TEST_CASE(UnterminatedBug)
 	GLIB_CHECK_RUNTIME_EXCEPTION({Htmlify(code, stm);}, "Termination error, State: CommentLine, StartLine: 1");
 }
 
-//**/#define BULK_TEST
+//**/ #define BULK_TEST
 #ifdef BULK_TEST
 namespace fs = GLib::Compat::filesystem;
 

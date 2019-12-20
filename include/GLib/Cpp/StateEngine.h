@@ -21,8 +21,7 @@ namespace GLib::Cpp
 		RawStringPrefix,	// (: RawString
 		RawString,				// ): None  not continue state?
 		Code,							// WS:Whitespace, ":String, R":RawStringPrefix, ':CharacterLiteral  *sets return state*
-		CharacterLiteral, // ':None, \:CharacterEscape
-		CharacterEscape, // \:CharacterLiteral, ':CharacterLiteral, else Error?
+		CharacterLiteral, // ':None
 
 		Count
 	};
@@ -55,6 +54,7 @@ namespace GLib::Cpp
 		mutable std::string rawStringPrefix;
 		mutable size_t matchCount {};
 		mutable State continuationState {};
+		mutable bool stringEscape {};
 
 	public:
 		explicit StateEngine(State state = State::None)
@@ -199,15 +199,11 @@ namespace GLib::Cpp
 
 		State CommentLine(char c) const
 		{
-			if (c == BackSlash)
-			{
-				SetContinue(state);
-				return State::Continuation;
-			}
-			if (c == NewLine)
+			if (c == NewLine && lastChar != BackSlash)
 			{
 				return State::None;
 			}
+
 			return state;
 		}
 
@@ -240,7 +236,7 @@ namespace GLib::Cpp
 
 		State Directive(char c) const
 		{
-			if (c == NewLine)
+			if (c == NewLine && lastChar != BackSlash)
 			{
 				return State::None;
 			}
@@ -251,26 +247,26 @@ namespace GLib::Cpp
 				return State::CommentStart;
 			}
 
-			if (c == BackSlash)
-			{
-				SetContinue(state);
-				return State::Continuation;
-			}
-
 			return state;
 		}
 
 		State String(char c) const
 		{
+			if (c == BackSlash)
+			{
+				stringEscape = !stringEscape;
+				return state;
+			}
+
+			if (stringEscape)
+			{
+				stringEscape = {};
+				return state;
+			}
+
 			if (c == DoubleQuote)
 			{
 				return State::None;
-			}
-
-			if (c == BackSlash)
-			{
-				SetContinue(state);
-				return State::Continuation;
 			}
 
 			return state;
@@ -352,7 +348,7 @@ namespace GLib::Cpp
 				return State::String;
 			}
 
-			if (c == SingleQuote)
+			if (c == SingleQuote && !std::isxdigit(lastChar))
 			{
 				return State::CharacterLiteral;
 			}
@@ -362,26 +358,29 @@ namespace GLib::Cpp
 
 		State CharacterLiteral(char c) const
 		{
+			if (c == BackSlash)
+			{
+				stringEscape = !stringEscape;
+				return state;
+			}
+
+			if (c == NewLine)
+			{
+				return State::Error;
+			}
+
+			if (stringEscape)
+			{
+				stringEscape = {};
+				return state;
+			}
+
 			if (c == SingleQuote)
 			{
 				return State::None;
 			}
 
-			if (c == BackSlash)
-			{
-				return State::CharacterEscape;
-			}
-
 			return state;
-		}
-
-		State CharacterEscape(char c) const
-		{
-			if (c == NewLine)
-			{
-				return State::Error;
-			}
-			return State::CharacterLiteral;
 		}
 
 		// must be enum order
@@ -401,7 +400,6 @@ namespace GLib::Cpp
 			&StateEngine::RawString,
 			&StateEngine::Code,
 			&StateEngine::CharacterLiteral,
-			&StateEngine::CharacterEscape,
 		};
 	};
 }
