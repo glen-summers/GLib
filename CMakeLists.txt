@@ -1,4 +1,5 @@
-cmake_minimum_required(VERSION 3.14)
+cmake_minimum_required(VERSION 3.12.4)
+
 include(ExternalProject)
 
 project(GLib VERSION 1.0.0 DESCRIPTION "GLib project")
