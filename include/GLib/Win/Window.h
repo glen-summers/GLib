@@ -101,13 +101,14 @@ namespace GLib::Win
 			{
 				Util::AssertTrue(::GetLastError() == ERROR_CLASS_DOES_NOT_EXIST, "GetClassInfoExW");
 
+				HICON i = icon == 0 ? nullptr : ::LoadIconW(instance, MakeIntResource(icon));
+
 				WNDCLASSEXW wc =
 				{
 					sizeof(WNDCLASSEXW),
 					HRedraw | VRedraw,
 					static_cast<WNDPROC>(proc),
-					0, 0, instance,
-					::LoadIconW(instance, MakeIntResource(icon)),
+					0, 0, instance, i,
 					::LoadCursorW(nullptr, IDC_ARROW), // NOLINT(cppcoreguidelines-pro-type-cstyle-cast) baad macro
 					Detail::Munge<HBRUSH>(size_t{COLOR_WINDOW} + 1),
 					MakeIntResource(menu),
@@ -164,7 +165,7 @@ namespace GLib::Win
 	public:
 		Window(int icon, int menu, int accel, const std::string & title)
 			: handle{Detail::Create(Detail::OverlappedWindow, icon, menu, title, WindowProc, this)}
-			, accel{Detail::LoadAccel(accel)}
+			, accel{accel ? Detail::LoadAccel(accel) : nullptr}
 		{}
 
 		int PumpMessages() const

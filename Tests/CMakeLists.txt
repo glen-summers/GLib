@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.14)
 
-set(BOOST_VER boost_1_69_0_TEST)
+set(BOOST_VER boost_1_72_0_TEST)
 set(BOOST_SIG ExternalDependencies/${BOOST_VER})
 set(BOOST_ITEM boost/test/unit_test.hpp)
 

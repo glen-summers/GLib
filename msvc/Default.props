@@ -3,7 +3,7 @@
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
-    <BoostVer>boost_1_69_0_TEST</BoostVer>
+    <BoostVer>boost_1_72_0_TEST</BoostVer>
     <BoostSig>ExternalDependencies\$(BoostVer)</BoostSig>
     <BoostItem>boost\test\unit_test.hpp</BoostItem>
     <ExtDeps>$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), "$(BoostSig)/$(BoostItem)"))</ExtDeps>

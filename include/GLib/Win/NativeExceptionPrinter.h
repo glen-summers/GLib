@@ -209,9 +209,10 @@ namespace GLib::Win::Symbols
 					Detail::GetCPlusPlusExceptionNameEx(info, name);
 				}
 				Formatter::Format(s, " : C++ exception of type: '{0}'\n", name);
+
+				[[fallthrough]];
 			}
 
-			// fall through
 			default:
 			{
 				if (er.NumberParameters != 0)

@@ -8,8 +8,8 @@
 		<SevenZipVer>18.1.0</SevenZipVer>
 		<SevenZipPath>7-Zip.CommandLine.$(SevenZipVer)\tools\x64\7za.exe</SevenZipPath>
 
-		<BoostBuilderUrl>https://github.com/glen-summers/BoostModularBuild/tarball/v1.0</BoostBuilderUrl>
-		<BoostBuilderName>glen-summers-BoostModularBuild-c5050ff</BoostBuilderName>
+		<BoostBuilderUrl>https://github.com/glen-summers/BoostModularBuild/archive/1.72.tar.gz</BoostBuilderUrl>
+		<BoostBuilderName>BoostModularBuild-1.72</BoostBuilderName>
 	</PropertyGroup>
 
 	<PropertyGroup>
