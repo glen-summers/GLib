@@ -85,7 +85,7 @@ namespace
 		{
 			throw std::runtime_error(appName + " not found");
 		}
-		return std::move(p);
+		return p;
 	}
 
 

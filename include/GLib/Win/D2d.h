@@ -16,7 +16,7 @@ namespace GLib::Win::D2d
 			D2D1_FACTORY_OPTIONS options { D2D1_DEBUG_LEVEL_INFORMATION };
 			GLib::Win::CheckHr(::D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED, __uuidof(ID2D1Factory), &options,
 				GLib::Win::GetAddress<ID2D1Factory>(factory)), "D2D1CreateFactory");
-			return std::move(factory);
+			return factory;
 		}
 	}
 
@@ -31,7 +31,7 @@ namespace GLib::Win::D2d
 
 			GLib::Win::WarnHr(factory->CreateHwndRenderTarget(D2D1::RenderTargetProperties(),
 				D2D1::HwndRenderTargetProperties(handle, D2D1::SizeU(size.cx, size.cy)), GetAddress(renderTarget)), "CreateHwndRenderTarget");
-			return std::move(renderTarget);
+			return renderTarget;
 		}
 	};
 

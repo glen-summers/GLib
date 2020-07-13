@@ -144,7 +144,7 @@ namespace GLib::Win
 			GLib::Win::MessageDebug::Write("Window create", handle.get(), param);
 #endif
 
-			return move(handle);
+			return handle;
 		}
 
 		inline HACCEL LoadAccel(int id)

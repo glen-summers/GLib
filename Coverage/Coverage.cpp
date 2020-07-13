@@ -237,7 +237,7 @@ CoverageData Coverage::GetCoverageData() const
 		}
 	}
 
-	return move(coverageData);
+	return coverageData;
 }
 
 void Coverage::CleanupFunctionNames(const std::string & name, const std::string & typeName,

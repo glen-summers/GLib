@@ -84,7 +84,7 @@ namespace GLib::Compat
 		ss << t.rdbuf();
 		std::string r{ss.str()};
 		std::replace(r.begin(), r.end(), '\0', ' ');
-		return move(r);
+		return r;
 	}
 
 	inline std::string ProcessName()

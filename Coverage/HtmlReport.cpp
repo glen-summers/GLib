@@ -89,7 +89,7 @@ std::filesystem::path HtmlReport::Initialise(const std::filesystem::path & path)
 		throw std::runtime_error("Unable to create file");
 	}
 	css << s;
-	return std::move(cssPath);
+	return cssPath;
 }
 
 std::set<std::filesystem::path> HtmlReport::RootPaths(const CoverageData & data)

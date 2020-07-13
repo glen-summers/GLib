@@ -227,7 +227,7 @@ namespace GLib::Win::Symbols
 				symbol = { symbuf->Index, symbuf->TypeIndex, static_cast<enum SymTagEnum>(symbuf->Tag),
 						Cvt::w2a(std::wstring_view{static_cast<const wchar_t *>(symbuf->Name)}), displacement };
 			}
-			return move(symbol);
+			return symbol;
 		}
 
 		std::optional<Symbol> TryGetSymbolFromInlineContext(uint64_t address, ULONG context) const
@@ -246,7 +246,7 @@ namespace GLib::Win::Symbols
 				symbol = { symbuf->Index, symbuf->TypeIndex, static_cast<enum SymTagEnum>(symbuf->Tag),
 						Cvt::w2a(std::wstring_view{static_cast<const wchar_t *>(symbuf->Name)}), displacement };
 			}
-			return move(symbol);
+			return symbol;
 		}
 
 
@@ -261,7 +261,7 @@ namespace GLib::Win::Symbols
 			{
 				line = { tmpLine.LineNumber, Cvt::w2a(tmpLine.FileName), tmpLine.Address, displacement };
 			}
-			return move(line);
+			return line;
 		}
 
 		std::optional<Line> TryGetLineFromInlineContext(uint64_t address, ULONG inlineContext) const
@@ -275,7 +275,7 @@ namespace GLib::Win::Symbols
 			{
 				line = { tmpLine.LineNumber, Cvt::w2a(tmpLine.FileName), tmpLine.Address, displacement };
 			}
-			return move(line);
+			return line;
 		}
 
 		bool TryGetClassParent(LONG symbolId, Symbol & result) const
