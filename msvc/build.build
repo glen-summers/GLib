@@ -8,8 +8,9 @@
 		<SevenZipVer>18.1.0</SevenZipVer>
 		<SevenZipPath>7-Zip.CommandLine.$(SevenZipVer)\tools\x64\7za.exe</SevenZipPath>
 
-		<BoostBuilderUrl>https://github.com/glen-summers/BoostModularBuild/archive/1.72.tar.gz</BoostBuilderUrl>
-		<BoostBuilderName>BoostModularBuild-1.72</BoostBuilderName>
+		<BoostBuilderVer>1.72.0</BoostBuilderVer>
+		<BoostBuilderUrl>https://github.com/glen-summers/BoostModularBuild/archive/v$(BoostBuilderVer).tar.gz</BoostBuilderUrl>
+		<BoostBuilderName>BoostModularBuild-$(BoostBuilderVer)</BoostBuilderName>
 	</PropertyGroup>
 
 	<PropertyGroup>
@@ -23,6 +24,7 @@
 		<Platform>x64</Platform>
 		<BuildInParallel>true</BuildInParallel>
 		<TestProject>Tests</TestProject>
+		<ReportsRepo>https://github.com/glen-summers/reports.git</ReportsRepo>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -55,7 +57,7 @@
 			<FileToDelete Include="$(Source)/**/ipch/**/*"/>
 			<FileToDelete Include="$(Source)/lib/*"/>
 		</ItemGroup>
-		<Delete Files="@(FileToDelete)" ContinueOnError="WarnAndContinue"/>
+		<Exec Command='del /F /Q /S "$(Out)"'/>
 
 		<ItemGroup>
 			<Directories Include="$([System.IO.Directory]::GetDirectories('$(Source)', '*', System.IO.SearchOption.AllDirectories))" />
@@ -259,6 +261,19 @@
 
 	<Target Name="TidyFile">
 		<Exec Command="$(Tidy) $(FileName) $(TidyCmd)" WorkingDirectory="$(Source)"/>
+	</Target>
+
+	<Target Name="PushReport">
+		<Exec Command="
+git config --global user.email glen.summers@outlook.com
+git config --global user.name glen-summers
+git init .
+git remote add origin $(ReportsRepo)
+git add *
+git commit --no-edit --all --verbose --message init
+" WorkingDirectory="$(Out)\HtmlReport" ContinueOnError="false"/>
+
+		<Exec Command="git push --force --verbose $(ReportsRepo)" WorkingDirectory="$(Out)\HtmlReport" ContinueOnError="false"/>
 	</Target>
 
 </Project>

@@ -43,7 +43,7 @@ BOOST_AUTO_TEST_CASE(LocalTimeZero)
 BOOST_AUTO_TEST_CASE(LocalTimeSpecific)
 {
 	auto tz = GLib::Compat::GetEnv("TZ");
-	GLib::Compat::SetEnv("TZ", "EST5EDT");
+	GLib::Compat::SetEnv("TZ", "CST");
 	GLib::Compat::TzSet();
 	SCOPE(_, [&]() noexcept
 	{
@@ -57,13 +57,13 @@ BOOST_AUTO_TEST_CASE(LocalTimeSpecific)
 
 	BOOST_TEST(tm.tm_sec == 5);
 	BOOST_TEST(tm.tm_min == 58);
-	BOOST_TEST(tm.tm_hour == 4);
+	BOOST_TEST(tm.tm_hour == 8);
 	BOOST_TEST(tm.tm_mday == 21);
 	BOOST_TEST(tm.tm_mon == 8);
 	BOOST_TEST(tm.tm_year == 119);
 	BOOST_TEST(tm.tm_wday == 6);
 	BOOST_TEST(tm.tm_yday == 263);
-	BOOST_TEST(tm.tm_isdst == 1);
+	BOOST_TEST(tm.tm_isdst == 0);
 }
 
 BOOST_AUTO_TEST_CASE(GmTime)

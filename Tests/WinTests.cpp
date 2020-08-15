@@ -170,7 +170,8 @@ BOOST_AUTO_TEST_SUITE(WinTests)
 		auto key = RegistryKeys::CurrentUser / "Environment";
 		std::string regValue = key.GetString("TEMP");
 
-		auto envValue = *GLib::Compat::GetEnv("TEMP");
+		std::string envValue = *GLib::Compat::GetEnv("TEMP");
+		envValue = GLib::Win::FileSystem::LongPath(envValue);
 		BOOST_TEST(envValue == regValue);
 	}
 
@@ -185,6 +186,8 @@ BOOST_AUTO_TEST_SUITE(WinTests)
 		auto regValue = RegistryKeys::CurrentUser / "Environment" & "TEMP";
 
 		std::string envValue = *GLib::Compat::GetEnv("TEMP");
+		envValue = GLib::Win::FileSystem::LongPath(envValue);
+
 		BOOST_TEST(std::holds_alternative<std::string>(regValue));
 		BOOST_TEST(envValue == std::get<std::string>(regValue));
 	}

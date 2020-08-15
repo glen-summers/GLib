@@ -145,4 +145,18 @@ namespace GLib::Win::FileSystem
 		Util::AssertTrue(h != nullptr, "CreateFileW");
 		return Handle(h);
 	}
+
+	inline std::string LongPath(const std::string & name)
+	{
+		auto ws = GLib::Cvt::a2w(name);
+		size_t lenNoTerminator = ::GetLongPathNameW(ws.c_str(), nullptr, 0);
+		Util::AssertTrue(lenNoTerminator != 0, "GetLongPathNameW");
+
+		GLib::Util::WideCharBuffer s;
+		s.EnsureSize(lenNoTerminator + 1);
+
+		lenNoTerminator = ::GetLongPathNameW(ws.c_str(), s.Get(), static_cast<DWORD>(s.size()));
+		Util::AssertTrue(lenNoTerminator != 0, "GetLongPathNameW");
+		return Cvt::w2a(std::wstring_view{s.Get(), lenNoTerminator});
+	}
 }
