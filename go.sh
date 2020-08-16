@@ -1,8 +1,26 @@
 #!/bin/bash
 
+BoostBuilderVer="1.72.0"
+
 error_exit() {
 	echo "$1" 1>&2
 	exit 1
+}
+
+Perms() {
+	sudo locale-gen en_GB.UTF-8 || error_exit "locale-gen" 
+	sudo update-locale LANG=en_GB.UTF-8 || error_exit "update-locale" 
+	locale -a
+}
+
+Deps() {
+	Url="https://github.com/glen-summers/BoostModularBuild/archive/v${BoostBuilderVer}.tar.gz"
+
+	mkdir -p "${RootDir}/out/downloads/Deps" || error_exit "mkdir failed" 
+	pushd "${RootDir}/out/downloads/Deps" || error_exit "download failed" 
+	(wget -c ${Url} -O - | tar -xz) || error_exit "download failed"
+
+	. "./BoostModularBuild-${BoostBuilderVer}/go.sh" build test || error_exit "module build failed"
 }
 
 Build() {
@@ -14,6 +32,9 @@ Build() {
 }
 
 RunTests() {
+	echo $LANG
+	LANG=en_GB.UTF-8
+	echo $LANG
 	CTEST_OUTPUT_ON_FAILURE=1 cmake --build "${CMakeBuildDir}" --config ${Configuration} --target test || error_exit "cmake build failed"
 	cat ${CMakeBuildDir}/Testing/Temporary/LastTest.log || error_exit "test log missing"
 }
@@ -61,6 +82,12 @@ case "$1" in
 		;;
 	clean)
 		Clean
+		;;
+	deps)
+		Deps
+		;;
+	perms)
+		Perms
 		;;
 	*)
 		error_exit "Usage: $0 {build*|clean}"
