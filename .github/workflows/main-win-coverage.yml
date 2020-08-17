@@ -1,0 +1,17 @@
+name: windows-2019 coverage
+
+on: [workflow_dispatch]
+
+jobs:
+  build:
+    runs-on: windows-2019
+    steps:
+      - uses: actions/checkout@v2
+      - name: Push report
+        run: |
+          mkdir ..\ExternalDependencies
+          .\go.cmd deps
+          .\go.cmd coverage
+          .\go.cmd PushReport /p:ReportsRepo="${{env.remote_repo}}"
+        env:
+          remote_repo: "https://${{secrets.repo_write}}@github.com/glen-summers/reports.git"

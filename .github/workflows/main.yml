@@ -1,0 +1,17 @@
+name: ubuntu-18.04
+
+on: [workflow_dispatch]
+
+jobs:
+  build:
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@master
+      - name: Perms
+        run: ./go.sh perms
+      - name: ExtDir
+        run: mkdir ../ExternalDependencies
+      - name: Deps
+        run: ./go.sh deps
+      - name: Run
+        run: ./go.sh

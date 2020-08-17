@@ -1,0 +1,15 @@
+name: windows-2019
+
+on: [workflow_dispatch]
+
+jobs:
+  build:
+    runs-on: windows-2019
+    steps:
+      - uses: actions/checkout@master
+      - name: ExtDir
+        run: mkdir ..\ExternalDependencies
+      - name: Deps
+        run: .\go.cmd deps
+      - name: Build and test
+        run: .\go.cmd
