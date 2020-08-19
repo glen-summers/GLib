@@ -50,14 +50,15 @@
 	</Target>
 
 	<Target Name="Clean">
+		<Exec Command='del /F /Q /S "$(Out)"' Condition="Exists($(Out))"/>
+
 		<ItemGroup>
-			<FileToDelete Include="$(Out)/**/*"/>
 			<FileToDelete Include="$(Source)/**/Debug/**/*"/>
 			<FileToDelete Include="$(Source)/**/Release/**/*"/>
 			<FileToDelete Include="$(Source)/**/ipch/**/*"/>
 			<FileToDelete Include="$(Source)/lib/*"/>
 		</ItemGroup>
-		<Exec Command='del /F /Q /S "$(Out)"'/>
+		<Delete Files="%(FileToDelete.Identity)"/>
 
 		<ItemGroup>
 			<Directories Include="$([System.IO.Directory]::GetDirectories('$(Source)', '*', System.IO.SearchOption.AllDirectories))" />
