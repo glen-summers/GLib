@@ -1,7 +1,9 @@
 #pragma once
 
 #include <array>
+#include <ostream>
 #include <string_view>
+#include <utility>
 
 namespace GLib::Xml::Utils
 {

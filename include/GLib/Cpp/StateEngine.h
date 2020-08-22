@@ -2,6 +2,7 @@
 
 #include <array>
 #include <cctype>
+#include <string>
 #include <utility>
 
 namespace GLib::Cpp

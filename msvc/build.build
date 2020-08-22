@@ -228,25 +228,34 @@
 		<TidyCheck Include="-google-readability-todo"/>
 		<TidyCheck Include="-google-explicit-constructor"/>
 		<TidyCheck Include="-hicpp-explicit-conversions"/>
+
+		<!--new ignores todo fix-->
+		<TidyCheck Include="-fuchsia-default-arguments-calls"/>
+		<TidyCheck Include="-fuchsia-default-arguments-declarations"/>
+		<TidyCheck Include="-modernize-use-trailing-return-type"/>
 	</ItemGroup>
 
-	<PropertyGroup>
-		<Tidy>"$(ProgramFiles)\LLVM\bin\clang-tidy.exe"</Tidy>
-		<TidyCmd>-quiet -checks=@(TidyCheck, ',') --header-filter=^.*\\GLib\\.*$ -- -I@(TidyInclude, ' -I') -std=c++17 -D@(TidyDefine, ' -D') -x c++ -W@(TidyIgnoreWarning, ',')</TidyCmd>
-	</PropertyGroup>
-
 	<Target Name="Tidy">
+		<PropertyGroup>
+			<TidySig>VC\Tools\Llvm\x64\bin\clang-tidy.exe</TidySig>
+			<TidyFound>$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildBinPath), $(TidySig)))</TidyFound>
+			<Tidy>$(TidyFound)\$(TidySig)</Tidy>
+			<TidyCmd>-fix -quiet -checks=@(TidyCheck, ',') --header-filter=^.*\\GLib\\.*$ -- -I@(TidyInclude, ' -I') -std=c++17 -D@(TidyDefine, ' -D') -x c++ -W@(TidyIgnoreWarning, ',')</TidyCmd>
+		</PropertyGroup>
+		<Error Text="Clang Tidy not found" Condition="'$(TidyFound)' == ''"/>
+
 		<ItemGroup>
 			<FileToCheck Include="$(Source)/include/**/*.h" Exclude="$(Source)/include/GLib/CompatLinux.h"/>
 			<FileToCheck Include="$(Source)/GLib/**/*.h"/>
 			<FileToCheck Include="$(Source)/GLib/**/*.cpp"/>
 			<FileToCheck Include="$(Source)/Coverage/**/*.cpp"/>
 			<FileToCheck Include="$(Source)/Coverage/**/*.h" Exclude="$(Source)/Coverage/resource.h"/>
+
 			<Relative Include="$([MSBuild]::MakeRelative($(Source), %(FileToCheck.FullPath)))"/>
 		</ItemGroup>
 
-		<!-- slow, split and run in parallel? or add compilation database json? -->
-		<Exec Command="$(Tidy) @(Relative, ' ') $(TidyCmd)" WorkingDirectory="$(Source)"/>
+		<!-- run one file at a time to avoid duplicate fixes applied to headers -->
+		<Exec Command="$(Tidy) %(Relative.Identity) $(TidyCmd)" WorkingDirectory="$(Source)"/>
 	</Target>
 
 	<Target Name="TidyTests">
