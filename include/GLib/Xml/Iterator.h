@@ -92,7 +92,7 @@ namespace GLib::Xml
 		}
 
 	private:
-		[[noreturn]] void IllegalCharacter(char c) const
+		[[noreturn]] static void IllegalCharacter(char c) 
 		{
 			std::ostringstream s;
 			s << "Illegal character: ";
@@ -129,7 +129,7 @@ namespace GLib::Xml
 					return;
 				}
 
-				const auto oldPtr = ptr;
+				const auto * const oldPtr = ptr;
 				const auto oldState = engine.GetState();
 				const auto newState = engine.Push(*ptr);
 				if (newState == Xml::State::Error)
@@ -192,7 +192,7 @@ namespace GLib::Xml
 					{
 						case Xml::State::AttributeEnd:
 						{
-							auto tmp = attributeValueStart;
+							const auto * tmp = attributeValueStart;
 							manager->Push(Utils::ToStringView(attributeName), Utils::ToStringView(++tmp, oldPtr), elementStack.size());
 							attributes.second = ptr;
 							break;

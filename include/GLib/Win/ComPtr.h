@@ -57,8 +57,8 @@ namespace GLib::Win
 	class ComPtr
 	{
 		template<typename U> friend class ComPtr;
-		template<typename U> friend U * Get(ComPtr<U> & p) noexcept;
-		template<typename U> friend const U * Get(const ComPtr<U> & p) noexcept;
+		template<typename U> friend U * Get(ComPtr<U> & p) noexcept; // NOLINT clang-tidy bug
+		template<typename U> friend const U * Get(const ComPtr<U> & p) noexcept; // NOLINT clang-tidy bug
 
 		T * p {};
 

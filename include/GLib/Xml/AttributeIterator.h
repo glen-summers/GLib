@@ -102,7 +102,7 @@ namespace GLib::Xml
 					return;
 				}
 
-				const auto oldPtr = ptr;
+				const auto * const oldPtr = ptr;
 				const auto oldState = engine.GetState();
 				const auto newState = engine.Push(*ptr);
 				if (newState == Xml::State::Error)
@@ -133,9 +133,13 @@ namespace GLib::Xml
 							{
 								return;
 							}
+							break;
 						}
 
-						default:;
+						default:
+						{
+							break;
+						}
 					}
 
 					switch (newState)
@@ -152,7 +156,10 @@ namespace GLib::Xml
 							break;
 						}
 
-						default:;
+						default:
+						{
+							break;
+						}
 					}
 				}
 			}

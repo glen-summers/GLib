@@ -45,7 +45,7 @@ namespace GLib::Win
 			HWND ret{};
 			WindowEnumerator func = [&](HWND wnd) noexcept -> bool
 			{
-				DWORD windowPid;
+				DWORD windowPid = 0;
 				::GetWindowThreadProcessId(wnd, &windowPid);
 
 				try

@@ -29,7 +29,7 @@ namespace GLib::Win::Symbols
 
 		inline Handle Duplicate(HANDLE handle)
 		{
-			HANDLE duplicatedHandle;
+			HANDLE duplicatedHandle = nullptr;
 			Util::AssertTrue(::DuplicateHandle(::GetCurrentProcess(), handle, ::GetCurrentProcess(),
 				&duplicatedHandle, 0, FALSE, DUPLICATE_SAME_ACCESS), "DuplicateHandle");
 			return Handle { duplicatedHandle };
@@ -206,7 +206,7 @@ namespace GLib::Win::Symbols
 			SYMBOL_INFOW buffer {};
 			auto const symbuf = &buffer;
 			symbuf->SizeOfStruct = sizeof(SYMBOL_INFOW);
-			DWORD64 displacement;
+			DWORD64 displacement = 0;
 			BOOL result = ::SymFromAddrW(Handle(), address, &displacement, symbuf);
 			Util::AssertTrue(result, "SymFromAddrW");
 			return symbuf->Index;
@@ -220,7 +220,7 @@ namespace GLib::Win::Symbols
 			auto const symbuf = buffer.data();
 			symbuf->SizeOfStruct = sizeof(SYMBOL_INFOW);
 			symbuf->MaxNameLen = MAX_SYM_NAME;
-			DWORD64 displacement;
+			DWORD64 displacement = 0;
 			BOOL result = ::SymFromAddrW(Handle(), address, &displacement, symbuf);
 			if (Util::WarnAssertTrue(result, "SymFromAddrW"))
 			{
@@ -238,7 +238,7 @@ namespace GLib::Win::Symbols
 			auto const symbuf = buffer.data();
 			symbuf->SizeOfStruct = sizeof(SYMBOL_INFOW);
 			symbuf->MaxNameLen = MAX_SYM_NAME;
-			DWORD64 displacement;
+			DWORD64 displacement = 0;
 
 			auto result = ::SymFromInlineContextW(Handle(), address, context, &displacement, symbuf);
 			if (Util::WarnAssertTrue(result, "SymFromInlineContext"))
@@ -255,7 +255,7 @@ namespace GLib::Win::Symbols
 			std::optional<Line> line;
 
 			IMAGEHLP_LINEW64 tmpLine{sizeof(IMAGEHLP_LINEW64)};
-			DWORD displacement;
+			DWORD displacement = 0;
 			BOOL result = ::SymGetLineFromAddrW64(Handle(), address, &displacement, &tmpLine);
 			if (Util::WarnAssertTrue(result, "SymGetLineFromAddrW64"))
 			{
@@ -269,7 +269,7 @@ namespace GLib::Win::Symbols
 			std::optional<Line> line;
 
 			IMAGEHLP_LINEW64 tmpLine{sizeof(IMAGEHLP_LINEW64)};
-			DWORD displacement;
+			DWORD displacement = 0;
 			BOOL result = ::SymGetLineFromInlineContextW(Handle(), address, inlineContext, 0, &displacement, &tmpLine);
 			if (Util::WarnAssertTrue(result, "SymGetLineFromInlineContext"))
 			{
@@ -280,7 +280,7 @@ namespace GLib::Win::Symbols
 
 		bool TryGetClassParent(LONG symbolId, Symbol & result) const
 		{
-			DWORD typeIndexOfClassParent;
+			DWORD typeIndexOfClassParent = 0;
 
 			// docs say TypeId param should be the TypeIndex member of returned SYMBOL_INFO
 			// and the result from TI_GET_CLASSPARENTID is "The type index of the class parent."
@@ -291,7 +291,7 @@ namespace GLib::Win::Symbols
 				return false;
 			}
 
-			DWORD indexOfClassParent;
+			DWORD indexOfClassParent = 0;
 			if (::SymGetTypeInfo(Handle(), baseOfImage, typeIndexOfClassParent, TI_GET_SYMINDEX, &indexOfClassParent) == FALSE)
 			{
 				return false;

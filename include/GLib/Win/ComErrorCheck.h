@@ -22,7 +22,7 @@ namespace GLib::Win
 			bool hasMessage = false;
 			std::ostringstream stm;
 			stm << message << " : ";
-			IErrorInfo* pErrorInfo;
+			IErrorInfo* pErrorInfo = nullptr;
 			if (::GetErrorInfo(0, &pErrorInfo) == S_OK)
 			{
 				BSTR description = nullptr;

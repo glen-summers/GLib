@@ -20,7 +20,7 @@ namespace GLib::Win::Util
 
 	inline void FormatErrorMessage(std::ostream & stm, unsigned int error, const wchar_t * moduleName = nullptr)
 	{
-		wchar_t *pszMsg;
+		wchar_t *pszMsg = nullptr;
 		int flags = FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS; // NOLINT(hicpp-signed-bitwise) baad macro
 		if (moduleName != nullptr)
 		{

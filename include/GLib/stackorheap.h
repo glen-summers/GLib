@@ -14,13 +14,11 @@ namespace GLib::Util
 		using Stack = std::array<T, StackElementCount>;
 		using Heap = std::unique_ptr<T[]>; // NOLINT(cppcoreguidelines-avoid-c-arrays,hicpp-avoid-c-arrays,modernize-avoid-c-arrays)
 
-		size_t heapSize;
+		size_t heapSize{};
 		std::variant<Stack, Heap> storage;
 
 	public:
-		StackOrHeap() : heapSize{}
-		{}
-
+		StackOrHeap() = default;
 		StackOrHeap(const StackOrHeap &) = delete;
 		StackOrHeap & operator=(const StackOrHeap &) = delete;
 		StackOrHeap(StackOrHeap &&) = delete;

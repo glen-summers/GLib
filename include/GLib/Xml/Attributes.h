@@ -21,7 +21,7 @@ namespace GLib::Xml
 			return {manager, data.data(), data.data() + data.size()};
 		}
 
-		AttributeIterator end() const
+		static AttributeIterator end()
 		{
 			return {};
 		}

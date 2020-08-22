@@ -29,7 +29,7 @@ namespace GLib::Win
 
 		inline bool Terminate(HANDLE process, UINT terminationExitCode) noexcept
 		{
-			DWORD exitCode;
+			DWORD exitCode = 0;
 			BOOL result = ::GetExitCodeProcess(process, &exitCode);
 			bool stillRunning = result != FALSE && exitCode == STILL_ACTIVE;
 			if (stillRunning)
@@ -130,7 +130,7 @@ namespace GLib::Win
 
 		DWORD ExitCode() const
 		{
-			DWORD exitCode;
+			DWORD exitCode = 0;
 			BOOL win32Result = ::GetExitCodeProcess(p.get(), &exitCode);
 			Util::AssertTrue(win32Result, "GetExitCodeProcess");
 			return exitCode;

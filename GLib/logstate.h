@@ -13,16 +13,12 @@ class LogState
 	using StreamType = GLib::Util::GenericOutStream<char, GLib::Util::VectorStreamBuffer<char, DefaultCapacity>>;
 
 	std::stack<Scope> scopes;
-	int depth;
-	bool pending;
-	const char * threadName;
+	int depth{};
+	bool pending{};
+	const char * threadName{};
 	StreamType stream;
 
 public:
-	LogState() noexcept
-		: depth{}, pending{}, threadName{}
-	{}
-
 	std::ostream & Stream()
 	{
 		return stream.Stream();

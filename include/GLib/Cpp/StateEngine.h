@@ -349,7 +349,7 @@ namespace GLib::Cpp
 				return State::String;
 			}
 
-			if (c == SingleQuote && !std::isxdigit(lastChar))
+			if (c == SingleQuote && (std::isxdigit(lastChar) == 0))
 			{
 				return State::CharacterLiteral;
 			}

@@ -165,7 +165,7 @@ namespace GLib::Win
 	public:
 		Window(int icon, int menu, int accel, const std::string & title)
 			: handle{Detail::Create(Detail::OverlappedWindow, icon, menu, title, WindowProc, this)}
-			, accel{accel ? Detail::LoadAccel(accel) : nullptr}
+			, accel{accel != 0 ? Detail::LoadAccel(accel) : nullptr}
 		{}
 
 		int PumpMessages() const

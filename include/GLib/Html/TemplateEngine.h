@@ -115,7 +115,7 @@ namespace GLib::Html
 				{
 					std::string_view eachValue;
 					std::string_view ifValue;
-					for (auto attr : e.Attributes())
+					for (const Xml::Attribute & attr : e.Attributes()) // NOLINT clang-tidy bug
 					{
 						if (attr.name == Each)
 						{
@@ -180,13 +180,13 @@ namespace GLib::Html
 			std::string_view text;
 			std::string_view iff;
 			std::string_view each;
-			
-			auto attr = e.Attributes().Value();
-			Xml::Attributes attributes { e.Attributes().Value(), nullptr };
+
+			const std::string_view & attr = e.Attributes().Value();
+			Xml::Attributes attributes { attr, nullptr };
 			bool pop{};
 
 			// handle duplicate attr names?
-			for (auto a : attributes)
+			for (const Xml::Attribute & a : attributes) // NOLINT clang-tidy bug
 			{
 				if (!Xml::NameSpaceManager::IsDeclaration(a.name))
 				{
@@ -253,7 +253,7 @@ namespace GLib::Html
 			{
 				node->AddFragment(e.OuterXml().data(), attr.data()-1);
 
-				for (const auto & a : attributes)
+				for (const Xml::Attribute & a : attributes) // NOLINT clang-tidy bug
 				{
 					std::string_view nameSpacePrefix;
 					if (Xml::NameSpaceManager::CheckForDeclaration(a.name, nameSpacePrefix))
@@ -284,7 +284,7 @@ namespace GLib::Html
 			else
 			{
 				auto p = e.OuterXml().data();
-				for (const Xml::Attribute & a : attributes)
+				for (const Xml::Attribute & a : attributes) // NOLINT clang-tidy bug
 				{
 					std::string_view prefix;
 					if (Xml::NameSpaceManager::CheckForDeclaration(a.name, prefix))
@@ -368,10 +368,10 @@ namespace GLib::Html
 					for (;;)
 					{
 						out << it->prefix();
-						auto var = (*it)[1]; // +format;
+						const auto & var = (*it)[1]; // +format;
 						out << evaluator.Evaluate(var);
-						auto suffix = it->suffix();
-						if (++it == end)
+						auto suffix = it++->suffix(); // capture before ++
+						if (it == end)
 						{
 							out << suffix;
 							break;

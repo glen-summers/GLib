@@ -29,7 +29,7 @@ namespace GLib::Compat
 		{
 			constexpr auto ErrorBufferSize = 256;
 			std::array<char, ErrorBufferSize> err{};
-			char * msg;
+			char * msg = nullptr;
 			strerror_s(msg = err.data(), err.size(), error);
 			throw std::runtime_error(std::string(prefix) + " : " + msg);
 		}
@@ -48,7 +48,7 @@ namespace GLib::Compat
 		auto wideName = GLib::Cvt::a2w(name);
 
 		GLib::Util::WideCharBuffer tmp;
-		size_t len;
+		size_t len = 0;
 		errno_t err = ::_wgetenv_s(&len, tmp.Get(), tmp.size(), wideName.c_str());
 		if (len == 0)
 		{

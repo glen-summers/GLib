@@ -234,7 +234,7 @@ namespace GLib::Win::Symbols
 
 		STACKFRAME64 frame = {};
 		CONTEXT context = Detail::GetContext(*exceptionInfo);
-		DWORD machineType;
+		DWORD machineType = 0;
 
 #if defined(_M_IX86)
 		machineType = IMAGE_FILE_MACHINE_I386;
