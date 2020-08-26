@@ -30,7 +30,7 @@ public:
 		return level;
 	}
 
-	const std::string  & Prefix() const
+	const std::string & Prefix() const
 	{
 		return prefix;
 	}
@@ -40,7 +40,7 @@ public:
 		return scopeText;
 	}
 
-	const std::string  & Stem() const
+	const std::string & Stem() const
 	{
 		return stem;
 	}

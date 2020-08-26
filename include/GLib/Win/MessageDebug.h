@@ -57,19 +57,20 @@ namespace GLib::Win
 			if (message == WM_NOTIFY) // check
 			{
 				const NMHDR & hdr = *reinterpret_cast<const NMHDR *>(lParam);
-				Debug::Write("Msg: WM_NOTIFY {0,-20} {1,-20}[hw:{2}] : From Hw:{3} Id:{4}, Code:{5:%8x}",
-					sourceName, className, hWnd, hdr.hwndFrom, hdr.idFrom, hdr.code);
+				Debug::Write("Msg: WM_NOTIFY {0,-20} {1,-20}[hw:{2}] : From Hw:{3} Id:{4}, Code:{5:%8x}", sourceName, className, hWnd, hdr.hwndFrom,
+										 hdr.idFrom, hdr.code);
 				return;
 			}
 
-			Debug::Write("Msg: {0,-6} {1,-24} : {2,-20} {3,-20} Hw:{4} : W:{5} L:{6} -> {7}",
-				message, msgName, sourceName, className, hWnd, wParam, lParam, lresult);
+			Debug::Write("Msg: {0,-6} {1,-24} : {2,-20} {3,-20} Hw:{4} : W:{5} L:{6} -> {7}", message, msgName, sourceName, className, hWnd,
+									 wParam, lParam, lresult);
 		}
 
 	private:
 		// http ://blog.airesoft.co.uk/2009/11/wm_messages/
 		static const auto & MessageStrings()
 		{
+			// clang-format off
 			constexpr unsigned int Messages = 1024;
 			static auto msgs = std::array<const char *, Messages>
 			{
@@ -1098,6 +1099,7 @@ namespace GLib::Win
 				"<WM_CBT_RESERVED__reserved_3fe>",
 				"WM_CBT_RESERVED_LAST"
 			};
+			// clang-format on
 			return msgs;
 		}
 	};

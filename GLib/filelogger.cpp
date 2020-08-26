@@ -49,7 +49,7 @@ StreamInfo FileLogger::GetStream() const
 	// without adding the date at start, it currently wont get added at rollover
 	// rollover will just increase the fileCount app_pid_n, and again will confuse flog tails fileChain logic
 	// change this to be full flog compliant, with some params, then upgrade flog tail to handle any scenario
-	//static constexpr bool alwaysAddDate = false;
+	// static constexpr bool alwaysAddDate = false;
 
 	std::ostringstream s;
 	s << baseFileName;
@@ -73,7 +73,7 @@ StreamInfo FileLogger::GetStream() const
 			logFileName.replace_filename(s.str() + "_" + std::to_string(num) + ".log");
 		}
 
-		//RenameOldFile(logFileName.u8string());
+		// RenameOldFile(logFileName.u8string());
 
 		if (exists(logFileName))
 		{
@@ -86,7 +86,7 @@ StreamInfo FileLogger::GetStream() const
 			continue;
 		}
 
-		//Debug::Write("Flogging to file : {0}", logFileName.u8string());
+		// Debug::Write("Flogging to file : {0}", logFileName.u8string());
 		try
 		{
 			//					Stream stream = File.Open(str, FileMode.CreateNew, FileAccess.Write, FileShare.ReadWrite | FileShare.Delete);
@@ -102,11 +102,10 @@ StreamInfo FileLogger::GetStream() const
 			//::GetSystemTimeAsFileTime(&ft);
 			//::SetFileTime(GetImpl(m_stream), &ft, NULL, NULL); // filesystem ver? nope
 
-			return StreamInfo { move(newStreamWriter), logFileName, date };
+			return StreamInfo {move(newStreamWriter), logFileName, date};
 		}
 		catch (...) // specific
-		{
-		}
+		{}
 	}
 	throw std::runtime_error("Exhausted possible stream names " + logFileName.u8string());
 }
@@ -142,17 +141,17 @@ void FileLogger::WriteToStream(GLib::Flog::Level level, const char * prefix, std
 
 			auto now = std::chrono::system_clock::now();
 			const std::time_t t = std::chrono::system_clock::to_time_t(now);
-			std::tm tm{};
+			std::tm tm {};
 			GLib::Compat::LocalTime(tm, t);
 
 			const auto ms = static_cast<int>(std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count() % 1000);
 
-			streamInfo.Stream() << std::left
-				<< std::put_time(&tm, "%d %b %Y, %H:%M:%S") << "." << std::setw(3) << std::setfill('0') << ms << std::setfill(' ')
-				<< " : [ " << std::setw(THREAD_ID_WIDTH) << Manipulate(ThreadName, logState.ThreadName()) << " ] : "
-				<< std::setw(LEVEL_WIDTH) << Manipulate(TranslateLevel, level) << " : "
-				<< std::setw(PREFIX_WIDTH) << prefix << " : "
-				<< message << std::endl << std::flush;
+			auto & s = streamInfo.Stream();
+			s << std::left << std::put_time(&tm, "%d %b %Y, %H:%M:%S") << "." << std::setw(3) << std::setfill('0') << ms;
+			s << std::setfill(' ') << " : [ " << std::setw(THREAD_ID_WIDTH) << Manipulate(ThreadName, logState.ThreadName()) << " ] : ";
+			s << std::setw(LEVEL_WIDTH) << Manipulate(TranslateLevel, level) << " : ";
+			s << std::setw(PREFIX_WIDTH) << prefix << " : " << message;
+			s << std::endl << std::flush;
 		}
 		catch (...)
 		{
@@ -179,7 +178,7 @@ void FileLogger::HandleFileRollover(size_t newEntrySize)
 		if (newEntrySize + size >= maxFileSize || streamInfo.Date() != GetDate())
 		{
 			CloseStream();
-			//RenameOldFile(oldPath);
+			// RenameOldFile(oldPath);
 		}
 	}
 }
@@ -193,16 +192,16 @@ void FileLogger::CloseStream() noexcept
 			WriteFooter(streamInfo.Stream());
 		}
 		catch (...) // specific?
-		{
-		}
+		{}
+
 		try
 		{
 			streamInfo.Stream().flush();
 		}
 		catch (...) // specific?
-		{
-		}
-		//streamWriter.close();
+		{}
+
+		// streamWriter.close();
 		streamInfo = StreamInfo();
 	}
 }
@@ -227,33 +226,31 @@ void FileLogger::WriteHeader(std::ostream & writer)
 		cmd.erase(pos, path.size());
 	}
 
-	static constexpr bool is64BitProcess = sizeof(void*) == 8;
+	static constexpr bool is64BitProcess = sizeof(void *) == 8;
 	static constexpr int bits = is64BitProcess ? 64 : 32; // more?
 
-	writer
-		<< "Opened      : " << std::put_time(&tm, "%d %b %Y, %H:%M:%S (%z)") << std::endl
-		<< "OpenedUtc   : " << std::put_time(&gtm, "%F %TZ") << std::endl
-		<< "ProcessName : (" << bits << " bit) " << name << std::endl
-		<< "FullPath    : " << path << std::endl
-		<< "CmdLine     : " << cmd << std::endl
-		<< "ProcessId   : " << GLib::Compat::ProcessId() << std::endl
-		<< "ThreadId    : " << std::this_thread::get_id() << std::endl;
-	//Formatter::Format(writer, "UserName    : {0}\\{1}", Environment.UserDomainName, Environment.UserName);
+	writer << "Opened      : " << std::put_time(&tm, "%d %b %Y, %H:%M:%S (%z)") << std::endl
+				 << "OpenedUtc   : " << std::put_time(&gtm, "%F %TZ") << std::endl
+				 << "ProcessName : (" << bits << " bit) " << name << std::endl
+				 << "FullPath    : " << path << std::endl
+				 << "CmdLine     : " << cmd << std::endl
+				 << "ProcessId   : " << GLib::Compat::ProcessId() << std::endl
+				 << "ThreadId    : " << std::this_thread::get_id() << std::endl;
+	// Formatter::Format(writer, "UserName    : {0}\\{1}", Environment.UserDomainName, Environment.UserName);
 
 	writer << HeaderFooterSeparator << std::endl;
 	writer.flush();
 }
 
-void FileLogger::WriteFooter(std::ostream &writer)
+void FileLogger::WriteFooter(std::ostream & writer)
 {
 	const std::time_t t = std::time(nullptr);
 	std::tm tm {};
 	GLib::Compat::LocalTime(tm, t);
 
-	writer
-		<< HeaderFooterSeparator << std::endl
-		<< "Closed       " << std::put_time(&tm, "%d %b %Y, %H:%M:%S (%z)") << std::endl
-		<< HeaderFooterSeparator << std::endl;
+	writer << HeaderFooterSeparator << std::endl
+				 << "Closed       " << std::put_time(&tm, "%d %b %Y, %H:%M:%S (%z)") << std::endl
+				 << HeaderFooterSeparator << std::endl;
 	writer.flush();
 }
 
@@ -283,7 +280,7 @@ void FileLogger::ScopeStart(GLib::Flog::Level level, const char * prefix, const 
 {
 	// level check?
 	CommitPendingScope();
-	logState.Push({ level, prefix, scope, stem });
+	logState.Push({level, prefix, scope, stem});
 }
 
 void FileLogger::CommitBuffer(GLib::Flog::Level level, const char * prefix)
@@ -298,7 +295,8 @@ void FileLogger::ScopeEnd(const char * prefix)
 	bool pending = logState.Pop();
 
 	std::ostringstream s; // use thread stream
-	s << std::setw(logState.Depth()) << "" << "<" << scope.Stem();
+	s << std::setw(logState.Depth()) << "";
+	s << "<" << scope.Stem();
 
 	if (pending)
 	{
@@ -308,7 +306,7 @@ void FileLogger::ScopeEnd(const char * prefix)
 	Write(scope.Level(), prefix, s.str().c_str());
 }
 
-FileLogger& FileLogger::Instance()
+FileLogger & FileLogger::Instance()
 {
 	static FileLogger fileLogger;
 	return fileLogger;
@@ -359,11 +357,9 @@ std::ostream & FileLogger::TranslateLevel(std::ostream & stream, GLib::Flog::Lev
 	return stream;
 }
 
-std:: ostream & FileLogger::ThreadName(std:: ostream & stream, const char * threadName)
+std::ostream & FileLogger::ThreadName(std::ostream & stream, const char * threadName)
 {
-	return threadName != nullptr
-		? stream << threadName
-		: stream << std::this_thread::get_id();
+	return threadName != nullptr ? stream << threadName : stream << std::this_thread::get_id();
 }
 
 unsigned FileLogger::GetDate()

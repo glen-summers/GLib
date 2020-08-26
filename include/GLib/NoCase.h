@@ -5,27 +5,30 @@
 
 namespace GLib
 {
-	template <typename CharType> struct NoCaseLess;
+	template <typename CharType>
+	struct NoCaseLess;
 
-	template<>
+	template <>
 	struct NoCaseLess<char>
 	{
-		bool operator()(const std::string & s1, const std::string &s2) const
+		bool operator()(const std::string & s1, const std::string & s2) const
 		{
 			return IcuUtils::CompareNoCase(s1, s2) == IcuUtils::CompareResult::Less;
 		}
 	};
 
-	template<typename CharType> class NoCaseHash;
+	template <typename CharType>
+	class NoCaseHash;
 
-	template<> class NoCaseHash<char>
+	template <>
+	class NoCaseHash<char>
 	{
 		static constexpr size_t fnvPrime = 16777619U;
 
 	public:
 		size_t operator()(const std::string & key) const
 		{
-			size_t val{};
+			size_t val {};
 			for (char c : IcuUtils::ToLower(key))
 			{
 				val ^= static_cast<size_t>(c);
@@ -35,9 +38,10 @@ namespace GLib
 		}
 	};
 
-	template<typename CharType> struct NoCaseEquality;
+	template <typename CharType>
+	struct NoCaseEquality;
 
-	template<>
+	template <>
 	struct NoCaseEquality<char>
 	{
 		bool operator()(const std::string & left, const std::string & right) const

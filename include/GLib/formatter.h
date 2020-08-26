@@ -221,48 +221,48 @@ namespace GLib
 	class FormatterT
 	{
 	public:
-		template <typename... Ts> static std::ostream & Format(std::ostream & str, const char * format, const Ts&... ts)
+		template <typename... Ts>
+		static std::ostream & Format(std::ostream & str, const char * format, const Ts &... ts)
 		{
 			std::array<FormatterDetail::StreamFunction, sizeof...(Ts)> ar {ToStreamFunctions(ts)...};
 			return FormatterDetail::AppendFormatHelper(str, format, {ar.data(), ar.size()});
 		}
 
-		template <typename... Ts> static std::string Format(const char * format, Ts&&... ts)
+		template <typename... Ts>
+		static std::string Format(const char * format, Ts &&... ts)
 		{
 			std::ostringstream str;
 			Format(str, format, std::forward<Ts>(ts)...);
 			return str.str();
 		}
 
-		template <typename... Ts> static std::string Format(const char * format)
+		template <typename... Ts>
+		static std::string Format(const char * format)
 		{
-			(void)format;
+			(void) format;
 			throw std::logic_error("NoArguments");
 		}
 
 	private:
 		// ? http://www.drdobbs.com/cpp/efficient-use-of-lambda-expressions-and/232500059
 		template <typename T>
-		static FormatterDetail::StreamFunction ToStreamFunctions(const T& t)
+		static FormatterDetail::StreamFunction ToStreamFunctions(const T & t)
 		{
-			return FormatterDetail::StreamFunction([&](std::ostream & stm, const std::string & format)
-			{
-				FormatImpl(stm, t, format, 0);
-			});
+			return FormatterDetail::StreamFunction([&](std::ostream & stm, const std::string & format) { FormatImpl(stm, t, format, 0); });
 		}
 
-		template<typename T>
-		static auto FormatImpl(std::ostream& os, const T& obj, const std::string & format, int unused)
+		template <typename T>
+		static auto FormatImpl(std::ostream & os, const T & obj, const std::string & format, int unused)
 			-> decltype(Policy::Format(os, obj, format), void())
 		{
-			(void)unused;
+			(void) unused;
 			return Policy::Format(os, obj, format);
 		}
 
-		template <typename T, typename std::enable_if<FormatterDetail::IsFormattable<T>::value>::type* = nullptr>
-		static void FormatImpl(std::ostream& stm, const T& value, const std::string & format, long unused)
+		template <typename T, typename std::enable_if<FormatterDetail::IsFormattable<T>::value>::type * = nullptr>
+		static void FormatImpl(std::ostream & stm, const T & value, const std::string & format, long unused)
 		{
-			(void)unused;
+			(void) unused;
 			if (!format.empty())
 			{
 				value.Format(stm, format);
@@ -273,11 +273,11 @@ namespace GLib
 			}
 		}
 
-		template <typename T, typename std::enable_if<!FormatterDetail::IsFormattable<T>::value>::type* = nullptr>
-		static void FormatImpl(std::ostream& stm, const T& value, const std::string & format, long unused)
+		template <typename T, typename std::enable_if<!FormatterDetail::IsFormattable<T>::value>::type * = nullptr>
+		static void FormatImpl(std::ostream & stm, const T & value, const std::string & format, long unused)
 		{
 			// handle T==wide string?
-			(void)unused;
+			(void) unused;
 			FormatterDetail::CheckEmptyFormat(format);
 			stm << value;
 		}

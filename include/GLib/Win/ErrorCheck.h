@@ -43,22 +43,26 @@ namespace GLib::Win::Util
 		class Checker
 		{
 		public:
-			template<typename T> static bool AssertTrue(T value, const char * message, DWORD errorCode)
+			template <typename T>
+			static bool AssertTrue(T value, const char * message, DWORD errorCode)
 			{
 				static_assert(false, "Invalid check parameter, only bool and BOOL allowed");
 			}
 
-			template<typename T> static bool WarnAssertTrue(T value, const char * message, DWORD errorCode)
+			template <typename T>
+			static bool WarnAssertTrue(T value, const char * message, DWORD errorCode)
 			{
 				static_assert(false, "Invalid check parameter, only bool and BOOL allowed");
 			}
 
-			template<typename T> static bool AssertSuccess(T value, const char * message)
+			template <typename T>
+			static bool AssertSuccess(T value, const char * message)
 			{
 				static_assert(false, "Invalid check parameter, only DWORD allowed");
 			}
 
-			template<typename T> static bool WarnAssertSuccess(T value, const char * message)
+			template <typename T>
+			static bool WarnAssertSuccess(T value, const char * message)
 			{
 				static_assert(false, "Invalid check parameter, only DWORD and LSTATUS allowed");
 			}
@@ -85,7 +89,8 @@ namespace GLib::Win::Util
 					Debug::Stream() << "GLib warning: " << Detail::FormatErrorMessage(message, errorCode) << std::endl;
 				}
 #else
-				(void)message; (void)errorCode;
+				(void) message;
+				(void) errorCode;
 #endif
 				return result;
 			}
@@ -117,22 +122,26 @@ namespace GLib::Win::Util
 		};
 	}
 
-	template <typename T> bool AssertTrue(T result, const char * message)
+	template <typename T>
+	bool AssertTrue(T result, const char * message)
 	{
 		return Detail::Checker::AssertTrue(result, message, ::GetLastError());
 	}
 
-	template <typename T> bool WarnAssertTrue(T result, const char * message)
+	template <typename T>
+	bool WarnAssertTrue(T result, const char * message)
 	{
 		return Detail::Checker::WarnAssertTrue(result, message, ::GetLastError());
 	}
 
-	template <typename T> bool AssertSuccess(T errorCode, const char * message)
+	template <typename T>
+	bool AssertSuccess(T errorCode, const char * message)
 	{
 		return Detail::Checker::AssertSuccess(errorCode, message);
 	}
 
-	template <typename T> bool WarnAssertSuccess(T errorCode, const char * message)
+	template <typename T>
+	bool WarnAssertSuccess(T errorCode, const char * message)
 	{
 		return Detail::Checker::WarnAssertSuccess(errorCode, message);
 	}

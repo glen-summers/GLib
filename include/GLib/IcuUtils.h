@@ -10,8 +10,8 @@
 #include <unicode/ucasemap.h>
 #elif _MSC_VER
 #include <icu.h>
-#pragma comment (lib, "icuuc.lib")
-#pragma comment (lib, "icuin.lib")
+#pragma comment(lib, "icuuc.lib")
+#pragma comment(lib, "icuin.lib")
 #endif
 
 namespace GLib::IcuUtils
@@ -36,7 +36,7 @@ namespace GLib::IcuUtils
 
 		struct CollatorCloser
 		{
-			void operator()(UCollator *collator) const noexcept
+			void operator()(UCollator * collator) const noexcept
 			{
 				::ucol_close(collator);
 			}
@@ -74,7 +74,12 @@ namespace GLib::IcuUtils
 		}
 	}
 
-	enum class CompareResult : int { Less = -1, Equal = 0, Greater = +1 };
+	enum class CompareResult : int
+	{
+		Less = -1,
+		Equal = 0,
+		Greater = +1
+	};
 
 	inline CompareResult CompareNoCase(const char * s1, size_t s1size, const char * s2, size_t s2size, const char * locale = nullptr)
 	{
@@ -91,11 +96,14 @@ namespace GLib::IcuUtils
 		Detail::AssertNoError(error, "ucol_strcollIter");
 		switch (result)
 		{
-		case UCOL_LESS: return CompareResult::Less;
-		case UCOL_EQUAL: return CompareResult::Equal;
-		case UCOL_GREATER: return CompareResult::Greater;
-		default:
-			throw std::runtime_error("Unexpected result");
+			case UCOL_LESS:
+				return CompareResult::Less;
+			case UCOL_EQUAL:
+				return CompareResult::Equal;
+			case UCOL_GREATER:
+				return CompareResult::Greater;
+			default:
+				throw std::runtime_error("Unexpected result");
 		}
 	}
 
@@ -118,7 +126,7 @@ namespace GLib::IcuUtils
 		s.EnsureSize(destLength);
 		::ucasemap_utf8ToLower(map.get(), s.Get(), destLength, value.c_str(), sourceLength, &error);
 		Detail::AssertNoError(error, "ucasemap_utf8ToLower");
-		return { s.Get(), static_cast<size_t>(destLength) };
+		return {s.Get(), static_cast<size_t>(destLength)};
 	}
 
 	inline std::string ToUpper(const std::string & value, const char * locale = nullptr)
@@ -135,6 +143,6 @@ namespace GLib::IcuUtils
 		s.EnsureSize(destLength);
 		::ucasemap_utf8ToUpper(map.get(), s.Get(), destLength, value.c_str(), sourceLength, &error);
 		Detail::AssertNoError(error, "ucasemap_utf8ToUpper");
-		return { s.Get(), static_cast<size_t>(destLength) };
+		return {s.Get(), static_cast<size_t>(destLength)};
 	}
 }

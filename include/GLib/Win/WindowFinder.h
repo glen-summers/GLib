@@ -32,7 +32,9 @@ namespace GLib::Win
 		static BOOL CALLBACK EnumWindowsCallback(HWND handle, LPARAM param) noexcept
 		{
 			// todo setlasterror when return false
-			return (*reinterpret_cast<const WindowEnumerator*>(param))(handle) ? TRUE : FALSE; // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast) required
+			return (*reinterpret_cast<const WindowEnumerator *>(param))(handle)
+							 ? TRUE
+							 : FALSE; // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast) required
 		}
 
 	public:
@@ -42,9 +44,8 @@ namespace GLib::Win
 			Util::AssertTrue(desktop != nullptr, "GetThreadDesktop");
 			auto wideWindowText = Cvt::a2w(windowText);
 
-			HWND ret{};
-			WindowEnumerator func = [&](HWND wnd) noexcept -> bool
-			{
+			HWND ret {};
+			WindowEnumerator func = [&](HWND wnd) noexcept -> bool {
 				DWORD windowPid = 0;
 				::GetWindowThreadProcessId(wnd, &windowPid);
 
@@ -56,12 +57,13 @@ namespace GLib::Win
 						ret = wnd;
 					}
 				}
-				catch(const std::exception &)
+				catch (const std::exception &)
 				{}
 				return true;
 			};
 
-			BOOL result = ::EnumDesktopWindows(desktop, EnumWindowsCallback, reinterpret_cast<LPARAM>(&func)); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
+			BOOL result = ::EnumDesktopWindows(desktop, EnumWindowsCallback,
+																				 reinterpret_cast<LPARAM>(&func)); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
 			Util::AssertTrue(result, "EnumDesktopWindows");
 			return ret;
 		}

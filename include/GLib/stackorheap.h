@@ -14,7 +14,7 @@ namespace GLib::Util
 		using Stack = std::array<T, StackElementCount>;
 		using Heap = std::unique_ptr<T[]>; // NOLINT(cppcoreguidelines-avoid-c-arrays,hicpp-avoid-c-arrays,modernize-avoid-c-arrays)
 
-		size_t heapSize{};
+		size_t heapSize {};
 		std::variant<Stack, Heap> storage;
 
 	public:
@@ -39,14 +39,14 @@ namespace GLib::Util
 			return GetSize();
 		}
 
-		T* Get()
+		T * Get()
 		{
 			return HeapInUse() ? std::get<1>(storage).get() : std::get<0>(storage).data();
 		}
 
-		const T* Get() const
+		const T * Get() const
 		{
-				return HeapInUse() ? std::get<1>(storage).get() : std::get<0>(storage).data();
+			return HeapInUse() ? std::get<1>(storage).get() : std::get<0>(storage).data();
 		}
 
 	private:

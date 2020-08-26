@@ -11,9 +11,10 @@ namespace GLib::Win
 {
 	class Bstr
 	{
-		BSTR value{}; // use unique_ptr?
+		BSTR value {}; // use unique_ptr?
 
-		Bstr(BSTR value) : value(value)
+		Bstr(BSTR value)
+			: value(value)
 		{}
 
 	public:
@@ -21,12 +22,13 @@ namespace GLib::Win
 
 		Bstr(const Bstr &) = delete;
 
-		Bstr(Bstr && other) noexcept : value{std::exchange(other.value, nullptr)}
+		Bstr(Bstr && other) noexcept
+			: value {std::exchange(other.value, nullptr)}
 		{}
 
-		Bstr & operator = (const Bstr & other) noexcept = delete;
+		Bstr & operator=(const Bstr & other) noexcept = delete;
 
-		Bstr & operator = (Bstr && other) noexcept
+		Bstr & operator=(Bstr && other) noexcept
 		{
 			value = std::exchange(other.value, nullptr);
 			return *this;
@@ -51,7 +53,7 @@ namespace GLib::Win
 		Bstr(BSTR other, bool ignored) noexcept
 			: value(other)
 		{
-			(void)ignored;
+			(void) ignored;
 		}
 	};
 

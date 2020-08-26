@@ -31,6 +31,9 @@ namespace GLib::Xml
 			return data.empty();
 		}
 
-		const std::string_view & Value() const { return data; }
+		const std::string_view & Value() const
+		{
+			return data;
+		}
 	};
 }

@@ -28,7 +28,7 @@ namespace GLib::Compat
 		if (!value)
 		{
 			constexpr auto ErrorBufferSize = 256;
-			std::array<char, ErrorBufferSize> err{};
+			std::array<char, ErrorBufferSize> err {};
 			char * msg = nullptr;
 			strerror_s(msg = err.data(), err.size(), error);
 			throw std::runtime_error(std::string(prefix) + " : " + msg);
@@ -61,7 +61,7 @@ namespace GLib::Compat
 			err = ::_wgetenv_s(&len, tmp.Get(), tmp.size(), wideName.c_str());
 		}
 		AssertTrue(err == 0, "_wgetenv_s", err);
-		return Cvt::w2a({tmp.Get(), len-1});
+		return Cvt::w2a({tmp.Get(), len - 1});
 	}
 
 	inline void UnsetEnv(const char * name)
@@ -74,11 +74,13 @@ namespace GLib::Compat
 		constexpr std::string_view Class = "class ";
 		constexpr std::string_view Struct = "struct ";
 
+		// clang-format off
 		return name.compare(0, Class.size(), Class) == 0
 			? name.substr(Class.size())
 			: name.compare(0, Struct.size(), Struct) == 0
 				? name.substr(Struct.size())
 				: name; // etc...
+		// clang-format on
 	}
 
 	inline int64_t ProcessId()

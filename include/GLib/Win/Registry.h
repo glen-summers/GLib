@@ -9,7 +9,7 @@ namespace GLib::Win
 
 	namespace Detail
 	{
-		inline static constexpr DWORD Read = KEY_READ; // NOLINT(hicpp-signed-bitwise)
+		inline static constexpr DWORD Read = KEY_READ;						// NOLINT(hicpp-signed-bitwise)
 		inline static constexpr DWORD AllAccess = KEY_ALL_ACCESS; // NOLINT(hicpp-signed-bitwise)
 
 		struct KeyCloser
@@ -27,7 +27,8 @@ namespace GLib::Win
 			ULONG_PTR value;
 
 		public:
-			constexpr RootKeyHolder(ULONG_PTR value) : value(value)
+			constexpr RootKeyHolder(ULONG_PTR value)
+				: value(value)
 			{}
 
 			HKEY get() const
@@ -36,12 +37,14 @@ namespace GLib::Win
 			}
 		};
 
-		template <typename T> BYTE * ToBytes(T * value)
+		template <typename T>
+		BYTE * ToBytes(T * value)
 		{
 			return reinterpret_cast<BYTE *>(value); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast) arcane api
 		}
 
-		template <typename T> const BYTE * ToBytes(const T * value)
+		template <typename T>
+		const BYTE * ToBytes(const T * value)
 		{
 			return reinterpret_cast<const BYTE *>(value); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast) arcane api
 		}
@@ -66,7 +69,7 @@ namespace GLib::Win
 
 		inline std::string GetString(HKEY key, const std::wstring & valueName)
 		{
-			DWORD size{};
+			DWORD size {};
 			DWORD flags = static_cast<DWORD>(RRF_RT_REG_SZ) | static_cast<DWORD>(RRF_RT_REG_EXPAND_SZ);
 			LSTATUS result = ::RegGetValueW(key, nullptr, valueName.c_str(), flags, nullptr, nullptr, &size);
 			Util::AssertSuccess(result, "RegGetValue");
@@ -81,16 +84,18 @@ namespace GLib::Win
 		template <typename T>
 		T GetScalar(HKEY key, const std::wstring & valueName)
 		{
-			DWORD actualTypeCode{};
-			T value{};
-			DWORD bytes{sizeof(T)};
+			DWORD actualTypeCode {};
+			T value {};
+			DWORD bytes {sizeof(T)};
 			LSTATUS result = ::RegQueryValueExW(key, valueName.c_str(), nullptr, &actualTypeCode, Detail::ToBytes(&value), &bytes);
 			Util::AssertSuccess(result, "RegQueryValueEx");
 			return value;
 		}
 	}
 
-	template <typename Key> class RegistryKey;
+	template <typename Key>
+	class RegistryKey;
+
 	using RootKey = RegistryKey<Detail::RootKeyHolder>;
 	using SubKey = RegistryKey<Detail::KeyHolder>;
 
@@ -106,7 +111,7 @@ namespace GLib::Win
 
 		bool KeyExists(const std::string_view & path) const
 		{
-			HKEY resultKey{};
+			HKEY resultKey {};
 			LSTATUS result = ::RegOpenKeyW(key.get(), Cvt::a2w(path).c_str(), &resultKey);
 			bool exists = Detail::Found(result, "RegOpenKey");
 			if (exists)
@@ -134,8 +139,8 @@ namespace GLib::Win
 		RegistryValue Get(const std::string_view & valueName) const
 		{
 			auto wideName = Cvt::a2w(valueName);
-			DWORD bytes{};
-			DWORD actualTypeCode{};
+			DWORD bytes {};
+			DWORD actualTypeCode {};
 			LSTATUS result = ::RegQueryValueExW(key.get(), wideName.c_str(), nullptr, &actualTypeCode, nullptr, &bytes);
 			Util::AssertSuccess(result, "RegQueryValueEx");
 
@@ -184,16 +189,16 @@ namespace GLib::Win
 			HKEY subKey;
 			LSTATUS result = ::RegOpenKeyExW(key.get(), Cvt::a2w(path).c_str(), 0, Detail::Read, &subKey);
 			Util::AssertSuccess(result, "RegOpenKeyEx");
-			return {Detail::KeyHolder{subKey}};
+			return {Detail::KeyHolder {subKey}};
 		}
 
 		SubKey CreateSubKey(const std::string_view & path) const
 		{
 			HKEY subKey;
-			LSTATUS result = ::RegCreateKeyExW(key.get(), Cvt::a2w(path).c_str(), 0, nullptr, REG_OPTION_NON_VOLATILE,
-				Detail::AllAccess, nullptr, &subKey, nullptr);
+			LSTATUS result = ::RegCreateKeyExW(key.get(), Cvt::a2w(path).c_str(), 0, nullptr, REG_OPTION_NON_VOLATILE, Detail::AllAccess, nullptr,
+																				 &subKey, nullptr);
 			Util::AssertSuccess(result, "RegCreateKeyEx");
-			return {Detail::KeyHolder{subKey}};
+			return {Detail::KeyHolder {subKey}};
 		}
 
 		bool DeleteSubKey(const std::string & path) const
@@ -203,13 +208,13 @@ namespace GLib::Win
 	};
 
 	template <typename T>
-	inline auto operator / (const RegistryKey<T> & key, const std::string_view & name)
+	inline auto operator/(const RegistryKey<T> & key, const std::string_view & name)
 	{
 		return key.OpenSubKey(name);
 	}
 
 	template <typename T>
-	inline RegistryValue operator & (const RegistryKey<T> & key, const std::string_view & name)
+	inline RegistryValue operator&(const RegistryKey<T> & key, const std::string_view & name)
 	{
 		return key.Get(name);
 	}

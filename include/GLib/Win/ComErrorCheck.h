@@ -22,13 +22,12 @@ namespace GLib::Win
 			bool hasMessage = false;
 			std::ostringstream stm;
 			stm << message << " : ";
-			IErrorInfo* pErrorInfo = nullptr;
+			IErrorInfo * pErrorInfo = nullptr;
 			if (::GetErrorInfo(0, &pErrorInfo) == S_OK)
 			{
 				BSTR description = nullptr;
 				pErrorInfo->GetDescription(&description);
-				SCOPE(_, [=] () noexcept
-				{
+				SCOPE(_, [=]() noexcept {
 					::SysFreeString(description);
 					pErrorInfo->Release();
 				});
@@ -73,8 +72,8 @@ namespace GLib::Win
 			Debug::Stream() << "ComWarning : " << Detail::FormatErrorInfo(message, hr) << std::endl;
 		}
 #else
-			(void)hr;
-			(void)message;
+		(void) hr;
+		(void) message;
 #endif
 	}
 }

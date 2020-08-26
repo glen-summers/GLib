@@ -12,7 +12,8 @@ namespace GLib::Win::Aut
 		ComPtr<IUIAutomationElement> element;
 
 	public:
-		UIElement(ComPtr<IUIAutomationElement> element) : element(std::move(element))
+		UIElement(ComPtr<IUIAutomationElement> element)
+			: element(std::move(element))
 		{}
 
 		template <typename T>
@@ -49,8 +50,9 @@ namespace GLib::Win::Aut
 	public:
 		UIAut()
 		{
-			CheckHr(::CoCreateInstance(__uuidof(CUIAutomation), nullptr, ComPtrDetail::ContextAll, __uuidof(IUIAutomation),
-				GetAddress(automation)), "CoCreateInstance");
+			CheckHr(
+				::CoCreateInstance(__uuidof(CUIAutomation), nullptr, ComPtrDetail::ContextAll, __uuidof(IUIAutomation), GetAddress(automation)),
+				"CoCreateInstance");
 		}
 
 		UIElement ElementFromHandle(HWND hWnd) const

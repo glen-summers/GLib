@@ -9,7 +9,7 @@
 namespace GLib::Eval
 {
 	// move?
-	template <typename T, std::enable_if_t<std::is_class<T>::value>* = nullptr>
+	template <typename T, std::enable_if_t<std::is_class<T>::value> * = nullptr>
 	void VisitProperty(const T & value, const std::string & propertyName)
 	{
 		Visitor<T>::Visit(propertyName, value);
@@ -21,7 +21,8 @@ namespace GLib::Eval
 		std::unordered_map<std::string, const ValueBase &> localValues;
 
 	public:
-		template<typename ValueType> void Set(const std::string & name, ValueType value)
+		template <typename ValueType>
+		void Set(const std::string & name, ValueType value)
 		{
 			ValuePtr v = MakeValue(value);
 			auto it = values.find(name);
@@ -37,7 +38,8 @@ namespace GLib::Eval
 		}
 
 		// specialise add with IsCollection? allow value types?
-		template<typename Container> void SetCollection(const std::string & name, const Container & container)
+		template <typename Container>
+		void SetCollection(const std::string & name, const Container & container)
 		{
 			auto v = std::make_unique<Collection<Container>>(container);
 			auto it = values.find(name);
@@ -80,26 +82,20 @@ namespace GLib::Eval
 
 		void ForEach(const std::string & name, const ValueVisitor & visitor) const
 		{
-			Evaluate(name, [&](const ValueBase & value)
-			{
-				value.ForEach(visitor);
-			});
+			Evaluate(name, [&](const ValueBase & value) { value.ForEach(visitor); });
 		}
 
 		std::string Evaluate(const std::string & name) const
 		{
 			std::string result;
-			Evaluate(name, [&](const ValueBase & value)
-			{
-				result = value.ToString();
-			});
+			Evaluate(name, [&](const ValueBase & value) { result = value.ToString(); });
 			return result;
 		}
 
 	private:
 		void Evaluate(const std::string & value, const ValueVisitor & visitor) const
 		{
-			const auto & s = GLib::Util::Splitter{value, "."};
+			const auto & s = GLib::Util::Splitter {value, "."};
 			auto it = s.begin();
 
 			const auto lit = localValues.find(*it);
@@ -118,13 +114,12 @@ namespace GLib::Eval
 			SubEvaluate(*vit->second, it, s.end(), visitor);
 		}
 
-		static void SubEvaluate(const ValueBase & value, GLib::Util::Splitter::iterator & it,
-			const GLib::Util::Splitter::iterator & end, const ValueVisitor & visitor)
+		static void SubEvaluate(const ValueBase & value, GLib::Util::Splitter::iterator & it, const GLib::Util::Splitter::iterator & end,
+														const ValueVisitor & visitor)
 		{
-			if (it!=end)
+			if (it != end)
 			{
-				value.VisitProperty(*it, [&](const ValueBase & subValue)
-				{
+				value.VisitProperty(*it, [&](const ValueBase & subValue) {
 					++it;
 					SubEvaluate(subValue, it, end, visitor);
 				});

@@ -19,17 +19,24 @@ namespace GLib::Html
 	public:
 		Node() = default;
 
-		Node(Node * parent, std::string_view value) : parent(parent), value(value)
+		Node(Node * parent, std::string_view value)
+			: parent(parent)
+			, value(value)
 		{}
 
 		Node(Node * parent, std::string variable, std::string enumeration, std::string_view condition, size_t depth)
-			: parent(parent), variable(move(variable)), enumeration(move(enumeration)), condition(condition), depth(depth)
+			: parent(parent)
+			, variable(move(variable))
+			, enumeration(move(enumeration))
+			, condition(condition)
+			, depth(depth)
 		{}
 
 		Node(Node * parent, std::string_view condition, bool unused)
-			: parent(parent), condition(condition)
+			: parent(parent)
+			, condition(condition)
 		{
-			(void)unused;
+			(void) unused;
 		}
 
 		Node * Parent() const
@@ -67,7 +74,7 @@ namespace GLib::Html
 			return depth;
 		}
 
-		Node * AddFragment(const std::string_view & fragment={})
+		Node * AddFragment(const std::string_view & fragment = {})
 		{
 			children.emplace_back(this, fragment);
 			return &children.back();
@@ -75,7 +82,7 @@ namespace GLib::Html
 
 		Node * AddFragment(const char * start, const char * end)
 		{
-			return AddFragment({start, static_cast<size_t>(end - start) });
+			return AddFragment({start, static_cast<size_t>(end - start)});
 		}
 
 		Node * AddEnumeration(const std::string & var, const std::string & e, const std::string_view & c, size_t enumDepth)

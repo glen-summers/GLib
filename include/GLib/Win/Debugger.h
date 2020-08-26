@@ -12,6 +12,7 @@
 
 namespace GLib::Win
 {
+	// clang-format off
 	namespace Detail
 	{
 		inline const EXCEPTION_DEBUG_INFO & Exception(const DEBUG_EVENT & event) { return event.u.Exception; } // NOLINT(cppcoreguidelines-pro-type-union-access)
@@ -22,6 +23,7 @@ namespace GLib::Win
 		inline const LOAD_DLL_DEBUG_INFO & LoadDll(const DEBUG_EVENT & event) { return event.u.LoadDll; } // NOLINT(cppcoreguidelines-pro-type-union-access)
 		inline const UNLOAD_DLL_DEBUG_INFO & UnloadDll(const DEBUG_EVENT & event) { return event.u.UnloadDll; } // NOLINT(cppcoreguidelines-pro-type-union-access)
 		inline const OUTPUT_DEBUG_STRING_INFO & DebugString(const DEBUG_EVENT & event) { return event.u.DebugString; } // NOLINT(cppcoreguidelines-pro-type-union-access)
+		// clang-format on
 
 		inline uint64_t ConvertAddress(const void * address)
 		{
@@ -47,10 +49,10 @@ namespace GLib::Win
 			, debugChildProcesses(debugChildProcesses)
 		{}
 
-		Debugger(const Debugger&) = delete;
-		Debugger(Debugger&&) = delete;
-		Debugger& operator=(const Debugger&) = delete;
-		Debugger& operator=(Debugger&&) = delete;
+		Debugger(const Debugger &) = delete;
+		Debugger(Debugger &&) = delete;
+		Debugger & operator=(const Debugger &) = delete;
+		Debugger & operator=(Debugger &&) = delete;
 		virtual ~Debugger() = default;
 
 		const Symbols::Engine & Symbols() const
@@ -63,7 +65,7 @@ namespace GLib::Win
 			return debugProcessId;
 		}
 
-		DWORD ExitCode() const 
+		DWORD ExitCode() const
 		{
 			return exitCode.value();
 		}
@@ -72,7 +74,7 @@ namespace GLib::Win
 		{
 			DEBUG_EVENT debugEvent {};
 			BOOL const result = ::WaitForDebugEventEx(&debugEvent, timeout);
-			Util::WarnAssertTrue(result==TRUE || ::GetLastError()==ERROR_SEM_TIMEOUT, "WaitForDebugEventEx");
+			Util::WarnAssertTrue(result == TRUE || ::GetLastError() == ERROR_SEM_TIMEOUT, "WaitForDebugEventEx");
 			if (result == FALSE)
 			{
 				return !exitCode.has_value();
@@ -87,7 +89,7 @@ namespace GLib::Win
 				case CREATE_PROCESS_DEBUG_EVENT:
 				{
 					auto pi = Detail::CreateProcessInfo(debugEvent);
-					SCOPE(_, [&] () noexcept { ::CloseHandle(pi.hFile); });
+					SCOPE(_, [&]() noexcept { ::CloseHandle(pi.hFile); });
 					OnCreateProcess(processId, threadId, pi);
 					break;
 				}
@@ -112,7 +114,7 @@ namespace GLib::Win
 
 				case LOAD_DLL_DEBUG_EVENT:
 				{
-					SCOPE(_, [&] () noexcept { ::CloseHandle(Detail::LoadDll(debugEvent).hFile); });
+					SCOPE(_, [&]() noexcept { ::CloseHandle(Detail::LoadDll(debugEvent).hFile); });
 					OnLoadDll(processId, threadId, Detail::LoadDll(debugEvent));
 					break;
 				}
@@ -160,14 +162,15 @@ namespace GLib::Win
 	protected:
 		virtual void OnCreateProcess(DWORD processId, DWORD threadId, const CREATE_PROCESS_DEBUG_INFO & info)
 		{
-			(void)threadId;
+			(void) threadId;
 
 			std::string const logicalName = FileSystem::PathOfFileHandle(info.hFile, VOLUME_NAME_NT);
 			std::string const name = FileSystem::NormalisePath(logicalName, driveMap);
 
 			GLib::Win::Debug::Write("Attach Process: {0}, Pid: {1}", name, processId);
 
-			const Symbols::SymProcess & process = symbols.AddProcess(processId, info.hProcess, Detail::ConvertAddress(info.lpBaseOfImage), info.hFile, name);
+			const Symbols::SymProcess & process =
+				symbols.AddProcess(processId, info.hProcess, Detail::ConvertAddress(info.lpBaseOfImage), info.hFile, name);
 
 			IMAGE_DOS_HEADER header {};
 			process.ReadMemory(0, &header, sizeof(header));
@@ -199,17 +202,17 @@ namespace GLib::Win
 
 		virtual void On32BitProcess(const IMAGE_NT_HEADERS32 & headers)
 		{
-			(void)headers;
+			(void) headers;
 		}
 
 		virtual void On64BitProcess(const IMAGE_NT_HEADERS64 & headers)
 		{
-			(void)headers;
+			(void) headers;
 		}
 
 		virtual void OnExitProcess(DWORD processId, DWORD threadId, const EXIT_PROCESS_DEBUG_INFO & info)
 		{
-			(void)threadId;
+			(void) threadId;
 
 			if (processId == debugProcessId)
 			{
@@ -221,8 +224,8 @@ namespace GLib::Win
 
 		virtual void OnLoadDll(DWORD processId, DWORD threadId, const LOAD_DLL_DEBUG_INFO & info) const
 		{
-			(void)processId;
-			(void)threadId;
+			(void) processId;
+			(void) threadId;
 
 			std::string const logicalName = FileSystem::PathOfFileHandle(info.hFile, VOLUME_NAME_NT);
 			std::string const name = FileSystem::NormalisePath(logicalName, driveMap);
@@ -232,39 +235,39 @@ namespace GLib::Win
 
 		virtual void OnUnloadDll(DWORD processId, DWORD threadId, const UNLOAD_DLL_DEBUG_INFO & info) const
 		{
-			(void)processId;
-			(void)threadId;
+			(void) processId;
+			(void) threadId;
 
 			Debug::Stream() << "GDB UnloadDll: " << info.lpBaseOfDll << std::endl;
 		}
 
 		virtual void OnCreateThread(DWORD processId, DWORD threadId, const CREATE_THREAD_DEBUG_INFO & info)
 		{
-			(void)processId;
-			(void)threadId;
+			(void) processId;
+			(void) threadId;
 
 			Debug::Stream() << "GDB CreateThread: " << info.hThread << std::endl;
 		}
 
 		virtual void OnExitThread(DWORD processId, DWORD threadId, const EXIT_THREAD_DEBUG_INFO & info)
 		{
-			(void)processId;
-			(void)threadId;
+			(void) processId;
+			(void) threadId;
 
 			Debug::Stream() << "GDB ThreadExit code: " << info.dwExitCode << std::endl;
 		}
 
 		virtual DWORD OnException(DWORD processId, DWORD threadId, const EXCEPTION_DEBUG_INFO & info)
 		{
-			(void)processId;
-			(void)threadId;
-			(void)info;
+			(void) processId;
+			(void) threadId;
+			(void) info;
 			return DBG_EXCEPTION_NOT_HANDLED;
 		}
 
 		virtual void OnDebugString(DWORD processId, DWORD threadId, const OUTPUT_DEBUG_STRING_INFO & info)
 		{
-			(void)threadId;
+			(void) threadId;
 
 			auto address = Detail::ConvertAddress(info.lpDebugStringData);
 
@@ -274,14 +277,14 @@ namespace GLib::Win
 				auto size = static_cast<size_t>(info.nDebugStringLength / 2) - 1;
 				std::vector<wchar_t> buffer(size); // soh?
 				symbols.GetProcess(processId).Process().ReadMemory<wchar_t>(address, &buffer[0], size);
-				message =  Cvt::w2a(std::wstring{ &buffer[0], size });
+				message = Cvt::w2a(std::wstring {&buffer[0], size});
 			}
 			else
 			{
 				size_t size = info.nDebugStringLength - 1;
 				std::vector<char> buffer(size); // soh?
 				symbols.GetProcess(processId).Process().ReadMemory<char>(address, &buffer[0], size);
-				message =  std::string{ &buffer[0], size };
+				message = std::string {&buffer[0], size};
 			}
 
 			message.erase(std::remove(message.begin(), message.end(), '\r'), message.end());

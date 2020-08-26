@@ -9,9 +9,20 @@ namespace GLib::Util
 {
 	namespace Detail
 	{
-		template <typename CharType> const CharType * DefaultDelimiter();
-		template <> inline const char * DefaultDelimiter() { return ","; }
-		template <> inline const wchar_t * DefaultDelimiter() { return L","; }
+		template <typename CharType>
+		const CharType * DefaultDelimiter();
+
+		template <>
+		inline const char * DefaultDelimiter()
+		{
+			return ",";
+		}
+
+		template <>
+		inline const wchar_t * DefaultDelimiter()
+		{
+			return L",";
+		}
 
 		template <typename StringType>
 		class Splitter
@@ -49,15 +60,18 @@ namespace GLib::Util
 					, nextDelimiter(splitter.value.find(splitter.delimiter, 0))
 				{}
 
-				iterator() : splitter(), current(StringType::npos), nextDelimiter(StringType::npos)
+				iterator()
+					: splitter()
+					, current(StringType::npos)
+					, nextDelimiter(StringType::npos)
 				{}
 
-				bool operator==(const iterator& it) const
+				bool operator==(const iterator & it) const
 				{
 					return current == it.current;
 				}
 
-				bool operator!=(const iterator& it) const
+				bool operator!=(const iterator & it) const
 				{
 					return !(*this == it);
 				}
@@ -79,9 +93,7 @@ namespace GLib::Util
 
 				StringType operator*() const
 				{
-					auto end = nextDelimiter != StringType::npos
-						? nextDelimiter
-						: splitter->value.size();
+					auto end = nextDelimiter != StringType::npos ? nextDelimiter : splitter->value.size();
 					return splitter->value.substr(current, end - current);
 				}
 			};
@@ -102,16 +114,17 @@ namespace GLib::Util
 	using SplitterView = Detail::Splitter<std::string_view>;
 
 	template <typename StringType, typename OutputIterator>
-	void Split(const StringType & value, OutputIterator it, const StringType & delimiter = Detail::DefaultDelimiter<typename StringType::value_type>())
+	void Split(const StringType & value, OutputIterator it,
+						 const StringType & delimiter = Detail::DefaultDelimiter<typename StringType::value_type>())
 	{
-		Detail::Splitter<StringType> splitter { value, delimiter };
+		Detail::Splitter<StringType> splitter {value, delimiter};
 		std::copy(splitter.begin(), splitter.end(), it);
 	}
 
 	template <typename Predicate, typename OutYes, typename OutNo>
 	inline void Split(const std::string_view & value, Predicate predicate, OutYes outYes, OutNo outNo)
 	{
-		for(auto it = value.begin(); it != value.end();)
+		for (auto it = value.begin(); it != value.end();)
 		{
 			auto falseStart = std::find_if_not(it, value.end(), predicate);
 			if (falseStart != it)

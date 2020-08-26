@@ -6,7 +6,7 @@
 namespace GLib::Win::Debug
 {
 	template <typename... Ts>
-	void Write(const char * format, Ts&&... ts)
+	void Write(const char * format, Ts &&... ts)
 	{
 		Formatter::Format(Stream(), format, std::forward<Ts>(ts)...) << std::endl;
 	}

@@ -20,7 +20,7 @@ namespace GLib::Compat
 		if (!value)
 		{
 			constexpr auto ErrorBufferSize = 256;
-			std::array<char, ErrorBufferSize> err{};
+			std::array<char, ErrorBufferSize> err {};
 			char * msg = ::strerror_r(error, err.data(), err.size());
 			throw std::runtime_error(std::string(prefix) + " : " + msg);
 		}
@@ -47,7 +47,7 @@ namespace GLib::Compat
 	inline std::optional<std::string> GetEnv(const char * name)
 	{
 		const char * value = ::getenv(name);
-		return value != nullptr ? std::optional<std::string>{value} : std::nullopt;
+		return value != nullptr ? std::optional<std::string> {value} : std::nullopt;
 	}
 
 	inline void UnsetEnv(const char * name)
@@ -59,13 +59,13 @@ namespace GLib::Compat
 	inline std::string Unmangle(const std::string & name)
 	{
 		int status = -1;
-		std::unique_ptr<char, void(*)(void*)> res { abi::__cxa_demangle(name.c_str(), NULL, NULL, &status), std::free };
+		std::unique_ptr<char, void (*)(void *)> res {abi::__cxa_demangle(name.c_str(), NULL, NULL, &status), std::free};
 		return status == 0 ? res.get() : name;
 	}
 
 	inline int64_t ProcessId()
 	{
-			return ::getpid();
+		return ::getpid();
 	}
 
 	inline std::string ProcessPath()
@@ -82,7 +82,7 @@ namespace GLib::Compat
 		}
 		std::stringstream ss;
 		ss << t.rdbuf();
-		std::string r{ss.str()};
+		std::string r {ss.str()};
 		std::replace(r.begin(), r.end(), '\0', ' ');
 		return r;
 	}

@@ -14,12 +14,12 @@ namespace GLib::Win
 	{
 		inline const void * ToAddress(uint64_t value)
 		{
-			return reinterpret_cast<const void*>(value); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
+			return reinterpret_cast<const void *>(value); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
 		}
 
 		inline void * ToPseudoWritableAddress(uint64_t value)
 		{
-			return reinterpret_cast<void*>(value); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
+			return reinterpret_cast<void *>(value); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
 		}
 
 		inline wchar_t * ToPseudoWritableString(const wchar_t * value)
@@ -39,7 +39,7 @@ namespace GLib::Win
 			return stillRunning;
 		}
 
-		template<UINT ExitCode>
+		template <UINT ExitCode>
 		struct Terminator
 		{
 			void operator()(HANDLE process) const noexcept
@@ -48,7 +48,7 @@ namespace GLib::Win
 			}
 		};
 
-		template<UINT ExitCode>
+		template <UINT ExitCode>
 		using TerminatorHolder = std::unique_ptr<void, Terminator<ExitCode>>;
 	}
 
@@ -79,12 +79,13 @@ namespace GLib::Win
 		{}
 
 		// creation flags  DETACHED_PROCESS?
-		Process(const std::string & app, const std::string & cmd = {}, DWORD creationFlags = {}, WORD show = {}, const std::string & desktop = {})
+		Process(const std::string & app, const std::string & cmd = {}, DWORD creationFlags = {}, WORD show = {},
+						const std::string & desktop = {})
 			: Process(Create(app, cmd, creationFlags, show, desktop))
 		{}
 
 		// returns immediately for successful start but failed later? e.g. on non existent desktop
-		template<typename R, typename P>
+		template <typename R, typename P>
 		void WaitForInputIdle(const std::chrono::duration<R, P> & duration) const
 		{
 			auto count = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
@@ -102,7 +103,7 @@ namespace GLib::Win
 			Detail::Terminate(p.get(), exitCode);
 		}
 
-		template<UINT ExitCode=1>
+		template <UINT ExitCode = 1>
 		Detail::TerminatorHolder<ExitCode> ScopedTerminator() const
 		{
 			return Detail::TerminatorHolder<ExitCode>(p.get());
@@ -121,7 +122,7 @@ namespace GLib::Win
 			Wait(p.get(), INFINITE);
 		}
 
-		template<typename R, typename P>
+		template <typename R, typename P>
 		void WaitForExit(const std::chrono::duration<R, P> & duration) const
 		{
 			auto ms = GLib::Util::checked_cast<DWORD>(std::chrono::duration_cast<std::chrono::milliseconds>(duration).count());
@@ -148,9 +149,9 @@ namespace GLib::Win
 		}
 
 		template <typename T>
-		void ReadMemory(uint64_t address, void * buffer , size_t size) const
+		void ReadMemory(uint64_t address, void * buffer, size_t size) const
 		{
-			BOOL result = ::ReadProcessMemory(p.get(), Detail::ToAddress(address), buffer, size*sizeof(T), nullptr);
+			BOOL result = ::ReadProcessMemory(p.get(), Detail::ToAddress(address), buffer, size * sizeof(T), nullptr);
 			Util::AssertTrue(result, "ReadProcessMemory");
 		}
 
@@ -166,7 +167,8 @@ namespace GLib::Win
 			return Create(Cvt::a2w(app), Cvt::a2w(app + " " + cmd), creationFlags, show, Cvt::a2w(desktop));
 		}
 
-		static Win::Handle Create(const std::wstring & app, const std::wstring & cmd, DWORD creationFlags, WORD show, const std::wstring & desktop)
+		static Win::Handle Create(const std::wstring & app, const std::wstring & cmd, DWORD creationFlags, WORD show,
+															const std::wstring & desktop)
 		{
 			STARTUPINFOW sui = {};
 			sui.cb = sizeof(STARTUPINFOW);
@@ -176,12 +178,12 @@ namespace GLib::Win
 
 			PROCESS_INFORMATION pi = {};
 			wchar_t * writableCmd = cmd.empty() ? nullptr : Detail::ToPseudoWritableString(cmd.c_str());
-			Util::AssertTrue(::CreateProcessW(app.c_str(), writableCmd, nullptr, nullptr, FALSE, creationFlags,
-				nullptr, nullptr, &sui, &pi), "CreateProcessW");
+			Util::AssertTrue(::CreateProcessW(app.c_str(), writableCmd, nullptr, nullptr, FALSE, creationFlags, nullptr, nullptr, &sui, &pi),
+											 "CreateProcessW");
 			Win::Handle p(pi.hProcess);
 			Win::Handle t(pi.hThread);
-			(void)t;
-			//DWORD pid = pi.dwProcessId;
+			(void) t;
+			// DWORD pid = pi.dwProcessId;
 			return p;
 		}
 

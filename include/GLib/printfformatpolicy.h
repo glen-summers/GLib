@@ -58,7 +58,7 @@ namespace GLib
 				std::string f = CheckFormat(defaultFormat, format);
 				// stream to wide to correctly convert locale symbols, is there a better better way? maybe when code convert gets fixed
 				std::wstringstream wideStream;
-				(void)wideStream.imbue(stm.getloc());
+				(void) wideStream.imbue(stm.getloc());
 				wideStream << std::put_time(&value, Cvt::a2w(f).c_str());
 				stm << Cvt::w2a(wideStream.str());
 			}
@@ -66,28 +66,29 @@ namespace GLib
 			template <>
 			inline void ToStringImpl(const char * defaultFormat, std::ostream & stm, const Money & value, const std::string & format)
 			{
-				(void)defaultFormat;
+				(void) defaultFormat;
 				CheckFormatEmpty(format);
 				// stream to wide to correctly convert locale symbols, is there a better better way? maybe when code convert gets fixed
 				std::wstringstream wideStream;
-				(void)wideStream.imbue(stm.getloc());
+				(void) wideStream.imbue(stm.getloc());
 				wideStream << std::showbase << std::put_money(value.value);
 				stm << Cvt::w2a(wideStream.str());
 			}
 
-			template<size_t> void FormatPointer(std::ostream & stm, void * const & value)
+			template <size_t>
+			void FormatPointer(std::ostream & stm, void * const & value)
 			{
-				(void)value;
+				(void) value;
 				throw std::runtime_error("Unknown pointer size : " + std::to_string(sizeof(value)));
 			}
 
-			template<>
+			template <>
 			inline void FormatPointer<sizeof(uint32_t)>(std::ostream & stm, void * const & value)
 			{
 				ToStringImpl("", stm, value, "%08x");
 			}
 
-			template<>
+			template <>
 			inline void FormatPointer<sizeof(uint64_t)>(std::ostream & stm, void * const & value)
 			{
 				ToStringImpl("", stm, value, "%016llx");
@@ -166,7 +167,7 @@ namespace GLib
 			{
 				if (format.empty())
 				{
-					Detail::FormatPointer<sizeof(void*)>(stm, value);
+					Detail::FormatPointer<sizeof(void *)>(stm, value);
 				}
 				else
 				{
@@ -187,7 +188,8 @@ namespace GLib
 			}
 
 		private:
-			template< typename T> static void Format(std::ostream & stm, const T & value, const std::string & fmt);
+			template <typename T>
+			static void Format(std::ostream & stm, const T & value, const std::string & fmt);
 		};
 	}
 }

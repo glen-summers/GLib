@@ -4,7 +4,7 @@
 #include <iomanip>
 #include <ostream>
 
-inline std::ostream & operator<< (std::ostream & s, std::chrono::nanoseconds duration)
+inline std::ostream & operator<<(std::ostream & s, std::chrono::nanoseconds duration)
 {
 	if (std::chrono::duration_cast<std::chrono::seconds>(duration).count() == 0)
 	{

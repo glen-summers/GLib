@@ -4,8 +4,8 @@
 
 #include <GLib/flogging.h>
 
-using GLib::Flog::Log;
 using GLib::Flog::Level;
+using GLib::Flog::Log;
 
 void Log::Write(Level level, const char * message) const
 {

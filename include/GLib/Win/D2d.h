@@ -4,7 +4,7 @@
 
 #include <d2d1.h>
 #include <d2d1_3.h>
-#pragma comment(lib , "D2d1.lib")
+#pragma comment(lib, "D2d1.lib")
 
 namespace GLib::Win::D2d
 {
@@ -13,9 +13,10 @@ namespace GLib::Win::D2d
 		inline ComPtr<ID2D1Factory> CreateFactory()
 		{
 			GLib::Win::ComPtr<ID2D1Factory> factory;
-			D2D1_FACTORY_OPTIONS options { D2D1_DEBUG_LEVEL_INFORMATION };
+			D2D1_FACTORY_OPTIONS options {D2D1_DEBUG_LEVEL_INFORMATION};
 			GLib::Win::CheckHr(::D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED, __uuidof(ID2D1Factory), &options,
-				GLib::Win::GetAddress<ID2D1Factory>(factory)), "D2D1CreateFactory");
+																						 GLib::Win::GetAddress<ID2D1Factory>(factory)),
+												 "D2D1CreateFactory");
 			return factory;
 		}
 	}
@@ -30,7 +31,9 @@ namespace GLib::Win::D2d
 			ComPtr<ID2D1HwndRenderTarget> renderTarget;
 
 			GLib::Win::WarnHr(factory->CreateHwndRenderTarget(D2D1::RenderTargetProperties(),
-				D2D1::HwndRenderTargetProperties(handle, D2D1::SizeU(size.cx, size.cy)), GetAddress(renderTarget)), "CreateHwndRenderTarget");
+																												D2D1::HwndRenderTargetProperties(handle, D2D1::SizeU(size.cx, size.cy)),
+																												GetAddress(renderTarget)),
+												"CreateHwndRenderTarget");
 			return renderTarget;
 		}
 	};
@@ -42,7 +45,9 @@ namespace GLib::Win::D2d
 		bool recreated;
 
 	public:
-		Renderer(Factory factory) : factory(std::move(factory)), recreated()
+		Renderer(Factory factory)
+			: factory(std::move(factory))
+			, recreated()
 		{}
 
 		const Factory & Factory() const
@@ -60,7 +65,8 @@ namespace GLib::Win::D2d
 			recreated = recreate; // how reset
 		}
 
-		template <typename Function> void CheckDevice(const Function & function) const
+		template <typename Function>
+		void CheckDevice(const Function & function) const
 		{
 			if (recreated)
 			{

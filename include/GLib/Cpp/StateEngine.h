@@ -68,7 +68,7 @@ namespace GLib::Cpp
 		State Push(char value)
 		{
 			SetState((this->*stateFunction)(value));
-			lastChar  = value;
+			lastChar = value;
 			return state;
 		}
 
@@ -114,7 +114,7 @@ namespace GLib::Cpp
 
 		State Error(char c) const
 		{
-			(void)c;
+			(void) c;
 			return state;
 		}
 
@@ -308,12 +308,12 @@ namespace GLib::Cpp
 				return state;
 			}
 
-			if (matchCount != 0 && matchCount-1 == rawStringPrefix.size() && c == DoubleQuote)
+			if (matchCount != 0 && matchCount - 1 == rawStringPrefix.size() && c == DoubleQuote)
 			{
 				return State::None;
 			}
 
-			if (matchCount != 0 && matchCount-1 < rawStringPrefix.size() && c == rawStringPrefix[matchCount-1])
+			if (matchCount != 0 && matchCount - 1 < rawStringPrefix.size() && c == rawStringPrefix[matchCount - 1])
 			{
 				++matchCount;
 			}
@@ -385,6 +385,7 @@ namespace GLib::Cpp
 		}
 
 		// must be enum order
+		// clang-format off
 		static constexpr std::array<StateFunction, static_cast<int>(State::Count)> stateFunctions =
 		{
 			&StateEngine::Error,
@@ -402,5 +403,6 @@ namespace GLib::Cpp
 			&StateEngine::Code,
 			&StateEngine::CharacterLiteral,
 		};
+		// clang-format on
 	};
 }

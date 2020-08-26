@@ -27,14 +27,14 @@ namespace GLib::Win
 			std::swap(wrapped, newValue);
 		}
 
-		operator Raw*()
+		operator Raw *()
 		{
 			return &rawValue;
 		}
 
-		operator void**()
+		operator void * *()
 		{
-			return reinterpret_cast<void**>(&rawValue); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast) for IUnknown factory methods
+			return reinterpret_cast<void **>(&rawValue); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast) for IUnknown factory methods
 		}
 	};
 }

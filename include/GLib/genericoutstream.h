@@ -11,7 +11,8 @@ namespace GLib::Util
 		BufferType buffer;
 
 	public:
-		explicit GenericOutStream(std::ios_base::fmtflags flags = {}) : stream(&buffer)
+		explicit GenericOutStream(std::ios_base::fmtflags flags = {})
+			: stream(&buffer)
 		{
 			stream.setf(flags);
 		}

@@ -18,13 +18,15 @@ namespace GLib::Win
 		};
 	}
 
-	template <typename T> class Local
+	template <typename T>
+	class Local
 	{
 		using Ptr = std::unique_ptr<T, LocalDetail::LocalFreer>;
 		Ptr p;
 
 	public:
-		explicit Local(T * value = nullptr) : p(value)
+		explicit Local(T * value = nullptr)
+			: p(value)
 		{}
 
 		const T * Get() const
@@ -34,13 +36,13 @@ namespace GLib::Win
 
 		static Local Attach(T * value)
 		{
-			return Local{value};
+			return Local {value};
 		}
 	};
 
 	template <typename T>
 	auto GetAddress(Local<T> & value) noexcept
 	{
-		return Transfer<Local<T>, T*>(value);
+		return Transfer<Local<T>, T *>(value);
 	}
 }

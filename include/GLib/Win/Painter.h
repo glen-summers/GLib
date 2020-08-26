@@ -36,8 +36,8 @@ namespace GLib::Win
 
 	public:
 		Painter(const PaintInfo & info)
-			: info{info}
-			, p{&this->info, Detail::PaintEnder{}}
+			: info {info}
+			, p {&this->info, Detail::PaintEnder {}}
 		{}
 	};
 }

@@ -18,13 +18,19 @@ namespace GLib::Win
 {
 	class Window;
 
-	struct Size : SIZE {};
-	struct Point : POINT {};
-	struct Rect : RECT {};
+	struct Size : SIZE
+	{};
+
+	struct Point : POINT
+	{};
+
+	struct Rect : RECT
+	{};
 
 	namespace Detail
 	{
-		template <typename T1, typename T2> T1 Munge(T2 t2)
+		template <typename T1, typename T2>
+		T1 Munge(T2 t2)
 		{
 			return reinterpret_cast<T1>(t2); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast) many windows casts from LPARAMs etc.
 		}
@@ -40,17 +46,17 @@ namespace GLib::Win
 
 		inline WORD LoWord(WPARAM param)
 		{
-			return LOWORD(param);  // NOLINT(hicpp-signed-bitwise)
+			return LOWORD(param); // NOLINT(hicpp-signed-bitwise)
 		}
 
 		inline WORD HiWord(WPARAM param)
 		{
-			return HIWORD(param);  // NOLINT(hicpp-signed-bitwise)
+			return HIWORD(param); // NOLINT(hicpp-signed-bitwise)
 		}
 
 		inline Point PointFromParam(LPARAM param)
 		{
-			return { GET_X_LPARAM(param), GET_Y_LPARAM(param) }; // NOLINT(hicpp-signed-bitwise)
+			return {GET_X_LPARAM(param), GET_Y_LPARAM(param)}; // NOLINT(hicpp-signed-bitwise)
 		}
 
 		inline short WheelData(WPARAM param)
@@ -60,7 +66,7 @@ namespace GLib::Win
 
 		inline Size SizeFromParam(LPARAM param)
 		{
-			return { LoWord(param), HiWord(param) };
+			return {LoWord(param), HiWord(param)};
 		}
 
 		inline HINSTANCE Instance()
@@ -83,10 +89,10 @@ namespace GLib::Win
 		public:
 			static std::string Register(int icon, int menu, WNDPROC proc)
 			{
-				(void)icon;
-				(void)menu;
+				(void) icon;
+				(void) menu;
 				// hash+more
-				return Formatter::Format("GTL:{0}", static_cast<void*>(&proc));
+				return Formatter::Format("GTL:{0}", static_cast<void *>(&proc));
 			}
 		};
 
@@ -103,14 +109,16 @@ namespace GLib::Win
 
 				HICON i = icon == 0 ? nullptr : ::LoadIconW(instance, MakeIntResource(icon));
 
-				WNDCLASSEXW wc =
-				{
+				WNDCLASSEXW wc = {
 					sizeof(WNDCLASSEXW),
 					HRedraw | VRedraw,
 					static_cast<WNDPROC>(proc),
-					0, 0, instance, i,
+					0,
+					0,
+					instance,
+					i,
 					::LoadCursorW(nullptr, IDC_ARROW), // NOLINT(cppcoreguidelines-pro-type-cstyle-cast) baad macro
-					Detail::Munge<HBRUSH>(size_t{COLOR_WINDOW} + 1),
+					Detail::Munge<HBRUSH>(size_t {COLOR_WINDOW} + 1),
 					MakeIntResource(menu),
 					className.c_str()
 					// hIconSm etc.
@@ -130,13 +138,14 @@ namespace GLib::Win
 
 		inline Window * FromHandle(HWND hWnd)
 		{
-			return Detail::Munge<Window*>(::GetWindowLongPtr(hWnd, GWLP_USERDATA));
+			return Detail::Munge<Window *>(::GetWindowLongPtr(hWnd, GWLP_USERDATA));
 		}
 
 		inline WindowHandle Create(DWORD style, int icon, int menu, const std::string & title, WNDPROC proc, Window * param)
 		{
 			std::string className = RegisterClass(icon, menu, proc);
-			Detail::WindowHandle handle(::CreateWindowExW(0, Cvt::a2w(className).c_str(), Cvt::a2w(title).c_str(), style, CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, nullptr, nullptr, Instance(), param));
+			Detail::WindowHandle handle(::CreateWindowExW(0, Cvt::a2w(className).c_str(), Cvt::a2w(title).c_str(), style, CW_USEDEFAULT, 0,
+																										CW_USEDEFAULT, 0, nullptr, nullptr, Instance(), param));
 			Util::AssertTrue(!!handle, "CreateWindowExW");
 			AssociateHandle(param, handle.get());
 
@@ -155,17 +164,21 @@ namespace GLib::Win
 		}
 	}
 
-	enum class CloseResult { Allow, Prevent };
+	enum class CloseResult
+	{
+		Allow,
+		Prevent
+	};
 
 	class Window
 	{
 		Detail::WindowHandle handle;
-		HACCEL accel{};
+		HACCEL accel {};
 
 	public:
 		Window(int icon, int menu, int accel, const std::string & title)
-			: handle{Detail::Create(Detail::OverlappedWindow, icon, menu, title, WindowProc, this)}
-			, accel{accel != 0 ? Detail::LoadAccel(accel) : nullptr}
+			: handle {Detail::Create(Detail::OverlappedWindow, icon, menu, title, WindowProc, this)}
+			, accel {accel != 0 ? Detail::LoadAccel(accel) : nullptr}
 		{}
 
 		int PumpMessages() const
@@ -197,9 +210,9 @@ namespace GLib::Win
 
 		Painter GetPainter() const
 		{
-			PAINTSTRUCT ps{};
+			PAINTSTRUCT ps {};
 			auto dc = ::BeginPaint(handle.get(), &ps);
-			return Painter{PaintInfo{ps, handle.get(), dc }};
+			return Painter {PaintInfo {ps, handle.get(), dc}};
 		}
 
 		void Close() const
@@ -219,7 +232,7 @@ namespace GLib::Win
 			return result;
 		}
 
-		template<typename R, typename P>
+		template <typename R, typename P>
 		void SetTimer(const std::chrono::duration<R, P> & interval, UINT_PTR id = 1) const
 		{
 			auto count = std::chrono::duration_cast<std::chrono::milliseconds>(interval).count();
@@ -258,7 +271,10 @@ namespace GLib::Win
 		virtual void OnSize(const Size & /**/) noexcept {}
 		virtual void OnGetMinMaxInfo(MINMAXINFO & /**/) noexcept {}
 		virtual void OnCommand(int /*command*/) noexcept {}
-		virtual CloseResult OnClose() noexcept { return CloseResult::Allow; }
+		virtual CloseResult OnClose() noexcept
+		{
+			return CloseResult::Allow;
+		}
 		virtual void OnDestroy() noexcept {}
 		virtual void OnNCDestroy() noexcept {}
 		virtual void OnUser(WPARAM /*w*/, LPARAM /*p*/) noexcept {}
@@ -327,7 +343,7 @@ namespace GLib::Win
 				case WM_NCDESTROY:
 				{
 					OnNCDestroy();
-					(void)handle.release();
+					(void) handle.release();
 					return;
 				}
 
@@ -338,7 +354,7 @@ namespace GLib::Win
 
 				case WM_NOTIFY:
 				{
-					return OnNotify(*Detail::Munge<const NMHDR*>(lParam));
+					return OnNotify(*Detail::Munge<const NMHDR *>(lParam));
 				}
 
 				case WM_CHAR:
@@ -373,7 +389,7 @@ namespace GLib::Win
 
 				case WM_MOUSEWHEEL:
 				{
-					//WORD keys = GET_KEYSTATE_WPARAM(wParam);
+					// WORD keys = GET_KEYSTATE_WPARAM(wParam);
 					return OnMouseWheel(Detail::PointFromParam(lParam), Detail::WheelData(wParam));
 				}
 
@@ -384,7 +400,7 @@ namespace GLib::Win
 
 				case WM_GETDLGCODE:
 				{
-					return OnGetDlgCode(static_cast<int>(wParam), *Detail::Munge<MSG*>(lParam), result);
+					return OnGetDlgCode(static_cast<int>(wParam), *Detail::Munge<MSG *>(lParam), result);
 				}
 
 				case WM_TIMER:
@@ -399,28 +415,28 @@ namespace GLib::Win
 			}
 		}
 
-		protected:
-			HWND Handle() const
-			{
-				return handle.get();
-			}
+	protected:
+		HWND Handle() const
+		{
+			return handle.get();
+		}
 
-			static HINSTANCE Instance()
-			{
-				return Detail::Instance();
-			}
+		static HINSTANCE Instance()
+		{
+			return Detail::Instance();
+		}
 
-			LRESULT Send(UINT msg, WPARAM wParam = {}, LPARAM lParam = {}) const
-			{
-				return ::SendMessageW(Handle(), msg, wParam, lParam);
-			}
+		LRESULT Send(UINT msg, WPARAM wParam = {}, LPARAM lParam = {}) const
+		{
+			return ::SendMessageW(Handle(), msg, wParam, lParam);
+		}
 
 	private:
 		static LRESULT APIENTRY WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) noexcept
 		{
 			LRESULT result = 0;
 			Window * window = Detail::FromHandle(hWnd);
-			bool handled{};
+			bool handled {};
 			if (window != nullptr)
 			{
 				auto oldValue = SetHandled(false, true);

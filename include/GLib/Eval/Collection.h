@@ -15,15 +15,15 @@ namespace GLib::Eval
 		~CollectionBase() override = default;
 	};
 
-	template<typename Container> class Collection : public CollectionBase
+	template <typename Container>
+	class Collection : public CollectionBase
 	{
 		const Container & container;
 
 	public:
 		Collection(const Container & container)
 			: container(container)
-		{
-		}
+		{}
 
 	protected:
 		std::string ToString() const override
@@ -44,8 +44,8 @@ namespace GLib::Eval
 
 		void VisitProperty(const std::string & propertyName, const ValueVisitor & visitor) const override
 		{
-			(void)propertyName;
-			(void)visitor;
+			(void) propertyName;
+			(void) visitor;
 			throw std::runtime_error("Not implemented");
 			// size?
 		}
@@ -54,12 +54,13 @@ namespace GLib::Eval
 		{
 			for (const auto & value : container)
 			{
-				f(Value<typename Container::value_type> { value });
+				f(Value<typename Container::value_type> {value});
 			}
 		}
 	};
 
-	template <typename T> Collection<T> MakeCollection(const T & container)
+	template <typename T>
+	Collection<T> MakeCollection(const T & container)
 	{
 		return Collection<T>(container);
 	}

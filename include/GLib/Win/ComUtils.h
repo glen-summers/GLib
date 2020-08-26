@@ -10,7 +10,7 @@ namespace GLib::Win
 		{
 			void operator()(void * unused) const noexcept
 			{
-				(void)unused;
+				(void) unused;
 				::CoUninitialize();
 			}
 		};
@@ -22,12 +22,14 @@ namespace GLib::Win
 		};
 	}
 
-	template <Detail::Apartment appartment> class ComInitialiser
+	template <Detail::Apartment appartment>
+	class ComInitialiser
 	{
 		std::unique_ptr<void, Detail::ComUninitialiser> com;
 
 	public:
-		ComInitialiser() : com{this}
+		ComInitialiser()
+			: com {this}
 		{
 			GLib::Win::CheckHr(::CoInitializeEx(nullptr, static_cast<DWORD>(appartment)), "CoInitializeEx");
 		}

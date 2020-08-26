@@ -8,7 +8,7 @@ namespace GLib::Cvt
 {
 #ifdef _MSC_VER
 #pragma warning(push)
-#pragma warning(disable: 4996)	// until have proper\efficient fix
+#pragma warning(disable : 4996) // until have proper\efficient fix
 #endif
 	namespace Detail
 	{
@@ -21,14 +21,14 @@ namespace GLib::Cvt
 
 	inline std::wstring a2w(std::string_view s)
 	{
-		return Detail::Converter().from_bytes(s.data(), s.data()+s.size());
-		//Detail::AssertTrue(convert.converted() == s.size(), "conversion failed");
+		return Detail::Converter().from_bytes(s.data(), s.data() + s.size());
+		// Detail::AssertTrue(convert.converted() == s.size(), "conversion failed");
 	}
 
 	inline std::string w2a(std::wstring_view s)
 	{
-		return Detail::Converter().to_bytes(s.data(), s.data()+s.size());
-		//Detail::AssertTrue(convert.converted() == s.size(), "conversion failed");
+		return Detail::Converter().to_bytes(s.data(), s.data() + s.size());
+		// Detail::AssertTrue(convert.converted() == s.size(), "conversion failed");
 	}
 
 #ifdef _MSC_VER

@@ -26,7 +26,9 @@ namespace GLib
 
 	public:
 		constexpr Span() noexcept = default;
-		constexpr Span(pointer ptr, size_type size) : ptr{ptr}, size{size}
+		constexpr Span(pointer ptr, size_type size)
+			: ptr {ptr}
+			, size {size}
 		{
 			if (size < 0)
 			{
@@ -36,7 +38,7 @@ namespace GLib
 
 		constexpr Iterator begin() const
 		{
-			return { ptr, size };
+			return {ptr, size};
 		}
 
 		constexpr Iterator end() const
@@ -70,7 +72,8 @@ namespace GLib
 			constexpr Iterator() noexcept = default;
 
 			constexpr Iterator(pointer ptr, size_type size) noexcept
-				: ptr{ptr}, end{ptr+size}
+				: ptr {ptr}
+				, end {ptr + size}
 			{}
 
 			constexpr bool operator==(const Iterator & other) const
@@ -94,7 +97,7 @@ namespace GLib
 
 			constexpr Iterator operator++(int) // NOLINT(cert-dcl21-cpp) 'operator++' returns a non-constant object but constexpr is const
 			{
-				Iterator it{*this};
+				Iterator it {*this};
 				++(*this);
 				return it;
 			}
@@ -111,8 +114,9 @@ namespace GLib
 		};
 	};
 
-	template <typename T> Span<T> MakeSpan(const T * value, size_t size)
+	template <typename T>
+	Span<T> MakeSpan(const T * value, size_t size)
 	{
-		return Span<T>{value, static_cast<std::ptrdiff_t>(size)};
+		return Span<T> {value, static_cast<std::ptrdiff_t>(size)};
 	}
 }

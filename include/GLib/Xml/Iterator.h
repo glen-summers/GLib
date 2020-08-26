@@ -92,7 +92,7 @@ namespace GLib::Xml
 		}
 
 	private:
-		[[noreturn]] static void IllegalCharacter(char c) 
+		[[noreturn]] static void IllegalCharacter(char c)
 		{
 			std::ostringstream s;
 			s << "Illegal character: ";
@@ -171,7 +171,7 @@ namespace GLib::Xml
 							}
 							break;
 						}
-						
+
 						case Xml::State::ElementEndName:
 						{
 							elementName.second = oldPtr;
@@ -192,8 +192,8 @@ namespace GLib::Xml
 					{
 						case Xml::State::AttributeEnd:
 						{
-							const auto * tmp = attributeValueStart;
-							manager->Push(Utils::ToStringView(attributeName), Utils::ToStringView(++tmp, oldPtr), elementStack.size());
+							manager->Push(Utils::ToStringView(attributeName), Utils::ToStringView(attributeValueStart, oldPtr).substr(1),
+														elementStack.size());
 							attributes.second = ptr;
 							break;
 						}
@@ -299,7 +299,7 @@ namespace GLib::Xml
 					if (element.qName != top)
 					{
 						std::ostringstream s;
-						s << "Element mismatch: "  << element.qName << " != " << top;
+						s << "Element mismatch: " << element.qName << " != " << top;
 						throw std::runtime_error(s.str());
 					}
 					if (element.depth == 1)
@@ -336,8 +336,8 @@ namespace GLib::Xml
 
 		Iterator end() const
 		{
-			(void)this;
-			return Iterator{};
+			(void) this;
+			return Iterator {};
 		}
 
 		const NameSpaceManager & Manager()

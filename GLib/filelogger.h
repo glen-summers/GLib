@@ -26,15 +26,15 @@ class FileLogger
 	std::mutex streamMonitor;
 	StreamInfo streamInfo;
 	GLib::Flog::Level logLevel = GLib::Flog::Level::Info; // config
-	size_t maxFileSize = DefaultMaxFileSize; // config
+	size_t maxFileSize = DefaultMaxFileSize;							// config
 	static thread_local LogState logState;
 
 public:
 	FileLogger();
-	FileLogger(const FileLogger&) = delete;
-	FileLogger(FileLogger&&) = delete;
-	FileLogger& operator=(const FileLogger&) = delete;
-	FileLogger& operator=(FileLogger&&) = delete;
+	FileLogger(const FileLogger &) = delete;
+	FileLogger(FileLogger &&) = delete;
+	FileLogger & operator=(const FileLogger &) = delete;
+	FileLogger & operator=(FileLogger &&) = delete;
 
 	static void Write(char c);
 
@@ -51,7 +51,7 @@ private:
 	static void WriteHeader(std::ostream & writer);
 	static void WriteFooter(std::ostream & writer);
 	bool ResourcesAvailable(size_t newEntrySize) const;
-	//std::string RenameOldFile(const std::string & oldFileName) const;
+	// std::string RenameOldFile(const std::string & oldFileName) const;
 
 	// improve
 	static FileLogger & Instance();

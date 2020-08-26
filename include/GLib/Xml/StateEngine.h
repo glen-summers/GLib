@@ -71,7 +71,7 @@ namespace GLib::Xml
 		// could also manage depth here to determine end
 		// but try in iterator first?
 		State state;
-		bool mutable isProlog { true };
+		bool mutable isProlog {true};
 		bool mutable hasDocTypeDecl {};
 		bool mutable hasContent {};
 		char mutable attributeQuoteChar {};
@@ -79,8 +79,8 @@ namespace GLib::Xml
 
 	public:
 		explicit StateEngine(State state = State::Start)
-		  : state(state)
-		  , stateFunction(stateFunctions.at(static_cast<int>(state)))
+			: state(state)
+			, stateFunction(stateFunctions.at(static_cast<int>(state)))
 		{}
 
 		State GetState() const
@@ -138,7 +138,7 @@ namespace GLib::Xml
 		// state functions
 		Xml::State Error(char c) const
 		{
-			(void)c;
+			(void) c;
 			return state;
 		}
 
@@ -505,8 +505,7 @@ namespace GLib::Xml
 		//////////////////////
 
 		// must be enum order
-		static constexpr std::array<StateFunction, static_cast<int>(State::Count)> stateFunctions =
-		{
+		static constexpr std::array<StateFunction, static_cast<int>(State::Count)> stateFunctions = {
 			&StateEngine::Error,
 			&StateEngine::Start,
 			&StateEngine::DocTypeDecl,

@@ -13,10 +13,11 @@ namespace GLib::Win
 			return v;
 		}
 
+		// clang-format off
 		inline VARTYPE Vt(const VARIANT & v) { return v.vt; } // NOLINT(cppcoreguidelines-pro-type-union-access) legacy code
 		inline VARTYPE & Vt(VARIANT & v) { return v.vt; } // NOLINT(cppcoreguidelines-pro-type-union-access) legacy code
-
 		inline BSTR & Bstr(VARIANT & v) { return v.bstrVal; } // NOLINT(cppcoreguidelines-pro-type-union-access) legacy code
+		// clang-format on
 
 		inline VARIANT Create(const std::string & value)
 		{
@@ -43,7 +44,7 @@ namespace GLib::Win
 
 		inline VARIANT Move(VARIANT & other)
 		{
-			VARIANT v{other};
+			VARIANT v {other};
 			::VariantInit(&other);
 			return v;
 		}
@@ -52,19 +53,23 @@ namespace GLib::Win
 	// get\set a C++ variant?
 	class Variant
 	{
-		VARIANT v{};
+		VARIANT v {};
 
 	public:
-		Variant() : v{Detail::Create()}
+		Variant()
+			: v {Detail::Create()}
 		{}
 
-		Variant(const std::string & value) : v{Detail::Create(value)}
+		Variant(const std::string & value)
+			: v {Detail::Create(value)}
 		{}
 
-		Variant(const Variant & other) : v{Detail::Copy(other.v)}
+		Variant(const Variant & other)
+			: v {Detail::Copy(other.v)}
 		{}
 
-		Variant(Variant && other) noexcept : v{Detail::Move(other.v)}
+		Variant(Variant && other) noexcept
+			: v {Detail::Move(other.v)}
 		{}
 
 		~Variant()
@@ -79,30 +84,31 @@ namespace GLib::Win
 
 		std::string ToString() const
 		{
-			VARIANT tmp{};
+			VARIANT tmp {};
 			GLib::Win::CheckHr(::VariantChangeType(&tmp, &v, 0, VT_BSTR), "VariantChangeType");
 			return Cvt::w2a(Detail::Bstr(tmp));
 		}
 
-		Variant & operator = (const Variant & other)
+		Variant & operator=(const Variant & other)
 		{
 			GLib::Win::CheckHr(::VariantCopy(&v, &other.v), "VariantCopy");
 			return *this;
 		}
 
-		Variant & operator = (Variant && other) noexcept
+		Variant & operator=(Variant && other) noexcept
 		{
 			v = other.v;
 			::VariantInit(&other.v);
 			return *this;
 		}
 
-		bool operator == (const Variant & other) const noexcept
+		bool operator==(const Variant & other) const noexcept
 		{
-			return ::VarCmp(const_cast<VARIANT *>(&v), const_cast<VARIANT *>(&other.v), 0) == VARCMP_EQ; // NOLINT(cppcoreguidelines-pro-type-const-cast) no const api
+			return ::VarCmp(const_cast<VARIANT *>(&v), const_cast<VARIANT *>(&other.v), 0) ==
+						 VARCMP_EQ; // NOLINT(cppcoreguidelines-pro-type-const-cast) no const api
 		}
 
-		bool operator != (const Variant & other) const noexcept
+		bool operator!=(const Variant & other) const noexcept
 		{
 			return !(*this == other);
 		}

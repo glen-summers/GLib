@@ -11,24 +11,29 @@ namespace GLib::Eval
 {
 	struct ValueBase;
 	using ValuePtr = std::unique_ptr<ValueBase>;
-	using ValueVisitor = std::function<void (const ValueBase &)>;
-	template<typename ValueType> class Value;
-	template<typename Value> struct Visitor;
+	using ValueVisitor = std::function<void(const ValueBase &)>;
 
-	template <typename ValueType> ValuePtr MakeValue(ValueType value)
+	template <typename ValueType>
+	class Value;
+
+	template <typename Value>
+	struct Visitor;
+
+	template <typename ValueType>
+	ValuePtr MakeValue(ValueType value)
 	{
 		return std::make_unique<Value<ValueType>>(value);
 	}
 
-	template <typename T, std::enable_if_t<!Utils::Detail::IsContainer<T>::value>* = nullptr>
+	template <typename T, std::enable_if_t<!Utils::Detail::IsContainer<T>::value> * = nullptr>
 	void ForEach(T value, const ValueVisitor & f)
 	{
-		(void)value;
-		(void)f;
+		(void) value;
+		(void) f;
 		throw std::runtime_error(std::string("ForEach not defined for : ") + Compat::Unmangle(typeid(T).name()));
 	}
 
-	template <typename T, std::enable_if_t<Utils::Detail::IsContainer<T>::value>* = nullptr>
+	template <typename T, std::enable_if_t<Utils::Detail::IsContainer<T>::value> * = nullptr>
 	void ForEach(T collection, const ValueVisitor & f)
 	{
 		for (const auto & value : collection)
@@ -52,7 +57,8 @@ namespace GLib::Eval
 		virtual void ForEach(const ValueVisitor & f) const = 0;
 	};
 
-	template<typename ValueType> class Value : public ValueBase
+	template <typename ValueType>
+	class Value : public ValueBase
 	{
 		ValueType value;
 
@@ -77,15 +83,16 @@ namespace GLib::Eval
 		}
 	};
 
-	template<typename Value> struct Visitor
+	template <typename Value>
+	struct Visitor
 	{
 		static void Visit(const Value & value, const std::string & propertyName, const ValueVisitor & visitor)
 		{
-			(void)value;
-			(void)visitor;
+			(void) value;
+			(void) visitor;
 
-			throw std::runtime_error(std::string("No accessor defined for property: '")
-				+ propertyName + "', type:'" + Compat::Unmangle(typeid(Value).name()) + '\'');
+			throw std::runtime_error(std::string("No accessor defined for property: '") + propertyName + "', type:'" +
+															 Compat::Unmangle(typeid(Value).name()) + '\'');
 		}
 	};
 }

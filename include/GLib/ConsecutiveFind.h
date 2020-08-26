@@ -2,7 +2,7 @@
 
 namespace GLib::Util
 {
-	template<typename InputIt, typename T>
+	template <typename InputIt, typename T>
 	constexpr InputIt FindNot(InputIt first, InputIt last, const T & value)
 	{
 		while (first != last && *first == value)
@@ -12,10 +12,10 @@ namespace GLib::Util
 		return first;
 	}
 
-	template<typename InputIt, typename T, typename BinaryPredicate>
+	template <typename InputIt, typename T, typename BinaryPredicate>
 	constexpr InputIt FindNextIf(InputIt first, InputIt last, const T & value, BinaryPredicate predicate)
 	{
-		while (first != last && !predicate(*first , value))
+		while (first != last && !predicate(*first, value))
 		{
 			++first;
 		}

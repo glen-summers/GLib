@@ -15,13 +15,13 @@ namespace GLib::Win
 		HGLOBAL resourceData = ::LoadResource(instance, resource);
 		Util::AssertTrue(resourceData != nullptr, "LoadResource");
 
-		return { static_cast<const T*>(::LockResource(resourceData)), ::SizeofResource(instance, resource) };
+		return {static_cast<const T *>(::LockResource(resourceData)), ::SizeofResource(instance, resource)};
 	}
 
 	inline std::string LoadResourceString(HINSTANCE instance, unsigned int id, LPCWSTR resourceType)
 	{
 		auto [p, size] = LoadResource<char>(instance, id, resourceType);
-		std::string s { p, size };
+		std::string s {p, size};
 		s.erase(remove(s.begin(), s.end(), '\r'), s.end());
 		return s;
 	}

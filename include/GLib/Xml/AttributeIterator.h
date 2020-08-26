@@ -37,7 +37,7 @@ namespace GLib::Xml
 			, ptr(begin)
 			, end(end)
 		{
-			if (begin!=end)
+			if (begin != end)
 			{
 				Advance();
 			}
@@ -65,14 +65,14 @@ namespace GLib::Xml
 		{
 			auto qName = Utils::ToStringView(attributeName);
 			auto value = Utils::ToStringView(attributeValue);
-			auto rawValue = Utils::ToStringView(attributeName.first, attributeValue.second+1);
+			auto rawValue = Utils::ToStringView(attributeName.first, attributeValue.second + 1);
 
 			if (manager != nullptr)
 			{
 				auto [name, nameSpace] = manager->Normalise(qName);
-				return { name, value, nameSpace, rawValue };
+				return {name, value, nameSpace, rawValue};
 			}
-			return { qName, value, {}, rawValue };
+			return {qName, value, {}, rawValue};
 		}
 
 	private:

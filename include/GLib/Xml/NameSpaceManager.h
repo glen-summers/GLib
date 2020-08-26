@@ -12,7 +12,7 @@ namespace GLib::Xml
 		static constexpr std::string_view Attribute = "xmlns:";
 
 		std::unordered_map<std::string_view, std::string_view> nameSpaces;
-		std::stack<std::pair<size_t, std::pair<std::string_view,std::string_view>>> nameSpaceStack;
+		std::stack<std::pair<size_t, std::pair<std::string_view, std::string_view>>> nameSpaceStack;
 
 	public:
 		static bool IsDeclaration(const std::string_view & value)
@@ -33,7 +33,7 @@ namespace GLib::Xml
 		std::string_view Get(const std::string_view & prefix) const
 		{
 			auto nit = nameSpaces.find(prefix);
-			if (nit==nameSpaces.end())
+			if (nit == nameSpaces.end())
 			{
 				throw std::runtime_error("Namespace not found"); // +detail
 			}
@@ -50,7 +50,7 @@ namespace GLib::Xml
 			}
 
 			auto nit = nameSpaces.find(prefix);
-			if (nit!=nameSpaces.end())
+			if (nit != nameSpaces.end())
 			{
 				nameSpaceStack.push({depth, {prefix, nit->second}});
 				nit->second = value;
@@ -66,7 +66,7 @@ namespace GLib::Xml
 			while (!nameSpaceStack.empty() && depth == nameSpaceStack.top().first)
 			{
 				auto nit = nameSpaces.find(nameSpaceStack.top().second.first);
-				if (nit==nameSpaces.end())
+				if (nit == nameSpaces.end())
 				{
 					throw std::logic_error("Inconsistent namespace stack");
 				}
@@ -77,7 +77,7 @@ namespace GLib::Xml
 
 		static void ValidateName(size_t colon, const std::string_view & value)
 		{
-			if (colon == 0 || value.find(':', colon+1) != std::string_view::npos)
+			if (colon == 0 || value.find(':', colon + 1) != std::string_view::npos)
 			{
 				throw std::runtime_error(std::string("Illegal name : '") + std::string(value) + '\'');
 			}
@@ -95,9 +95,9 @@ namespace GLib::Xml
 				{
 					throw std::runtime_error(std::string("NameSpace ") + std::string(prefix) + " not found");
 				}
-				return { name.substr(colon+1), it->second };
+				return {name.substr(colon + 1), it->second};
 			}
-			return { name, {}};
+			return {name, {}};
 		}
 	};
 }

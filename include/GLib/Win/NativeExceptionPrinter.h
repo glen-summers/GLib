@@ -13,7 +13,8 @@ namespace GLib::Win::Symbols
 
 	namespace Detail
 	{
-		template <typename Function> auto NativeTryCatch(Function function) -> decltype(function())
+		template <typename Function>
+		auto NativeTryCatch(Function function) -> decltype(function())
 		{
 			__try
 			{
@@ -27,13 +28,11 @@ namespace GLib::Win::Symbols
 
 		inline CONTEXT GetContext(const EXCEPTION_POINTERS & exceptionInfo)
 		{
-			return NativeTryCatch([&]()
-			{
-				return *(exceptionInfo.ContextRecord);
-			});
+			return NativeTryCatch([&]() { return *(exceptionInfo.ContextRecord); });
 		}
 
-		template <typename T1, typename T2> T1 Munge(T2 t2)
+		template <typename T1, typename T2>
+		T1 Munge(T2 t2)
 		{
 			return reinterpret_cast<T1>(t2); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
 		}
@@ -50,8 +49,7 @@ namespace GLib::Win::Symbols
 
 		inline bool GetCPlusPlusExceptionName(const Span<ULONG_PTR> & ei, std::string & name)
 		{
-			return NativeTryCatch([&]()
-			{
+			return NativeTryCatch([&]() {
 				const Vbase & q = *Munge<Vbase *>(ei[1]);
 				const type_info & t = typeid(q);
 				name = t.name();
@@ -61,8 +59,7 @@ namespace GLib::Win::Symbols
 
 		inline bool GetCPlusPlusExceptionNameEx(const Span<ULONG_PTR> & ei, std::string & name)
 		{
-			return NativeTryCatch([&]()
-			{
+			return NativeTryCatch([&]() {
 				constexpr auto instanceOffset64 = 3;
 				constexpr auto throwInfoIndex = 2;
 				constexpr auto catchableOffsetIndex = 3;
@@ -77,11 +74,11 @@ namespace GLib::Win::Symbols
 #error unexpected target
 #endif
 
-				const auto throwInfo = GLib::MakeSpan<DWORD>(Munge<const DWORD *>(ei[throwInfoIndex]), catchableOffsetIndex+1);
+				const auto throwInfo = GLib::MakeSpan<DWORD>(Munge<const DWORD *>(ei[throwInfoIndex]), catchableOffsetIndex + 1);
 				const DWORD catchableOffset = throwInfo[catchableOffsetIndex];
-				const auto catchables = GLib::MakeSpan<DWORD>(Munge<const DWORD *>(hinstance + catchableOffset), catchablesOffsetIndex+1);
+				const auto catchables = GLib::MakeSpan<DWORD>(Munge<const DWORD *>(hinstance + catchableOffset), catchablesOffsetIndex + 1);
 				const DWORD catchablesOffset = catchables[catchablesOffsetIndex];
-				const auto catchablesTypes = GLib::MakeSpan<DWORD>(Munge<const DWORD *>(hinstance + catchablesOffset), typeInfoOffsetIndex+1);
+				const auto catchablesTypes = GLib::MakeSpan<DWORD>(Munge<const DWORD *>(hinstance + catchablesOffset), typeInfoOffsetIndex + 1);
 				const DWORD typeInfoOffset = catchablesTypes[typeInfoOffsetIndex];
 				name = Munge<const type_info *>(hinstance + typeInfoOffset)->name();
 				return true;
@@ -91,10 +88,11 @@ namespace GLib::Win::Symbols
 		inline void UnDecorate(std::string & symbolName)
 		{
 			constexpr DWORD undecoratedNameSize = 512;
-			std::array<char, undecoratedNameSize> undecoratedName{};
+			std::array<char, undecoratedNameSize> undecoratedName {};
 			DWORD flags = UNDNAME_NAME_ONLY;
 
-			if (!symbolName.empty() && *symbolName.begin() == '?' && ::UnDecorateSymbolName(symbolName.c_str(), undecoratedName.data(), undecoratedNameSize, flags) != 0)
+			if (!symbolName.empty() && *symbolName.begin() == '?' &&
+					::UnDecorateSymbolName(symbolName.c_str(), undecoratedName.data(), undecoratedNameSize, flags) != 0)
 			{
 				symbolName = undecoratedName.data();
 			}
@@ -118,8 +116,8 @@ namespace GLib::Win::Symbols
 
 		inline void InlineTrace(std::ostream & s, const SymProcess & process, DWORD64 address, DWORD inlineTrace)
 		{
-			DWORD inlineContext{};
-			DWORD inlineFrameIndex{};
+			DWORD inlineContext {};
+			DWORD inlineFrameIndex {};
 
 			if (::SymQueryInlineTrace(process.Handle(), address, 0, address, address, &inlineContext, &inlineFrameIndex) == TRUE)
 			{
@@ -144,14 +142,15 @@ namespace GLib::Win::Symbols
 			}
 		}
 
-		inline void WalkStack(std::ostream & s, const SymProcess & process, DWORD machineType, STACKFRAME64 * frame, CONTEXT * context, unsigned int maxFrames)
+		inline void WalkStack(std::ostream & s, const SymProcess & process, DWORD machineType, STACKFRAME64 * frame, CONTEXT * context,
+													unsigned int maxFrames)
 		{
 			for (unsigned int frames = 0; frames < maxFrames; ++frames)
 			{
-				if (::StackWalk64(machineType, process.Handle(), ::GetCurrentThread(), frame, context, nullptr,
-					SymFunctionTableAccess64, SymGetModuleBase64, nullptr) == FALSE)
+				if (::StackWalk64(machineType, process.Handle(), ::GetCurrentThread(), frame, context, nullptr, SymFunctionTableAccess64,
+													SymGetModuleBase64, nullptr) == FALSE)
 				{
-					s << "StackWalk64: " <<  ::GetLastError() << '\n';
+					s << "StackWalk64: " << ::GetLastError() << '\n';
 					break;
 				}
 
@@ -161,7 +160,7 @@ namespace GLib::Win::Symbols
 					break;
 				}
 
-				MEMORY_BASIC_INFORMATION mb{};
+				MEMORY_BASIC_INFORMATION mb {};
 				if (::VirtualQueryEx(process.Handle(), Munge<PVOID>(address), &mb, sizeof mb) != 0)
 				{
 					auto module = static_cast<HMODULE>(mb.AllocationBase);
@@ -253,7 +252,7 @@ namespace GLib::Win::Symbols
 		frame.AddrStack.Offset = context.Rsp;
 		frame.AddrStack.Mode = AddrModeFlat;
 #else
-		#error "Unsupported platform"
+#error "Unsupported platform"
 #endif
 
 		Detail::WalkStack(s, SymProcess::CurrentProcess(), machineType, &frame, &context, maxFrames);

@@ -9,6 +9,7 @@ namespace GLib::Cpp
 {
 	inline std::ostream & operator<<(std::ostream & str, State s)
 	{
+		// clang-format off
 		static constexpr std::array<std::string_view, static_cast<unsigned int>(State::Count)> stateNames
 		{
 			"Error",
@@ -26,7 +27,7 @@ namespace GLib::Cpp
 			"Code",
 			"CharacterLiteral",
 		};
-
+		// clang-format on
 		return str << stateNames.at(static_cast<unsigned int>(s));
 	}
 
@@ -54,40 +55,40 @@ namespace GLib::Cpp
 		using reference = void;
 
 		Iterator(const char * begin, const char * end)
-				: ptr(begin)
-				, end(end)
-				, lastPtr(begin)
-			{
-				Advance();
-			}
+			: ptr(begin)
+			, end(end)
+			, lastPtr(begin)
+		{
+			Advance();
+		}
 
-			Iterator() = default;
+		Iterator() = default;
 
-			bool operator==(const Iterator & other) const
-			{
-				return lastPtr == other.lastPtr;
-			}
+		bool operator==(const Iterator & other) const
+		{
+			return lastPtr == other.lastPtr;
+		}
 
-			bool operator!=(const Iterator & it) const
-			{
-				return !(*this == it);
-			}
+		bool operator!=(const Iterator & it) const
+		{
+			return !(*this == it);
+		}
 
-			Iterator & operator++()
-			{
-				Advance();
-				return *this;
-			}
+		Iterator & operator++()
+		{
+			Advance();
+			return *this;
+		}
 
-			const Fragment & operator*() const
-			{
-				return fragment;
-			}
+		const Fragment & operator*() const
+		{
+			return fragment;
+		}
 
-			const Fragment * operator->() const
-			{
-				return &fragment;
-			}
+		const Fragment * operator->() const
+		{
+			return &fragment;
+		}
 
 	private:
 		[[noreturn]] static void IllegalCharacter(char c, unsigned int lineNumber, State state, unsigned int startLine)
@@ -99,8 +100,7 @@ namespace GLib::Cpp
 				s << '\'' << c << "' ";
 			}
 
-			s << "(0x" << std::hex << static_cast<unsigned>(c) << std::dec << ") at line: " << lineNumber
-				<< ", state: " << state;
+			s << "(0x" << std::hex << static_cast<unsigned>(c) << std::dec << ") at line: " << lineNumber << ", state: " << state;
 
 			if (startLine != lineNumber)
 			{
@@ -113,10 +113,10 @@ namespace GLib::Cpp
 		bool Set(State state, const char * yieldValue)
 		{
 			bool ret = false;
-			auto size = static_cast<size_t>(yieldValue-lastPtr);
+			auto size = static_cast<size_t>(yieldValue - lastPtr);
 			if (size != 0)
 			{
-				fragment = {state, { lastPtr, size }};
+				fragment = {state, {lastPtr, size}};
 				ret = true;
 			}
 			lastPtr = yieldValue;
@@ -128,7 +128,7 @@ namespace GLib::Cpp
 			if (lastState != State::None)
 			{
 				auto endState = engine.Push('\n');
-				if (endState != State::None && endState!=State::WhiteSpace)
+				if (endState != State::None && endState != State::WhiteSpace)
 				{
 					std::ostringstream s;
 					s << "Termination error, State: " << endState << ", StartLine: " << startLineNumber;
@@ -212,7 +212,7 @@ namespace GLib::Cpp
 					case State::Directive:
 					case State::Code:
 					{
-						if (Set(oldState, ptr-1)) // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic) todo use std::span
+						if (Set(oldState, ptr - 1)) // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic) todo use std::span
 						{
 							return;
 						}
@@ -239,13 +239,13 @@ namespace GLib::Cpp
 
 		Iterator begin() const
 		{
-			return Iterator{value.data(), value.size() + value.data()};
+			return Iterator {value.data(), value.size() + value.data()};
 		}
 
 		Iterator end() const
 		{
-			(void)this;
-			return Iterator{};
+			(void) this;
+			return Iterator {};
 		}
 	};
 }
