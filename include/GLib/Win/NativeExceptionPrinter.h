@@ -163,7 +163,7 @@ namespace GLib::Win::Symbols
 				MEMORY_BASIC_INFORMATION mb {};
 				if (::VirtualQueryEx(process.Handle(), Munge<PVOID>(address), &mb, sizeof mb) != 0)
 				{
-					auto module = static_cast<HMODULE>(mb.AllocationBase);
+					auto * module = static_cast<HMODULE>(mb.AllocationBase);
 					std::string moduleName = FileSystem::PathOfModule(module);
 					Formatter::Format(s, "{0,-30} + 0x{1:%08X}\n", moduleName, static_cast<DWORD_PTR>(address) - Munge<DWORD_PTR>(mb.AllocationBase));
 				}
@@ -195,7 +195,7 @@ namespace GLib::Win::Symbols
 		{
 			case STATUS_ACCESS_VIOLATION:
 			{
-				auto msg = static_cast<const char *>(info[0] == 0 ? "reading" : "writing");
+				const auto * msg = static_cast<const char *>(info[0] == 0 ? "reading" : "writing");
 				Formatter::Format(s, " : Access violation {0} address {1}\n", msg, Detail::Munge<PVOID>(info[1]));
 				break;
 			}

@@ -17,9 +17,9 @@ int main(int argc, char *argv[]) // NOLINT(bugprone-exception-escape) use of cou
 
 	try
 	{
-		auto desc {"Generates C++ HTML code coverage report"};
-		auto syntax {"Coverage <Executable> <Report> [-sub] [-i IncludePath]... [-x excludePath]..."};
-		auto detail {R"(
+		const auto * const desc {"Generates C++ HTML code coverage report"};
+		const auto * const syntax {"Coverage <Executable> <Report> [-sub] [-i IncludePath]... [-x excludePath]..."};
+		const auto * const detail {R"(
 Executable: Path to executeable
 Report    : Directory path for the generated report
 [-sub]    : Generates coverage for sub processes of main executable
@@ -40,15 +40,15 @@ Coverage c:\Build\Main.exe C:\Report -i C:\MainCode C:\Utils\ -x C:\ExternalCode
 
 		auto it = args.begin();
 		auto end = args.end();
-		const auto executable = *it++;
-		const auto reportPath = *it++;
+		const auto * const executable = *it++;
+		const auto * const reportPath = *it++;
 		bool debugChildProcesses{};
 
 		Strings includes;
 		Strings excludes;
 		while (it != end)
 		{
-			auto arg = *it++;
+			const auto * const arg = *it++;
 			if (strcmp(arg, "-?") == 0)
 			{
 				std::cout << desc << detail;

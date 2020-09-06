@@ -32,9 +32,9 @@ namespace GLib::Win
 		static BOOL CALLBACK EnumWindowsCallback(HWND handle, LPARAM param) noexcept
 		{
 			// todo setlasterror when return false
-			return (*reinterpret_cast<const WindowEnumerator *>(param))(handle)
+			return (*reinterpret_cast<const WindowEnumerator *>(param))(handle) // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast) required
 							 ? TRUE
-							 : FALSE; // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast) required
+							 : FALSE;
 		}
 
 	public:

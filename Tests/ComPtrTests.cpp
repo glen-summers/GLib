@@ -130,13 +130,18 @@ BOOST_AUTO_TEST_CASE(CtorFromOtherType)
 
 BOOST_AUTO_TEST_CASE(AssignmentSameType)
 {
-	GLib::Win::ComPtr<ITest1> p1, p2;
+	GLib::Win::ComPtr<ITest1> p1, p2, p3;
 	p1 = GLib::Win::Make<ImplementsITest1>();
+	BOOST_TEST(1U == UseCount(p1));
+	BOOST_TEST(0U == UseCount(p2));
+	BOOST_TEST(0U == UseCount(p3));
+
 	p2 = p1;
 	BOOST_TEST(2U == UseCount(p1));
 	BOOST_TEST(2U == UseCount(p2));
+	BOOST_TEST(0U == UseCount(p3));
 
-	GLib::Win::ComPtr<ITest1> p3 = std::move(p1);
+	p3 = std::move(p1);
 	BOOST_TEST(0U == UseCount(p1));
 	BOOST_TEST(2U == UseCount(p2));
 	BOOST_TEST(2U == UseCount(p3));
@@ -148,10 +153,12 @@ BOOST_AUTO_TEST_CASE(AssignmentOtherType)
 	GLib::Win::ComPtr<ITest1> p2, p3;
 	BOOST_TEST(1U == UseCount(p1));
 	BOOST_TEST(0U == UseCount(p2));
+	BOOST_TEST(0U == UseCount(p3));
 
 	p2 = p1;
 	BOOST_TEST(2U == UseCount(p1));
 	BOOST_TEST(2U == UseCount(p2));
+	BOOST_TEST(0U == UseCount(p3));
 
 	p3 = std::move(p1);
 	BOOST_TEST(0U == UseCount(p1));
@@ -173,11 +180,13 @@ BOOST_AUTO_TEST_CASE(SelfAssign)
 BOOST_AUTO_TEST_CASE(SelfAssignBug)
 {
 	GLib::Win::ComPtr<ITest1> p1(GLib::Win::Make<ImplementsITest1>());
+	const auto * raw = Get(p1);
 	p1 = p1;
 
 	BOOST_TEST(p1);
 	BOOST_TEST(p1 == p1);
 	BOOST_TEST(1U == UseCount(p1));
+	BOOST_TEST(Get(p1) == raw);
 }
 
 BOOST_AUTO_TEST_CASE(CallMethod)

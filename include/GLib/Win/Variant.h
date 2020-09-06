@@ -21,7 +21,7 @@ namespace GLib::Win
 
 		inline VARIANT Create(const std::string & value)
 		{
-			auto bstr = ::SysAllocString(Cvt::a2w(value).c_str());
+			auto * bstr = ::SysAllocString(Cvt::a2w(value).c_str());
 			if (bstr == nullptr)
 			{
 				throw std::runtime_error("SysAllocString");
@@ -89,6 +89,7 @@ namespace GLib::Win
 			return Cvt::w2a(Detail::Bstr(tmp));
 		}
 
+		// swapicle
 		Variant & operator=(const Variant & other)
 		{
 			GLib::Win::CheckHr(::VariantCopy(&v, &other.v), "VariantCopy");
@@ -104,8 +105,9 @@ namespace GLib::Win
 
 		bool operator==(const Variant & other) const noexcept
 		{
-			return ::VarCmp(const_cast<VARIANT *>(&v), const_cast<VARIANT *>(&other.v), 0) ==
-						 VARCMP_EQ; // NOLINT(cppcoreguidelines-pro-type-const-cast) no const api
+			auto * v1 = const_cast<VARIANT *>(&v);			 // NOLINT(cppcoreguidelines-pro-type-const-cast) no const VarCmp
+			auto * v2 = const_cast<VARIANT *>(&other.v); // NOLINT(cppcoreguidelines-pro-type-const-cast) no const VarCmp
+			return ::VarCmp(v1, v2, 0) == VARCMP_EQ;
 		}
 
 		bool operator!=(const Variant & other) const noexcept

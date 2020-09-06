@@ -198,7 +198,7 @@ namespace GLib::Win::Symbols
 		Symbol GetSymbolFromIndex(DWORD index) const
 		{
 			std::array<SYMBOL_INFOW, 2 + MAX_SYM_NAME * sizeof(wchar_t) / sizeof(SYMBOL_INFO)> buffer {};
-			auto const symbuf = buffer.data();
+			auto * const symbuf = buffer.data();
 			symbuf->SizeOfStruct = sizeof(SYMBOL_INFOW);
 			symbuf->MaxNameLen = MAX_SYM_NAME;
 
@@ -211,7 +211,7 @@ namespace GLib::Win::Symbols
 		ULONG GetSymbolIdFromAddress(uint64_t address) const
 		{
 			SYMBOL_INFOW buffer {};
-			auto const symbuf = &buffer;
+			auto * const symbuf = &buffer;
 			symbuf->SizeOfStruct = sizeof(SYMBOL_INFOW);
 			DWORD64 displacement = 0;
 			BOOL result = ::SymFromAddrW(Handle(), address, &displacement, symbuf);
@@ -224,7 +224,7 @@ namespace GLib::Win::Symbols
 			std::optional<Symbol> symbol;
 
 			std::array<SYMBOL_INFOW, 2 + MAX_SYM_NAME * sizeof(wchar_t) / sizeof(SYMBOL_INFO)> buffer {};
-			auto const symbuf = buffer.data();
+			auto * const symbuf = buffer.data();
 			symbuf->SizeOfStruct = sizeof(SYMBOL_INFOW);
 			symbuf->MaxNameLen = MAX_SYM_NAME;
 			DWORD64 displacement = 0;
@@ -242,7 +242,7 @@ namespace GLib::Win::Symbols
 			std::optional<Symbol> symbol;
 
 			std::array<SYMBOL_INFOW, 2 + MAX_SYM_NAME * sizeof(wchar_t) / sizeof(SYMBOL_INFOW)> buffer {};
-			auto const symbuf = buffer.data();
+			auto * const symbuf = buffer.data();
 			symbuf->SizeOfStruct = sizeof(SYMBOL_INFOW);
 			symbuf->MaxNameLen = MAX_SYM_NAME;
 			DWORD64 displacement = 0;

@@ -11,7 +11,8 @@ namespace GLib::Detail
 		Function function;
 
 	public:
-		explicit ScopedFunction(Function function) : function(function)
+		explicit ScopedFunction(Function function)
+			: function(function)
 		{}
 
 		ScopedFunction(const ScopedFunction &) = delete;
@@ -32,8 +33,10 @@ namespace GLib::Detail
 	}
 }
 
-#define SCOPE_IMPL(name, line, func) const auto & name##line = GLib::Detail::Scope(func); (void)name##line; // NOLINT(cppcoreguidelines-macro-usage)
-#define SCOPE_JOIN(name, line, func) SCOPE_IMPL(name, line, func) // NOLINT(cppcoreguidelines-macro-usage)
-#define SCOPE(name, func) SCOPE_JOIN(name, __LINE__, func) // NOLINT(cppcoreguidelines-macro-usage)
+#define SCOPE_IMPL(name, line, func) /*NOLINT*/                                                                                            \
+	const auto & name##line = GLib::Detail::Scope(func);                                                                                     \
+	(void) name##line;
+#define SCOPE_JOIN(name, line, func) SCOPE_IMPL(name, line, func) /*NOLINT*/
+#define SCOPE(name, func) SCOPE_JOIN(name, __LINE__, func)				/*NOLINT*/
 
 #endif // SCOPE_H

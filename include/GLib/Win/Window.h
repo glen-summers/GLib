@@ -99,7 +99,7 @@ namespace GLib::Win
 		inline std::string RegisterClass(int icon, int menu, WNDPROC proc)
 		{
 			std::wstring className = Cvt::a2w(ClassInfoStore::Register(icon, menu, proc));
-			auto instance = Instance();
+			auto * instance = Instance();
 
 			WNDCLASSEXW wcex = {};
 			BOOL exists = ::GetClassInfoExW(instance, className.c_str(), &wcex);
@@ -211,7 +211,7 @@ namespace GLib::Win
 		Painter GetPainter() const
 		{
 			PAINTSTRUCT ps {};
-			auto dc = ::BeginPaint(handle.get(), &ps);
+			auto * dc = ::BeginPaint(handle.get(), &ps);
 			return Painter {PaintInfo {ps, handle.get(), dc}};
 		}
 

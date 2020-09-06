@@ -191,15 +191,31 @@
 	</Target>
 
 	<Target Name="Format">
-		<PropertyGroup>
-			<ClangFormat>"$(ProgramFiles)\LLVM\bin\clang-format.exe"</ClangFormat>
-		</PropertyGroup>
 		<ItemGroup>
 			<FileToFormat Include="$(Source)/include/**/*.h"/>
 			<FileToFormat Include="$(Source)/GLib/**/*.cpp"/>
 			<FileToFormat Include="$(Source)/GLib/**/*.h"/>
 		</ItemGroup>
-		<Exec Command="$(ClangFormat) -i %(FileToFormat.Identity)"/>
+
+		<PropertyGroup>
+			<Sig>VC\Tools\Llvm\x64\bin\clang-format.exe</Sig>
+			<Found>$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildBinPath), $(Sig)))</Found>
+			<Binary>$(Found)\$(Sig)</Binary>
+		</PropertyGroup>
+
+		<Error Text="'$(Sig)' not found" Condition="'$(Found)' == ''"/>
+		<Exec Command="$(Binary) -i %(FileToFormat.Identity)"/>
+	</Target>
+
+	<!--merge with above-->
+	<Target Name="FormatFile">
+		<PropertyGroup>
+			<Sig>VC\Tools\Llvm\x64\bin\clang-format.exe</Sig>
+			<Found>$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildBinPath), $(Sig)))</Found>
+			<Binary>$(Found)\$(Sig)</Binary>
+		</PropertyGroup>
+		<Error Text="'$(Sig)' not found" Condition="'$(Found)' == ''"/>
+		<Exec Command="$(Binary) -i $(FileName)"/>
 	</Target>
 
 	<ItemGroup>
@@ -215,6 +231,7 @@
 
 		<TidyIgnoreWarning Include="no-pragma-once-outside-header"/>
 
+		<!-- include everything, then filter out -->
 		<TidyCheck Include="%2A"/>
 		<TidyCheck Include="-modernize-use-nodiscard"/>
 		<TidyCheck Include="-llvm-header-guard"/>
@@ -233,17 +250,24 @@
 		<TidyCheck Include="-fuchsia-default-arguments-calls"/>
 		<TidyCheck Include="-fuchsia-default-arguments-declarations"/>
 		<TidyCheck Include="-modernize-use-trailing-return-type"/>
+
+		<TidyFlags Condition="'$(Fix)'=='true'" Include="-fix"/>
+		<TidyFlags Include="-quiet"/>
 	</ItemGroup>
 
-	<Target Name="Tidy">
+	<!-- split tidy out to seperate file -->
+	<Target Name="FindTidy">
 		<PropertyGroup>
 			<TidySig>VC\Tools\Llvm\x64\bin\clang-tidy.exe</TidySig>
 			<TidyFound>$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildBinPath), $(TidySig)))</TidyFound>
 			<Tidy>$(TidyFound)\$(TidySig)</Tidy>
-			<TidyCmd>-fix -quiet -checks=@(TidyCheck, ',') --header-filter=^.*\\GLib\\.*$ -- -I@(TidyInclude, ' -I') -std=c++17 -D@(TidyDefine, ' -D') -x c++ -W@(TidyIgnoreWarning, ',')</TidyCmd>
+			<TidyCmd>@(TidyFlags, ' ') -checks=@(TidyCheck, ',') --header-filter=^.*\\GLib\\.*$ -- -I@(TidyInclude, ' -I') -std=c++17 -D@(TidyDefine, ' -D') -x c++ -W@(TidyIgnoreWarning, ',')</TidyCmd>
 		</PropertyGroup>
 		<Error Text="Clang Tidy not found" Condition="'$(TidyFound)' == ''"/>
+		<Message Text="TidyCmd = $(TidyCmd)"/>
+	</Target>
 
+	<Target Name="Tidy" DependsOnTargets="FindTidy">
 		<ItemGroup>
 			<FileToCheck Include="$(Source)/include/**/*.h" Exclude="$(Source)/include/GLib/CompatLinux.h"/>
 			<FileToCheck Include="$(Source)/GLib/**/*.h"/>
@@ -258,7 +282,7 @@
 		<Exec Command="$(Tidy) %(Relative.Identity) $(TidyCmd)" WorkingDirectory="$(Source)"/>
 	</Target>
 
-	<Target Name="TidyTests">
+	<Target Name="TidyTests" DependsOnTargets="FindTidy"> <!-- check -->
 		<ItemGroup>
 			<FileToCheck Include="$(Source)/Tests/**/*.h"/>
 			<FileToCheck Include="$(Source)/Tests/**/*.cpp"/>
@@ -269,8 +293,11 @@
 		<Exec Command="$(Tidy) @(Relative, ' ') $(TidyCmd)" WorkingDirectory="$(Source)"/>
 	</Target>
 
-	<Target Name="TidyFile">
-		<Exec Command="$(Tidy) $(FileName) $(TidyCmd)" WorkingDirectory="$(Source)"/>
+	<Target Name="TidyFile" DependsOnTargets="FindTidy">
+		<PropertyGroup>
+			<FileName>$([MSBuild]::MakeRelative($(Source), $(FileName)))</FileName>
+		</PropertyGroup>
+		<Exec Command='$(Tidy) $(FileName) $(TidyCmd)' WorkingDirectory="$(Source)"/>
 	</Target>
 
 	<Target Name="PushReport">

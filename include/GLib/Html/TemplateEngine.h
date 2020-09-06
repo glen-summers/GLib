@@ -21,8 +21,8 @@ namespace GLib::Html
 		static constexpr auto If = std::string_view {"if"};
 		static constexpr auto Text = std::string_view {"text"};
 
-		std::regex const propRegex { R"(\$\{([\w\.]+)\})" };
-		std::regex const varRegex { R"(^(\w+)\s:\s\$\{([\w\.]+)\}$)" };
+		std::regex const propRegex {R"(\$\{([\w\.]+)\})"};
+		std::regex const varRegex {R"(^(\w+)\s:\s\$\{([\w\.]+)\}$)"};
 
 		Eval::Evaluator & evaluator;
 		std::string_view textReplacement;
@@ -48,7 +48,7 @@ namespace GLib::Html
 			Node root;
 			Node * current = &root;
 
-			Xml::Holder holder{xml};
+			Xml::Holder holder {xml};
 			const auto & manager = holder.Manager();
 
 			for (auto it = holder.begin(), end = holder.end(); it != end; ++it)
@@ -89,7 +89,7 @@ namespace GLib::Html
 							}
 							else
 							{
-								current->AddFragment(std::exchange(textReplacement,{}));
+								current->AddFragment(std::exchange(textReplacement, {}));
 							}
 
 							break;
@@ -156,7 +156,7 @@ namespace GLib::Html
 			}
 		}
 
-		Node* AddBlock(const std::string_view & eachValue, const std::string_view & ifValue, Node * node, size_t depth)
+		Node * AddBlock(const std::string_view & eachValue, const std::string_view & ifValue, Node * node, size_t depth)
 		{
 			if (!eachValue.empty())
 			{
@@ -182,8 +182,8 @@ namespace GLib::Html
 			std::string_view each;
 
 			const std::string_view & attr = e.Attributes().Value();
-			Xml::Attributes attributes { attr, nullptr };
-			bool pop{};
+			Xml::Attributes attributes {attr, nullptr};
+			bool pop {};
 
 			// handle duplicate attr names?
 			for (const Xml::Attribute & a : attributes) // NOLINT clang-tidy bug
@@ -251,7 +251,7 @@ namespace GLib::Html
 
 			if (modified)
 			{
-				node->AddFragment(e.OuterXml().data(), attr.data()-1);
+				node->AddFragment(e.OuterXml().data(), attr.data() - 1);
 
 				for (const Xml::Attribute & a : attributes) // NOLINT clang-tidy bug
 				{
@@ -283,7 +283,7 @@ namespace GLib::Html
 			}
 			else
 			{
-				auto p = e.OuterXml().data();
+				const auto * p = e.OuterXml().data();
 				for (const Xml::Attribute & a : attributes) // NOLINT clang-tidy bug
 				{
 					std::string_view prefix;
@@ -292,8 +292,7 @@ namespace GLib::Html
 						if (manager.Get(prefix) == NameSpace)
 						{
 							node->AddFragment(p, a.name.data() - 1); // -1 minus space prefix
-							p = EndOf(a.value);
-							++p; // +1 trailing quote
+							p = EndOf(a.rawValue);
 						}
 					}
 				}
@@ -332,7 +331,7 @@ namespace GLib::Html
 					return;
 				}
 
-				if (result !="true")
+				if (result != "true")
 				{
 					throw std::runtime_error("Expected boolean value, got: " + result);
 				}
@@ -340,8 +339,7 @@ namespace GLib::Html
 
 			if (!node.Enumeration().empty())
 			{
-				evaluator.ForEach(node.Enumeration(), [&](const Eval::ValueBase & value)
-				{
+				evaluator.ForEach(node.Enumeration(), [&](const Eval::ValueBase & value) {
 					evaluator.Push(node.Variable(), value);
 
 					for (const auto & child : node.Children())
@@ -358,8 +356,8 @@ namespace GLib::Html
 			{
 				std::regex r(propRegex);
 				std::cregex_iterator it(node.Value().data(), EndOf(node.Value()), r);
-				auto end = std::cregex_iterator{};
-				if (it==end)
+				auto end = std::cregex_iterator {};
+				if (it == end)
 				{
 					out << node.Value();
 				}

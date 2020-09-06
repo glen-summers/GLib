@@ -63,7 +63,7 @@ namespace GLib::Win
 			auto wideName = Cvt::a2w(name);
 			auto wideValue = Cvt::a2w(value);
 			auto valueSize = static_cast<DWORD>((wideName.size() + 1) * sizeof(wchar_t));
-			auto valueBytes = Detail::ToBytes(wideValue.c_str());
+			const auto * valueBytes = Detail::ToBytes(wideValue.c_str());
 			Util::AssertSuccess(::RegSetValueExW(key, wideName.c_str(), 0, type, valueBytes, valueSize), "RegSetValueEx");
 		}
 

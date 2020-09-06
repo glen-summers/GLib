@@ -139,6 +139,7 @@ namespace GLib::Win
 
 				case RIP_EVENT:
 				{
+					Debug::Stream() << "RIP Event : " << debugEvent.dwDebugEventCode << std::endl;
 					break;
 				}
 
