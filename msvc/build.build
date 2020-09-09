@@ -313,4 +313,8 @@ git commit --no-edit --all --verbose --message init
 		<Exec Command="git push --force --verbose $(ReportsRepo)" WorkingDirectory="$(Out)\HtmlReport" ContinueOnError="false"/>
 	</Target>
 
+	<Target Name="Docker">
+		<Exec Command="docker build -t glib . -f dockerFile" WorkingDirectory="$(Root)"/>
+		<Exec Command="docker run --interactive glib /bin/bash /src/GLib/go.sh"/>
+	</Target>
 </Project>

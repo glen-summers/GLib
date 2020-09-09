@@ -1,0 +1,9 @@
+.git*
+docs
+**/.vs/
+include/GLib/Win/
+msvc/
+out/
+**/x64/
+**/Debug/
+**/Release/
