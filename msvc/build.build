@@ -1,5 +1,6 @@
-<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="14.0">
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="Current">
 	<Import Project="Default.props"/>
+	<Import Project="docker.build"/>
 
 	<PropertyGroup>
 		<Root>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)\..'))</Root>
@@ -145,16 +146,7 @@
 		<Exec Command="$(CMake) --build $(CMakeBuildDir) --config $(CMakeConfiguration) --target install"/>
 	</Target>
 
-	<Target Name="Wsl">
-		<Exec Command="wsl.exe ./go.sh" WorkingDirectory="$(Root)"/>
-	</Target>
-
-	<Target Name="WslCoverage">
-		<Exec Command="wsl.exe ./go.sh coverage" WorkingDirectory="$(Root)"/>
-		<Exec Command="start $(Out)\cmake\build\Debug\TestsCoverage\index.html"/>
-	</Target>
-
-	<Target Name="All" DependsOnTargets="Build;BuildX86;CMake;Wsl"/>
+	<Target Name="All" DependsOnTargets="Build;BuildX86;CMake;Docker"/>
 
 	<UsingTask TaskName="DownloadFile" TaskFactory="CodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll">
 		<ParameterGroup>
@@ -313,8 +305,32 @@ git commit --no-edit --all --verbose --message init
 		<Exec Command="git push --force --verbose $(ReportsRepo)" WorkingDirectory="$(Out)\HtmlReport" ContinueOnError="false"/>
 	</Target>
 
-	<Target Name="Docker">
-		<Exec Command="docker build -t glib . -f dockerFile" WorkingDirectory="$(Root)"/>
+	<!-- sort out dependencies start\stop\run? -->
+	<Target Name="BuildDocker">
+	<!-- keep intermediate as per coverage -->
+		<Exec Command="docker build --target glib --tag glib . --file dockerFile" WorkingDirectory="$(Root)"/>
 		<Exec Command="docker run --interactive glib /bin/bash /src/GLib/go.sh"/>
 	</Target>
+
+	<Target Name="Docker" DependsOnTargets="StartDocker;BuildDocker"/>
+	<Target Name="Stop" DependsOnTargets="StopDocker"/>
+
+	<!-- new -->
+	<Target Name="DockerCoverage" DependsOnTargets="StartDocker">
+		<PropertyGroup>
+			<TargetName>GLibCoverage</TargetName>
+			<ContainerName>GLibCoverageContainer</ContainerName>
+			<ImageName>glib-coverage</ImageName>
+		</PropertyGroup>
+
+		<!-- use ignore exitcode task?-->
+		<Exec Command="docker rm --force $(ContainerName)" IgnoreExitCode="true" ContinueOnError="true"/>
+
+		<Exec Command="docker build --target $(TargetName) --tag $(ImageName) . --file dockerFile" WorkingDirectory="$(Root)"/>
+		<Exec Command="docker container run --interactive --name $(ContainerName) $(ImageName)"/>
+		<Exec Command="docker cp $(ContainerName):/src/GLib/out/cmake/build/Debug/TestsCoverage/ $(out)/DockerCoverage/" WorkingDirectory="$(Root)"/>
+		<Exec Command="start $(Out)\DockerCoverage\index.html"/>
+		<!-- todo copy out raw coverage files and merge with windows coverage-->
+	</Target>
+
 </Project>

@@ -67,7 +67,7 @@ RootDir=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 Configuration=Release
 
 clear
-echo "go $1..."
+echo "${RootDir}/go.sh $1..."
 case "$1" in
 
 	"")

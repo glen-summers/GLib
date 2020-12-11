@@ -3,11 +3,13 @@
 ::[minInclude, maxExclude)
 set vsVersion=[16^^^^,17^^^^)
 set buildFile=%~dp0msvc\build.build
-set requires=Microsoft.Component.MSBuild Microsoft.VisualStudio.Component.VC.Tools.x86.x64 Microsoft.VisualStudio.Component.VC.CMake.Project
+set requires=Microsoft.Component.MSBuild^
+ Microsoft.VisualStudio.Component.VC.Tools.x86.x64^
+ Microsoft.VisualStudio.Component.VC.CMake.Project
 
 set vsWhere="%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe"
 if not exist %vswhere% echo missing vswhere & exit /b 1
-set vsWhereBaseCmd=%vsWhere% -latest -version %vsVersion% -requires %requires% 
+set vsWhereBaseCmd=%vsWhere% -products * -latest -version %vsVersion% -requires %requires% 
 for /f "tokens=* usebackq delims=" %%i in (`%vsWhereBaseCmd% -property installationPath`) do set vsInstallationPath=%%i
 if "%vsInstallationPath%" equ "" echo Visual studio not found & exit /b 1
 echo vsInstallationPath = %vsInstallationPath%

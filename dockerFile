@@ -3,6 +3,7 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install --no-instal
 	build-essential \
 	cmake  \
 	libicu-dev \
+	lcov \
 	git \
 	wget \
 	p7zip-full \
@@ -35,3 +36,7 @@ COPY /Tests $dir/Tests
 COPY /Coverage/CppHtmlGenerator.h $dir/Coverage/CppHtmlGenerator.h
 COPY /Coverage/SymbolNameUtils.h $dir/Coverage/SymbolNameUtils.h
 CMD ["/bin/bash"]
+
+FROM GLib as GLibCoverage
+LABEL description="GLib Coverage Build"
+RUN /src/GLib/go.sh coverage
