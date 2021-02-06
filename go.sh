@@ -1,6 +1,6 @@
 #!/bin/bash
 
-BoostBuilderVer="1.72.0"
+BoostBuilderVer="1.73.0"
 
 error_exit() {
 	echo "$1" 1>&2
@@ -8,18 +8,19 @@ error_exit() {
 }
 
 Perms() {
-	sudo locale-gen en_GB.UTF-8 || error_exit "locale-gen" 
-	sudo update-locale LANG=en_GB.UTF-8 || error_exit "update-locale" 
+	sudo locale-gen en_GB.UTF-8 || error_exit "locale-gen"
+	sudo update-locale LANG=en_GB.UTF-8 || error_exit "update-locale"
 	locale -a
 }
 
 Deps() {
 	Url="https://github.com/glen-summers/BoostModularBuild/archive/v${BoostBuilderVer}.tar.gz"
 
-	mkdir -p "${RootDir}/out/downloads/Deps" || error_exit "mkdir failed" 
-	pushd "${RootDir}/out/downloads/Deps" || error_exit "download failed" 
+	mkdir -p "${RootDir}/out/downloads/Deps" || error_exit "mkdir failed"
+	pushd "${RootDir}/out/downloads/Deps" || error_exit "download failed"
+	ls "${RootDir}/out/downloads/Deps"
 	(wget -c ${Url} -O - | tar -xz) || error_exit "download failed"
-
+	ls "${RootDir}/out/downloads/Deps"
 	. "./BoostModularBuild-${BoostBuilderVer}/go.sh" build test || error_exit "module build failed"
 }
 
@@ -60,7 +61,8 @@ Coverage() {
 		lcov -a "${Name}.Base" -a "${Name}.Info" --output-file "${Name}.Total" || error_exit "lcov total"
 		lcov --remove "${Name}.Total" '/usr/include/*' '*/boost/*' '*/Tests/*' --output-file "${Name}.info.cleaned" || error_exit "lcov remove"
 		genhtml -o "${Name}" "${Name}.info.cleaned" || error_exit "genhtml"
-		echo "html coverage generated at: ${CMakeBuildDir}/TestsCoverage/index.html"
+		echo "html coverage generated at: ${Name}/index.html"
+		ls ${Name}.info.cleaned
 }
 
 RootDir=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )

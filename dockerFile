@@ -10,7 +10,7 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install --no-instal
 	&& rm -rf /var/lib/apt/lists/* \
 	&& mkdir /src
 
-FROM cpp AS cppBoost
+FROM cpp AS cpp-boost
 LABEL description="C++ build with boost-test"
 RUN apt-get update && apt-get install -y ca-certificates \
 	&& cd /src \
@@ -19,7 +19,7 @@ RUN apt-get update && apt-get install -y ca-certificates \
 	&& ./BoostModularBuild/go.sh build test \
 	&& rm -r ./BoostModularBuild
 
-FROM cppBoost as GLib
+FROM cpp-boost as glib
 LABEL description="GLib"
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y locales dos2unix \
 	&& locale-gen en_GB.UTF-8 \
@@ -37,6 +37,6 @@ COPY /Coverage/CppHtmlGenerator.h $dir/Coverage/CppHtmlGenerator.h
 COPY /Coverage/SymbolNameUtils.h $dir/Coverage/SymbolNameUtils.h
 CMD ["/bin/bash"]
 
-FROM GLib as GLibCoverage
+FROM glib as glib-coverage
 LABEL description="GLib Coverage Build"
 RUN /src/GLib/go.sh coverage

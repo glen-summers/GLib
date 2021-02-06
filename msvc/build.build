@@ -9,7 +9,7 @@
 		<SevenZipVer>18.1.0</SevenZipVer>
 		<SevenZipPath>7-Zip.CommandLine.$(SevenZipVer)\tools\x64\7za.exe</SevenZipPath>
 
-		<BoostBuilderVer>1.72.0</BoostBuilderVer>
+		<BoostBuilderVer>1.73.0</BoostBuilderVer>
 		<BoostBuilderUrl>https://github.com/glen-summers/BoostModularBuild/archive/v$(BoostBuilderVer).tar.gz</BoostBuilderUrl>
 		<BoostBuilderName>BoostModularBuild-$(BoostBuilderVer)</BoostBuilderName>
 	</PropertyGroup>
@@ -318,7 +318,7 @@ git commit --no-edit --all --verbose --message init
 	<!-- new -->
 	<Target Name="DockerCoverage" DependsOnTargets="StartDocker">
 		<PropertyGroup>
-			<TargetName>GLibCoverage</TargetName>
+			<TargetName>glib-coverage</TargetName>
 			<ContainerName>GLibCoverageContainer</ContainerName>
 			<ImageName>glib-coverage</ImageName>
 		</PropertyGroup>
@@ -329,6 +329,8 @@ git commit --no-edit --all --verbose --message init
 		<Exec Command="docker build --target $(TargetName) --tag $(ImageName) . --file dockerFile" WorkingDirectory="$(Root)"/>
 		<Exec Command="docker container run --interactive --name $(ContainerName) $(ImageName)"/>
 		<Exec Command="docker cp $(ContainerName):/src/GLib/out/cmake/build/Debug/TestsCoverage/ $(out)/DockerCoverage/" WorkingDirectory="$(Root)"/>
+		<Exec Command="docker cp $(ContainerName):/src/GLib/out/cmake/build/Debug/TestsCoverage.info.cleaned $(out)" WorkingDirectory="$(Root)"/>
+
 		<Exec Command="start $(Out)\DockerCoverage\index.html"/>
 		<!-- todo copy out raw coverage files and merge with windows coverage-->
 	</Target>
