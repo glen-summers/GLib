@@ -33,7 +33,6 @@ COPY /cmake $dir/cmake
 COPY /GLib $dir/GLib
 COPY /include $dir/include
 COPY /Tests $dir/Tests
-COPY /Coverage/CppHtmlGenerator.h $dir/Coverage/CppHtmlGenerator.h
 COPY /Coverage/SymbolNameUtils.h $dir/Coverage/SymbolNameUtils.h
 CMD ["/bin/bash"]
 

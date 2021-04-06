@@ -1,11 +1,11 @@
 #include <boost/test/unit_test.hpp>
 
-#include "../Coverage/CppHtmlGenerator.h"
 #include "../Coverage/SymbolNameUtils.h"
 
 #include "TestUtils.h"
 
 #include "GLib/compat.h"
+#include "GLib/Cpp/HtmlGenerator.h"
 
 #include <fstream>
 

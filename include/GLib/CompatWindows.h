@@ -1,6 +1,8 @@
 #pragma once
 
-#include "Win/Process.h"
+#include <GLib/cvt.h>
+#include <GLib/stackorheap.h>
+#include <GLib/Win/FileSystem.h>
 
 #include <array>
 #include <ctime>
@@ -85,12 +87,12 @@ namespace GLib::Compat
 
 	inline int64_t ProcessId()
 	{
-		return Win::Process::CurrentId();
+		return ::GetCurrentProcessId();
 	}
 
 	inline std::string ProcessPath()
 	{
-		return Win::Process::CurrentPath();
+		return GLib::Win::FileSystem::PathOfModule(nullptr);
 	}
 
 	inline std::string ProcessName()

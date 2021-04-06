@@ -58,4 +58,12 @@
 		</ServiceStatus>
 		<Exec Condition="$(StartType)!='Manual'" Command="$(Elevate) 'config $(DockerServiceName) start= demand'"/>
 	</Target>
+
+	<Target Name="Purge">
+		<Exec Command="docker ps --quiet"/>
+		<Exec Command="docker system prune --all --force"/>
+		<Exec Command="docker images -f dangling=true"/>
+		<Exec Command="docker image ls --all"/>
+		<Exec Command="docker ps --all"/>
+	</Target>
 </Project>

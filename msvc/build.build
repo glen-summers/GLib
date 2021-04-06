@@ -243,6 +243,11 @@
 		<TidyCheck Include="-fuchsia-default-arguments-declarations"/>
 		<TidyCheck Include="-modernize-use-trailing-return-type"/>
 
+		<!--new new-->
+		<TidyCheck Include="-llvmlibc-callee-namespace"/>
+		<TidyCheck Include="-llvmlibc-restrict-system-libc-headers"/>
+		<TidyCheck Include="-llvmlibc-implementation-in-namespace"/>
+
 		<TidyFlags Condition="'$(Fix)'=='true'" Include="-fix"/>
 		<TidyFlags Include="-quiet"/>
 	</ItemGroup>
@@ -271,7 +276,7 @@
 		</ItemGroup>
 
 		<!-- run one file at a time to avoid duplicate fixes applied to headers -->
-		<Exec Command="$(Tidy) %(Relative.Identity) $(TidyCmd)" WorkingDirectory="$(Source)"/>
+		<Exec Command='"$(Tidy)" %(Relative.Identity) $(TidyCmd)' WorkingDirectory="$(Source)"/>
 	</Target>
 
 	<Target Name="TidyTests" DependsOnTargets="FindTidy"> <!-- check -->

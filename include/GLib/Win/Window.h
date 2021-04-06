@@ -2,6 +2,7 @@
 
 #include <windowsx.h>
 
+#include <GLib/checked_cast.h>
 #include <GLib/Win/ErrorCheck.h>
 #include <GLib/Win/Painter.h>
 

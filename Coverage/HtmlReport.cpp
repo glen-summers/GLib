@@ -5,7 +5,6 @@
 #include "FunctionVisitor.h"
 #include "Line.h"
 
-#include "CppHtmlGenerator.h"
 #include "FileCoverageData.h"
 #include "HtmlReport.h"
 #include "RootDirs.h"
@@ -13,6 +12,7 @@
 #include "resource.h"
 
 #include <GLib/ConsecutiveFind.h>
+#include <GLib/Cpp/HtmlGenerator.h>
 #include <GLib/Html/TemplateEngine.h>
 #include <GLib/Win/Resources.h>
 #include <GLib/Xml/Printer.h>
