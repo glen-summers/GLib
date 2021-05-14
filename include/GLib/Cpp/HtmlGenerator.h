@@ -11,7 +11,12 @@
 
 enum class Style : char
 {
-	WhiteSpace = 'w', Comment='c', String='s', Directive='d', Keyword = 'k', Type = 't'
+	WhiteSpace = 'w',
+	Comment = 'c',
+	String = 's',
+	Directive = 'd',
+	Keyword = 'k',
+	Type = 't'
 };
 
 // dumb version, search for contiguous chunks
@@ -26,7 +31,7 @@ inline void VisibleWhitespace(std::string_view value, std::ostream & s)
 			break;
 		}
 
-		std::string_view replacement = value[find]==' ' ? "\xC2\xB7" : " \xE2\x86\x92 ";
+		std::string_view replacement = value[find] == ' ' ? "\xC2\xB7" : " \xE2\x86\x92 ";
 		s << value.substr(startPos, find - startPos) << replacement;
 		startPos = find + 1;
 	}
@@ -34,7 +39,7 @@ inline void VisibleWhitespace(std::string_view value, std::ostream & s)
 
 inline void OpenSpan(Style cls, std::ostream & s)
 {
-	s <<"<span class=\"" << static_cast<char>(cls) << "\">";
+	s << "<span class=\"" << static_cast<char>(cls) << "\">";
 }
 
 inline void CloseSpan(std::ostream & s)
@@ -51,6 +56,7 @@ inline void Span(Style cls, const std::string_view & value, std::ostream & s)
 
 inline bool IsKeyword(const std::string_view & value)
 {
+	// clang-format off
 	static const std::unordered_set<std::string_view> keywords
 	{
 		"alignas","alignof","and","and_eq","asm","atomic_cancel","atomic_commit","atomic_noexcept","auto",
@@ -64,11 +70,13 @@ inline bool IsKeyword(const std::string_view & value)
 		"typename","union","unsigned","using","virtual","void","volatile","wchar_t","while","xor","xor_eq",
 		"override","final"
 	};
+	// clang-format on
 	return keywords.find(value) != keywords.end();
 }
 
 inline bool IsCommonType(const std::string_view & value)
 {
+	// clang-format off
 	static const std::unordered_set<std::string_view> types
 	{
 		"array", "bitset", "deque", "initializer_list", "istringstream", "list", "map", "multimap", "multiset",
@@ -76,11 +84,13 @@ inline bool IsCommonType(const std::string_view & value)
 		"stack", "stringstream", "unique_ptr", "unordered_map", "unordered_multimap", "unordered_multiset",
 		"unordered_set", "vector"
 	};
+	// clang-format on
 	return types.find(value) != types.end();
 }
 
 inline void Htmlify(const GLib::Cpp::Holder & code, std::ostream & out)
 {
+	// clang-format off
 	static std::unordered_map<GLib::Cpp::State, Style> styles =
 	{
 		{ GLib::Cpp::State::WhiteSpace, Style::WhiteSpace},
@@ -91,6 +101,7 @@ inline void Htmlify(const GLib::Cpp::Holder & code, std::ostream & out)
 		{ GLib::Cpp::State::CharacterLiteral, Style::String},
 		{ GLib::Cpp::State::Directive, Style::Directive},
 	};
+	// clang-format on
 
 	auto alphaNumUnd = [](unsigned char c) { return std::isalnum(c) != 0 || c == '_'; };
 	auto whitespace = [](unsigned char c) { return std::isspace(c) != 0; };
@@ -99,7 +110,8 @@ inline void Htmlify(const GLib::Cpp::Holder & code, std::ostream & out)
 	{
 		if (f.first == GLib::Cpp::State::Code)
 		{
-			GLib::Util::Split(f.second, alphaNumUnd,
+			GLib::Util::Split(
+				f.second, alphaNumUnd,
 				[&](const std::string_view & value)
 				{
 					if (IsKeyword(value))
@@ -115,10 +127,7 @@ inline void Htmlify(const GLib::Cpp::Holder & code, std::ostream & out)
 						GLib::Xml::Utils::Escape(value, out);
 					}
 				},
-				[&](const std::string_view & value)
-				{
-					GLib::Xml::Utils::Escape(value, out);
-				});
+				[&](const std::string_view & value) { GLib::Xml::Utils::Escape(value, out); });
 
 			continue;
 		}
@@ -147,15 +156,9 @@ inline void Htmlify(const GLib::Cpp::Holder & code, std::ostream & out)
 					}
 					else
 					{
-						GLib::Util::Split(value, whitespace,
-							[&](std::string_view v)
-							{
-								VisibleWhitespace(v, out);
-							},
-							[&](std::string_view v)
-							{
-								GLib::Xml::Utils::Escape(v, out);
-							});
+						GLib::Util::Split(
+							value, whitespace, [&](std::string_view v) { VisibleWhitespace(v, out); },
+							[&](std::string_view v) { GLib::Xml::Utils::Escape(v, out); });
 					}
 
 					CloseSpan(out);

@@ -32,7 +32,7 @@ namespace GLib::Win
 			return &rawValue;
 		}
 
-		operator void * *()
+		operator void **()
 		{
 			return reinterpret_cast<void **>(&rawValue); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast) for IUnknown factory methods
 		}

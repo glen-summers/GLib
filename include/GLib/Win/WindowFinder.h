@@ -45,7 +45,8 @@ namespace GLib::Win
 			auto wideWindowText = Cvt::a2w(windowText);
 
 			HWND ret {};
-			WindowEnumerator func = [&](HWND wnd) noexcept -> bool {
+			WindowEnumerator func = [&](HWND wnd) noexcept -> bool
+			{
 				DWORD windowPid = 0;
 				::GetWindowThreadProcessId(wnd, &windowPid);
 

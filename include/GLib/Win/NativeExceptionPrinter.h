@@ -49,40 +49,44 @@ namespace GLib::Win::Symbols
 
 		inline bool GetCPlusPlusExceptionName(const Span<ULONG_PTR> & ei, std::string & name)
 		{
-			return NativeTryCatch([&]() {
-				const Vbase & q = *Munge<Vbase *>(ei[1]);
-				const type_info & t = typeid(q);
-				name = t.name();
-				return true;
-			});
+			return NativeTryCatch(
+				[&]()
+				{
+					const Vbase & q = *Munge<Vbase *>(ei[1]);
+					const type_info & t = typeid(q);
+					name = t.name();
+					return true;
+				});
 		}
 
 		inline bool GetCPlusPlusExceptionNameEx(const Span<ULONG_PTR> & ei, std::string & name)
 		{
-			return NativeTryCatch([&]() {
-				constexpr auto instanceOffset64 = 3;
-				constexpr auto throwInfoIndex = 2;
-				constexpr auto catchableOffsetIndex = 3;
-				constexpr auto catchablesOffsetIndex = 1;
-				constexpr auto typeInfoOffsetIndex = 1;
+			return NativeTryCatch(
+				[&]()
+				{
+					constexpr auto instanceOffset64 = 3;
+					constexpr auto throwInfoIndex = 2;
+					constexpr auto catchableOffsetIndex = 3;
+					constexpr auto catchablesOffsetIndex = 1;
+					constexpr auto typeInfoOffsetIndex = 1;
 
 #if defined(_M_IX86)
-				ULONG_PTR hinstance = 0;
+					ULONG_PTR hinstance = 0;
 #elif defined(_M_X64)
-				ULONG_PTR hinstance = ei[instanceOffset64];
+					ULONG_PTR hinstance = ei[instanceOffset64];
 #elif
 #error unexpected target
 #endif
 
-				const auto throwInfo = GLib::MakeSpan<DWORD>(Munge<const DWORD *>(ei[throwInfoIndex]), catchableOffsetIndex + 1);
-				const DWORD catchableOffset = throwInfo[catchableOffsetIndex];
-				const auto catchables = GLib::MakeSpan<DWORD>(Munge<const DWORD *>(hinstance + catchableOffset), catchablesOffsetIndex + 1);
-				const DWORD catchablesOffset = catchables[catchablesOffsetIndex];
-				const auto catchablesTypes = GLib::MakeSpan<DWORD>(Munge<const DWORD *>(hinstance + catchablesOffset), typeInfoOffsetIndex + 1);
-				const DWORD typeInfoOffset = catchablesTypes[typeInfoOffsetIndex];
-				name = Munge<const type_info *>(hinstance + typeInfoOffset)->name();
-				return true;
-			});
+					const auto throwInfo = GLib::MakeSpan<DWORD>(Munge<const DWORD *>(ei[throwInfoIndex]), catchableOffsetIndex + 1);
+					const DWORD catchableOffset = throwInfo[catchableOffsetIndex];
+					const auto catchables = GLib::MakeSpan<DWORD>(Munge<const DWORD *>(hinstance + catchableOffset), catchablesOffsetIndex + 1);
+					const DWORD catchablesOffset = catchables[catchablesOffsetIndex];
+					const auto catchablesTypes = GLib::MakeSpan<DWORD>(Munge<const DWORD *>(hinstance + catchablesOffset), typeInfoOffsetIndex + 1);
+					const DWORD typeInfoOffset = catchablesTypes[typeInfoOffsetIndex];
+					name = Munge<const type_info *>(hinstance + typeInfoOffset)->name();
+					return true;
+				});
 		}
 
 		inline void UnDecorate(std::string & symbolName)

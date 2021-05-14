@@ -192,11 +192,10 @@
 		<PropertyGroup>
 			<Sig>VC\Tools\Llvm\x64\bin\clang-format.exe</Sig>
 			<Found>$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildBinPath), $(Sig)))</Found>
-			<Binary>$(Found)\$(Sig)</Binary>
 		</PropertyGroup>
 
 		<Error Text="'$(Sig)' not found" Condition="'$(Found)' == ''"/>
-		<Exec Command="$(Binary) -i %(FileToFormat.Identity)"/>
+		<Exec Command='"$(Found)\$(Sig)" -i "%(FileToFormat.Identity)"'/>
 	</Target>
 
 	<!--merge with above-->
@@ -204,10 +203,9 @@
 		<PropertyGroup>
 			<Sig>VC\Tools\Llvm\x64\bin\clang-format.exe</Sig>
 			<Found>$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildBinPath), $(Sig)))</Found>
-			<Binary>$(Found)\$(Sig)</Binary>
 		</PropertyGroup>
 		<Error Text="'$(Sig)' not found" Condition="'$(Found)' == ''"/>
-		<Exec Command="$(Binary) -i $(FileName)"/>
+		<Exec Command='"$(Found)\$(Sig)" -i "$(FileName)"'/>
 	</Target>
 
 	<ItemGroup>

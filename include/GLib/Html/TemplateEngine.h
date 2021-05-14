@@ -339,16 +339,18 @@ namespace GLib::Html
 
 			if (!node.Enumeration().empty())
 			{
-				evaluator.ForEach(node.Enumeration(), [&](const Eval::ValueBase & value) {
-					evaluator.Push(node.Variable(), value);
+				evaluator.ForEach(node.Enumeration(),
+													[&](const Eval::ValueBase & value)
+													{
+														evaluator.Push(node.Variable(), value);
 
-					for (const auto & child : node.Children())
-					{
-						Generate(child, out);
-					}
+														for (const auto & child : node.Children())
+														{
+															Generate(child, out);
+														}
 
-					evaluator.Pop(node.Variable());
-				});
+														evaluator.Pop(node.Variable());
+													});
 				return;
 			}
 

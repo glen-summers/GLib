@@ -119,10 +119,12 @@ namespace GLib::Eval
 		{
 			if (it != end)
 			{
-				value.VisitProperty(*it, [&](const ValueBase & subValue) {
-					++it;
-					SubEvaluate(subValue, it, end, visitor);
-				});
+				value.VisitProperty(*it,
+														[&](const ValueBase & subValue)
+														{
+															++it;
+															SubEvaluate(subValue, it, end, visitor);
+														});
 			}
 			else
 			{

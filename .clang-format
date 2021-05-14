@@ -33,6 +33,7 @@ BraceWrapping:
   AfterCaseLabel:  true
   BeforeCatch:     true
   BeforeElse:      true
+  BeforeLambdaBody: true
   IndentBraces:    false
   SplitEmptyFunction: false
   SplitEmptyRecord: false

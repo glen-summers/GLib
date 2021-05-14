@@ -27,10 +27,12 @@ namespace GLib::Win
 			{
 				BSTR description = nullptr;
 				pErrorInfo->GetDescription(&description);
-				SCOPE(_, [=]() noexcept {
-					::SysFreeString(description);
-					pErrorInfo->Release();
-				});
+				SCOPE(_,
+							[=]() noexcept
+							{
+								::SysFreeString(description);
+								pErrorInfo->Release();
+							});
 				hasMessage = description != nullptr;
 				if (hasMessage)
 				{
