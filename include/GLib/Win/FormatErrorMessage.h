@@ -13,8 +13,7 @@ namespace GLib::Win::Util
 	{
 		inline DWORD FormatMessageCast(DWORD dwFlags, LPCVOID lpSource, DWORD dwMessageId, LPWSTR * lpBuffer)
 		{
-			return ::FormatMessageW(dwFlags, lpSource, dwMessageId,
-															MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),			 // NOLINT(hicpp-signed-bitwise) baad macro
+			return ::FormatMessageW(dwFlags, lpSource, dwMessageId, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // NOLINT(hicpp-signed-bitwise) baad macro
 															reinterpret_cast<LPWSTR>(lpBuffer), 0, nullptr); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
 		}
 	}

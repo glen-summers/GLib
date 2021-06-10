@@ -151,8 +151,8 @@ namespace GLib::Win::Symbols
 		{
 			for (unsigned int frames = 0; frames < maxFrames; ++frames)
 			{
-				if (::StackWalk64(machineType, process.Handle(), ::GetCurrentThread(), frame, context, nullptr, SymFunctionTableAccess64,
-													SymGetModuleBase64, nullptr) == FALSE)
+				if (::StackWalk64(machineType, process.Handle(), ::GetCurrentThread(), frame, context, nullptr, SymFunctionTableAccess64, SymGetModuleBase64,
+													nullptr) == FALSE)
 				{
 					s << "StackWalk64: " << ::GetLastError() << '\n';
 					break;

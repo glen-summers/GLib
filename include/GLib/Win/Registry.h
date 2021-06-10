@@ -195,8 +195,8 @@ namespace GLib::Win
 		SubKey CreateSubKey(const std::string_view & path) const
 		{
 			HKEY subKey;
-			LSTATUS result = ::RegCreateKeyExW(key.get(), Cvt::a2w(path).c_str(), 0, nullptr, REG_OPTION_NON_VOLATILE, Detail::AllAccess, nullptr,
-																				 &subKey, nullptr);
+			LSTATUS result =
+				::RegCreateKeyExW(key.get(), Cvt::a2w(path).c_str(), 0, nullptr, REG_OPTION_NON_VOLATILE, Detail::AllAccess, nullptr, &subKey, nullptr);
 			Util::AssertSuccess(result, "RegCreateKeyEx");
 			return {Detail::KeyHolder {subKey}};
 		}

@@ -50,9 +50,8 @@ namespace GLib::Win::Aut
 	public:
 		UIAut()
 		{
-			CheckHr(
-				::CoCreateInstance(__uuidof(CUIAutomation), nullptr, ComPtrDetail::ContextAll, __uuidof(IUIAutomation), GetAddress(automation)),
-				"CoCreateInstance");
+			CheckHr(::CoCreateInstance(__uuidof(CUIAutomation), nullptr, ComPtrDetail::ContextAll, __uuidof(IUIAutomation), GetAddress(automation)),
+							"CoCreateInstance");
 		}
 
 		UIElement ElementFromHandle(HWND hWnd) const

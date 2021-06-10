@@ -79,8 +79,7 @@ namespace GLib::Win
 		{}
 
 		// creation flags  DETACHED_PROCESS?
-		Process(const std::string & app, const std::string & cmd = {}, DWORD creationFlags = {}, WORD show = {},
-						const std::string & desktop = {})
+		Process(const std::string & app, const std::string & cmd = {}, DWORD creationFlags = {}, WORD show = {}, const std::string & desktop = {})
 			: Process(Create(app, cmd, creationFlags, show, desktop))
 		{}
 
@@ -167,8 +166,7 @@ namespace GLib::Win
 			return Create(Cvt::a2w(app), Cvt::a2w(app + " " + cmd), creationFlags, show, Cvt::a2w(desktop));
 		}
 
-		static Win::Handle Create(const std::wstring & app, const std::wstring & cmd, DWORD creationFlags, WORD show,
-															const std::wstring & desktop)
+		static Win::Handle Create(const std::wstring & app, const std::wstring & cmd, DWORD creationFlags, WORD show, const std::wstring & desktop)
 		{
 			STARTUPINFOW sui = {};
 			sui.cb = sizeof(STARTUPINFOW);

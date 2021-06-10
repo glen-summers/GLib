@@ -1,8 +1,8 @@
 #pragma once
 
+#include <GLib/Win/FileSystem.h>
 #include <GLib/cvt.h>
 #include <GLib/stackorheap.h>
-#include <GLib/Win/FileSystem.h>
 
 #include <array>
 #include <ctime>
@@ -31,9 +31,8 @@ namespace GLib::Compat
 		{
 			constexpr auto ErrorBufferSize = 256;
 			std::array<char, ErrorBufferSize> err {};
-			char * msg = nullptr;
-			strerror_s(msg = err.data(), err.size(), error);
-			throw std::runtime_error(std::string(prefix) + " : " + msg);
+			strerror_s(err.data(), err.size(), error);
+			throw std::runtime_error(std::string(prefix) + " : " + err.data());
 		}
 	}
 

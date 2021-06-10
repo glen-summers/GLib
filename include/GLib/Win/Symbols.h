@@ -30,9 +30,8 @@ namespace GLib::Win::Symbols
 		inline Handle Duplicate(HANDLE handle)
 		{
 			HANDLE duplicatedHandle = nullptr;
-			Util::AssertTrue(
-				::DuplicateHandle(::GetCurrentProcess(), handle, ::GetCurrentProcess(), &duplicatedHandle, 0, FALSE, DUPLICATE_SAME_ACCESS),
-				"DuplicateHandle");
+			Util::AssertTrue(::DuplicateHandle(::GetCurrentProcess(), handle, ::GetCurrentProcess(), &duplicatedHandle, 0, FALSE, DUPLICATE_SAME_ACCESS),
+											 "DuplicateHandle");
 			return Handle {duplicatedHandle};
 		}
 
@@ -304,9 +303,8 @@ namespace GLib::Win::Symbols
 			}
 
 			Local<WCHAR> name;
-			Util::AssertTrue(
-				::SymGetTypeInfo(Handle(), baseOfImage, indexOfClassParent, TI_GET_SYMNAME, static_cast<void **>(GetAddress<WCHAR>(name))),
-				"SymGetTypeInfo");
+			Util::AssertTrue(::SymGetTypeInfo(Handle(), baseOfImage, indexOfClassParent, TI_GET_SYMNAME, static_cast<void **>(GetAddress<WCHAR>(name))),
+											 "SymGetTypeInfo");
 
 			result.Index(indexOfClassParent);
 			result.TypeIndex(typeIndexOfClassParent);

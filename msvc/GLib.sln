@@ -9,10 +9,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SolutionItems", "SolutionIt
 	ProjectSection(SolutionItems) = preProject
 		..\.clang-format = ..\.clang-format
 		..\.editorconfig = ..\.editorconfig
-		build.build = build.build
-		Default.props = Default.props
-		..\go.cmd = ..\go.cmd
-		..\go.sh = ..\go.sh
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GLib", "..\GLib\GLib.vcxproj", "{AE9CCD38-5A24-4794-AC41-BA9BB82F8B13}"
@@ -20,6 +16,19 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Coverage", "..\Coverage\Coverage.vcxproj", "{2D35D71B-4E6F-4627-BAAB-D5863E3052CD}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TestApp", "..\TestApp\TestApp.vcxproj", "{2BE55510-E3E4-4BA0-BED3-1EAB3CE81A5C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{460AF721-72CA-4B41-96F5-5072AC36A51E}"
+	ProjectSection(SolutionItems) = preProject
+		build.build = build.build
+		Default.props = Default.props
+		docker.build = docker.build
+		format.build = format.build
+		..\go.cmd = ..\go.cmd
+		..\go.sh = ..\go.sh
+		process.tasks = process.tasks
+		tidy.build = tidy.build
+		versions.build = versions.build
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -64,6 +73,9 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{460AF721-72CA-4B41-96F5-5072AC36A51E} = {E4242C09-3560-4051-A84A-5D38CA1712AA}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {F018344D-BD74-45EA-8360-D06266D9F6E4}

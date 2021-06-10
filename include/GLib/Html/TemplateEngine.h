@@ -307,7 +307,7 @@ namespace GLib::Html
 			return text;
 		}
 
-		void Generate(const Node & node, std::ostream & out)
+		void Generate(const Node & node, std::ostream & out) // NOLINT(misc-no-recursion)
 		{
 			// todo eval during parse, store bool or property to evaluate
 			const std::string_view & condition = node.Condition();

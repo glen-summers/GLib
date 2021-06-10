@@ -114,8 +114,7 @@ namespace GLib::Util
 	using SplitterView = Detail::Splitter<std::string_view>;
 
 	template <typename StringType, typename OutputIterator>
-	void Split(const StringType & value, OutputIterator it,
-						 const StringType & delimiter = Detail::DefaultDelimiter<typename StringType::value_type>())
+	void Split(const StringType & value, OutputIterator it, const StringType & delimiter = Detail::DefaultDelimiter<typename StringType::value_type>())
 	{
 		Detail::Splitter<StringType> splitter {value, delimiter};
 		std::copy(splitter.begin(), splitter.end(), it);

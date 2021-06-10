@@ -1,0 +1,28 @@
+<Project DefaultTargets="Format" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="Current">
+	<PropertyGroup>
+		<Sig>VC\Tools\Llvm\x64\bin\clang-format.exe</Sig>
+		<Found>$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildBinPath), $(Sig)))</Found>
+		<Binary>$(Found)\$(Sig)</Binary>
+	</PropertyGroup>
+
+	<Target Name="Format">
+		<ItemGroup>
+			<FileToFormat Include="$(Source)/include/**/*.h"/>
+			<FileToFormat Include="$(Source)/GLib/**/*.cpp"/>
+			<FileToFormat Include="$(Source)/GLib/**/*.h"/>
+		</ItemGroup>
+
+		<Error Text="'$(Sig)' not found" Condition="'$(Found)' == ''"/>
+		<Exec Command='"$(Binary)" -i %(FileToFormat.Identity)'/>
+	</Target>
+
+	<!--merge with above, todo add vc external tool to run-->
+	<Target Name="FormatFile">
+		<PropertyGroup>
+			<Sig>VC\Tools\Llvm\x64\bin\clang-format.exe</Sig>
+			<Found>$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildBinPath), $(Sig)))</Found>
+		</PropertyGroup>
+		<Error Text="'$(Sig)' not found" Condition="'$(Found)' == ''"/>
+		<Exec Command='"$(Found)\$(Sig)" -i "$(FileName)"'/>
+	</Target>
+</Project>

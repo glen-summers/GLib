@@ -62,8 +62,8 @@ namespace GLib::Win
 				return;
 			}
 
-			Debug::Write("Msg: {0,-6} {1,-24} : {2,-20} {3,-20} Hw:{4} : W:{5} L:{6} -> {7}", message, msgName, sourceName, className, hWnd,
-									 wParam, lParam, lresult);
+			Debug::Write("Msg: {0,-6} {1,-24} : {2,-20} {3,-20} Hw:{4} : W:{5} L:{6} -> {7}", message, msgName, sourceName, className, hWnd, wParam, lParam,
+									 lresult);
 		}
 
 	private:

@@ -182,119 +182,6 @@
 		<Exec Command="start $(Out)\HtmlReport\index.html"/>
 	</Target>
 
-	<Target Name="Format">
-		<ItemGroup>
-			<FileToFormat Include="$(Source)/include/**/*.h"/>
-			<FileToFormat Include="$(Source)/GLib/**/*.cpp"/>
-			<FileToFormat Include="$(Source)/GLib/**/*.h"/>
-		</ItemGroup>
-
-		<PropertyGroup>
-			<Sig>VC\Tools\Llvm\x64\bin\clang-format.exe</Sig>
-			<Found>$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildBinPath), $(Sig)))</Found>
-		</PropertyGroup>
-
-		<Error Text="'$(Sig)' not found" Condition="'$(Found)' == ''"/>
-		<Exec Command='"$(Found)\$(Sig)" -i "%(FileToFormat.Identity)"'/>
-	</Target>
-
-	<!--merge with above-->
-	<Target Name="FormatFile">
-		<PropertyGroup>
-			<Sig>VC\Tools\Llvm\x64\bin\clang-format.exe</Sig>
-			<Found>$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildBinPath), $(Sig)))</Found>
-		</PropertyGroup>
-		<Error Text="'$(Sig)' not found" Condition="'$(Found)' == ''"/>
-		<Exec Command='"$(Found)\$(Sig)" -i "$(FileName)"'/>
-	</Target>
-
-	<ItemGroup>
-		<TidyDefine Include="NDEBUG"/>
-		<TidyDefine Include="_UNICODE"/>
-		<TidyDefine Include="UNICODE"/>
-		<TidyDefine Include="NOMINMAX"/>
-		<TidyDefine Include="WIN32_LEAN_AND_MEAN"/>
-		<TidyDefine Include="_WIN64"/>
-
-		<TidyInclude Include="$(Source)\include"/>
-		<TidyInclude Include="$(Boost)"/>
-
-		<TidyIgnoreWarning Include="no-pragma-once-outside-header"/>
-
-		<!-- include everything, then filter out -->
-		<TidyCheck Include="%2A"/>
-		<TidyCheck Include="-modernize-use-nodiscard"/>
-		<TidyCheck Include="-llvm-header-guard"/>
-		<TidyCheck Include="-llvm-namespace-comment"/>
-		<TidyCheck Include="-clang-diagnostic-deprecated-declarations"/>
-		<TidyCheck Include="-fuchsia-overloaded-operator"/>
-		<TidyCheck Include="-fuchsia-default-arguments"/>
-		<TidyCheck Include="-google-runtime-int"/>
-		<TidyCheck Include="-google-runtime-references"/>
-		<TidyCheck Include="-google-readability-namespace-comments"/>
-		<TidyCheck Include="-google-readability-todo"/>
-		<TidyCheck Include="-google-explicit-constructor"/>
-		<TidyCheck Include="-hicpp-explicit-conversions"/>
-
-		<!--new ignores todo fix-->
-		<TidyCheck Include="-fuchsia-default-arguments-calls"/>
-		<TidyCheck Include="-fuchsia-default-arguments-declarations"/>
-		<TidyCheck Include="-modernize-use-trailing-return-type"/>
-
-		<!--new new-->
-		<TidyCheck Include="-llvmlibc-callee-namespace"/>
-		<TidyCheck Include="-llvmlibc-restrict-system-libc-headers"/>
-		<TidyCheck Include="-llvmlibc-implementation-in-namespace"/>
-
-		<TidyFlags Condition="'$(Fix)'=='true'" Include="-fix"/>
-		<TidyFlags Include="-quiet"/>
-	</ItemGroup>
-
-	<!-- split tidy out to seperate file -->
-	<Target Name="FindTidy">
-		<PropertyGroup>
-			<TidySig>VC\Tools\Llvm\x64\bin\clang-tidy.exe</TidySig>
-			<TidyFound>$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildBinPath), $(TidySig)))</TidyFound>
-			<Tidy>$(TidyFound)\$(TidySig)</Tidy>
-			<TidyCmd>@(TidyFlags, ' ') -checks=@(TidyCheck, ',') --header-filter=^.*\\GLib\\.*$ -- -I@(TidyInclude, ' -I') -std=c++17 -D@(TidyDefine, ' -D') -x c++ -W@(TidyIgnoreWarning, ',')</TidyCmd>
-		</PropertyGroup>
-		<Error Text="Clang Tidy not found" Condition="'$(TidyFound)' == ''"/>
-		<Message Text="TidyCmd = $(TidyCmd)"/>
-	</Target>
-
-	<Target Name="Tidy" DependsOnTargets="FindTidy">
-		<ItemGroup>
-			<FileToCheck Include="$(Source)/include/**/*.h" Exclude="$(Source)/include/GLib/CompatLinux.h"/>
-			<FileToCheck Include="$(Source)/GLib/**/*.h"/>
-			<FileToCheck Include="$(Source)/GLib/**/*.cpp"/>
-			<FileToCheck Include="$(Source)/Coverage/**/*.cpp"/>
-			<FileToCheck Include="$(Source)/Coverage/**/*.h" Exclude="$(Source)/Coverage/resource.h"/>
-
-			<Relative Include="$([MSBuild]::MakeRelative($(Source), %(FileToCheck.FullPath)))"/>
-		</ItemGroup>
-
-		<!-- run one file at a time to avoid duplicate fixes applied to headers -->
-		<Exec Command='"$(Tidy)" %(Relative.Identity) $(TidyCmd)' WorkingDirectory="$(Source)"/>
-	</Target>
-
-	<Target Name="TidyTests" DependsOnTargets="FindTidy"> <!-- check -->
-		<ItemGroup>
-			<FileToCheck Include="$(Source)/Tests/**/*.h"/>
-			<FileToCheck Include="$(Source)/Tests/**/*.cpp"/>
-			<Relative Include="$([MSBuild]::MakeRelative($(Source), %(FileToCheck.FullPath)))"/>
-		</ItemGroup>
-
-		<!-- vvslow, split and run in parallel? or add compilation database json? -->
-		<Exec Command="$(Tidy) @(Relative, ' ') $(TidyCmd)" WorkingDirectory="$(Source)"/>
-	</Target>
-
-	<Target Name="TidyFile" DependsOnTargets="FindTidy">
-		<PropertyGroup>
-			<FileName>$([MSBuild]::MakeRelative($(Source), $(FileName)))</FileName>
-		</PropertyGroup>
-		<Exec Command='$(Tidy) $(FileName) $(TidyCmd)' WorkingDirectory="$(Source)"/>
-	</Target>
-
 	<Target Name="PushReport">
 		<Exec Command="
 git config --global user.email glen.summers@outlook.com
@@ -337,5 +224,19 @@ git commit --no-edit --all --verbose --message init
 		<Exec Command="start $(Out)\DockerCoverage\index.html"/>
 		<!-- todo copy out raw coverage files and merge with windows coverage-->
 	</Target>
+
+	<!-- fwds if exist? maybe split out-->
+	<Target Name="Format">
+		<MSBuild Projects="Format.build" Targets="Format" Properties="Source=$(Source)"/>
+	</Target>
+
+	<Target Name="Tidy">
+		<MSBuild Projects="Tidy.build" Targets="Tidy" Properties="Source=$(Source)"/>
+	</Target>
+
+	<Target Name="TidyFile">
+		<MSBuild Projects="Tidy.build" Targets="TidyFile" Properties="FileName=$(FileName);Source=$(Source)"/>
+	</Target>
+	<!-- fwds -->
 
 </Project>

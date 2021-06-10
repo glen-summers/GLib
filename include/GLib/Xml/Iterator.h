@@ -192,8 +192,7 @@ namespace GLib::Xml
 					{
 						case Xml::State::AttributeEnd:
 						{
-							manager->Push(Utils::ToStringView(attributeName), Utils::ToStringView(attributeValueStart, oldPtr).substr(1),
-														elementStack.size());
+							manager->Push(Utils::ToStringView(attributeName), Utils::ToStringView(attributeValueStart, oldPtr).substr(1), elementStack.size());
 							attributes.second = ptr;
 							break;
 						}

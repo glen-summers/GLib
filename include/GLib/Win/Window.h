@@ -145,8 +145,8 @@ namespace GLib::Win
 		inline WindowHandle Create(DWORD style, int icon, int menu, const std::string & title, WNDPROC proc, Window * param)
 		{
 			std::string className = RegisterClass(icon, menu, proc);
-			Detail::WindowHandle handle(::CreateWindowExW(0, Cvt::a2w(className).c_str(), Cvt::a2w(title).c_str(), style, CW_USEDEFAULT, 0,
-																										CW_USEDEFAULT, 0, nullptr, nullptr, Instance(), param));
+			Detail::WindowHandle handle(::CreateWindowExW(0, Cvt::a2w(className).c_str(), Cvt::a2w(title).c_str(), style, CW_USEDEFAULT, 0, CW_USEDEFAULT,
+																										0, nullptr, nullptr, Instance(), param));
 			Util::AssertTrue(!!handle, "CreateWindowExW");
 			AssociateHandle(param, handle.get());
 
