@@ -37,7 +37,7 @@ namespace GLib::Win::Symbols
 
 		inline ULONG64 ConvertBase(void * baseValue)
 		{
-			return reinterpret_cast<ULONG64>(baseValue); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
+			return reinterpret_cast<ULONG64>(baseValue);
 		}
 	}
 

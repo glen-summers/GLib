@@ -14,17 +14,17 @@ namespace GLib::Win
 	{
 		inline const void * ToAddress(uint64_t value)
 		{
-			return reinterpret_cast<const void *>(value); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
+			return reinterpret_cast<const void *>(value);
 		}
 
 		inline void * ToPseudoWritableAddress(uint64_t value)
 		{
-			return reinterpret_cast<void *>(value); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
+			return reinterpret_cast<void *>(value);
 		}
 
 		inline wchar_t * ToPseudoWritableString(const wchar_t * value)
 		{
-			return const_cast<wchar_t *>(value); // NOLINT(cppcoreguidelines-pro-type-const-cast)
+			return const_cast<wchar_t *>(value);
 		}
 
 		inline bool Terminate(HANDLE process, UINT terminationExitCode) noexcept
@@ -70,7 +70,7 @@ namespace GLib::Win
 
 		static HMODULE CurrentModule()
 		{
-			return reinterpret_cast<HMODULE>(&__ImageBase); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
+			return reinterpret_cast<HMODULE>(&__ImageBase);
 		}
 
 		Process(Handle handle)

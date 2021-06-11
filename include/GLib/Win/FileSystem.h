@@ -140,9 +140,9 @@ namespace GLib::Win::FileSystem
 
 	inline Handle CreateAutoDeleteFile(const std::string & name)
 	{
-		DWORD access = GENERIC_READ | GENERIC_WRITE;												// NOLINT(hicpp-signed-bitwise) baad macros
-		DWORD create = CREATE_ALWAYS;																				// NOLINT(hicpp-signed-bitwise) baad macros
-		DWORD flags = FILE_ATTRIBUTE_TEMPORARY | FILE_FLAG_DELETE_ON_CLOSE; // NOLINT(hicpp-signed-bitwise) baad macros
+		DWORD access = GENERIC_READ | GENERIC_WRITE;
+		DWORD create = CREATE_ALWAYS;
+		DWORD flags = FILE_ATTRIBUTE_TEMPORARY | FILE_FLAG_DELETE_ON_CLOSE;
 
 		HANDLE h = ::CreateFileW(Cvt::a2w(name).c_str(), access, 0, nullptr, create, flags, nullptr);
 		Util::AssertTrue(h != nullptr, "CreateFileW");

@@ -23,7 +23,7 @@
 
 std::string LoadHtml(unsigned int id)
 {
-	return GLib::Win::LoadResourceString(nullptr, id, RT_HTML); // NOLINT(cppcoreguidelines-pro-type-cstyle-cast) baad macro
+	return GLib::Win::LoadResourceString(nullptr, id, RT_HTML);
 }
 
 std::string GetDateTime(time_t t)

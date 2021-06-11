@@ -157,7 +157,7 @@ namespace GLib::Cpp
 
 				if (ptr != end)
 				{
-					char c = *ptr++; // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic) todo use std::span
+					char c = *ptr++; // todo use std::span
 					newState = engine.Push(c);
 					if (newState == State::Error)
 					{
@@ -212,7 +212,7 @@ namespace GLib::Cpp
 					case State::Directive:
 					case State::Code:
 					{
-						if (Set(oldState, ptr - 1)) // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic) todo use std::span
+						if (Set(oldState, ptr - 1)) // todo use std::span
 						{
 							return;
 						}

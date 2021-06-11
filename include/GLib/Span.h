@@ -52,7 +52,7 @@ namespace GLib
 			{
 				throw std::logic_error("IndexOutOfRange");
 			}
-			return ptr[idx]; // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic) until c++20 span
+			return ptr[idx]; // todo use c++20 span
 		}
 
 		class Iterator
@@ -95,7 +95,7 @@ namespace GLib
 				return *this;
 			}
 
-			constexpr Iterator operator++(int) // NOLINT(cert-dcl21-cpp) 'operator++' returns a non-constant object but constexpr is const
+			constexpr Iterator operator++(int)
 			{
 				Iterator it {*this};
 				++(*this);

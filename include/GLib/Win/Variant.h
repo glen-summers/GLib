@@ -14,9 +14,9 @@ namespace GLib::Win
 		}
 
 		// clang-format off
-		inline VARTYPE Vt(const VARIANT & v) { return v.vt; } // NOLINT(cppcoreguidelines-pro-type-union-access) legacy code
-		inline VARTYPE & Vt(VARIANT & v) { return v.vt; } // NOLINT(cppcoreguidelines-pro-type-union-access) legacy code
-		inline BSTR & Bstr(VARIANT & v) { return v.bstrVal; } // NOLINT(cppcoreguidelines-pro-type-union-access) legacy code
+		inline VARTYPE Vt(const VARIANT & v) { return v.vt; }
+		inline VARTYPE & Vt(VARIANT & v) { return v.vt; }
+		inline BSTR & Bstr(VARIANT & v) { return v.bstrVal; }
 		// clang-format on
 
 		inline VARIANT Create(const std::string & value)
@@ -105,8 +105,8 @@ namespace GLib::Win
 
 		bool operator==(const Variant & other) const noexcept
 		{
-			auto * v1 = const_cast<VARIANT *>(&v);			 // NOLINT(cppcoreguidelines-pro-type-const-cast) no const VarCmp
-			auto * v2 = const_cast<VARIANT *>(&other.v); // NOLINT(cppcoreguidelines-pro-type-const-cast) no const VarCmp
+			auto * v1 = const_cast<VARIANT *>(&v);
+			auto * v2 = const_cast<VARIANT *>(&other.v);
 			return ::VarCmp(v1, v2, 0) == VARCMP_EQ;
 		}
 

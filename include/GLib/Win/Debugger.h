@@ -15,19 +15,19 @@ namespace GLib::Win
 	// clang-format off
 	namespace Detail
 	{
-		inline const EXCEPTION_DEBUG_INFO & Exception(const DEBUG_EVENT & event) { return event.u.Exception; } // NOLINT(cppcoreguidelines-pro-type-union-access)
-		inline const CREATE_THREAD_DEBUG_INFO & CreateThread(const DEBUG_EVENT & event) { return event.u.CreateThread; } // NOLINT(cppcoreguidelines-pro-type-union-access)
-		inline const CREATE_PROCESS_DEBUG_INFO & CreateProcessInfo(const DEBUG_EVENT & event) { return event.u.CreateProcessInfo; } // NOLINT(cppcoreguidelines-pro-type-union-access)
-		inline const EXIT_THREAD_DEBUG_INFO & ExitThread(const DEBUG_EVENT & event) { return event.u.ExitThread; } // NOLINT(cppcoreguidelines-pro-type-union-access)
-		inline const EXIT_PROCESS_DEBUG_INFO & ExitProcess(const DEBUG_EVENT & event) { return event.u.ExitProcess; } // NOLINT(cppcoreguidelines-pro-type-union-access)
-		inline const LOAD_DLL_DEBUG_INFO & LoadDll(const DEBUG_EVENT & event) { return event.u.LoadDll; } // NOLINT(cppcoreguidelines-pro-type-union-access)
-		inline const UNLOAD_DLL_DEBUG_INFO & UnloadDll(const DEBUG_EVENT & event) { return event.u.UnloadDll; } // NOLINT(cppcoreguidelines-pro-type-union-access)
-		inline const OUTPUT_DEBUG_STRING_INFO & DebugString(const DEBUG_EVENT & event) { return event.u.DebugString; } // NOLINT(cppcoreguidelines-pro-type-union-access)
+		inline const EXCEPTION_DEBUG_INFO & Exception(const DEBUG_EVENT & event) { return event.u.Exception; }
+		inline const CREATE_THREAD_DEBUG_INFO & CreateThread(const DEBUG_EVENT & event) { return event.u.CreateThread; }
+		inline const CREATE_PROCESS_DEBUG_INFO & CreateProcessInfo(const DEBUG_EVENT & event) { return event.u.CreateProcessInfo; }
+		inline const EXIT_THREAD_DEBUG_INFO & ExitThread(const DEBUG_EVENT & event) { return event.u.ExitThread; }
+		inline const EXIT_PROCESS_DEBUG_INFO & ExitProcess(const DEBUG_EVENT & event) { return event.u.ExitProcess; }
+		inline const LOAD_DLL_DEBUG_INFO & LoadDll(const DEBUG_EVENT & event) { return event.u.LoadDll; }
+		inline const UNLOAD_DLL_DEBUG_INFO & UnloadDll(const DEBUG_EVENT & event) { return event.u.UnloadDll; }
+		inline const OUTPUT_DEBUG_STRING_INFO & DebugString(const DEBUG_EVENT & event) { return event.u.DebugString; }
 		// clang-format on
 
 		inline uint64_t ConvertAddress(const void * address)
 		{
-			return reinterpret_cast<uint64_t>(address); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
+			return reinterpret_cast<uint64_t>(address);
 		}
 	}
 

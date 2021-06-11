@@ -34,7 +34,7 @@ namespace GLib::Win::Symbols
 		template <typename T1, typename T2>
 		T1 Munge(T2 t2)
 		{
-			return reinterpret_cast<T1>(t2); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
+			return reinterpret_cast<T1>(t2);
 		}
 
 		struct Vbase

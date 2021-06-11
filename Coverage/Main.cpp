@@ -11,7 +11,7 @@
 
 using namespace std::string_literals;
 
-int main(int argc, char *argv[]) // NOLINT(bugprone-exception-escape) use of cout in catch
+int main(int argc, char *argv[])
 {
 	int errorCode = 0;
 
@@ -76,7 +76,7 @@ Coverage c:\Build\Main.exe C:\Report -i C:\MainCode C:\Utils\ -x C:\ExternalCode
 			}
 			else
 			{
-				throw std::runtime_error("Unexpected: "s + arg); // NOLINT(cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers) bug in clang-tidy
+				throw std::runtime_error("Unexpected: "s + arg);
 			}
 		}
 

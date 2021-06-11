@@ -197,7 +197,7 @@ namespace GLib::Xml
 			return State::Error;
 		}
 
-		Xml::State ElementEnd(char c) const // NOLINT
+		Xml::State ElementEnd(char c) const
 		{
 			if (IsNameStart(c))
 			{
@@ -257,7 +257,7 @@ namespace GLib::Xml
 			return State::Error;
 		}
 
-		Xml::State EmptyElement(char c) const // NOLINT
+		Xml::State EmptyElement(char c) const
 		{
 			if (c == RightAngleBracket)
 			{
@@ -331,7 +331,7 @@ namespace GLib::Xml
 			return State::Error;
 		}
 
-		Xml::State AttributeValue(char c) const // NOLINT
+		Xml::State AttributeValue(char c) const
 		{
 			if (c == attributeQuoteChar)
 			{
@@ -348,7 +348,7 @@ namespace GLib::Xml
 			return State::Error;
 		}
 
-		Xml::State AttributeEnd(char c) const // NOLINT
+		Xml::State AttributeEnd(char c) const
 		{
 			if (IsWhiteSpace(c))
 			{
@@ -400,7 +400,7 @@ namespace GLib::Xml
 			return State::Error;
 		}
 
-		Xml::State CommentStartDash(char c) const // NOLINT
+		Xml::State CommentStartDash(char c) const
 		{
 			if (c == Dash)
 			{
@@ -418,7 +418,7 @@ namespace GLib::Xml
 			return state;
 		}
 
-		Xml::State CommentEndDash(char c) const // NOLINT
+		Xml::State CommentEndDash(char c) const
 		{
 			if (c == Dash)
 			{
@@ -427,7 +427,7 @@ namespace GLib::Xml
 			return State::Comment;
 		}
 
-		Xml::State CommentEnd(char c) const // NOLINT
+		Xml::State CommentEnd(char c) const
 		{
 			if (c == RightAngleBracket)
 			{
@@ -463,7 +463,7 @@ namespace GLib::Xml
 			return state;
 		}
 
-		Xml::State CDataEnd1(char c) const // NOLINT
+		Xml::State CDataEnd1(char c) const
 		{
 			if (c == RightSquareBracket)
 			{
@@ -472,7 +472,7 @@ namespace GLib::Xml
 			return Xml::State::CDataValue;
 		}
 
-		Xml::State CDataEnd2(char c) const // NOLINT
+		Xml::State CDataEnd2(char c) const
 		{
 			if (c == RightAngleBracket)
 			{

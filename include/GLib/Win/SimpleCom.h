@@ -12,16 +12,16 @@
 
 #include <atomic>
 
-#define WRAP(x) x												 // NOLINT(cppcoreguidelines-macro-usage)
-#define GLIB_COM_RULE_OF_FIVE(ClassName) /* NOLINT(cppcoreguidelines-macro-usage)*/                                                                  \
-public:                                                                                                                                              \
-	(ClassName)() = default;                                                                                                                           \
-	(ClassName)(const WRAP(ClassName) & other) = delete;                                                                                               \
-	(ClassName)(WRAP(ClassName) && other) noexcept = delete;                                                                                           \
-	WRAP(ClassName) & operator=(const WRAP(ClassName) & other) = delete;                                                                               \
-	WRAP(ClassName) & operator=(WRAP(ClassName) && other) noexcept = delete;                                                                           \
-                                                                                                                                                     \
-protected:                                                                                                                                           \
+#define WRAP(x) x
+#define GLIB_COM_RULE_OF_FIVE(ClassName)                                  \
+public:                                                                   \
+	(ClassName)() = default;                                                \
+	(ClassName)(const WRAP(ClassName) & other) = delete;                    \
+	(ClassName)(WRAP(ClassName) && other) noexcept = delete;                \
+	WRAP(ClassName) & operator=(const WRAP(ClassName) & other) = delete;    \
+	WRAP(ClassName) & operator=(WRAP(ClassName) && other) noexcept = delete;\
+                                                                          \
+protected:                                                                \
 	virtual ~ClassName() = default;
 
 namespace GLib::Win

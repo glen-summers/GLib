@@ -44,10 +44,10 @@ namespace GLib
 				std::string f = CheckFormat(defaultFormat, format);
 				constexpr auto InitialBufferSize = 21;
 				Util::StackOrHeap<char, InitialBufferSize> s;
-				const int len = ::snprintf(nullptr, 0, f.c_str(), value); // NOLINT(cppcoreguidelines-pro-type-vararg,hicpp-vararg) by design
+				const int len = ::snprintf(nullptr, 0, f.c_str(), value);
 				Compat::AssertTrue(len >= 0, "snprintf", errno);
 				s.EnsureSize(static_cast<size_t>(len) + 1);
-				::snprintf(s.Get(), s.size(), f.c_str(), value); // NOLINT(cppcoreguidelines-pro-type-vararg,hicpp-vararg) by design
+				::snprintf(s.Get(), s.size(), f.c_str(), value);
 
 				stm << s.Get();
 			}

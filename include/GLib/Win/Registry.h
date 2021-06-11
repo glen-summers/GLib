@@ -9,8 +9,8 @@ namespace GLib::Win
 
 	namespace Detail
 	{
-		inline static constexpr DWORD Read = KEY_READ;						// NOLINT(hicpp-signed-bitwise)
-		inline static constexpr DWORD AllAccess = KEY_ALL_ACCESS; // NOLINT(hicpp-signed-bitwise)
+		inline static constexpr DWORD Read = KEY_READ;
+		inline static constexpr DWORD AllAccess = KEY_ALL_ACCESS;
 
 		struct KeyCloser
 		{
@@ -33,20 +33,20 @@ namespace GLib::Win
 
 			HKEY get() const
 			{
-				return reinterpret_cast<HKEY>(value); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast) for root keys
+				return reinterpret_cast<HKEY>(value);
 			}
 		};
 
 		template <typename T>
 		BYTE * ToBytes(T * value)
 		{
-			return reinterpret_cast<BYTE *>(value); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast) arcane api
+			return reinterpret_cast<BYTE *>(value);
 		}
 
 		template <typename T>
 		const BYTE * ToBytes(const T * value)
 		{
-			return reinterpret_cast<const BYTE *>(value); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast) arcane api
+			return reinterpret_cast<const BYTE *>(value);
 		}
 
 		inline bool Found(LSTATUS result, const char * message)
@@ -222,8 +222,8 @@ namespace GLib::Win
 	namespace RegistryKeys
 	{
 		// STRICT means HKEY_CLASSES_ROOT etc have value of struct Key__* and cant be used in constexpr, so copying definitions
-		inline static constexpr RegistryKey ClassesRoot = RootKey(0x80000000);
-		inline static constexpr RegistryKey CurrentUser = RootKey(0x80000001);
-		inline static constexpr RegistryKey LocalMachine = RootKey(0x80000002);
+		inline static constexpr RegistryKey ClassesRoot = RootKey((ULONG_PTR)(HKEY_CLASSES_ROOT));
+		inline static constexpr RegistryKey CurrentUser = RootKey((ULONG_PTR)(HKEY_CURRENT_USER));
+		inline static constexpr RegistryKey LocalMachine = RootKey((ULONG_PTR)(HKEY_LOCAL_MACHINE));
 	}
 }

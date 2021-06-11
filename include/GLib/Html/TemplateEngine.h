@@ -115,7 +115,7 @@ namespace GLib::Html
 				{
 					std::string_view eachValue;
 					std::string_view ifValue;
-					for (const Xml::Attribute & attr : e.Attributes()) // NOLINT clang-tidy bug
+					for (const Xml::Attribute & attr : e.Attributes())
 					{
 						if (attr.name == Each)
 						{
@@ -186,7 +186,7 @@ namespace GLib::Html
 			bool pop {};
 
 			// handle duplicate attr names?
-			for (const Xml::Attribute & a : attributes) // NOLINT clang-tidy bug
+			for (const Xml::Attribute & a : attributes)
 			{
 				if (!Xml::NameSpaceManager::IsDeclaration(a.name))
 				{
@@ -253,7 +253,7 @@ namespace GLib::Html
 			{
 				node->AddFragment(e.OuterXml().data(), attr.data() - 1);
 
-				for (const Xml::Attribute & a : attributes) // NOLINT clang-tidy bug
+				for (const Xml::Attribute & a : attributes)
 				{
 					std::string_view nameSpacePrefix;
 					if (Xml::NameSpaceManager::CheckForDeclaration(a.name, nameSpacePrefix))
@@ -284,7 +284,7 @@ namespace GLib::Html
 			else
 			{
 				const auto * p = e.OuterXml().data();
-				for (const Xml::Attribute & a : attributes) // NOLINT clang-tidy bug
+				for (const Xml::Attribute & a : attributes)
 				{
 					std::string_view prefix;
 					if (Xml::NameSpaceManager::CheckForDeclaration(a.name, prefix))
@@ -307,7 +307,7 @@ namespace GLib::Html
 			return text;
 		}
 
-		void Generate(const Node & node, std::ostream & out) // NOLINT(misc-no-recursion)
+		void Generate(const Node & node, std::ostream & out)
 		{
 			// todo eval during parse, store bool or property to evaluate
 			const std::string_view & condition = node.Condition();

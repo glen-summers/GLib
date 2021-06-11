@@ -12,7 +12,7 @@ namespace GLib::Util
 	class StackOrHeap
 	{
 		using Stack = std::array<T, StackElementCount>;
-		using Heap = std::unique_ptr<T[]>; // NOLINT(cppcoreguidelines-avoid-c-arrays,hicpp-avoid-c-arrays,modernize-avoid-c-arrays)
+		using Heap = std::unique_ptr<T[]>;
 
 		size_t heapSize {};
 		std::variant<Stack, Heap> storage;
@@ -62,7 +62,7 @@ namespace GLib::Util
 
 		void AllocateHeap(size_t size)
 		{
-			storage = std::make_unique<T[]>(size); // NOLINT(cppcoreguidelines-avoid-c-arrays,hicpp-avoid-c-arrays,modernize-avoid-c-arrays)
+			storage = std::make_unique<T[]>(size);
 			heapSize = size;
 		}
 	};

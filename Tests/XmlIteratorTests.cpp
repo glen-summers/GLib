@@ -167,9 +167,9 @@ BOOST_AUTO_TEST_CASE(XmlDecl)
 
 	std::vector<Xml::Element> expected
 	{
-		Xml::Element{"greeting", Xml::ElementType::Open, {}},
-		Xml::Element{Xml::ElementType::Text, "Hello, world!"},
-		Xml::Element{"greeting", Xml::ElementType::Close, {}},
+		{"greeting", Xml::ElementType::Open, {}},
+		{Xml::ElementType::Text, "Hello, world!"},
+		{"greeting", Xml::ElementType::Close, {}},
 	};
 	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), xml.begin(), xml.end());
 }
@@ -189,8 +189,7 @@ BOOST_AUTO_TEST_CASE(DefaultNameSpaceToDo)
 
 	std::vector<Xml::Element> expected
 	{
-		// Xml::Element{"xml", "xml", "foo", Xml::ElementType::Empty, {}},
-		Xml::Element{"xml", "xml", "", Xml::ElementType::Empty, {}},
+		{"xml", "xml", "", Xml::ElementType::Empty, {}},
 	};
 	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), xml.begin(), xml.end());
 }
@@ -322,11 +321,11 @@ BOOST_AUTO_TEST_CASE(AbundanceOfComments)
 
 	std::vector<Xml::Element> expected
 	{
-		Xml::Element{Xml::ElementType::Comment, "<!-- Comment1 -->"},
-		Xml::Element{"Xml", Xml::ElementType::Open, {}},
-		Xml::Element{Xml::ElementType::Comment, "\n<!-- Comment2 -->"},
-		Xml::Element{"Xml", Xml::ElementType::Close, {}},
-		Xml::Element{Xml::ElementType::Comment, "\n<!-- Comment3 -->"},
+		{Xml::ElementType::Comment, "<!-- Comment1 -->"},
+		{"Xml", Xml::ElementType::Open, {}},
+		{Xml::ElementType::Comment, "\n<!-- Comment2 -->"},
+		{"Xml", Xml::ElementType::Close, {}},
+		{Xml::ElementType::Comment, "\n<!-- Comment3 -->"},
 	};
 	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), xml.begin(), xml.end());
 }
@@ -361,8 +360,8 @@ BOOST_AUTO_TEST_CASE(CData)
 
 	std::vector<Xml::Element> expected
 	{
-		Xml::Element{"xml", Xml::ElementType::Open, {}},
-		Xml::Element{"xml", Xml::ElementType::Close, {}},
+		{"xml", Xml::ElementType::Open, {}},
+		{"xml", Xml::ElementType::Close, {}},
 	};
 	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), xml.begin(), xml.end());
 }
@@ -376,8 +375,8 @@ BOOST_AUTO_TEST_CASE(CDataOkWithRightSquareBrackets)
 
 	std::vector<Xml::Element> expected
 	{
-		Xml::Element{"xml", Xml::ElementType::Open, {}},
-		Xml::Element{"xml", Xml::ElementType::Close, {}},
+		{"xml", Xml::ElementType::Open, {}},
+		{"xml", Xml::ElementType::Close, {}},
 	};
 	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), xml.begin(), xml.end());
 }
@@ -505,9 +504,9 @@ BOOST_AUTO_TEST_CASE(ElementTextEntities)
 
 	std::vector<Xml::Element> expected
 	{
-		Xml::Element{"xml", Xml::ElementType::Open, {}},
-		Xml::Element{Xml::ElementType::Text, "&amp; &lt; &gt; &apos; &quot; &#x20ac; &#8364;"},
-		Xml::Element{"xml", Xml::ElementType::Close, {}},
+		{"xml", Xml::ElementType::Open, {}},
+		{Xml::ElementType::Text, "&amp; &lt; &gt; &apos; &quot; &#x20ac; &#8364;"},
+		{"xml", Xml::ElementType::Close, {}},
 	};
 	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), xml.begin(), xml.end());
 }
@@ -518,7 +517,7 @@ BOOST_AUTO_TEST_CASE(AttributeEntities)
 
 	std::vector<Xml::Element> expected
 	{
-		Xml::Element{"xml", Xml::ElementType::Empty, {"attr='&lt;'"}},
+		{"xml", Xml::ElementType::Empty, {"attr='&lt;'"}}
 	};
 	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), xml.begin(), xml.end());
 }

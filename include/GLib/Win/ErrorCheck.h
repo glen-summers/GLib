@@ -20,7 +20,7 @@ namespace GLib::Win::Util
 			std::ostringstream stm;
 			stm << message << " : ";
 			Util::FormatErrorMessage(stm, error, moduleName);
-			if (IS_ERROR(error)) // NOLINT(hicpp-signed-bitwise) baad macro
+			if (IS_ERROR(error))
 			{
 				stm << std::hex;
 			}

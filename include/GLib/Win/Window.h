@@ -2,9 +2,9 @@
 
 #include <windowsx.h>
 
-#include <GLib/checked_cast.h>
 #include <GLib/Win/ErrorCheck.h>
 #include <GLib/Win/Painter.h>
+#include <GLib/checked_cast.h>
 
 #ifdef GLIB_DEBUG_MESSAGES
 #include <GLib/Win/MessageDebug.h>
@@ -33,36 +33,36 @@ namespace GLib::Win
 		template <typename T1, typename T2>
 		T1 Munge(T2 t2)
 		{
-			return reinterpret_cast<T1>(t2); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast) many windows casts from LPARAMs etc.
+			return reinterpret_cast<T1>(t2);
 		}
 
 		constexpr unsigned int HRedraw = CS_HREDRAW;
 		constexpr unsigned int VRedraw = CS_VREDRAW;
-		constexpr unsigned int OverlappedWindow = WS_OVERLAPPEDWINDOW; // NOLINT(hicpp-signed-bitwise)
+		constexpr unsigned int OverlappedWindow = WS_OVERLAPPEDWINDOW;
 
 		inline auto MakeIntResource(int id)
 		{
-			return MAKEINTRESOURCEW(id); // NOLINT(cppcoreguidelines-pro-type-cstyle-cast) bad macro
+			return MAKEINTRESOURCEW(id);
 		}
 
 		inline WORD LoWord(WPARAM param)
 		{
-			return LOWORD(param); // NOLINT(hicpp-signed-bitwise)
+			return LOWORD(param);
 		}
 
 		inline WORD HiWord(WPARAM param)
 		{
-			return HIWORD(param); // NOLINT(hicpp-signed-bitwise)
+			return HIWORD(param);
 		}
 
 		inline Point PointFromParam(LPARAM param)
 		{
-			return {GET_X_LPARAM(param), GET_Y_LPARAM(param)}; // NOLINT(hicpp-signed-bitwise)
+			return {GET_X_LPARAM(param), GET_Y_LPARAM(param)};
 		}
 
 		inline short WheelData(WPARAM param)
 		{
-			return GET_WHEEL_DELTA_WPARAM(param); // NOLINT(hicpp-signed-bitwise)
+			return GET_WHEEL_DELTA_WPARAM(param);
 		}
 
 		inline Size SizeFromParam(LPARAM param)
@@ -118,7 +118,7 @@ namespace GLib::Win
 					0,
 					instance,
 					i,
-					::LoadCursorW(nullptr, IDC_ARROW), // NOLINT(cppcoreguidelines-pro-type-cstyle-cast) baad macro
+					::LoadCursorW(nullptr, IDC_ARROW),
 					Detail::Munge<HBRUSH>(size_t {COLOR_WINDOW} + 1),
 					MakeIntResource(menu),
 					className.c_str()

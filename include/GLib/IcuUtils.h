@@ -117,7 +117,7 @@ namespace GLib::IcuUtils
 		UErrorCode error = U_ZERO_ERROR;
 		auto map = Detail::MakeUCaseMap(locale); // cache
 
-		const auto sourceLength = static_cast<int32_t>(value.size());
+		const auto sourceLength = static_cast<int>(value.size());
 		const auto destLength = ::ucasemap_utf8ToLower(map.get(), nullptr, 0, value.c_str(), sourceLength, &error);
 		Detail::AssertTrue(error == U_BUFFER_OVERFLOW_ERROR, "ucasemap_utf8ToLower");
 
@@ -134,8 +134,8 @@ namespace GLib::IcuUtils
 		UErrorCode error = U_ZERO_ERROR;
 		auto map = Detail::MakeUCaseMap(locale); // cache
 
-		const auto sourceLength = static_cast<int32_t>(value.size());
-		const int32_t destLength = ::ucasemap_utf8ToUpper(map.get(), nullptr, 0, value.c_str(), sourceLength, &error);
+		const auto sourceLength = static_cast<int>(value.size());
+		const int destLength = ::ucasemap_utf8ToUpper(map.get(), nullptr, 0, value.c_str(), sourceLength, &error);
 		Detail::AssertTrue(error == U_BUFFER_OVERFLOW_ERROR, "ucasemap_utf8ToUpper");
 
 		error = U_ZERO_ERROR;

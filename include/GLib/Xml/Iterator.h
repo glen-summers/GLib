@@ -136,7 +136,7 @@ namespace GLib::Xml
 				{
 					IllegalCharacter(*ptr);
 				}
-				++ptr; // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic) todo use std::span
+				++ptr; // todo use std::span
 
 				if (newState != oldState)
 				{

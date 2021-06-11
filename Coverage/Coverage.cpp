@@ -173,7 +173,7 @@ DWORD Coverage::OnException(DWORD processId, DWORD threadId, const EXCEPTION_DEB
 			HANDLE threadHandle = process.FindThread(threadId);
 
 			CONTEXT ctx {};
-			ctx.ContextFlags = CONTEXT_ALL; // NOLINT(hicpp-signed-bitwise) baad macro
+			ctx.ContextFlags = CONTEXT_ALL;
 			GLib::Win::Util::AssertTrue(::GetThreadContext(threadHandle, &ctx), "GetThreadContext");
 #ifdef _WIN64
 			--ctx.Rip;
