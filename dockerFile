@@ -1,4 +1,5 @@
 FROM ubuntu:20.04 AS cpp
+LABEL description="C++ utils etc."
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
 	build-essential \
 	cmake  \
@@ -19,8 +20,8 @@ RUN apt-get update && apt-get install -y ca-certificates \
 	&& ./BoostModularBuild/go.sh build test \
 	&& rm -r ./BoostModularBuild
 
-FROM cpp-boost as glib
-LABEL description="GLib"
+FROM cpp-boost AS glib
+LABEL description="GLib source"
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y locales dos2unix \
 	&& locale-gen en_GB.UTF-8 \
 	&& update-locale LANG=en_GB.UTF-8
@@ -36,6 +37,6 @@ COPY /Tests $dir/Tests
 COPY /Coverage/SymbolNameUtils.h $dir/Coverage/SymbolNameUtils.h
 CMD ["/bin/bash"]
 
-FROM glib as glib-coverage
+FROM glib AS glib-coverage
 LABEL description="GLib Coverage Build"
-RUN /src/GLib/go.sh coverage
+CMD ["/bin/bash"]

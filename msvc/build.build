@@ -4,11 +4,6 @@
 
 	<PropertyGroup>
 		<Root>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)\..'))</Root>
-		<Nuget>https://dist.nuget.org/win-x86-commandline/v4.9.4/nuget.exe</Nuget>
-		<SevenZipNuget>7-Zip.CommandLine</SevenZipNuget>
-		<SevenZipVer>18.1.0</SevenZipVer>
-		<SevenZipPath>7-Zip.CommandLine.$(SevenZipVer)\tools\x64\7za.exe</SevenZipPath>
-
 		<BoostBuilderVer>1.73.0</BoostBuilderVer>
 		<BoostBuilderUrl>https://github.com/glen-summers/BoostModularBuild/archive/v$(BoostBuilderVer).tar.gz</BoostBuilderUrl>
 		<BoostBuilderName>BoostModularBuild-$(BoostBuilderVer)</BoostBuilderName>
@@ -44,6 +39,7 @@
 		<CoverageExecutable>$(OutputPath)\Coverage.exe</CoverageExecutable>
 		<CoverageArgs>-i @(CoverageInclude, ' -i ') -x @(CoverageExclude, ' -x ') -sub</CoverageArgs>
 		<Downloads>$(Out)\downloads</Downloads>
+		<VolumeShare>$(Out)\DockerShare\:/src/GLib/out</VolumeShare>
 	</PropertyGroup>
 
 	<Target Name="MakeTempDir">
@@ -70,15 +66,16 @@
 		<RemoveDir Directories="@(Directories)" Condition="%(Files)=='0'" />
 	</Target>
 
-	<Target Name="Deps" DependsOnTargets="DownloadTools">
+	<Target Name="Deps">
 		<PropertyGroup>
 			<BoostBuilderTar>$(Downloads)\BoostModularBuild.tar.gz</BoostBuilderTar>
 			<OutDir>$(Downloads)\Deps</OutDir>
 			<Go>$(Downloads)\Deps\$(BoostBuilderName)\go.cmd</Go>
 		</PropertyGroup>
 
+		<MakeDir Directories="$(OutDir)"/>
 		<DownloadFile Condition="!Exists($(BoostBuilderTar))" Address="$(BoostBuilderUrl)" FileName="$(BoostBuilderTar)"/>
-		<Exec Condition="!Exists($(Go))" Command="$(SevenZip) x $(BoostBuilderTar) -so | $(SevenZip) x -aoa -si -ttar -o$(OutDir)"/>
+		<Exec Condition="!Exists('$(Go)')" Command='tar -xvzf "$(BoostBuilderTar)" -C "$(OutDir)" &gt;NUL 2&gt;&amp;1' ConsoleToMsBuild="true"/>
 		<Exec Command="$(Go) build test $(Out)"/>
 	</Target>
 
@@ -105,11 +102,6 @@
 		</ItemGroup>
 		<MSBuild Projects="$(Solution)" Properties="@(Properties)" Targets="Tests"/>
 	</Target>
-
-	<!--32bit...
-	<Target Name="CompileX86">
-		<MSBuild Condition="'$(Platform)'!='x86'" Projects="$(MSBuildProjectFile)" Targets="Compile" Properties="Platform=x86"/>
-	</Target>-->
 
 	<Target Name="Test" DependsOnTargets="Compile">
 		<Exec command="$(TestExecutable)"/>
@@ -138,12 +130,12 @@
 
 	<Target Name="CMake">
 		<MakeDir Directories="$(CMakeBuildDir)"/>
-		<Exec Command='$(CMake) -G "Ninja" -DCMAKE_INSTALL_PREFIX:PATH="$(CMakeInstallDir)" -DCMAKE_BUILD_TYPE="$(CMakeConfiguration)" -DCMAKE_MAKE_PROGRAM=$(Ninja) $(Root)'
-			WorkingDirectory="$(CMakeBuildDir)"/>
-		<Exec Command="$(CMake) --build $(CMakeBuildDir) --config $(CMakeConfiguration) -- -v"/>
-		<!-- <Exec Command="set CTEST_OUTPUT_ON_FAILURE=1 &amp;&amp; $(CMake) - -build $(CMakeBuildDir) - -config $(CMakeConfiguration) - -target test"/> -->
-		<Exec Command="set CTEST_OUTPUT_ON_FAILURE=1 &amp;&amp; $(CTest) -VV" WorkingDirectory="$(CMakeBuildDir)"/>
-		<Exec Command="$(CMake) --build $(CMakeBuildDir) --config $(CMakeConfiguration) --target install"/>
+		<Exec WorkingDirectory="$(CMakeBuildDir)" Command='
+$(CMake) -G "Ninja" -DCMAKE_INSTALL_PREFIX:PATH="$(CMakeInstallDir)" -DCMAKE_BUILD_TYPE="$(CMakeConfiguration)" -DCMAKE_MAKE_PROGRAM=$(Ninja) $(Root)
+$(CMake) --build . --config $(CMakeConfiguration) -- -v
+set CTEST_OUTPUT_ON_FAILURE=1 &amp;&amp; $(CTest) -VV
+$(CMake) --build . --config $(CMakeConfiguration) --target install
+'/>
 	</Target>
 
 	<Target Name="All" DependsOnTargets="Build;BuildX86;CMake;Docker"/>
@@ -160,17 +152,6 @@
 		</Task>
 	</UsingTask>
 
-	<Target Name="DownloadTools">
-		<MakeDir Directories="$(Downloads)"/>
-		<DownloadFile Condition="!Exists($(Nuget))" Address="$(Nuget)" FileName="$(Downloads)\nuget.exe" />
-
-		<CreateProperty Value="$(Downloads)\$(SevenZipPath)">
-			<Output TaskParameter="Value" PropertyName="SevenZip"/>
-		</CreateProperty>
-		<Exec Condition="!Exists($(SevenZip))" Command="nuget.exe install $(SevenZipNuget) -version $(SevenZipVer)"
-			WorkingDirectory="$(Downloads)"/>
-	</Target>
-
 	<Target Name="Coverage" DependsOnTargets="Compile">
 		<MSBuild Projects="$(MSBuildProjectFile)" Targets="CompileTests" Properties="Configuration=Debug"/>
 		<Exec Command="$(CoverageExecutable) $(DebugTestExecutable) $(Out)\HtmlReport $(CoverageArgs)"/>
@@ -183,45 +164,33 @@
 	</Target>
 
 	<Target Name="PushReport">
-		<Exec Command="
+		<Exec WorkingDirectory="$(Out)\HtmlReport" Command="
 git config --global user.email glen.summers@outlook.com
 git config --global user.name glen-summers
 git init .
 git remote add origin $(ReportsRepo)
 git add *
 git commit --no-edit --all --verbose --message init
-" WorkingDirectory="$(Out)\HtmlReport" ContinueOnError="false"/>
+"/>
 
-		<Exec Command="git push --force --verbose $(ReportsRepo)" WorkingDirectory="$(Out)\HtmlReport" ContinueOnError="false"/>
+		<Exec Command="git push --force --verbose $(ReportsRepo)" WorkingDirectory="$(Out)\HtmlReport"/>
 	</Target>
 
-	<!-- sort out dependencies start\stop\run? -->
-	<Target Name="BuildDocker">
-	<!-- keep intermediate as per coverage -->
-		<Exec Command="docker build --target glib --tag glib . --file dockerFile" WorkingDirectory="$(Root)"/>
-		<Exec Command="docker run --interactive glib /bin/bash /src/GLib/go.sh"/>
+	<Target Name="Docker" DependsOnTargets="StartDocker">
+		<Exec WorkingDirectory="$(Root)" Command="
+docker build --file dockerFile --target glib --tag glib .
+docker container run --rm -v $(VolumeShare) glib /src/GLib/go.sh
+"/>
 	</Target>
 
-	<Target Name="Docker" DependsOnTargets="StartDocker;BuildDocker"/>
 	<Target Name="Stop" DependsOnTargets="StopDocker"/>
 
-	<!-- new -->
 	<Target Name="DockerCoverage" DependsOnTargets="StartDocker">
-		<PropertyGroup>
-			<TargetName>glib-coverage</TargetName>
-			<ContainerName>GLibCoverageContainer</ContainerName>
-			<ImageName>glib-coverage</ImageName>
-		</PropertyGroup>
-
-		<!-- use ignore exitcode task?-->
-		<Exec Command="docker rm --force $(ContainerName)" IgnoreExitCode="true" ContinueOnError="true"/>
-
-		<Exec Command="docker build --target $(TargetName) --tag $(ImageName) . --file dockerFile" WorkingDirectory="$(Root)"/>
-		<Exec Command="docker container run --interactive --name $(ContainerName) $(ImageName)"/>
-		<Exec Command="docker cp $(ContainerName):/src/GLib/out/cmake/build/Debug/TestsCoverage/ $(out)/DockerCoverage/" WorkingDirectory="$(Root)"/>
-		<Exec Command="docker cp $(ContainerName):/src/GLib/out/cmake/build/Debug/TestsCoverage.info.cleaned $(out)" WorkingDirectory="$(Root)"/>
-
-		<Exec Command="start $(Out)\DockerCoverage\index.html"/>
+		<Exec WorkingDirectory="$(Root)" Command="
+docker build --file dockerFile --target glib-coverage --tag glib-coverage .
+docker container run --rm -v $(VolumeShare) glib-coverage /src/GLib/go.sh coverage
+start $(out)\DockerShare\cmake\build\Debug\TestsCoverage\index.html
+"/>
 		<!-- todo copy out raw coverage files and merge with windows coverage-->
 	</Target>
 

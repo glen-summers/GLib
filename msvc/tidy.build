@@ -31,12 +31,16 @@
 		<!--new ignores todo fix-->
 		<TidyCheck Include="-fuchsia-default-arguments-calls"/>
 		<TidyCheck Include="-fuchsia-default-arguments-declarations"/>
+		<TidyCheck Include="-fuchsia-trailing-return"/><!--bugged-->
 		<TidyCheck Include="-modernize-use-trailing-return-type"/>
 
 		<!--new new-->
 		<TidyCheck Include="-llvmlibc-callee-namespace"/>
 		<TidyCheck Include="-llvmlibc-restrict-system-libc-headers"/>
 		<TidyCheck Include="-llvmlibc-implementation-in-namespace"/>
+
+		<!--new new new-->
+		<TidyCheck Include="-abseil-string-find-str-contains"/>
 
 		<TidyFlags Condition="'$(Fix)'=='true'" Include="-fix"/>
 		<TidyFlags Include="-quiet"/>
