@@ -96,7 +96,7 @@ namespace GLib::Compat
 
 	inline std::string ProcessName()
 	{
-		return filesystem::path(ProcessPath()).filename().u8string();
+		return Cvt::p2a(filesystem::path(ProcessPath()).filename());
 	}
 
 	inline std::string CommandLine()

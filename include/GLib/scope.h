@@ -33,8 +33,8 @@ namespace GLib::Detail
 	}
 }
 
-#define SCOPE_IMPL(name, line, func)\
-	const auto & name##line = GLib::Detail::Scope(func);\
+#define SCOPE_IMPL(name, line, func)                                                                                                                 \
+	const auto & name##line = GLib::Detail::Scope(func);                                                                                               \
 	(void) name##line;
 #define SCOPE_JOIN(name, line, func) SCOPE_IMPL(name, line, func)
 #define SCOPE(name, func) SCOPE_JOIN(name, __LINE__, func)

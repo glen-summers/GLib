@@ -10,7 +10,7 @@
 #include <sstream>
 #include <thread>
 
-thread_local LogState FileLogger::logState;
+thread_local LogState const FileLogger::logState;
 
 FileLogger::FileLogger()
 	: baseFileName(GLib::Compat::ProcessName() + "_" + std::to_string(GLib::Compat::ProcessId()))
@@ -19,7 +19,6 @@ FileLogger::FileLogger()
 	create_directories(path);
 }
 
-// avoid
 FileLogger::~FileLogger()
 {
 	CloseStream(); //
@@ -107,7 +106,7 @@ StreamInfo FileLogger::GetStream() const
 		catch (...) // specific
 		{}
 	}
-	throw std::runtime_error("Exhausted possible stream names " + logFileName.u8string());
+	throw std::runtime_error("Exhausted possible stream names " + GLib::Cvt::p2a(logFileName));
 }
 
 void FileLogger::InternalWrite(GLib::Flog::Level level, const char * prefix, std::string_view message)

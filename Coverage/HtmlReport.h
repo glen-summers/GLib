@@ -10,7 +10,7 @@ class FileCoverageData;
 
 class HtmlReport
 {
-	inline static auto log = GLib::Flog::LogManager::GetLog<HtmlReport>();
+	inline static const auto log = GLib::Flog::LogManager::GetLog<HtmlReport>();
 
 	std::string testName;
 	std::string time;

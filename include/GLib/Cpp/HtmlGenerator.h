@@ -106,7 +106,7 @@ inline void Htmlify(const GLib::Cpp::Holder & code, std::ostream & out)
 	auto alphaNumUnd = [](unsigned char c) { return std::isalnum(c) != 0 || c == '_'; };
 	auto whitespace = [](unsigned char c) { return std::isspace(c) != 0; };
 
-	for (auto f : code)
+	for (const auto & f : code)
 	{
 		if (f.first == GLib::Cpp::State::Code)
 		{

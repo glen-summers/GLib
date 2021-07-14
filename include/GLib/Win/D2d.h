@@ -12,11 +12,10 @@ namespace GLib::Win::D2d
 	{
 		inline ComPtr<ID2D1Factory> CreateFactory()
 		{
-			GLib::Win::ComPtr<ID2D1Factory> factory;
+			ComPtr<ID2D1Factory> factory;
 			D2D1_FACTORY_OPTIONS options {D2D1_DEBUG_LEVEL_INFORMATION};
-			GLib::Win::CheckHr(
-				::D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED, __uuidof(ID2D1Factory), &options, GLib::Win::GetAddress<ID2D1Factory>(factory)),
-				"D2D1CreateFactory");
+			CheckHr(::D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED, __uuidof(ID2D1Factory), &options, GetAddress<ID2D1Factory>(factory)),
+							"D2D1CreateFactory");
 			return factory;
 		}
 	}
@@ -29,11 +28,9 @@ namespace GLib::Win::D2d
 		ComPtr<ID2D1HwndRenderTarget> CreateRenderTarget(HWND handle, const SIZE & size) const
 		{
 			ComPtr<ID2D1HwndRenderTarget> renderTarget;
-
-			GLib::Win::WarnHr(factory->CreateHwndRenderTarget(D2D1::RenderTargetProperties(),
-																												D2D1::HwndRenderTargetProperties(handle, D2D1::SizeU(size.cx, size.cy)),
-																												GetAddress(renderTarget)),
-												"CreateHwndRenderTarget");
+			WarnHr(factory->CreateHwndRenderTarget(D2D1::RenderTargetProperties(), D2D1::HwndRenderTargetProperties(handle, D2D1::SizeU(size.cx, size.cy)),
+																						 GetAddress(renderTarget)),
+						 "CreateHwndRenderTarget");
 			return renderTarget;
 		}
 	};

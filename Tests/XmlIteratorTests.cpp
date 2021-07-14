@@ -87,7 +87,7 @@ BOOST_AUTO_TEST_CASE(SubElement)
 
 BOOST_AUTO_TEST_CASE(Attributes)
 {
-	Xml::Holder xml { R"(<root a='1' b='2' >
+	Xml::Holder xml { R"(<root a='1' b='2'>
 	<sub c='3' d="4"/>
 </root>)" };
 
@@ -102,7 +102,7 @@ BOOST_AUTO_TEST_CASE(Attributes)
 
 BOOST_AUTO_TEST_CASE(IterateAttributes)
 {
-	Xml::Holder xml { R"(<root a='1' b='2' >
+	Xml::Holder xml { R"(<root a='1' b='2'>
 	<sub c='3' d="4"/>
 </root>)" };
 
@@ -133,11 +133,11 @@ BOOST_AUTO_TEST_CASE(IterateAttributes)
 
 BOOST_AUTO_TEST_CASE(AttributeSpace)
 {
-	Xml::Holder xml { "<root a = '1' b  =  '2'/>" };
+	Xml::Holder xml { "<root a = '1' b = '2' />" };
 
 	std::vector<Xml::Element> expected
 	{
-		{"root", Xml::ElementType::Empty, { "a = '1' b  =  '2'" }},
+		{"root", Xml::ElementType::Empty, {"a = '1' b = '2'"}},
 	};
 	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), xml.begin(), xml.end());
 }
@@ -161,7 +161,7 @@ BOOST_AUTO_TEST_CASE(OuterXml)
 
 BOOST_AUTO_TEST_CASE(XmlDecl)
 {
-	Xml::Holder xml = { R"(<?xml version="1.0" encoding="UTF-8" ?>
+	Xml::Holder xml { R"(<?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE greeting SYSTEM "hello.dtd">
 <greeting>Hello, world!</greeting>)" };
 
@@ -353,7 +353,7 @@ BOOST_AUTO_TEST_CASE(DocTypeTwiceIsError)
 
 BOOST_AUTO_TEST_CASE(CData)
 {
-	Xml::Holder xml = { R"(<xml>
+	Xml::Holder xml { R"(<xml>
 	<![CDATA[<greeting>Hello, world!</greeting>]]>
 </xml>
 )" };
@@ -368,7 +368,7 @@ BOOST_AUTO_TEST_CASE(CData)
 
 BOOST_AUTO_TEST_CASE(CDataOkWithRightSquareBrackets)
 {
-	Xml::Holder xml = { R"(<xml>
+	Xml::Holder xml { R"(<xml>
 	<![CDATA[<greeting>Hello, world! ] ]] </greeting>]]>
 </xml>
 )" };
@@ -500,7 +500,7 @@ BOOST_AUTO_TEST_CASE(ElementTextEntities)
 	EntityRef: '&' Name '; [amp, lt, gt, apos, quot]
 */
 
-	Xml::Holder xml = { "<xml>&amp; &lt; &gt; &apos; &quot; &#x20ac; &#8364;</xml>" };
+	Xml::Holder xml { "<xml>&amp; &lt; &gt; &apos; &quot; &#x20ac; &#8364;</xml>" };
 
 	std::vector<Xml::Element> expected
 	{
@@ -513,7 +513,7 @@ BOOST_AUTO_TEST_CASE(ElementTextEntities)
 
 BOOST_AUTO_TEST_CASE(AttributeEntities)
 {
-	Xml::Holder xml = { "<xml attr='&lt;'/>" };
+	Xml::Holder xml { "<xml attr='&lt;'/>" };
 
 	std::vector<Xml::Element> expected
 	{
@@ -564,9 +564,9 @@ BOOST_AUTO_TEST_CASE(AttributeIteratorEnum)
 
 BOOST_AUTO_TEST_CASE(AttributeIteratorInvalidChars)
 {
-	GLIB_CHECK_RUNTIME_EXCEPTION(for (auto a : Xml::Attributes{ "0='baad'"}){(void)a;};, "Illegal character: '0' (0x30)");
-	GLIB_CHECK_RUNTIME_EXCEPTION(for (auto a : Xml::Attributes{ "baad=baad"}){(void)a;};, "Illegal character: 'b' (0x62)");
-	GLIB_CHECK_RUNTIME_EXCEPTION(for (auto a : Xml::Attributes{ "baad='-<-'"}){(void)a;};, "Illegal character: '<' (0x3c)");
+	GLIB_CHECK_RUNTIME_EXCEPTION(for (const auto & a : Xml::Attributes{ "0='baad'"}){(void)a;};, "Illegal character: '0' (0x30)");
+	GLIB_CHECK_RUNTIME_EXCEPTION(for (const auto & a : Xml::Attributes{ "baad=baad"}){(void)a;};, "Illegal character: 'b' (0x62)");
+	GLIB_CHECK_RUNTIME_EXCEPTION(for (const auto & a : Xml::Attributes{ "baad='-<-'"}){(void)a;};, "Illegal character: '<' (0x3c)");
 }
 
 BOOST_AUTO_TEST_CASE(AttributeIteratorEnd)
@@ -578,7 +578,7 @@ BOOST_AUTO_TEST_CASE(AttributeIteratorEnd)
 
 	BOOST_AUTO_TEST_CASE(PrinterEscapes) // move, expand
 	{
-		GLib::Xml::Printer p;
+		Xml::Printer p;
 		p.PushText("Start && End");
 		BOOST_TEST("Start &amp;&amp; End" == p.Xml());
 	}
@@ -586,7 +586,7 @@ BOOST_AUTO_TEST_CASE(AttributeIteratorEnd)
 	BOOST_AUTO_TEST_CASE(PrinterFormat)
 	{
 		{
-			GLib::Xml::Printer formatted{ true };
+			Xml::Printer formatted{ true };
 			formatted.OpenElement("Root");
 			formatted.OpenElement("Nested");
 			formatted.CloseElement();
@@ -599,7 +599,7 @@ BOOST_AUTO_TEST_CASE(AttributeIteratorEnd)
 		}
 
 		{
-			GLib::Xml::Printer unFormatted{ false };
+			Xml::Printer unFormatted{ false };
 			unFormatted.OpenElement("Root");
 			unFormatted.OpenElement("Nested");
 			unFormatted.CloseElement();
@@ -609,7 +609,7 @@ BOOST_AUTO_TEST_CASE(AttributeIteratorEnd)
 		}
 
 		{
-			GLib::Xml::Printer unFormatted2{ true };
+			Xml::Printer unFormatted2{ true };
 			unFormatted2.OpenElement("Root", false);
 			unFormatted2.OpenElement("Nested", false);
 			unFormatted2.CloseElement(false);

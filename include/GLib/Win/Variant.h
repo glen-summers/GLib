@@ -38,7 +38,7 @@ namespace GLib::Win
 		{
 			VARIANT copy;
 			::VariantInit(&copy);
-			GLib::Win::CheckHr(::VariantCopy(&copy, &v), "VariantCopy");
+			CheckHr(::VariantCopy(&copy, &v), "VariantCopy");
 			return copy;
 		}
 
@@ -74,7 +74,7 @@ namespace GLib::Win
 
 		~Variant()
 		{
-			GLib::Win::WarnHr(::VariantClear(&v), "VariantClear");
+			WarnHr(::VariantClear(&v), "VariantClear");
 		}
 
 		VARTYPE Type() const
@@ -85,14 +85,15 @@ namespace GLib::Win
 		std::string ToString() const
 		{
 			VARIANT tmp {};
-			GLib::Win::CheckHr(::VariantChangeType(&tmp, &v, 0, VT_BSTR), "VariantChangeType");
+			CheckHr(::VariantChangeType(&tmp, &v, 0, VT_BSTR), "VariantChangeType");
 			return Cvt::w2a(Detail::Bstr(tmp));
 		}
 
 		// swapicle
 		Variant & operator=(const Variant & other)
 		{
-			GLib::Win::CheckHr(::VariantCopy(&v, &other.v), "VariantCopy");
+			Variant {other}.Swap(*this);
+			CheckHr(::VariantCopy(&v, &other.v), "VariantCopy");
 			return *this;
 		}
 
@@ -113,6 +114,12 @@ namespace GLib::Win
 		bool operator!=(const Variant & other) const noexcept
 		{
 			return !(*this == other);
+		}
+
+	private:
+		void Swap(Variant & rhs)
+		{
+			std::swap(v, rhs.v);
 		}
 	};
 }

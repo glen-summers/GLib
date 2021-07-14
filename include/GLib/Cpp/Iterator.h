@@ -3,7 +3,9 @@
 #include "StateEngine.h"
 
 #include <iterator>
+#include <optional>
 #include <sstream>
+#include <string_view>
 
 namespace GLib::Cpp
 {
@@ -39,9 +41,9 @@ namespace GLib::Cpp
 
 		StateEngine engine;
 
-		const char * ptr {};
-		const char * end {};
-		const char * lastPtr {};
+		std::string_view::const_iterator ptr;
+		std::string_view::const_iterator end;
+		std::optional<std::string_view::const_iterator> lastPtr;
 		unsigned lineNumber {1};
 		unsigned startLineNumber {};
 
@@ -54,7 +56,7 @@ namespace GLib::Cpp
 		using pointer = void;
 		using reference = void;
 
-		Iterator(const char * begin, const char * end)
+		Iterator(std::string_view::const_iterator begin, std::string_view::const_iterator end)
 			: ptr(begin)
 			, end(end)
 			, lastPtr(begin)
@@ -110,13 +112,17 @@ namespace GLib::Cpp
 			throw std::runtime_error(s.str());
 		}
 
-		bool Set(State state, const char * yieldValue)
+		bool Set(State state, std::string_view::const_iterator yieldValue)
 		{
 			bool ret = false;
-			auto size = static_cast<size_t>(yieldValue - lastPtr);
-			if (size != 0)
+			if (yieldValue != lastPtr)
 			{
-				fragment = {state, {lastPtr, size}};
+				// c++17 version
+				fragment = {state, {&(*lastPtr)[0], static_cast<size_t>(yieldValue - *lastPtr)}};
+
+				// c++20 version
+				// fragment = {state, {*lastPtr, yieldValue}}; // current clang tidy gets: error G5C7C4CC9: no viable overloaded '='
+
 				ret = true;
 			}
 			lastPtr = yieldValue;
@@ -138,13 +144,13 @@ namespace GLib::Cpp
 
 			if (!Set(lastState, ptr))
 			{
-				lastPtr = nullptr;
+				lastPtr = {};
 			}
 		}
 
 		void Advance()
 		{
-			if (lastPtr == nullptr)
+			if (!lastPtr.has_value())
 			{
 				throw std::runtime_error("++end");
 			}
@@ -157,7 +163,7 @@ namespace GLib::Cpp
 
 				if (ptr != end)
 				{
-					char c = *ptr++; // todo use std::span
+					char c = *ptr++;
 					newState = engine.Push(c);
 					if (newState == State::Error)
 					{
@@ -212,7 +218,7 @@ namespace GLib::Cpp
 					case State::Directive:
 					case State::Code:
 					{
-						if (Set(oldState, ptr - 1)) // todo use std::span
+						if (Set(oldState, ptr - 1))
 						{
 							return;
 						}
@@ -230,7 +236,7 @@ namespace GLib::Cpp
 
 	class Holder
 	{
-		std::string_view const value;
+		std::string_view value;
 
 	public:
 		Holder(std::string_view value)
@@ -239,13 +245,13 @@ namespace GLib::Cpp
 
 		Iterator begin() const
 		{
-			return Iterator {value.data(), value.size() + value.data()};
+			return {value.cbegin(), value.cend()};
 		}
 
 		Iterator end() const
 		{
 			(void) this;
-			return Iterator {};
+			return {};
 		}
 	};
 }

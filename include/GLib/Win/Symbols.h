@@ -141,7 +141,7 @@ namespace GLib::Win::Symbols
 
 			std::ostringstream searchPath;
 
-			auto const processPath = std::filesystem::path(FileSystem::PathOfProcessHandle(duplicate.get())).parent_path().u8string();
+			auto const processPath = Cvt::p2a(std::filesystem::path(FileSystem::PathOfProcessHandle(duplicate.get())).parent_path());
 			searchPath << processPath << ";";
 
 			// set sym opts, add exe to sym path, legacy code, still needed?

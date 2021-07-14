@@ -19,32 +19,32 @@
 #include <GLib/Win/Window.h>
 #include <GLib/Win/WindowFinder.h>
 
-#include <GLib/Span.h>
-
 #include <boost/test/unit_test.hpp>
 
 #include "TestUtils.h"
 
+using namespace std::chrono_literals;
+
+using namespace GLib::Cvt;
+using namespace GLib::Win;
+
 namespace boost::test_tools::tt_detail
 {
 	template <>
-	struct print_log_value<GLib::Win::Variant>
+	struct print_log_value<Variant>
 	{
-		inline void operator()(std::ostream & str, const GLib::Win::Variant & item)
+		inline void operator()(std::ostream & str, const Variant & item)
 		{
 			str << item.Type();
 		}
 	};
 }
 
-using namespace std::chrono_literals;
-using namespace GLib::Win;
-
 namespace
 {
 	LONG WINAPI Filter(std::ostream & s, EXCEPTION_POINTERS * exceptionInfo)
 	{
-		GLib::Win::Symbols::Print(s, exceptionInfo, 100);
+		Symbols::Print(s, exceptionInfo, 100);
 		return EXCEPTION_EXECUTE_HANDLER;
 	}
 
@@ -72,7 +72,7 @@ namespace
 	std::filesystem::path GetTestApp()
 	{
 		std::string appName = "TestApp.exe", cmakeName="TestApp/"+appName;
-		auto p = std::filesystem::path(GLib::Win::Process::CurrentPath()).parent_path();
+		auto p = std::filesystem::path(Process::CurrentPath()).parent_path();
 		if (exists(p/appName))
 		{
 			p /= appName;
@@ -101,31 +101,31 @@ BOOST_AUTO_TEST_SUITE(WinTests)
 		(void)ld;
 		auto dm = FileSystem::DriveMap();
 
-		std::filesystem::path tempFilePath = std::filesystem::temp_directory_path() / GLib::Cvt::a2w(to_string(Util::Uuid::CreateRandom()) + ".tmp");
-		Handle h(FileSystem::CreateAutoDeleteFile(tempFilePath.u8string()));
+		std::filesystem::path tempFilePath = std::filesystem::temp_directory_path() / a2w(to_string(Util::Uuid::CreateRandom()) + ".tmp");
+		Handle h(FileSystem::CreateAutoDeleteFile(p2a(tempFilePath)));
 		std::string pathOfHandle = FileSystem::PathOfFileHandle(h.get(), VOLUME_NAME_NT);
 
-		BOOST_TEST(!exists(std::filesystem::u8path(pathOfHandle)));
+		BOOST_TEST(!exists(std::filesystem::path(pathOfHandle)));
 		auto normalisedPath = FileSystem::NormalisePath(pathOfHandle, dm);
-		BOOST_TEST(exists(std::filesystem::u8path(normalisedPath)));
+		BOOST_TEST(exists(std::filesystem::path(normalisedPath)));
 	}
 
 	BOOST_AUTO_TEST_CASE(TestPathOfModule)
 	{
 		std::string path = FileSystem::PathOfModule(Process::CurrentModule());
-		BOOST_TEST("Tests.exe" == std::filesystem::path(path).filename().u8string());
+		BOOST_TEST("Tests.exe" == p2a(std::filesystem::path(path).filename()));
 	}
 
 	BOOST_AUTO_TEST_CASE(TestPathOfhandle)
 	{
 		std::filesystem::path tempFilePath = std::filesystem::temp_directory_path()
-			/ GLib::Cvt::a2w(to_string(Util::Uuid::CreateRandom()) + "\xE2\x82\xAC.tmp");
+			/ a2w(to_string(Util::Uuid::CreateRandom()) + "\xE2\x82\xAC.tmp");
 
-		Handle h(FileSystem::CreateAutoDeleteFile(tempFilePath.u8string()));
-		std::string pathOfHandle = FileSystem::PathOfFileHandle(h.get(), 0);
-		BOOST_TEST(true == exists(std::filesystem::u8path(pathOfHandle)));
+		Handle h(FileSystem::CreateAutoDeleteFile(p2a(tempFilePath)));
+		std::wstring pathOfHandle = a2w(FileSystem::PathOfFileHandle(h.get(), 0));
+		BOOST_TEST(true == exists(std::filesystem::path(pathOfHandle)));
 		h.reset();
-		BOOST_TEST(false == exists(std::filesystem::u8path(pathOfHandle)));
+		BOOST_TEST(false == exists(std::filesystem::path(pathOfHandle)));
 	}
 
 	BOOST_AUTO_TEST_CASE(TestDebugStream)
@@ -171,7 +171,7 @@ BOOST_AUTO_TEST_SUITE(WinTests)
 		std::string regValue = key.GetString("TEMP");
 
 		std::string envValue = *GLib::Compat::GetEnv("TEMP");
-		envValue = GLib::Win::FileSystem::LongPath(envValue);
+		envValue = FileSystem::LongPath(envValue);
 		BOOST_TEST(envValue == regValue);
 	}
 
@@ -186,7 +186,7 @@ BOOST_AUTO_TEST_SUITE(WinTests)
 		auto regValue = RegistryKeys::CurrentUser / "Environment" & "TEMP";
 
 		std::string envValue = *GLib::Compat::GetEnv("TEMP");
-		envValue = GLib::Win::FileSystem::LongPath(envValue);
+		envValue = FileSystem::LongPath(envValue);
 
 		BOOST_TEST(std::holds_alternative<std::string>(regValue));
 		BOOST_TEST(envValue == std::get<std::string>(regValue));
@@ -298,7 +298,7 @@ BOOST_AUTO_TEST_SUITE(WinTests)
 
 	BOOST_AUTO_TEST_CASE(TestApp0)
 	{
-		Process p(GetTestApp().u8string(), "-exitTime 1", 0, SW_HIDE);
+		Process p(p2a(GetTestApp()), "-exitTime 1", 0, SW_HIDE);
 		auto scopedTerminator(p.ScopedTerminator());
 		p.WaitForExit(defaultTimeout);
 		scopedTerminator.release();
@@ -309,7 +309,7 @@ BOOST_AUTO_TEST_SUITE(WinTests)
 	{
 		Mta mta;
 		Aut::UIAut aut; // causes leaks
-		Process p(GetTestApp().u8string(), "-exitTime 500", 0, SW_SHOWNORMAL);
+		Process p(p2a(GetTestApp()), "-exitTime 500", 0, SW_SHOWNORMAL);
 		auto scopedTerminator(p.ScopedTerminator());
 		p.WaitForInputIdle(defaultTimeout);
 

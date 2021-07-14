@@ -21,7 +21,7 @@ using namespace GLib::Cpp;
 
 void Parse(const Holder & code)
 {
-	for (auto x : code)
+	for (const auto & x : code)
 	{
 		(void)x;
 	}
@@ -31,7 +31,7 @@ BOOST_AUTO_TEST_SUITE(CppIteratorTests)
 
 BOOST_AUTO_TEST_CASE(Empty)
 {
-	Holder code = { R"()" };
+	Holder code {R"()"};
 
 	std::vector<Fragment> expected {};
 
@@ -40,11 +40,11 @@ BOOST_AUTO_TEST_CASE(Empty)
 
 BOOST_AUTO_TEST_CASE(Code0)
 {
-	Holder code = { "void" };
+	Holder code {"void"};
 
 	std::vector<Fragment> expected
 	{
-		{State::Code, "void" },
+		{State::Code, "void"},
 	};
 
 	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), code.begin(), code.end());
@@ -52,7 +52,7 @@ BOOST_AUTO_TEST_CASE(Code0)
 
 BOOST_AUTO_TEST_CASE(Code1)
 {
-	Holder code = { R"(void foo)" };
+	Holder code { R"(void foo)" };
 
 	std::vector<Fragment> expected
 	{
@@ -66,7 +66,7 @@ BOOST_AUTO_TEST_CASE(Code1)
 
 BOOST_AUTO_TEST_CASE(CommentBlock)
 {
-	Holder code = { R"(/***/)" };
+	Holder code { R"(/***/)" };
 
 	std::vector<Fragment> expected
 	{
@@ -78,7 +78,7 @@ BOOST_AUTO_TEST_CASE(CommentBlock)
 
 BOOST_AUTO_TEST_CASE(CommentWhiteSpace)
 {
-	Holder code = { R"(/**/ 
+	Holder code { R"(/**/ 
 ;)" };
 
 	std::vector<Fragment> expected
@@ -93,7 +93,7 @@ BOOST_AUTO_TEST_CASE(CommentWhiteSpace)
 
 BOOST_AUTO_TEST_CASE(CommentLineContinue)
 {
-	Holder code = { R"(// hello\
+	Holder code { R"(// hello\
 continue
 /* block */ /* another block */
 )" };
@@ -112,7 +112,7 @@ continue
 
 BOOST_AUTO_TEST_CASE(CommentLineNotContinue)
 {
-	Holder code = { "// hello \\ not continuation" };
+	Holder code { "// hello \\ not continuation" };
 
 	std::vector<Fragment> expected
 	{
@@ -124,7 +124,7 @@ BOOST_AUTO_TEST_CASE(CommentLineNotContinue)
 
 BOOST_AUTO_TEST_CASE(CommentLineNotContinueEnd)
 {
-	Holder code = { "// hello not continuation \\/" };
+	Holder code {"// hello not continuation \\/"};
 
 	std::vector<Fragment> expected
 	{
@@ -136,7 +136,7 @@ BOOST_AUTO_TEST_CASE(CommentLineNotContinueEnd)
 
 BOOST_AUTO_TEST_CASE(CommentStar)
 {
-	Holder code = { "/* * */" };
+	Holder code {"/* * */"};
 
 	std::vector<Fragment> expected
 	{
@@ -148,7 +148,7 @@ BOOST_AUTO_TEST_CASE(CommentStar)
 
 BOOST_AUTO_TEST_CASE(NotCommentStart)
 {
-	Holder code = { "int foo=bar/baz;" };
+	Holder code {"int foo=bar/baz;"};
 
 	std::vector<Fragment> expected
 	{
@@ -163,7 +163,7 @@ BOOST_AUTO_TEST_CASE(NotCommentStart)
 
 BOOST_AUTO_TEST_CASE(CommentFromStateCode)
 {
-	Holder code = { "bar//comment\n;" };
+	Holder code {"bar//comment\n;"};
 
 	std::vector<Fragment> expected
 	{
@@ -177,7 +177,7 @@ BOOST_AUTO_TEST_CASE(CommentFromStateCode)
 
 BOOST_AUTO_TEST_CASE(String)
 {
-	Holder code = { R"(auto fred = "this is a string";)" };
+	Holder code {R"(auto fred = "this is a string";)"};
 
 	std::vector<Fragment> expected
 	{
@@ -196,7 +196,7 @@ BOOST_AUTO_TEST_CASE(String)
 
 BOOST_AUTO_TEST_CASE(StringFromStateCode)
 {
-	Holder code = { R"(;"hello";)" };
+	Holder code {R"(;"hello";)"};
 
 	std::vector<Fragment> expected
 	{
@@ -210,7 +210,7 @@ BOOST_AUTO_TEST_CASE(StringFromStateCode)
 
 BOOST_AUTO_TEST_CASE(StringContinue)
 {
-	Holder code = { R"--("abc\
+	Holder code {R"--("abc\
 def")--" };
 
 	std::vector<Fragment> expected
@@ -224,7 +224,7 @@ def")--" }}
 
 BOOST_AUTO_TEST_CASE(StringNotContinue)
 {
-	Holder code = { R"--("\\abc\\")--" };
+	Holder code {R"--("\\abc\\")--"};
 
 	std::vector<Fragment> expected
 	{
@@ -236,7 +236,7 @@ BOOST_AUTO_TEST_CASE(StringNotContinue)
 
 BOOST_AUTO_TEST_CASE(StringWithQuotes)
 {
-	Holder code = { R"--("\"abc\"")--" };
+	Holder code {R"--("\"abc\"")--"};
 
 	std::vector<Fragment> expected
 	{
@@ -248,10 +248,7 @@ BOOST_AUTO_TEST_CASE(StringWithQuotes)
 
 BOOST_AUTO_TEST_CASE(RawString)
 {
-	Holder code =
-	{
-		R"--(auto fred = R"(this is a raw string)";)--"
-	};
+	Holder code {R"--(auto fred = R"(this is a raw string)";)--"};
 
 	std::vector<Fragment> expected
 	{
@@ -271,7 +268,7 @@ BOOST_AUTO_TEST_CASE(RawString)
 
 BOOST_AUTO_TEST_CASE(RawStringPrefix)
 {
-	Holder code = { R"--(auto fred = R"==(this is a raw string)==";)--" };
+	Holder code {R"--(auto fred = R"==(this is a raw string)==";)--"};
 
 	std::vector<Fragment> expected
 	{
@@ -291,7 +288,7 @@ BOOST_AUTO_TEST_CASE(RawStringPrefix)
 
 BOOST_AUTO_TEST_CASE(RawStringIgnored)
 {
-	Holder code = { R"(R"--(hello)--)--")" };
+	Holder code {R"(R"--(hello)--)--")"};
 
 	std::vector<Fragment> expected
 	{
@@ -304,7 +301,7 @@ BOOST_AUTO_TEST_CASE(RawStringIgnored)
 
 BOOST_AUTO_TEST_CASE(RawStringPrefixTooLong)
 {
-	std::string_view  code = R"(R"12345678901234567(content)12345678901234567")";
+	std::string_view code = R"(R"12345678901234567(content)12345678901234567")";
 
 	GLIB_CHECK_RUNTIME_EXCEPTION(Parse(code), "Illegal character: '7' (0x37) at line: 1, state: RawStringPrefix");
 }
@@ -332,7 +329,7 @@ BOOST_AUTO_TEST_CASE(RawStringPrefixBackslash)
 
 BOOST_AUTO_TEST_CASE(RawStringNewLine)
 {
-	Holder code =
+	Holder code
 	{
 		R"--(R"(1
 2
@@ -426,7 +423,7 @@ BOOST_AUTO_TEST_CASE(SystemInclude)
 
 BOOST_AUTO_TEST_CASE(CharacterLiteral)
 {
-	Holder code = { R"(auto char1='"';
+	Holder code {R"(auto char1='"';
 auto char2='\"';
 auto char3='\\';
 )" };
@@ -460,7 +457,7 @@ auto char3='\\';
 
 BOOST_AUTO_TEST_CASE(CharacterLiteralFromStateNone)
 {
-	Holder code = { R"('\x00';)" };
+	Holder code {R"('\x00';)"};
 
 	std::vector<Fragment> expected
 	{
@@ -473,7 +470,7 @@ BOOST_AUTO_TEST_CASE(CharacterLiteralFromStateNone)
 
 BOOST_AUTO_TEST_CASE(CharacterLiteralFromStateWhitespace)
 {
-	Holder code = { R"( '\x00';)" };
+	Holder code {R"( '\x00';)"};
 
 	std::vector<Fragment> expected
 	{
@@ -487,7 +484,7 @@ BOOST_AUTO_TEST_CASE(CharacterLiteralFromStateWhitespace)
 
 BOOST_AUTO_TEST_CASE(NotCharacterLiteral)
 {
-	Holder code = { R"(0xFFFF'FFFFU;)" };
+	Holder code {R"(0xFFFF'FFFFU;)"};
 
 	std::vector<Fragment> expected
 	{
@@ -499,7 +496,7 @@ BOOST_AUTO_TEST_CASE(NotCharacterLiteral)
 
 BOOST_AUTO_TEST_CASE(Guard)
 {
-	Holder code = { R"(/* comment */
+	Holder code {R"(/* comment */
 #ifndef file_included // another comment
 #define file_included
 
@@ -524,7 +521,7 @@ BOOST_AUTO_TEST_CASE(Guard)
 
 BOOST_AUTO_TEST_CASE(DirectiveContinue)
 {
-	Holder code = { R"(#include \
+	Holder code {R"(#include \
 "foo")" };
 
 	std::vector<Fragment> expected
@@ -659,7 +656,7 @@ BOOST_AUTO_TEST_CASE(SymbolNamePreOps)
 
 BOOST_AUTO_TEST_CASE(SymbolNamePostOps)
 {
-  std::string value = "Foo<Bar> operator>";
+	std::string value = "Foo<Bar> operator>";
 	RemoveTemplateDefinitions(value);
 	BOOST_TEST("Foo<T> operator>" == value);
 
@@ -698,7 +695,7 @@ void ScanFile(const fs::path & p, std::ostream & s)
 	std::ifstream t(p);
 	if (!t)
 	{
-		std::cout << "read failed  : " + p.u8string() << '\n';
+		std::cout << "read failed : " + p.u8string() << '\n';
 		return;
 	}
 

@@ -2,6 +2,7 @@
 
 #include <GLib/stackorheap.h>
 
+#include <memory>
 #include <stdexcept>
 #include <string>
 

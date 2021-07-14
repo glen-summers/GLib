@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Windows.h>
+
 #include <Commctrl.h>
 
 #include <GLib/Win/D2d.h>
@@ -15,7 +16,7 @@ using namespace GLib::Win;
 
 class MainWindow : public Window
 {
-	inline static GLib::Flog::Log log = GLib::Flog::LogManager::GetLog<MainWindow>();
+	inline static GLib::Flog::Log const log = GLib::Flog::LogManager::GetLog<MainWindow>();
 
 	D2d::Factory factory;
 	D2d::Renderer renderer{factory};
@@ -37,7 +38,7 @@ protected:
 		{
 			case ID_HELP_ABOUT:
 			{
-				int button;
+				int button {};
 				WarnHr(::TaskDialog(Handle(), Instance(), L"About", L"Main", L"Sub", TDCBF_CLOSE_BUTTON, TD_INFORMATION_ICON, &button), "TaskDialog");
 				break;
 			}
@@ -47,6 +48,8 @@ protected:
 				Close();
 				break;
 			}
+
+			default:;
 		}
 	}
 
@@ -70,7 +73,7 @@ protected:
 		}
 	}
 
-	CloseResult OnClose() noexcept
+	CloseResult OnClose() noexcept override
 	{
 		log.Info("OnClose");
 		return CloseResult::Allow;

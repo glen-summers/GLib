@@ -22,11 +22,6 @@ namespace GLib::Win
 			return reinterpret_cast<void *>(value);
 		}
 
-		inline wchar_t * ToPseudoWritableString(const wchar_t * value)
-		{
-			return const_cast<wchar_t *>(value);
-		}
-
 		inline bool Terminate(HANDLE process, UINT terminationExitCode) noexcept
 		{
 			DWORD exitCode = 0;
@@ -170,19 +165,20 @@ namespace GLib::Win
 		{
 			STARTUPINFOW sui = {};
 			sui.cb = sizeof(STARTUPINFOW);
-			sui.lpDesktop = desktop.empty() ? nullptr : Detail::ToPseudoWritableString(desktop.c_str());
+
+			std::unique_ptr<wchar_t, void (*)(void *)> cmdCopy {::_wcsdup(cmd.c_str()), std::free};
+			std::unique_ptr<wchar_t, void (*)(void *)> desktopCopy {::_wcsdup(desktop.c_str()), std::free};
+
+			sui.lpDesktop = desktopCopy.get();
 			sui.dwFlags = STARTF_USESHOWWINDOW;
 			sui.wShowWindow = show;
 
 			PROCESS_INFORMATION pi = {};
-			wchar_t * writableCmd = cmd.empty() ? nullptr : Detail::ToPseudoWritableString(cmd.c_str());
-			Util::AssertTrue(::CreateProcessW(app.c_str(), writableCmd, nullptr, nullptr, FALSE, creationFlags, nullptr, nullptr, &sui, &pi),
+
+			Util::AssertTrue(::CreateProcessW(app.c_str(), cmdCopy.get(), nullptr, nullptr, FALSE, creationFlags, nullptr, nullptr, &sui, &pi),
 											 "CreateProcessW");
-			Win::Handle p(pi.hProcess);
-			Win::Handle t(pi.hThread);
-			(void) t;
-			// DWORD pid = pi.dwProcessId;
-			return p;
+			Win::Handle(pi.hThread).reset();
+			return Win::Handle {pi.hProcess};
 		}
 
 		static void Wait(HANDLE h, DWORD timeoutMilliseconds)

@@ -2,8 +2,8 @@
 #define STACK_OR_HEAP_H
 
 #include <array>
-#include <memory>
 #include <variant>
+#include <vector>
 
 namespace GLib::Util
 {
@@ -12,7 +12,7 @@ namespace GLib::Util
 	class StackOrHeap
 	{
 		using Stack = std::array<T, StackElementCount>;
-		using Heap = std::unique_ptr<T[]>;
+		using Heap = std::vector<T>;
 
 		size_t heapSize {};
 		std::variant<Stack, Heap> storage;
@@ -41,12 +41,12 @@ namespace GLib::Util
 
 		T * Get()
 		{
-			return HeapInUse() ? std::get<1>(storage).get() : std::get<0>(storage).data();
+			return HeapInUse() ? &std::get<1>(storage)[0] : std::get<0>(storage).data();
 		}
 
 		const T * Get() const
 		{
-			return HeapInUse() ? std::get<1>(storage).get() : std::get<0>(storage).data();
+			return HeapInUse() ? &std::get<1>(storage)[0] : std::get<0>(storage).data();
 		}
 
 	private:
@@ -62,7 +62,7 @@ namespace GLib::Util
 
 		void AllocateHeap(size_t size)
 		{
-			storage = std::make_unique<T[]>(size);
+			storage = std::vector<T>(size);
 			heapSize = size;
 		}
 	};

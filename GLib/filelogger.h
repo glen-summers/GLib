@@ -27,7 +27,7 @@ class FileLogger
 	StreamInfo streamInfo;
 	GLib::Flog::Level logLevel = GLib::Flog::Level::Info; // config
 	size_t maxFileSize = DefaultMaxFileSize;							// config
-	static thread_local LogState logState;
+	static thread_local LogState const logState;
 
 public:
 	FileLogger();

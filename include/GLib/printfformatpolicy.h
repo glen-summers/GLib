@@ -78,7 +78,7 @@ namespace GLib
 			template <size_t>
 			void FormatPointer(std::ostream & stm, void * const & value)
 			{
-				(void) value;
+				(void) stm;
 				throw std::runtime_error("Unknown pointer size : " + std::to_string(sizeof(value)));
 			}
 

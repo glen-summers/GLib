@@ -10,7 +10,7 @@
 
 class Coverage : public GLib::Win::Debugger
 {
-	inline static auto log = GLib::Flog::LogManager::GetLog<Coverage>();
+	inline static auto const log = GLib::Flog::LogManager::GetLog<Coverage>();
 
 	static constexpr unsigned char debugBreakByte = 0xCC;
 	static constexpr unsigned int FooFoo = 0xf00f00;

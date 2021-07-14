@@ -19,12 +19,12 @@ namespace TestUtils
 	}
 
 	template <typename Iterator>
-	void Dump(std::ostream & s, Iterator begin, Iterator end, unsigned count)
+	void Dump(std::ostream & s, Iterator begin, Iterator end, size_t maxCount)
 	{
 		s << '[';
 		if (begin != end)
 		{
-			for (auto it = begin; it!=end && count != 0; ++it, --count)
+			for (auto it = begin; it != end && maxCount != 0; ++it, --maxCount)
 			{
 				switch (*it)
 				{
@@ -47,7 +47,7 @@ namespace TestUtils
 		s << ']';
 	}
 
-	inline bool CompareStrings(const std::string & expected, const std::string & actual, unsigned length, std::ostringstream & msg)
+	inline bool CompareStrings(const std::string & expected, const std::string & actual, size_t maxCount, std::ostringstream & msg)
 	{
 		auto ret = std::mismatch(expected.begin(), expected.end(), actual.begin(), actual.end());
 
@@ -57,27 +57,27 @@ namespace TestUtils
 			size_t pos = std::distance(actual.begin(), ret.second);
 			msg << "Difference at position: " << pos << "\n";
 			msg << "Expected: ";
-			Dump(msg, ret.first, expected.end(), length);
+			Dump(msg, ret.first, expected.end(), maxCount);
 			msg << '\n';
 
 			msg << "Actual  : ";
-			Dump(msg, actual.begin() + pos, actual.end(), length);
+			Dump(msg, actual.begin() + pos, actual.end(), maxCount);
 			result = true;
 		}
 		else if (ret.first != expected.end())
 		{
 			msg << "Expected data at end missing: ";
-			Dump(msg , ret.first, expected.end(), length);
+			Dump(msg, ret.first, expected.end(), maxCount);
 			result = true;
 		}
 
 		return result;
 	}
 
-	inline void Compare(const std::string & expected, const std::string & actual, unsigned length = 30)
+	inline void Compare(const std::string & expected, const std::string & actual, size_t maxCount = 30)
 	{
 		std::ostringstream stm;
-		if (CompareStrings(expected, actual, length, stm))
+		if (CompareStrings(expected, actual, maxCount, stm))
 		{
 			throw std::runtime_error(stm.str());
 		}

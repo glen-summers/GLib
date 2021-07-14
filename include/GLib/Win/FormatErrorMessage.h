@@ -13,16 +13,15 @@ namespace GLib::Win::Util
 	{
 		inline DWORD FormatMessageCast(DWORD dwFlags, LPCVOID lpSource, DWORD dwMessageId, LPWSTR * lpBuffer)
 		{
-			return ::FormatMessageW(dwFlags, lpSource, dwMessageId, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-															reinterpret_cast<LPWSTR>(lpBuffer), 0, nullptr);
+			return ::FormatMessageW(dwFlags, lpSource, dwMessageId, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), reinterpret_cast<LPWSTR>(lpBuffer), 0,
+															nullptr);
 		}
 	}
 
 	inline void FormatErrorMessage(std::ostream & stm, unsigned int error, const wchar_t * moduleName = nullptr)
 	{
 		wchar_t * pszMsg = nullptr;
-		int flags = FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM |
-								FORMAT_MESSAGE_IGNORE_INSERTS;
+		int flags = FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS;
 		if (moduleName != nullptr)
 		{
 			flags |= FORMAT_MESSAGE_FROM_HMODULE;

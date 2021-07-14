@@ -168,7 +168,7 @@ namespace GLib::Win
 			std::string const logicalName = FileSystem::PathOfFileHandle(info.hFile, VOLUME_NAME_NT);
 			std::string const name = FileSystem::NormalisePath(logicalName, driveMap);
 
-			GLib::Win::Debug::Write("Attach Process: {0}, Pid: {1}", name, processId);
+			Debug::Write("Attach Process: {0}, Pid: {1}", name, processId);
 
 			const Symbols::SymProcess & process =
 				symbols.AddProcess(processId, info.hProcess, Detail::ConvertAddress(info.lpBaseOfImage), info.hFile, name);

@@ -4,6 +4,7 @@
 #include <GLib/Xml/StateEngine.h>
 #include <GLib/Xml/Utils.h>
 
+#include <optional>
 #include <sstream>
 #include <stdexcept>
 
@@ -19,11 +20,13 @@ namespace GLib::Xml
 
 	class AttributeIterator
 	{
+		using Iterator = std::string_view::const_iterator;
+
 		Xml::StateEngine engine;
 		const NameSpaceManager * manager {};
-		const char * ptr {};
-		const char * end {};
-		const char * currentPtr {};
+		Iterator ptr;
+		Iterator end;
+		std::optional<Iterator> currentPtr;
 
 		/////////// working data
 		Utils::PtrPair attributeName;
@@ -31,7 +34,7 @@ namespace GLib::Xml
 		///////////
 
 	public:
-		AttributeIterator(const NameSpaceManager * manager, const char * begin, const char * end)
+		AttributeIterator(const NameSpaceManager * manager, Iterator begin, Iterator end)
 			: engine(State::AttributeSpace)
 			, manager(manager)
 			, ptr(begin)
@@ -65,7 +68,7 @@ namespace GLib::Xml
 		{
 			auto qName = Utils::ToStringView(attributeName);
 			auto value = Utils::ToStringView(attributeValue);
-			auto rawValue = Utils::ToStringView(attributeName.first, attributeValue.second + 1);
+			auto rawValue = Utils::ToStringView({attributeName.first, attributeValue.second + 1});
 
 			if (manager != nullptr)
 			{
@@ -86,9 +89,13 @@ namespace GLib::Xml
 		void Advance()
 		{
 			attributeName = attributeValue = {};
-			currentPtr = ptr;
 
-			if (currentPtr == nullptr)
+			if (ptr != end)
+			{
+				currentPtr = ptr;
+			}
+
+			if (!currentPtr.has_value())
 			{
 				throw std::runtime_error("++end");
 			}
@@ -97,19 +104,19 @@ namespace GLib::Xml
 			{
 				if (ptr == end)
 				{
-					currentPtr = nullptr;
+					currentPtr = {};
 					// verify state == ?
 					return;
 				}
 
-				const auto * const oldPtr = ptr;
+				const auto oldPtr = ptr;
 				const auto oldState = engine.GetState();
 				const auto newState = engine.Push(*ptr);
 				if (newState == Xml::State::Error)
 				{
 					IllegalCharacter(*ptr);
 				}
-				++ptr; // todo use std::span
+				++ptr;
 
 				if (newState != oldState)
 				{

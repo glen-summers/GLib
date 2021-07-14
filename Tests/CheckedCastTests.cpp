@@ -27,8 +27,8 @@ BOOST_AUTO_TEST_CASE(DetailTest)
 
 BOOST_AUTO_TEST_CASE(SameType)
 {
-	BOOST_TEST(std::numeric_limits<int>::max() == GLib::Util::checked_cast<int>(std::numeric_limits<int>::max()));
-	BOOST_TEST(std::numeric_limits<int>::min() == GLib::Util::checked_cast<int>(std::numeric_limits<int>::min()));
+	BOOST_TEST(std::numeric_limits<int>::max() == checked_cast<int>(std::numeric_limits<int>::max()));
+	BOOST_TEST(std::numeric_limits<int>::min() == checked_cast<int>(std::numeric_limits<int>::min()));
 }
 
 BOOST_AUTO_TEST_CASE(SameSignSubranged)
@@ -44,7 +44,7 @@ BOOST_AUTO_TEST_CASE(SameSignSubranged)
 
 BOOST_AUTO_TEST_CASE(SignedToUnsignedReverseSubranged)
 {
-	BOOST_TEST(static_cast<unsigned short>(1234) == GLib::Util::checked_cast<unsigned short>(1234));
+	BOOST_TEST(static_cast<unsigned short>(1234) == checked_cast<unsigned short>(1234));
 
 	BOOST_CHECK_EXCEPTION(checked_cast<unsigned short>(std::numeric_limits<int>::min()), Exception,
 		IsUnderflow);

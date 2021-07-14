@@ -11,6 +11,8 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#include <GLib/cvt.h>
+
 namespace GLib::Compat
 {
 	namespace filesystem = std::experimental::filesystem;
@@ -70,7 +72,7 @@ namespace GLib::Compat
 
 	inline std::string ProcessPath()
 	{
-		return filesystem::read_symlink("/proc/self/exe").u8string();
+		return Cvt::p2a(filesystem::read_symlink("/proc/self/exe"));
 	}
 
 	inline std::string CommandLine()
@@ -89,7 +91,7 @@ namespace GLib::Compat
 
 	inline std::string ProcessName()
 	{
-		return filesystem::path(ProcessPath()).filename().u8string();
+		return Cvt::p2a(filesystem::path(ProcessPath()).filename());
 	}
 
 	inline void TzSet()

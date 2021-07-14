@@ -3,6 +3,7 @@
 #include <GLib/Xml/Element.h>
 #include <GLib/Xml/NameSpaceManager.h>
 #include <GLib/Xml/StateEngine.h>
+#include <GLib/Xml/Utils.h>
 
 #include <iterator>
 #include <sstream>
@@ -28,9 +29,9 @@ namespace GLib::Xml
 
 		StateEngine engine;
 
-		const char * ptr {};
-		const char * end {};
-		const char * lastPtr {};
+		std::string_view::const_iterator ptr {};
+		std::string_view::const_iterator const end {};
+		std::optional<std::string_view::const_iterator> lastPtr;
 		NameSpaceManager * manager = {};
 
 		/////////// element working data, could just use element storage
@@ -39,7 +40,7 @@ namespace GLib::Xml
 		Utils::PtrPair attributes;
 		Utils::PtrPair attributeName;
 
-		const char * attributeValueStart {}; // can use just one start Ptr?
+		std::string_view::const_iterator attributeValueStart;
 
 		bool contentClosed {};
 		///////////
@@ -54,7 +55,7 @@ namespace GLib::Xml
 		using pointer = void;
 		using reference = void;
 
-		Iterator(const char * begin, const char * end, NameSpaceManager * manager)
+		Iterator(std::string_view::const_iterator begin, std::string_view::const_iterator end, NameSpaceManager * manager)
 			: ptr(begin)
 			, end(end)
 			, lastPtr(begin)
@@ -63,7 +64,7 @@ namespace GLib::Xml
 			Advance();
 		}
 
-		Iterator() = default; // end
+		Iterator() = default;
 
 		bool operator==(const Iterator & other) const
 		{
@@ -107,7 +108,7 @@ namespace GLib::Xml
 
 		void Advance()
 		{
-			if (lastPtr == nullptr)
+			if (!lastPtr.has_value())
 			{
 				throw std::runtime_error("++end");
 			}
@@ -116,7 +117,7 @@ namespace GLib::Xml
 			{
 				if (ptr == end)
 				{
-					lastPtr = nullptr;
+					lastPtr.reset();
 					if (!engine.HasRootElement())
 					{
 						throw std::runtime_error("No root element");
@@ -129,14 +130,14 @@ namespace GLib::Xml
 					return;
 				}
 
-				const auto * const oldPtr = ptr;
+				const auto oldPtr = ptr;
 				const auto oldState = engine.GetState();
 				const auto newState = engine.Push(*ptr);
 				if (newState == Xml::State::Error)
 				{
 					IllegalCharacter(*ptr);
 				}
-				++ptr; // todo use std::span
+				++ptr;
 
 				if (newState != oldState)
 				{
@@ -149,14 +150,14 @@ namespace GLib::Xml
 								break;
 							}
 
-							element = {Xml::ElementType::Text, Utils::ToStringView(lastPtr, oldPtr)};
+							element = {Xml::ElementType::Text, Utils::ToStringView({*lastPtr, oldPtr})};
 							lastPtr = oldPtr;
 							return;
 						}
 
 						case Xml::State::CommentEnd:
 						{
-							element = {Xml::ElementType::Comment, Utils::ToStringView(lastPtr, ptr)};
+							element = {Xml::ElementType::Comment, Utils::ToStringView({*lastPtr, ptr})};
 							lastPtr = ptr;
 							return;
 						}
@@ -167,7 +168,7 @@ namespace GLib::Xml
 							elementType = ElementType::Open;
 							if (newState == State::AttributeSpace)
 							{
-								attributes = {ptr, nullptr};
+								attributes = {ptr, ptr};
 							}
 							break;
 						}
@@ -192,21 +193,16 @@ namespace GLib::Xml
 					{
 						case Xml::State::AttributeEnd:
 						{
-							manager->Push(Utils::ToStringView(attributeName), Utils::ToStringView(attributeValueStart, oldPtr).substr(1), elementStack.size());
+							manager->Push(Utils::ToStringView(attributeName), Utils::ToStringView({attributeValueStart, oldPtr}).substr(1), elementStack.size());
 							attributes.second = ptr;
 							break;
 						}
 
 						case Xml::State::ElementName:
 						case Xml::State::ElementEndName:
-						{
-							elementName.first = oldPtr;
-							break;
-						}
-
 						case Xml::State::Bang:
 						{
-							elementName.first = nullptr;
+							elementName = {oldPtr, oldPtr};
 							break;
 						}
 
@@ -233,7 +229,13 @@ namespace GLib::Xml
 							// bug: white space at end is not in outerXml...
 							// don't yield for !doctype atm
 							// just set a member value for now?
-							if (elementName.first != nullptr)
+
+							if (elementName.first == elementName.second) // skip docktype
+							{
+								break;
+							}
+
+							if (elementName.first != end && elementName.first != elementName.second)
 							{
 								ProcessElement(ptr);
 								lastPtr = ptr;
@@ -248,7 +250,7 @@ namespace GLib::Xml
 			}
 		}
 
-		void ProcessElement(const char * outerXmlEnd)
+		void ProcessElement(std::string_view::const_iterator outerXmlEnd)
 		{
 			if (contentClosed)
 			{
@@ -259,9 +261,9 @@ namespace GLib::Xml
 			auto [name, nameSpace] = manager->Normalise(qName);
 
 			element = {qName, name, nameSpace, elementType};
-			element.outerXml = Utils::ToStringView(lastPtr, outerXmlEnd);
+			element.outerXml = Utils::ToStringView({*lastPtr, outerXmlEnd});
 
-			if (attributes.first != nullptr && attributes.second != nullptr && element.type != ElementType::Close)
+			if (attributes.first != attributes.second && attributes.first != end && attributes.second != end && element.type != ElementType::Close)
 			{
 				element.attributes = {Utils::ToStringView(attributes), manager};
 			}
@@ -330,7 +332,7 @@ namespace GLib::Xml
 
 		Iterator begin()
 		{
-			return {value.data(), value.size() + value.data(), &manager};
+			return {value.begin(), value.end(), &manager};
 		}
 
 		Iterator end() const

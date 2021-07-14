@@ -3,6 +3,9 @@
 #include <GLib/Win/ErrorCheck.h>
 #include <GLib/stackorheap.h>
 
+#define STRINGIFY2(X) #X
+#define STRINGIFY(X) STRINGIFY2(X)
+
 namespace GLib::Win
 {
 	using RegistryValue = std::variant<std::string, uint32_t, uint64_t>;
@@ -11,6 +14,52 @@ namespace GLib::Win
 	{
 		inline static constexpr DWORD Read = KEY_READ;
 		inline static constexpr DWORD AllAccess = KEY_ALL_ACCESS;
+		inline static constexpr size_t pos = 30;
+		inline static constexpr size_t len = 8;
+
+		constexpr ULONG_PTR SignExtend(uint32_t value)
+		{
+			switch (sizeof(ULONG_PTR))
+			{
+				case sizeof(uint32_t):
+				{
+					return static_cast<ULONG_PTR>(value);
+				}
+				case sizeof(uint64_t):
+				{
+					constexpr auto magicNumber = 0xffffffff00000000;
+					return static_cast<ULONG_PTR>(magicNumber + value);
+				}
+				default:
+				{
+					throw std::logic_error("Unexpected");
+				}
+			}
+		}
+
+		constexpr uint32_t Hex(char number)
+		{
+			constexpr auto ten = 0x0a;
+			return (number >= '0' && number <= '9')		? number - '0'
+						 : (number >= 'a' && number <= 'f') ? number - 'a' + ten
+						 : (number >= 'A' && number <= 'F') ? number - 'A' + ten
+																								: throw std::runtime_error("!");
+		}
+
+		constexpr uint32_t ToInt32(std::string_view s)
+		{
+			uint32_t result {};
+			for (auto c : s)
+			{
+				result <<= 4U;
+				result += Hex(c);
+			}
+			return result;
+		}
+
+		inline static constexpr ULONG_PTR ClassesRoot = SignExtend(ToInt32(std::string_view {STRINGIFY(HKEY_CLASSES_ROOT)}.substr(pos, len)));
+		inline static constexpr ULONG_PTR CurrentUser = SignExtend(ToInt32(std::string_view {STRINGIFY(HKEY_CURRENT_USER)}.substr(pos, len)));
+		inline static constexpr ULONG_PTR LocalMachine = SignExtend(ToInt32(std::string_view {STRINGIFY(HKEY_LOCAL_MACHINE)}.substr(pos, len)));
 
 		struct KeyCloser
 		{

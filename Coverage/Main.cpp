@@ -84,7 +84,7 @@ Coverage c:\Build\Main.exe C:\Report -i C:\MainCode C:\Utils\ -x C:\ExternalCode
 		(void)scope;
 
 		Coverage dbg(executable, debugChildProcesses, includes, excludes);
-		constexpr unsigned TimeoutMilliseconds = 1000; // just use INFINITE?
+		constexpr unsigned TimeoutMilliseconds = 1000;
 		while(dbg.ProcessEvents(TimeoutMilliseconds))
 		{}
 

@@ -18,11 +18,12 @@ namespace GLib::Xml
 
 		AttributeIterator begin() const
 		{
-			return {manager, data.data(), data.data() + data.size()};
+			return {manager, data.begin(), data.end()};
 		}
 
-		static AttributeIterator end()
+		AttributeIterator end() const
 		{
+			(void) this;
 			return {};
 		}
 

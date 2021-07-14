@@ -31,6 +31,12 @@ namespace GLib::Cvt
 		// Detail::AssertTrue(convert.converted() == s.size(), "conversion failed");
 	}
 
+	template <typename T>
+	inline std::string p2a(const T & t)
+	{
+		return w2a(t.wstring());
+	}
+
 #ifdef _MSC_VER
 #pragma warning(pop)
 #endif

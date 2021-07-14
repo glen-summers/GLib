@@ -31,7 +31,7 @@ namespace GLib::Win
 		ComInitialiser()
 			: com {this}
 		{
-			GLib::Win::CheckHr(::CoInitializeEx(nullptr, static_cast<DWORD>(appartment)), "CoInitializeEx");
+			CheckHr(::CoInitializeEx(nullptr, static_cast<DWORD>(appartment)), "CoInitializeEx");
 		}
 	};
 

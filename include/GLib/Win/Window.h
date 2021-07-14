@@ -151,7 +151,7 @@ namespace GLib::Win
 			AssociateHandle(param, handle.get());
 
 #ifdef GLIB_DEBUG_MESSAGES
-			GLib::Win::MessageDebug::Write("Window create", handle.get(), param);
+			MessageDebug::Write("Window create", handle.get(), param);
 #endif
 
 			return handle;

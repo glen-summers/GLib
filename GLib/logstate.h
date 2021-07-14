@@ -12,14 +12,14 @@ class LogState
 	static constexpr auto DefaultCapacity = 256;
 	using StreamType = GLib::Util::GenericOutStream<char, GLib::Util::VectorStreamBuffer<char, DefaultCapacity>>;
 
-	std::stack<Scope> scopes;
-	int depth {};
-	bool pending {};
-	const char * threadName {};
-	StreamType stream;
+	mutable std::stack<Scope> scopes;
+	mutable int depth {};
+	mutable bool pending {};
+	mutable const char * threadName {};
+	mutable StreamType stream;
 
 public:
-	std::ostream & Stream()
+	std::ostream & Stream() const
 	{
 		return stream.Stream();
 	}
@@ -29,7 +29,7 @@ public:
 		return scopes.top();
 	}
 
-	bool Pop()
+	bool Pop() const
 	{
 		scopes.pop();
 		if (!pending)
@@ -39,7 +39,7 @@ public:
 		return std::exchange(pending, false);
 	}
 
-	void Push(const Scope & scope)
+	void Push(const Scope & scope) const
 	{
 		scopes.push(scope);
 		pending = true;
@@ -60,27 +60,27 @@ public:
 		return threadName;
 	}
 
-	void ThreadName(const char * name)
+	void ThreadName(const char * name) const
 	{
 		threadName = name;
 	}
 
-	void Put(char c)
+	void Put(char c) const
 	{
 		stream.Stream().put(c);
 	}
 
-	std::string_view Get()
+	std::string_view Get() const
 	{
 		return stream.Buffer().Get();
 	}
 
-	void Reset()
+	void Reset() const
 	{
 		stream.Buffer().Reset();
 	}
 
-	void Commit()
+	void Commit() const
 	{
 		++depth;
 		pending = false;

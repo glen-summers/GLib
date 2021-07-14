@@ -58,8 +58,7 @@ namespace GLib::Win::Aut
 		{
 			ComPtr<IUIAutomationElement> element;
 			CheckHr(automation->ElementFromHandle(hWnd, GetAddress(element)), "ElementFromHandle");
-			// null check?
-			return element;
+			return std::move(element);
 		}
 	};
 }

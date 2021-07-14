@@ -7,19 +7,14 @@
 
 namespace GLib::Xml::Utils
 {
-	using PtrPair = std::pair<const char *, const char *>;
+	using PtrPair = std::pair<std::string_view::const_iterator, std::string_view::const_iterator>;
 
 	inline std::string_view ToStringView(const PtrPair & value)
 	{
-		return {value.first, static_cast<size_t>(value.second - value.first)};
+		return {&value.first[0], static_cast<size_t>(value.second - value.first)};
 	}
 
-	inline std::string_view ToStringView(const char * start, const char * end)
-	{
-		return {start, static_cast<size_t>(end - start)};
-	}
-
-	using Entity = std::pair<const char *, char>;
+	using Entity = std::pair<std::string_view, char>;
 
 	// clang-format off
 	static constexpr auto EntitySize = 5;

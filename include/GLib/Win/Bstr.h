@@ -41,7 +41,7 @@ namespace GLib::Win
 
 		std::string Value() const
 		{
-			return value != nullptr ? Cvt::w2a(value) : "";
+			return value != nullptr ? Cvt::w2a(value) : std::string {};
 		}
 
 		static Bstr Attach(BSTR value)

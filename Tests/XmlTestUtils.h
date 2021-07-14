@@ -80,9 +80,9 @@ namespace GLib::Xml
 
 	inline void Parse(const std::string_view & xml) // +expectexception
 	{
-		for (auto e : Holder{xml})
+		for (const auto & e : Holder {xml})
 		{
-			for (auto a : e.Attributes())
+			for (const auto & a : e.Attributes())
 			{
 				(void)a;
 			}
