@@ -10,8 +10,6 @@
 #include <sstream>
 #include <thread>
 
-thread_local LogState const FileLogger::logState;
-
 FileLogger::FileLogger()
 	: baseFileName(GLib::Compat::ProcessName() + "_" + std::to_string(GLib::Compat::ProcessId()))
 	, path(GLib::Compat::filesystem::temp_directory_path() / "glogfiles")
@@ -22,6 +20,12 @@ FileLogger::FileLogger()
 FileLogger::~FileLogger()
 {
 	CloseStream(); //
+}
+
+const LogState & FileLogger::GetLogState()
+{
+	thread_local LogState const state;
+	return state;
 }
 
 void FileLogger::Write(GLib::Flog::Level level, const char * prefix, std::string_view message)

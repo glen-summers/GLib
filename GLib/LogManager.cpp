@@ -24,7 +24,7 @@ size_t LogManager::SetMaxFileSize(size_t size)
 void LogManager::SetThreadName(const char * name)
 {
 	FileLogger::Write(Level::Info, "ThreadName", name != nullptr ? name : "(null)");
-	FileLogger::logState.ThreadName(name);
+	FileLogger::GetLogState().ThreadName(name);
 }
 
 GLib::Compat::filesystem::path LogManager::GetLogPath()

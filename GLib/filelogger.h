@@ -27,7 +27,6 @@ class FileLogger
 	StreamInfo streamInfo;
 	GLib::Flog::Level logLevel = GLib::Flog::Level::Info; // config
 	size_t maxFileSize = DefaultMaxFileSize;							// config
-	static thread_local LogState const logState;
 
 public:
 	FileLogger();
@@ -39,8 +38,12 @@ public:
 	static void Write(char c);
 
 private:
-	static void Write(GLib::Flog::Level level, const char * prefix, std::string_view message);
 	~FileLogger();
+
+	static const LogState & GetLogState();
+	static inline const LogState & logState {GetLogState()};
+
+	static void Write(GLib::Flog::Level level, const char * prefix, std::string_view message);
 
 	StreamInfo GetStream() const;
 	void InternalWrite(GLib::Flog::Level level, const char * prefix, std::string_view message);
