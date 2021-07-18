@@ -40,7 +40,7 @@ public:
 private:
 	~FileLogger();
 
-	static const LogState & GetLogState();
+	static const LogState & GetLogState() noexcept;
 	static inline const LogState & logState {GetLogState()};
 
 	static void Write(GLib::Flog::Level level, const char * prefix, std::string_view message);

@@ -22,7 +22,7 @@ FileLogger::~FileLogger()
 	CloseStream(); //
 }
 
-const LogState & FileLogger::GetLogState()
+const LogState & FileLogger::GetLogState() noexcept
 {
 	thread_local LogState const state;
 	return state;
@@ -317,7 +317,7 @@ FileLogger & FileLogger::Instance()
 
 std::ostream & FileLogger::Stream()
 {
-	return Instance().logState.Stream();
+	return logState.Stream();
 }
 
 GLib::Flog::Level FileLogger::SetLogLevel(GLib::Flog::Level level)

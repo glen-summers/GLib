@@ -8,6 +8,8 @@
 #include "TestInterfaces.h"
 #include "TestUtils.h"
 
+#include <Glib/Win/ComException.h>
+
 namespace
 {
 	template <typename T> unsigned int UseCount(const GLib::Win::ComPtr<T> & p)

@@ -1,6 +1,5 @@
 #pragma once
 
-#include <GLib/Win/ComErrorCheck.h>
 #include <GLib/Win/Transfer.h>
 #include <GLib/Win/WinException.h>
 
@@ -15,6 +14,9 @@ namespace GLib::Win
 {
 	template <typename T>
 	class ComPtr;
+
+	void CheckHr(HRESULT hr, const char * message);
+	void WarnHr(HRESULT hr, const char * message) noexcept;
 
 	namespace ComPtrDetail
 	{

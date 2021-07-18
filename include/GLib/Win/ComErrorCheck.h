@@ -1,6 +1,8 @@
 #pragma once
 
+#include <GLib/Win/Bstr.h>
 #include <GLib/Win/ComException.h>
+#include <GLib/Win/ComPtr.h>
 #include <GLib/Win/FormatErrorMessage.h>
 
 #ifdef _DEBUG // || defined(GLIB_DEBUG)
@@ -19,31 +21,24 @@ namespace GLib::Win
 	{
 		inline std::string FormatErrorInfo(const char * message, HRESULT hr)
 		{
-			bool hasMessage = false;
 			std::ostringstream stm;
 			stm << message << " : ";
-			IErrorInfo * pErrorInfo = nullptr;
-			if (::GetErrorInfo(0, &pErrorInfo) == S_OK)
+			ComPtr<IErrorInfo> errorInfo;
+			if (::GetErrorInfo(0, GetAddress(errorInfo)) == S_OK)
 			{
-				BSTR description = nullptr;
-				pErrorInfo->GetDescription(&description);
-				SCOPE(_,
-							[=]() noexcept
-							{
-								::SysFreeString(description);
-								pErrorInfo->Release();
-							});
-				hasMessage = description != nullptr;
-				if (hasMessage)
+				Bstr description;
+				errorInfo->GetDescription(GetAddress(description));
+				if (description.HasValue())
 				{
-					stm << Cvt::w2a(description);
+					stm << description.Value();
 				}
 			}
-			if (!hasMessage)
+			else
 			{
 				Util::FormatErrorMessage(stm, hr);
 			}
 			stm << " (" << std::hex << std::uppercase << hr << ")";
+
 			return stm.str();
 		}
 
