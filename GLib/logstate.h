@@ -6,6 +6,7 @@
 #include <GLib/vectorstreambuffer.h>
 
 #include <stack>
+#include <tuple>
 
 class LogState
 {
@@ -15,7 +16,7 @@ class LogState
 	mutable std::stack<Scope> scopes;
 	mutable int depth {};
 	mutable bool pending {};
-	mutable const char * threadName {};
+	mutable std::string_view threadName {};
 	mutable StreamType stream;
 
 public:
@@ -29,14 +30,15 @@ public:
 		return scopes.top();
 	}
 
-	bool Pop() const
+	auto TopAndPop() const
 	{
+		Scope top = scopes.top();
 		scopes.pop();
 		if (!pending)
 		{
 			--depth;
 		}
-		return std::exchange(pending, false);
+		return std::make_tuple(top, std::exchange(pending, false));
 	}
 
 	void Push(const Scope & scope) const
@@ -55,12 +57,12 @@ public:
 		return pending;
 	}
 
-	const char * ThreadName() const
+	std::string_view ThreadName() const
 	{
 		return threadName;
 	}
 
-	void ThreadName(const char * name) const
+	void ThreadName(std::string_view name) const
 	{
 		threadName = name;
 	}

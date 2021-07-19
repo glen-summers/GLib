@@ -103,7 +103,7 @@ BOOST_AUTO_TEST_SUITE(FlogTests)
 
 		auto log = GLib::Flog::LogManager::GetLog<Fred>();
 		log.Info("Hello");
-		GLib::Flog::LogManager::SetThreadName(nullptr);
+		GLib::Flog::LogManager::SetThreadName({});
 
 		std::ifstream in(GLib::Flog::LogManager::GetLogPath());
 		std::string contents((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());

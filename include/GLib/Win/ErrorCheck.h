@@ -15,7 +15,7 @@ namespace GLib::Win::Util
 {
 	namespace Detail
 	{
-		inline std::string FormatErrorMessage(const char * message, DWORD error, const wchar_t * moduleName = nullptr)
+		inline std::string FormatErrorMessage(std::string_view message, DWORD error, const wchar_t * moduleName = {})
 		{
 			std::ostringstream stm;
 			stm << message << " : ";
@@ -28,7 +28,7 @@ namespace GLib::Win::Util
 			return stm.str();
 		}
 
-		__declspec(noreturn) inline void Throw(const char * message, DWORD result)
+		__declspec(noreturn) inline void Throw(std::string_view message, DWORD result)
 		{
 			std::string formattedMessage = FormatErrorMessage(message, result);
 
@@ -44,30 +44,30 @@ namespace GLib::Win::Util
 		{
 		public:
 			template <typename T>
-			static bool AssertTrue(T value, const char * message, DWORD errorCode)
+			static bool AssertTrue(T value, std::string_view message, DWORD errorCode)
 			{
 				static_assert(false, "Invalid check parameter, only bool and BOOL allowed");
 			}
 
 			template <typename T>
-			static bool WarnAssertTrue(T value, const char * message, DWORD errorCode)
+			static bool WarnAssertTrue(T value, std::string_view message, DWORD errorCode)
 			{
 				static_assert(false, "Invalid check parameter, only bool and BOOL allowed");
 			}
 
 			template <typename T>
-			static bool AssertSuccess(T value, const char * message)
+			static bool AssertSuccess(T value, std::string_view message)
 			{
 				static_assert(false, "Invalid check parameter, only DWORD allowed");
 			}
 
 			template <typename T>
-			static bool WarnAssertSuccess(T value, const char * message)
+			static bool WarnAssertSuccess(T value, std::string_view message)
 			{
 				static_assert(false, "Invalid check parameter, only DWORD and LSTATUS allowed");
 			}
 
-			static bool AssertTrue(bool result, const char * message, DWORD errorCode)
+			static bool AssertTrue(bool result, std::string_view message, DWORD errorCode)
 			{
 				if (!result)
 				{
@@ -76,12 +76,12 @@ namespace GLib::Win::Util
 				return result;
 			}
 
-			static bool AssertTrue(BOOL result, const char * message, DWORD errorCode)
+			static bool AssertTrue(BOOL result, std::string_view message, DWORD errorCode)
 			{
 				return AssertTrue(result != FALSE, message, errorCode);
 			}
 
-			static bool WarnAssertTrue(bool result, const char * message, DWORD errorCode) noexcept
+			static bool WarnAssertTrue(bool result, std::string_view message, DWORD errorCode) noexcept
 			{
 #ifdef _DEBUG // || defined(GLIB_DEBUG)
 				if (!result)
@@ -95,27 +95,27 @@ namespace GLib::Win::Util
 				return result;
 			}
 
-			static bool WarnAssertTrue(BOOL result, const char * message, DWORD errorCode) noexcept
+			static bool WarnAssertTrue(BOOL result, std::string_view message, DWORD errorCode) noexcept
 			{
 				return WarnAssertTrue(result != FALSE, message, errorCode);
 			}
 
-			static bool AssertSuccess(DWORD result, const char * message)
+			static bool AssertSuccess(DWORD result, std::string_view message)
 			{
 				return AssertTrue(result == ERROR_SUCCESS, message, result);
 			}
 
-			static bool WarnAssertSuccess(DWORD result, const char * message) noexcept
+			static bool WarnAssertSuccess(DWORD result, std::string_view message) noexcept
 			{
 				return WarnAssertTrue(result == ERROR_SUCCESS, message, result);
 			}
 
-			static bool AssertSuccess(LSTATUS result, const char * message)
+			static bool AssertSuccess(LSTATUS result, std::string_view message)
 			{
 				return AssertTrue(result == ERROR_SUCCESS, message, static_cast<DWORD>(result));
 			}
 
-			static bool WarnAssertSuccess(LSTATUS result, const char * message) noexcept
+			static bool WarnAssertSuccess(LSTATUS result, std::string_view message) noexcept
 			{
 				return WarnAssertTrue(result == ERROR_SUCCESS, message, static_cast<DWORD>(result));
 			}
@@ -123,25 +123,25 @@ namespace GLib::Win::Util
 	}
 
 	template <typename T>
-	bool AssertTrue(T result, const char * message)
+	bool AssertTrue(T result, std::string_view message)
 	{
 		return Detail::Checker::AssertTrue(result, message, ::GetLastError());
 	}
 
 	template <typename T>
-	bool WarnAssertTrue(T result, const char * message)
+	bool WarnAssertTrue(T result, std::string_view message)
 	{
 		return Detail::Checker::WarnAssertTrue(result, message, ::GetLastError());
 	}
 
 	template <typename T>
-	bool AssertSuccess(T errorCode, const char * message)
+	bool AssertSuccess(T errorCode, std::string_view message)
 	{
 		return Detail::Checker::AssertSuccess(errorCode, message);
 	}
 
 	template <typename T>
-	bool WarnAssertSuccess(T errorCode, const char * message)
+	bool WarnAssertSuccess(T errorCode, std::string_view message)
 	{
 		return Detail::Checker::WarnAssertSuccess(errorCode, message);
 	}

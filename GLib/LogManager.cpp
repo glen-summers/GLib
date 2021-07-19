@@ -21,9 +21,9 @@ size_t LogManager::SetMaxFileSize(size_t size)
 	return FileLogger::SetMaxFileSize(size);
 }
 
-void LogManager::SetThreadName(const char * name)
+void LogManager::SetThreadName(std::string_view name)
 {
-	FileLogger::Write(Level::Info, "ThreadName", name != nullptr ? name : "(null)");
+	FileLogger::Write(Level::Info, "ThreadName", !name.empty() ? name : "(null)");
 	FileLogger::GetLogState().ThreadName(name);
 }
 

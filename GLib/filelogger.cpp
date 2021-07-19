@@ -28,7 +28,7 @@ const LogState & FileLogger::GetLogState() noexcept
 	return state;
 }
 
-void FileLogger::Write(GLib::Flog::Level level, const char * prefix, std::string_view message)
+void FileLogger::Write(GLib::Flog::Level level, std::string_view prefix, std::string_view message)
 {
 	Instance().InternalWrite(level, prefix, message);
 }
@@ -113,7 +113,7 @@ StreamInfo FileLogger::GetStream() const
 	throw std::runtime_error("Exhausted possible stream names " + GLib::Cvt::p2a(logFileName));
 }
 
-void FileLogger::InternalWrite(GLib::Flog::Level level, const char * prefix, std::string_view message)
+void FileLogger::InternalWrite(GLib::Flog::Level level, std::string_view prefix, std::string_view message)
 {
 	// ShouldTrace ...
 	if (level < logLevel)
@@ -125,7 +125,7 @@ void FileLogger::InternalWrite(GLib::Flog::Level level, const char * prefix, std
 	WriteToStream(level, prefix, message);
 }
 
-void FileLogger::WriteToStream(GLib::Flog::Level level, const char * prefix, std::string_view message)
+void FileLogger::WriteToStream(GLib::Flog::Level level, std::string_view prefix, std::string_view message)
 {
 	std::lock_guard<std::mutex> guard(streamMonitor);
 	{
@@ -274,28 +274,27 @@ void FileLogger::CommitPendingScope()
 	s << std::setw(logState.Depth()) << "" << scope.Stem() << "> " << scope.ScopeText();
 
 	// need to go via Instance() again as method is static due to use of logState
-	Instance().WriteToStream(scope.Level(), scope.Prefix().c_str(), s.str().c_str());
+	Instance().WriteToStream(scope.Level(), scope.Prefix(), s.str().c_str());
 
 	logState.Commit();
 }
 
-void FileLogger::ScopeStart(GLib::Flog::Level level, const char * prefix, const char * scope, const char * stem)
+void FileLogger::ScopeStart(GLib::Flog::Level level, std::string_view prefix, std::string_view scope, std::string_view stem)
 {
 	// level check?
 	CommitPendingScope();
 	logState.Push({level, prefix, scope, stem});
 }
 
-void FileLogger::CommitBuffer(GLib::Flog::Level level, const char * prefix)
+void FileLogger::CommitBuffer(GLib::Flog::Level level, std::string_view prefix)
 {
 	Write(level, prefix, logState.Get());
 	logState.Reset(); // had AV here
 }
 
-void FileLogger::ScopeEnd(const char * prefix)
+void FileLogger::ScopeEnd(std::string_view prefix)
 {
-	const Scope scope = logState.Top();
-	bool pending = logState.Pop();
+	auto [scope, pending] = logState.TopAndPop();
 
 	std::ostringstream s; // use thread stream
 	s << std::setw(logState.Depth()) << "";
@@ -360,9 +359,9 @@ std::ostream & FileLogger::TranslateLevel(std::ostream & stream, GLib::Flog::Lev
 	return stream;
 }
 
-std::ostream & FileLogger::ThreadName(std::ostream & stream, const char * threadName)
+std::ostream & FileLogger::ThreadName(std::ostream & stream, std::string_view threadName)
 {
-	return threadName != nullptr ? stream << threadName : stream << std::this_thread::get_id();
+	return !threadName.empty() ? stream << threadName : stream << std::this_thread::get_id();
 }
 
 unsigned FileLogger::GetDate()

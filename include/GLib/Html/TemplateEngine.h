@@ -32,13 +32,13 @@ namespace GLib::Html
 			: evaluator(evaluator)
 		{}
 
-		void Generate(const std::string_view & xml, std::ostream & out)
+		void Generate(std::string_view xml, std::ostream & out)
 		{
 			Generate(Parse(xml), out);
 		}
 
 	private:
-		static const char * EndOf(const std::string_view & value)
+		static const char * EndOf(std::string_view value)
 		{
 			return value.data() + value.size(); // &*value.rbegin()+1;
 		}
@@ -156,7 +156,7 @@ namespace GLib::Html
 			}
 		}
 
-		Node * AddBlock(const std::string_view & eachValue, const std::string_view & ifValue, Node * node, size_t depth)
+		Node * AddBlock(std::string_view eachValue, std::string_view ifValue, Node * node, size_t depth)
 		{
 			if (!eachValue.empty())
 			{
@@ -181,7 +181,7 @@ namespace GLib::Html
 			std::string_view iff;
 			std::string_view each;
 
-			const std::string_view & attr = e.Attributes().Value();
+			std::string_view attr = e.Attributes().Value();
 			Xml::Attributes attributes {attr, nullptr};
 			bool pop {};
 
@@ -310,7 +310,7 @@ namespace GLib::Html
 		void Generate(const Node & node, std::ostream & out)
 		{
 			// todo eval during parse, store bool or property to evaluate
-			const std::string_view & condition = node.Condition();
+			std::string_view condition = node.Condition();
 			if (!condition.empty() && condition != "true")
 			{
 				if (condition == "false")
@@ -387,7 +387,7 @@ namespace GLib::Html
 		}
 	};
 
-	inline void Generate(Eval::Evaluator & e, const std::string_view & xml, std::ostream & out)
+	inline void Generate(Eval::Evaluator & e, std::string_view xml, std::ostream & out)
 	{
 		Generator(e).Generate(xml, out);
 	}

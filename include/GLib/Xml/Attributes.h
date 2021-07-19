@@ -32,7 +32,7 @@ namespace GLib::Xml
 			return data.empty();
 		}
 
-		const std::string_view & Value() const
+		std::string_view Value() const
 		{
 			return data;
 		}

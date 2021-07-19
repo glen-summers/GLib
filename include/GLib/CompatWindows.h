@@ -75,13 +75,9 @@ namespace GLib::Compat
 		constexpr std::string_view Class = "class ";
 		constexpr std::string_view Struct = "struct ";
 
-		// clang-format off
-		return name.compare(0, Class.size(), Class) == 0
-			? name.substr(Class.size())
-			: name.compare(0, Struct.size(), Struct) == 0
-				? name.substr(Struct.size())
-				: name; // etc...
-		// clang-format on
+		return name.compare(0, Class.size(), Class) == 0		 ? name.substr(Class.size())
+					 : name.compare(0, Struct.size(), Struct) == 0 ? name.substr(Struct.size())
+																												 : name; // etc...
 	}
 
 	inline int64_t ProcessId()

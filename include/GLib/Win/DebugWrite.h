@@ -6,7 +6,7 @@
 namespace GLib::Win::Debug
 {
 	template <typename... Ts>
-	void Write(const char * format, Ts &&... ts)
+	void Write(std::string_view format, Ts &&... ts)
 	{
 		Formatter::Format(Stream(), format, std::forward<Ts>(ts)...) << std::endl;
 	}
@@ -17,12 +17,12 @@ namespace GLib::Win::Debug
 		Stream() << value << std::endl;
 	}
 
-	inline void Write(const char * value)
+	inline void Write(std::string_view value)
 	{
 		Stream() << value << std::endl;
 	}
 
-	inline void Write(const std::wstring & value)
+	inline void Write(std::wstring_view value)
 	{
 		Stream() << Cvt::w2a(value) << std::endl;
 	}

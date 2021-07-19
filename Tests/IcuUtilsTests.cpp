@@ -22,8 +22,8 @@ BOOST_AUTO_TEST_SUITE(IcuUtilsTests)
 
 	BOOST_AUTO_TEST_CASE(DiaeresisCompare)
 	{
-		const char * lowercaseUWithDiaeresis = "\xc3\xbc";
-		const char * uppercaseUWithDiaeresis = "\xc3\x9c";
+		auto lowercaseUWithDiaeresis = "\xc3\xbc";
+		auto uppercaseUWithDiaeresis = "\xc3\x9c";
 
 		BOOST_TEST(0 == static_cast<int>(GLib::IcuUtils::CompareNoCase(lowercaseUWithDiaeresis, uppercaseUWithDiaeresis)));
 		BOOST_TEST(-1 == static_cast<int>(GLib::IcuUtils::CompareNoCase("u", lowercaseUWithDiaeresis)));
@@ -32,11 +32,11 @@ BOOST_AUTO_TEST_SUITE(IcuUtilsTests)
 
 	BOOST_AUTO_TEST_CASE(StartWithNoCasePartialDecode)
 	{
-		const char * s1 = "abcd" "\xc3\xbc" "defg";
+		auto s = "abcd" "\xc3\xbc" "defg";
 
-		BOOST_TEST(0 == static_cast<int>(GLib::IcuUtils::CompareNoCase(s1, 4, s1, 4)));
-		BOOST_TEST(0 == static_cast<int>(GLib::IcuUtils::CompareNoCase(s1, 5, s1, 5)));
-		BOOST_TEST(0 == static_cast<int>(GLib::IcuUtils::CompareNoCase(s1, 6, s1, 6)));
+		BOOST_TEST(0 == static_cast<int>(GLib::IcuUtils::CompareNoCase(s, s, 4)));
+		BOOST_TEST(0 == static_cast<int>(GLib::IcuUtils::CompareNoCase(s, s, 5)));
+		BOOST_TEST(0 == static_cast<int>(GLib::IcuUtils::CompareNoCase(s, s, 6)));
 	}
 
 	BOOST_AUTO_TEST_CASE(LowerUpper)

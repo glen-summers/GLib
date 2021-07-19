@@ -44,7 +44,7 @@ namespace GLib::Html
 			return parent;
 		}
 
-		const std::string_view & Value() const
+		std::string_view Value() const
 		{
 			return value;
 		}
@@ -59,7 +59,7 @@ namespace GLib::Html
 			return enumeration;
 		}
 
-		const std::string_view & Condition() const
+		std::string_view Condition() const
 		{
 			return condition;
 		}
@@ -74,7 +74,7 @@ namespace GLib::Html
 			return depth;
 		}
 
-		Node * AddFragment(const std::string_view & fragment = {})
+		Node * AddFragment(std::string_view fragment = {})
 		{
 			children.emplace_back(this, fragment);
 			return &children.back();
@@ -85,13 +85,13 @@ namespace GLib::Html
 			return AddFragment({start, static_cast<size_t>(end - start)});
 		}
 
-		Node * AddEnumeration(const std::string & var, const std::string & e, const std::string_view & c, size_t enumDepth)
+		Node * AddEnumeration(const std::string & var, const std::string & e, std::string_view c, size_t enumDepth)
 		{
 			children.emplace_back(this, var, e, c, enumDepth);
 			return &children.back();
 		}
 
-		Node * AddConditional(const std::string_view & c)
+		Node * AddConditional(std::string_view c)
 		{
 			children.emplace_back(this, c, true);
 			return &children.back();

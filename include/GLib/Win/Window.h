@@ -237,7 +237,7 @@ namespace GLib::Win
 		void SetTimer(const std::chrono::duration<R, P> & interval, UINT_PTR id = 1) const
 		{
 			auto count = std::chrono::duration_cast<std::chrono::milliseconds>(interval).count();
-			DWORD milliseconds = GLib::Util::checked_cast<DWORD>(count);
+			auto milliseconds = GLib::Util::checked_cast<DWORD>(count);
 			UINT_PTR timerResult = ::SetTimer(handle.get(), id, milliseconds, nullptr);
 			Util::AssertTrue(timerResult != 0, "SetTimer");
 		}

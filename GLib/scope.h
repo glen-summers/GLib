@@ -11,17 +11,17 @@ class Scope
 	using TimePoint = std::chrono::high_resolution_clock::time_point;
 
 	GLib::Flog::Level level;
-	std::string prefix;
-	std::string scopeText;
-	std::string stem;
+	std::string_view prefix;
+	std::string_view scopeText;
+	std::string_view stem;
 	TimePoint start;
 
 public:
-	Scope(GLib::Flog::Level level, std::string prefix, std::string scope, std::string stem)
+	Scope(GLib::Flog::Level level, std::string_view prefix, std::string_view scope, std::string_view stem)
 		: level(level)
-		, prefix(std::move(prefix))
-		, scopeText(std::move(scope))
-		, stem(std::move(stem))
+		, prefix(prefix)
+		, scopeText(scope)
+		, stem(stem)
 		, start(std::chrono::high_resolution_clock::now())
 	{}
 
@@ -30,17 +30,17 @@ public:
 		return level;
 	}
 
-	const std::string & Prefix() const
+	std::string_view Prefix() const
 	{
 		return prefix;
 	}
 
-	const std::string & ScopeText() const
+	std::string_view ScopeText() const
 	{
 		return scopeText;
 	}
 
-	const std::string & Stem() const
+	std::string_view Stem() const
 	{
 		return stem;
 	}

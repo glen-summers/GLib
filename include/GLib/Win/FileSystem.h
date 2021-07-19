@@ -74,7 +74,7 @@ namespace GLib::Win::FileSystem
 		for (const auto & [deviceName, logicalName] : driveMap)
 		{
 			size_t compareSize = logicalName.size();
-			if (IcuUtils::CompareNoCase(path.c_str(), compareSize, logicalName.c_str(), compareSize) == IcuUtils::CompareResult::Equal)
+			if (IcuUtils::CompareNoCase(path, logicalName, compareSize) == IcuUtils::CompareResult::Equal)
 			{
 				return deviceName + path.substr(compareSize);
 			}

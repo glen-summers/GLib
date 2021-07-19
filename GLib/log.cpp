@@ -7,22 +7,22 @@
 using GLib::Flog::Level;
 using GLib::Flog::Log;
 
-void Log::Write(Level level, const char * message) const
+void Log::Write(Level level, std::string_view message) const
 {
-	FileLogger::Write(level, name.c_str(), message);
+	FileLogger::Write(level, name, message);
 }
 
-void Log::ScopeStart(Level level, const char * scope, const char * stem) const
+void Log::ScopeStart(Level level, std::string_view scope, std::string_view stem) const
 {
-	FileLogger::ScopeStart(level, name.c_str(), scope, stem);
+	FileLogger::ScopeStart(level, name, scope, stem);
 }
 
 void Log::ScopeEnd() const
 {
-	FileLogger::ScopeEnd(name.c_str());
+	FileLogger::ScopeEnd(name);
 }
 
 void Log::CommitStream(Level level) const
 {
-	FileLogger::CommitBuffer(level, name.c_str());
+	FileLogger::CommitBuffer(level, name);
 }

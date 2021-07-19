@@ -55,82 +55,57 @@ namespace GLib::Flog
 		std::string const name;
 
 	public:
-		void Spam(const char * message) const
+		void Spam(std::string_view message) const
 		{
 			Write(Level::Spam, message);
 		}
 
-		void Spam(const std::string & message) const
-		{
-			Write(Level::Spam, message.c_str());
-		}
-
 		template <typename... Ts>
-		void Spam(const char * format, Ts &&... ts) const
+		void Spam(std::string_view format, Ts &&... ts) const
 		{
 			Write(Level::Spam, format, std::forward<Ts>(ts)...);
 		}
 
-		void Debug(const char * message) const
+		void Debug(std::string_view message) const
 		{
 			Write(Level::Debug, message);
 		}
 
-		void Debug(const std::string & message) const
-		{
-			Write(Level::Debug, message.c_str());
-		}
-
 		template <typename... Ts>
-		void Debug(const char * format, Ts &&... ts) const
+		void Debug(std::string_view format, Ts &&... ts) const
 		{
 			Write(Level::Debug, format, std::forward<Ts>(ts)...);
 		}
 
-		void Info(const char * message) const
+		void Info(std::string_view message) const
 		{
 			Write(Level::Info, message);
 		}
 
-		void Info(const std::string & message) const
-		{
-			Write(Level::Info, message.c_str());
-		}
-
 		template <typename... Ts>
-		void Info(const char * format, Ts &&... ts) const
+		void Info(std::string_view format, Ts &&... ts) const
 		{
 			Write(Level::Info, format, std::forward<Ts>(ts)...);
 		}
 
-		void Warning(const char * message) const
+		void Warning(std::string_view message) const
 		{
 			Write(Level::Warning, message);
 		}
 
-		void Warning(const std::string & message) const
-		{
-			Write(Level::Warning, message.c_str());
-		}
-
 		template <typename... Ts>
-		void Warning(const char * format, Ts &&... ts) const
+		void Warning(std::string_view format, Ts &&... ts) const
 		{
 			Write(Level::Warning, format, std::forward<Ts>(ts)...);
 		}
 
-		void Error(const char * message) const
+		void Error(std::string_view message) const
 		{
 			Write(Level::Error, message);
 		}
 
-		void Error(const std::string & message) const
-		{
-			Write(Level::Error, message.c_str());
-		}
-
 		template <typename... Ts>
-		void Error(const char * format, Ts &&... ts) const
+		void Error(std::string_view format, Ts &&... ts) const
 		{
 			Write(Level::Error, format, std::forward<Ts>(ts)...);
 		}
@@ -143,14 +118,14 @@ namespace GLib::Flog
 			: name(std::move(name))
 		{}
 
-		void Write(Level level, const char * message) const;
-		void ScopeStart(Level level, const char * scope, const char * stem) const;
+		void Write(Level level, std::string_view message) const;
+		void ScopeStart(Level level, std::string_view scope, std::string_view stem) const;
 		void ScopeEnd() const;
 		// std::ostream & Stream() const;
 		void CommitStream(Level level) const;
 
 		template <typename... Ts>
-		void Write(Level level, const char * format, Ts... ts) const
+		void Write(Level level, std::string_view format, Ts... ts) const
 		{
 			Formatter::Format(Detail::Stream(), format, std::forward<Ts>(ts)...);
 			CommitStream(level);
@@ -161,8 +136,8 @@ namespace GLib::Flog
 	{
 		const Log & log;
 		Level level;
-		const char * scope;
-		const char * stem;
+		std::string_view scope;
+		std::string_view stem;
 
 	public:
 		ScopeLog(const ScopeLog &) = delete;
@@ -170,7 +145,7 @@ namespace GLib::Flog
 		ScopeLog(ScopeLog &&) = default;
 		ScopeLog & operator=(ScopeLog &&) = delete;
 
-		ScopeLog(const Log & log, Level level, const char * scope, const char * stem = "==")
+		ScopeLog(const Log & log, Level level, std::string_view scope, std::string_view stem = "==")
 			: log(log)
 			, level(level)
 			, scope(scope)
@@ -192,7 +167,7 @@ namespace GLib::Flog
 	public:
 		static Level SetLevel(Level level);
 		static size_t SetMaxFileSize(size_t size);
-		static void SetThreadName(const char * name);
+		static void SetThreadName(std::string_view name);
 		static GLib::Compat::filesystem::path GetLogPath();
 
 		static Log GetLog(const std::string & name) noexcept

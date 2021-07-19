@@ -15,12 +15,12 @@ namespace GLib::Xml
 		std::stack<std::pair<size_t, std::pair<std::string_view, std::string_view>>> nameSpaceStack;
 
 	public:
-		static bool IsDeclaration(const std::string_view & value)
+		static bool IsDeclaration(std::string_view value)
 		{
 			return value.compare(0, Attribute.size(), Attribute) == 0;
 		}
 
-		static bool CheckForDeclaration(const std::string_view & value, std::string_view & prefix)
+		static bool CheckForDeclaration(std::string_view value, std::string_view & prefix) // argh
 		{
 			bool check = IsDeclaration(value);
 			if (check)
@@ -30,7 +30,7 @@ namespace GLib::Xml
 			return check;
 		}
 
-		std::string_view Get(const std::string_view & prefix) const
+		std::string_view Get(std::string_view prefix) const
 		{
 			auto nit = nameSpaces.find(prefix);
 			if (nit == nameSpaces.end())
@@ -41,7 +41,7 @@ namespace GLib::Xml
 		}
 
 		// rename?
-		void Push(const std::string_view & qualifiedName, const std::string_view & value, size_t depth)
+		void Push(std::string_view qualifiedName, std::string_view value, size_t depth)
 		{
 			std::string_view prefix;
 			if (!CheckForDeclaration(qualifiedName, prefix))
@@ -75,7 +75,7 @@ namespace GLib::Xml
 			}
 		}
 
-		static void ValidateName(size_t colon, const std::string_view & value)
+		static void ValidateName(size_t colon, std::string_view value)
 		{
 			if (colon == 0 || value.find(':', colon + 1) != std::string_view::npos)
 			{
@@ -83,7 +83,7 @@ namespace GLib::Xml
 			}
 		}
 
-		std::tuple<std::string_view, std::string_view> Normalise(const std::string_view & name) const
+		std::tuple<std::string_view, std::string_view> Normalise(std::string_view name) const
 		{
 			const size_t colon = name.find(':');
 			if (colon != std::string_view::npos)

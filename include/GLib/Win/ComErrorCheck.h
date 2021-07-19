@@ -19,7 +19,7 @@ namespace GLib::Win
 {
 	namespace Detail
 	{
-		inline std::string FormatErrorInfo(const char * message, HRESULT hr)
+		inline std::string FormatErrorInfo(std::string_view message, HRESULT hr)
 		{
 			std::ostringstream stm;
 			stm << message << " : ";
@@ -42,7 +42,7 @@ namespace GLib::Win
 			return stm.str();
 		}
 
-		__declspec(noreturn) inline void Throw(const char * message, HRESULT hr)
+		__declspec(noreturn) inline void Throw(std::string_view message, HRESULT hr)
 		{
 			std::string formattedMessage = FormatErrorInfo(message, hr);
 #ifdef _DEBUG // || defined(GLIB_DEBUG)
@@ -52,7 +52,7 @@ namespace GLib::Win
 		}
 	}
 
-	inline void CheckHr(HRESULT hr, const char * message)
+	inline void CheckHr(HRESULT hr, std::string_view message)
 	{
 		if (FAILED(hr))
 		{
@@ -60,7 +60,7 @@ namespace GLib::Win
 		}
 	}
 
-	inline void WarnHr(HRESULT hr, const char * message) noexcept
+	inline void WarnHr(HRESULT hr, std::string_view message) noexcept
 	{
 #ifdef _DEBUG // || defined(GLIB_DEBUG)
 		bool result = SUCCEEDED(hr);

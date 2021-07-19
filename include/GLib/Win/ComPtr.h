@@ -15,8 +15,8 @@ namespace GLib::Win
 	template <typename T>
 	class ComPtr;
 
-	void CheckHr(HRESULT hr, const char * message);
-	void WarnHr(HRESULT hr, const char * message) noexcept;
+	void CheckHr(HRESULT hr, std::string_view message);
+	void WarnHr(HRESULT hr, std::string_view message) noexcept;
 
 	namespace ComPtrDetail
 	{

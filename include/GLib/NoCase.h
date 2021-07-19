@@ -12,7 +12,7 @@ namespace GLib
 	template <>
 	struct NoCaseLess<char>
 	{
-		bool operator()(const std::string & s1, const std::string & s2) const
+		bool operator()(std::string_view s1, std::string_view s2) const
 		{
 			return IcuUtils::CompareNoCase(s1, s2) == IcuUtils::CompareResult::Less;
 		}

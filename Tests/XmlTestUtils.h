@@ -78,7 +78,7 @@ namespace GLib::Xml
 		return s;
 	}
 
-	inline void Parse(const std::string_view & xml) // +expectexception
+	inline void Parse(std::string_view xml) // +expectexception
 	{
 		for (const auto & e : Holder {xml})
 		{

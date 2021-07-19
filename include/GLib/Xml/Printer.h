@@ -3,6 +3,7 @@
 #include <GLib/Xml/Utils.h>
 
 #include <array>
+#include <iomanip>
 #include <sstream>
 #include <stack>
 
@@ -54,7 +55,7 @@ namespace GLib::Xml
 			++depth;
 		}
 
-		void PushAttribute(const std::string & name, const char * value)
+		void PushAttribute(std::string_view name, std::string_view value)
 		{
 			AssertTrue(elementOpen, "Element not open");
 			s << ' ' << name << R"(=")";
@@ -62,27 +63,19 @@ namespace GLib::Xml
 			s << '"';
 		}
 
-		void PushAttribute(const std::string & name, const std::string & value)
-		{
-			AssertTrue(elementOpen, "Element not open");
-			s << ' ' << name << R"(=")";
-			Text(value);
-			s << '"';
-		}
-
-		void PushAttribute(const std::string & name, int64_t value)
+		void PushAttribute(std::string_view name, int64_t value)
 		{
 			PushAttribute(name, std::to_string(value).c_str());
 		}
 
-		void PushText(const std::string & text)
+		void PushText(std::string_view text)
 		{
 			textDepth = depth - 1;
 			CloseJustOpenedElement();
 			Text(text);
 		}
 
-		void PushDocType(const std::string & docType)
+		void PushDocType(std::string_view docType)
 		{
 			s << "<!DOCTYPE " << docType << '>' << std::endl;
 		}
@@ -105,7 +98,7 @@ namespace GLib::Xml
 			{
 				if (textDepth == TextDepthNotSet && elementFormat)
 				{
-					s << std::endl << std::string(depth, ' ');
+					s << std::endl << std::setw(depth) << "";
 				}
 				s << "</" << name << '>';
 			}
@@ -150,7 +143,7 @@ namespace GLib::Xml
 			}
 		}
 
-		void Text(const std::string_view & value)
+		void Text(std::string_view value)
 		{
 			Utils::Escape(value, s);
 		}

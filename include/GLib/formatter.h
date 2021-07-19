@@ -43,7 +43,7 @@ namespace GLib
 			}
 		}
 
-		inline std::ostream & AppendFormatHelper(std::ostream & str, const std::string_view & view, const Span<StreamFunction> & args)
+		inline std::ostream & AppendFormatHelper(std::ostream & str, std::string_view view, const Span<StreamFunction> & args)
 		{
 			constexpr auto DecimalShift = 10;
 			char ch = {};
@@ -222,14 +222,14 @@ namespace GLib
 	{
 	public:
 		template <typename... Ts>
-		static std::ostream & Format(std::ostream & str, const char * format, const Ts &... ts)
+		static std::ostream & Format(std::ostream & str, std::string_view format, const Ts &... ts)
 		{
 			std::array<FormatterDetail::StreamFunction, sizeof...(Ts)> ar {ToStreamFunctions(ts)...};
 			return FormatterDetail::AppendFormatHelper(str, format, {ar.data(), ar.size()});
 		}
 
 		template <typename... Ts>
-		static std::string Format(const char * format, Ts &&... ts)
+		static std::string Format(std::string_view format, Ts &&... ts)
 		{
 			std::ostringstream str;
 			Format(str, format, std::forward<Ts>(ts)...);
@@ -237,7 +237,7 @@ namespace GLib
 		}
 
 		template <typename... Ts>
-		static std::string Format(const char * format)
+		static std::string Format(std::string_view format)
 		{
 			(void) format;
 			throw std::logic_error("NoArguments");

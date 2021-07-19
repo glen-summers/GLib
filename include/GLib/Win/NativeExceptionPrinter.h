@@ -11,6 +11,8 @@ namespace GLib::Win::Symbols
 	// http://www.geoffchappell.com/studies/msvc/language/predefined/
 	// https://blogs.msdn.microsoft.com/oldnewthing/20100730-00/?p=13273
 
+	using namespace std::string_view_literals;
+
 	namespace Detail
 	{
 		template <typename Function>
@@ -199,7 +201,7 @@ namespace GLib::Win::Symbols
 		{
 			case STATUS_ACCESS_VIOLATION:
 			{
-				const auto * msg = static_cast<const char *>(info[0] == 0 ? "reading" : "writing");
+				auto msg = info[0] == 0 ? "reading"sv : "writing"sv;
 				Formatter::Format(s, " : Access violation {0} address {1}\n", msg, Detail::Munge<PVOID>(info[1]));
 				break;
 			}

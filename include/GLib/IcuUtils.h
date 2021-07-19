@@ -19,7 +19,7 @@ namespace GLib::IcuUtils
 {
 	namespace Detail
 	{
-		inline void AssertNoError(UErrorCode error, const char * msg)
+		inline void AssertNoError(UErrorCode error, std::string_view msg)
 		{
 			if (U_FAILURE(error) != FALSE)
 			{
@@ -27,11 +27,11 @@ namespace GLib::IcuUtils
 			}
 		}
 
-		inline void AssertTrue(bool value, const char * msg)
+		inline void AssertTrue(bool value, std::string_view msg)
 		{
 			if (!value)
 			{
-				throw std::runtime_error(msg);
+				throw std::runtime_error(std::string(msg));
 			}
 		}
 
@@ -82,15 +82,16 @@ namespace GLib::IcuUtils
 		Greater = +1
 	};
 
-	inline CompareResult CompareNoCase(const char * s1, size_t s1size, const char * s2, size_t s2size, const char * locale = nullptr)
+	inline CompareResult CompareNoCase(std::string_view s1, std::string_view s2, const char * locale = nullptr)
 	{
 		auto collator = Detail::MakeCollator(locale); // cache? perf test
 		::ucol_setStrength(collator.get(), UCOL_SECONDARY);
 
 		UCharIterator i1;
 		UCharIterator i2;
-		::uiter_setUTF8(&i1, s1, static_cast<int32_t>(s1size));
-		::uiter_setUTF8(&i2, s2, static_cast<int32_t>(s2size));
+
+		::uiter_setUTF8(&i1, s1.data(), static_cast<int32_t>(s1.size()));
+		::uiter_setUTF8(&i2, s2.data(), static_cast<int32_t>(s2.size()));
 
 		UErrorCode error = U_ZERO_ERROR;
 		UCollationResult result = ::ucol_strcollIter(collator.get(), &i1, &i2, &error);
@@ -108,9 +109,9 @@ namespace GLib::IcuUtils
 		}
 	}
 
-	inline CompareResult CompareNoCase(const std::string & s1, const std::string & s2, const char * locale = nullptr)
+	inline CompareResult CompareNoCase(std::string_view s1, std::string_view s2, size_t size, const char * locale = nullptr)
 	{
-		return CompareNoCase(s1.c_str(), s1.size(), s2.c_str(), s2.size(), locale);
+		return CompareNoCase(s1.substr(0, size), s2.substr(0, size), locale);
 	}
 
 	inline std::string ToLower(const std::string & value, const char * locale = nullptr)

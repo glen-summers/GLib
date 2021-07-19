@@ -385,9 +385,7 @@ namespace GLib::Cpp
 		}
 
 		// must be enum order
-		// clang-format off
-		static constexpr std::array<StateFunction, static_cast<int>(State::Count)> stateFunctions =
-		{
+		static constexpr std::array<StateFunction, static_cast<int>(State::Count)> stateFunctions = {
 			&StateEngine::Error,
 			&StateEngine::None,
 			&StateEngine::WhiteSpace,
@@ -403,6 +401,5 @@ namespace GLib::Cpp
 			&StateEngine::Code,
 			&StateEngine::CharacterLiteral,
 		};
-		// clang-format on
 	};
 }

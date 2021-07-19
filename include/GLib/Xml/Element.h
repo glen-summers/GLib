@@ -49,22 +49,22 @@ namespace GLib::Xml
 
 		Element() = default;
 
-		const std::string_view & QName() const
+		std::string_view QName() const
 		{
 			return qName;
 		}
 
-		const std::string_view & Name() const
+		std::string_view Name() const
 		{
 			return name;
 		}
 
-		const std::string_view & NameSpace() const
+		std::string_view NameSpace() const
 		{
 			return nameSpace;
 		}
 
-		const std::string_view & OuterXml() const
+		std::string_view OuterXml() const
 		{
 			return outerXml;
 		}
@@ -85,7 +85,7 @@ namespace GLib::Xml
 		}
 
 		// haxor
-		const std::string_view & Text() const
+		std::string_view Text() const
 		{
 			return text;
 		}

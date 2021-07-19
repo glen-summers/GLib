@@ -11,25 +11,11 @@ namespace GLib::Cpp
 {
 	inline std::ostream & operator<<(std::ostream & str, State s)
 	{
-		// clang-format off
-		static constexpr std::array<std::string_view, static_cast<unsigned int>(State::Count)> stateNames
-		{
-			"Error",
-			"None",
-			"WhiteSpace",
-			"CommentStart",
-			"CommentLine",
-			"Continuation",
-			"CommentBlock",
-			"CommentAsterix",
-			"Directive",
-			"String",
-			"RawStringPrefix",
-			"RawString",
-			"Code",
-			"CharacterLiteral",
+		static constexpr std::array<std::string_view, static_cast<unsigned int>(State::Count)> stateNames {
+			"Error",					"None",			 "WhiteSpace", "CommentStart",		"CommentLine", "Continuation", "CommentBlock",
+			"CommentAsterix", "Directive", "String",		 "RawStringPrefix", "RawString",	 "Code",				 "CharacterLiteral",
 		};
-		// clang-format on
+
 		return str << stateNames.at(static_cast<unsigned int>(s));
 	}
 

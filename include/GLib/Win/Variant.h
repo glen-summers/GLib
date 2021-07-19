@@ -13,11 +13,20 @@ namespace GLib::Win
 			return v;
 		}
 
-		// clang-format off
-		inline VARTYPE Vt(const VARIANT & v) { return v.vt; }
-		inline VARTYPE & Vt(VARIANT & v) { return v.vt; }
-		inline BSTR & Bstr(VARIANT & v) { return v.bstrVal; }
-		// clang-format on
+		inline VARTYPE Vt(const VARIANT & v)
+		{
+			return v.vt;
+		}
+
+		inline VARTYPE & Vt(VARIANT & v)
+		{
+			return v.vt;
+		}
+
+		inline BSTR & Bstr(VARIANT & v)
+		{
+			return v.bstrVal;
+		}
 
 		inline VARIANT Create(const std::string & value)
 		{

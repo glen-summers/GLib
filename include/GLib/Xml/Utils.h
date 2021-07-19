@@ -16,17 +16,9 @@ namespace GLib::Xml::Utils
 
 	using Entity = std::pair<std::string_view, char>;
 
-	// clang-format off
 	static constexpr auto EntitySize = 5;
-	static constexpr std::array<Entity, EntitySize> entities
-	{
-		Entity{ "&quot;", '\"' },
-		Entity{ "&amp;" , '&'  },
-		Entity{ "&apos;", '\'' },
-		Entity{ "&lt;"  , '<'  },
-		Entity{ "&gt;"  , '>'  }
-	};
-	// clang-format on
+	static constexpr std::array<Entity, EntitySize> entities {Entity {"&quot;", '\"'}, Entity {"&amp;", '&'}, Entity {"&apos;", '\''},
+																														Entity {"&lt;", '<'}, Entity {"&gt;", '>'}};
 
 	inline std::ostream & Escape(std::string_view value, std::ostream & out)
 	{
