@@ -21,9 +21,20 @@ public:
 		, functionName(std::move(functionName))
 	{}
 
-	const std::string & NameSpace() const { return nameSpace; }
-	const std::string & ClassName() const { return className; }
-	const std::string & FunctionName() const { return functionName; }
+	const std::string & NameSpace() const
+	{
+		return nameSpace;
+	}
+
+	const std::string & ClassName() const
+	{
+		return className;
+	}
+
+	const std::string & FunctionName() const
+	{
+		return functionName;
+	}
 
 	const FileLines & FileLines() const
 	{
@@ -38,7 +49,7 @@ public:
 		bool const visited = address.Visited();
 		for (const auto & [file, addressLines] : address.FileLines())
 		{
-			for (const auto & [line,_] : addressLines) // map merge method?
+			for (const auto & [line, _] : addressLines) // map merge method?
 			{
 				fileLines[file][line] |= visited;
 			}
@@ -55,7 +66,7 @@ public:
 			return false;
 		}
 
-		bool merged{};
+		bool merged {};
 		if (Overlap(existingIt->second, addedIt->second))
 		{
 			for (auto [line, covered] : addedIt->second)
@@ -90,7 +101,7 @@ public:
 
 	size_t CoveredLines() const
 	{
-		size_t total{};
+		size_t total {};
 		for (const auto & [_1, lines] : fileLines)
 		{
 			for (const auto & [_2, isCovered] : lines)
@@ -107,7 +118,7 @@ public:
 
 	size_t AllLines() const
 	{
-		size_t total{};
+		size_t total {};
 		for (const auto & [_, lines] : fileLines)
 		{
 			total += lines.size();
@@ -116,7 +127,7 @@ public:
 	}
 };
 
-inline bool operator < (const Function & f1, const Function & f2)
+inline bool operator<(const Function & f1, const Function & f2)
 {
 	return std::tie(f1.NameSpace(), f1.ClassName(), f1.FunctionName()) < std::tie(f2.NameSpace(), f2.ClassName(), f2.FunctionName());
 }

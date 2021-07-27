@@ -9,7 +9,7 @@
 
 #include <fstream>
 
-WideStrings Coverage::a2w(const Strings& strings)
+WideStrings Coverage::a2w(const Strings & strings)
 {
 	WideStrings wideStrings;
 	std::transform(strings.begin(), strings.end(), std::inserter(wideStrings, wideStrings.begin()), GLib::Cvt::a2w);
@@ -17,7 +17,7 @@ WideStrings Coverage::a2w(const Strings& strings)
 }
 
 void Coverage::AddLine(const std::wstring & fileName, unsigned lineNumber, const GLib::Win::Symbols::SymProcess & symProcess, DWORD64 address,
-	Process & process)
+											 Process & process)
 {
 	// filter out unknown source lines, looks like these cause the out of memory exceptions in ReportGenerator
 	if (lineNumber == FooFoo || lineNumber == FeeFee)
@@ -66,20 +66,19 @@ void Coverage::AddLine(const std::wstring & fileName, unsigned lineNumber, const
 	{
 		unsigned int id = symProcess.GetSymbolIdFromAddress(address);
 		const auto oldByte = symProcess.Read<unsigned char>(address);
-		it = process.AddAddress(address, Address{oldByte, id});
+		it = process.AddAddress(address, Address {oldByte, id});
 	}
 	it->second.AddFileLine(fileName, lineNumber);
 
 	symProcess.Write(address, debugBreakByte);
 }
 
-void Coverage::OnCreateProcess(DWORD processId, DWORD threadId, const CREATE_PROCESS_DEBUG_INFO& info)
+void Coverage::OnCreateProcess(DWORD processId, DWORD threadId, const CREATE_PROCESS_DEBUG_INFO & info)
 {
 	Debugger::OnCreateProcess(processId, threadId, info);
 	const GLib::Win::Symbols::SymProcess & process = Symbols().GetProcess(processId);
 
-	log.Info("+Process Pid:{0}, Path:{1}", processId,
-		GLib::Win::FileSystem::PathOfProcessHandle(process.Process().Handle().get()));
+	log.Info("+Process Pid:{0}, Path:{1}", processId, GLib::Win::FileSystem::PathOfProcessHandle(process.Process().Handle().get()));
 
 	auto it = processes.find(processId);
 	if (it == processes.end())
@@ -92,18 +91,17 @@ void Coverage::OnCreateProcess(DWORD processId, DWORD threadId, const CREATE_PRO
 	OnCreateThread(processId, threadId, threadInfo);
 
 	GLib::Flog::ScopeLog scopeLog(log, GLib::Flog::Level::Info, "EnumLines");
-	(void)scopeLog;
+	(void) scopeLog;
 
 	Symbols().Lines([&](PSRCCODEINFOW lineInfo)
-	{
-		AddLine(static_cast<const wchar_t *>(lineInfo->FileName), lineInfo->LineNumber, process, lineInfo->Address, it->second);
-	}, process.Handle(), info.lpBaseOfImage);
+									{ AddLine(static_cast<const wchar_t *>(lineInfo->FileName), lineInfo->LineNumber, process, lineInfo->Address, it->second); },
+									process.Handle(), info.lpBaseOfImage);
 }
 
 void Coverage::CaptureData(DWORD processId)
 {
 	GLib::Flog::ScopeLog scopeLog(log, GLib::Flog::Level::Info, "CaptureData");
-	(void)scopeLog;
+	(void) scopeLog;
 
 	const GLib::Win::Symbols::SymProcess & symProcess = Symbols().GetProcess(processId);
 	auto pit = processes.find(processId);
@@ -134,29 +132,29 @@ void Coverage::CaptureData(DWORD processId)
 	}
 }
 
-void Coverage::OnExitProcess(DWORD processId, DWORD threadId, const EXIT_PROCESS_DEBUG_INFO& info)
+void Coverage::OnExitProcess(DWORD processId, DWORD threadId, const EXIT_PROCESS_DEBUG_INFO & info)
 {
 	CaptureData(processId);
 	Debugger::OnExitProcess(processId, threadId, info);
 	log.Info("-Process Pid:{0}, Exited code: {1} ({1:%x})", processId, info.dwExitCode);
 }
 
-void Coverage::OnCreateThread(DWORD processId, DWORD threadId, const CREATE_THREAD_DEBUG_INFO& info)
+void Coverage::OnCreateThread(DWORD processId, DWORD threadId, const CREATE_THREAD_DEBUG_INFO & info)
 {
 	processes.at(processId).AddThread(threadId, info.hThread);
 }
 
-void Coverage::OnExitThread(DWORD processId, DWORD threadId, const EXIT_THREAD_DEBUG_INFO& info)
+void Coverage::OnExitThread(DWORD processId, DWORD threadId, const EXIT_THREAD_DEBUG_INFO & info)
 {
-	(void)info;
+	(void) info;
 	processes.at(processId).RemoveThread(threadId);
 }
 
-DWORD Coverage::OnException(DWORD processId, DWORD threadId, const EXCEPTION_DEBUG_INFO& info)
+DWORD Coverage::OnException(DWORD processId, DWORD threadId, const EXCEPTION_DEBUG_INFO & info)
 {
 	const bool isBreakpoint = info.ExceptionRecord.ExceptionCode == EXCEPTION_BREAKPOINT;
 
-	if (info.dwFirstChance!=0 && isBreakpoint)
+	if (info.dwFirstChance != 0 && isBreakpoint)
 	{
 		const uint64_t address = GLib::Win::Detail::ConvertAddress(info.ExceptionRecord.ExceptionAddress);
 		auto & process = processes.at(processId);
@@ -180,7 +178,7 @@ DWORD Coverage::OnException(DWORD processId, DWORD threadId, const EXCEPTION_DEB
 #elif _WIN32
 			--ctx.Eip;
 #endif
-			 GLib::Win::Util::AssertTrue(::SetThreadContext(threadHandle, &ctx), "SetThreadContext");
+			GLib::Win::Util::AssertTrue(::SetThreadContext(threadHandle, &ctx), "SetThreadContext");
 		}
 		return DBG_CONTINUE;
 	}
@@ -191,7 +189,7 @@ DWORD Coverage::OnException(DWORD processId, DWORD threadId, const EXCEPTION_DEB
 CoverageData Coverage::GetCoverageData() const
 {
 	GLib::Flog::ScopeLog scopeLog(log, GLib::Flog::Level::Info, "GetCoverageData");
-	(void)scopeLog;
+	(void) scopeLog;
 
 	CaseInsensitiveMap<wchar_t, Functions> fileNameToFunctionMap;
 
@@ -240,8 +238,8 @@ CoverageData Coverage::GetCoverageData() const
 	return coverageData;
 }
 
-void Coverage::CleanupFunctionNames(const std::string & name, const std::string & typeName,
-	std::string & nameSpace, std::string & className, std::string & functionName) const
+void Coverage::CleanupFunctionNames(const std::string & name, const std::string & typeName, std::string & nameSpace, std::string & className,
+																		std::string & functionName) const
 {
 	className = typeName;
 	functionName = name;

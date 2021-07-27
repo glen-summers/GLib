@@ -8,9 +8,10 @@
 #include <string>
 #include <unordered_map>
 
-template<> struct GLib::NoCaseLess<wchar_t>
+template <>
+struct GLib::NoCaseLess<wchar_t>
 {
-	bool operator()(const std::wstring & s1, const std::wstring &s2) const
+	bool operator()(const std::wstring & s1, const std::wstring & s2) const
 	{
 		return _wcsicmp(s1.c_str(), s2.c_str()) < 0;
 	}

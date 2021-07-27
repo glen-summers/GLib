@@ -4,11 +4,17 @@
 
 #include <string>
 
-enum class Quatrain : int { Fee, Fi, Fo, Fum };
+enum class Quatrain : int
+{
+	Fee,
+	Fi,
+	Fo,
+	Fum
+};
 
 inline std::ostream & operator<<(std::ostream & s, Quatrain q)
 {
-	constexpr auto a = std::array<std::string_view, 4> { "Fee", "Fi", "Fo", "Fum"};
+	constexpr auto a = std::array<std::string_view, 4> {"Fee", "Fi", "Fo", "Fum"};
 	return s << a.at(static_cast<int>(q));
 }
 

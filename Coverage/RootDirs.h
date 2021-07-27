@@ -45,7 +45,8 @@ inline void RootDirectories(std::set<std::filesystem::path> & paths)
 	}
 }
 
-inline std::tuple<std::filesystem::path, std::filesystem::path> Reduce(const std::filesystem::path & path, const std::set<std::filesystem::path> & paths)
+inline std::tuple<std::filesystem::path, std::filesystem::path> Reduce(const std::filesystem::path & path,
+																																			 const std::set<std::filesystem::path> & paths)
 {
 	for (const auto & p : paths)
 	{

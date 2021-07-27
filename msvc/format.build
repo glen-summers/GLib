@@ -10,6 +10,12 @@
 			<FileToFormat Include="$(Source)/include/**/*.h"/>
 			<FileToFormat Include="$(Source)/GLib/**/*.cpp"/>
 			<FileToFormat Include="$(Source)/GLib/**/*.h"/>
+			<FileToFormat Include="$(Source)/Coverage/**/*.cpp"/>
+			<FileToFormat Include="$(Source)/Coverage/**/*.h" Exclude="$(Source)/Coverage/resource.h"/>
+			<FileToFormat Include="$(Source)/Tests/**/*.cpp"/>
+			<FileToFormat Include="$(Source)/Tests/**/*.h"/>
+			<FileToFormat Include="$(Source)/TestApp/**/*.cpp"/>
+			<FileToFormat Include="$(Source)/TestApp/**/*.h" Exclude="$(Source)/TestApp/resource.h"/>
 		</ItemGroup>
 
 		<Error Text="'$(Sig)' not found" Condition="'$(Found)' == ''"/>

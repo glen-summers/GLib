@@ -5,56 +5,58 @@
 
 BOOST_AUTO_TEST_SUITE(IcuUtilsTests)
 
-	BOOST_AUTO_TEST_CASE(CompareSimpleCases)
-	{
-		BOOST_TEST(0 == static_cast<int>(GLib::IcuUtils::CompareNoCase("", "")));
-		BOOST_TEST(0 == static_cast<int>(GLib::IcuUtils::CompareNoCase("abc", "abc")));
-		BOOST_TEST(0 == static_cast<int>(GLib::IcuUtils::CompareNoCase("ABC", "abc")));
-		BOOST_TEST(0 == static_cast<int>(GLib::IcuUtils::CompareNoCase("abc", "ABC")));
-		BOOST_TEST(-1 == static_cast<int>(GLib::IcuUtils::CompareNoCase("abc", "abcd")));
-		BOOST_TEST(1 == static_cast<int>(GLib::IcuUtils::CompareNoCase("abcd", "abc")));
-	}
+BOOST_AUTO_TEST_CASE(CompareSimpleCases)
+{
+	BOOST_TEST(0 == static_cast<int>(GLib::IcuUtils::CompareNoCase("", "")));
+	BOOST_TEST(0 == static_cast<int>(GLib::IcuUtils::CompareNoCase("abc", "abc")));
+	BOOST_TEST(0 == static_cast<int>(GLib::IcuUtils::CompareNoCase("ABC", "abc")));
+	BOOST_TEST(0 == static_cast<int>(GLib::IcuUtils::CompareNoCase("abc", "ABC")));
+	BOOST_TEST(-1 == static_cast<int>(GLib::IcuUtils::CompareNoCase("abc", "abcd")));
+	BOOST_TEST(1 == static_cast<int>(GLib::IcuUtils::CompareNoCase("abcd", "abc")));
+}
 
-	BOOST_AUTO_TEST_CASE(CompareSimpleCases2)
-	{
-		BOOST_TEST(0 == static_cast<int>(GLib::IcuUtils::CompareNoCase("\xC4\xB0", "i", "tr")));
-	}
+BOOST_AUTO_TEST_CASE(CompareSimpleCases2)
+{
+	BOOST_TEST(0 == static_cast<int>(GLib::IcuUtils::CompareNoCase("\xC4\xB0", "i", "tr")));
+}
 
-	BOOST_AUTO_TEST_CASE(DiaeresisCompare)
-	{
-		auto lowercaseUWithDiaeresis = "\xc3\xbc";
-		auto uppercaseUWithDiaeresis = "\xc3\x9c";
+BOOST_AUTO_TEST_CASE(DiaeresisCompare)
+{
+	auto lowercaseUWithDiaeresis = "\xc3\xbc";
+	auto uppercaseUWithDiaeresis = "\xc3\x9c";
 
-		BOOST_TEST(0 == static_cast<int>(GLib::IcuUtils::CompareNoCase(lowercaseUWithDiaeresis, uppercaseUWithDiaeresis)));
-		BOOST_TEST(-1 == static_cast<int>(GLib::IcuUtils::CompareNoCase("u", lowercaseUWithDiaeresis)));
-		BOOST_TEST(-1 == static_cast<int>(GLib::IcuUtils::CompareNoCase("U", uppercaseUWithDiaeresis)));
-	}
+	BOOST_TEST(0 == static_cast<int>(GLib::IcuUtils::CompareNoCase(lowercaseUWithDiaeresis, uppercaseUWithDiaeresis)));
+	BOOST_TEST(-1 == static_cast<int>(GLib::IcuUtils::CompareNoCase("u", lowercaseUWithDiaeresis)));
+	BOOST_TEST(-1 == static_cast<int>(GLib::IcuUtils::CompareNoCase("U", uppercaseUWithDiaeresis)));
+}
 
-	BOOST_AUTO_TEST_CASE(StartWithNoCasePartialDecode)
-	{
-		auto s = "abcd" "\xc3\xbc" "defg";
+BOOST_AUTO_TEST_CASE(StartWithNoCasePartialDecode)
+{
+	auto s = "abcd"
+					 "\xc3\xbc"
+					 "defg";
 
-		BOOST_TEST(0 == static_cast<int>(GLib::IcuUtils::CompareNoCase(s, s, 4)));
-		BOOST_TEST(0 == static_cast<int>(GLib::IcuUtils::CompareNoCase(s, s, 5)));
-		BOOST_TEST(0 == static_cast<int>(GLib::IcuUtils::CompareNoCase(s, s, 6)));
-	}
+	BOOST_TEST(0 == static_cast<int>(GLib::IcuUtils::CompareNoCase(s, s, 4)));
+	BOOST_TEST(0 == static_cast<int>(GLib::IcuUtils::CompareNoCase(s, s, 5)));
+	BOOST_TEST(0 == static_cast<int>(GLib::IcuUtils::CompareNoCase(s, s, 6)));
+}
 
-	BOOST_AUTO_TEST_CASE(LowerUpper)
-	{
-		BOOST_TEST("abcde" == GLib::IcuUtils::ToLower("AbCdE"));
-		BOOST_TEST("ABCDE" == GLib::IcuUtils::ToUpper("AbCdE"));
+BOOST_AUTO_TEST_CASE(LowerUpper)
+{
+	BOOST_TEST("abcde" == GLib::IcuUtils::ToLower("AbCdE"));
+	BOOST_TEST("ABCDE" == GLib::IcuUtils::ToUpper("AbCdE"));
 
-		BOOST_TEST("GROSS" == GLib::IcuUtils::ToUpper("gro\xC3\x9F"));
-		BOOST_TEST("gross" == GLib::IcuUtils::ToLower("GROSS"));
+	BOOST_TEST("GROSS" == GLib::IcuUtils::ToUpper("gro\xC3\x9F"));
+	BOOST_TEST("gross" == GLib::IcuUtils::ToLower("GROSS"));
 
-		BOOST_TEST("perch\xC3\xA9" == GLib::IcuUtils::ToLower("PERCH\xC3\x89"));
-		BOOST_TEST("PERCH\xC3\x89" == GLib::IcuUtils::ToUpper("perch\xC3\xA9"));
-	}
+	BOOST_TEST("perch\xC3\xA9" == GLib::IcuUtils::ToLower("PERCH\xC3\x89"));
+	BOOST_TEST("PERCH\xC3\x89" == GLib::IcuUtils::ToUpper("perch\xC3\xA9"));
+}
 
-	BOOST_AUTO_TEST_CASE(TurkishI)
-	{
-		BOOST_TEST("I" == GLib::IcuUtils::ToUpper("i"));
-		BOOST_TEST("\xC4\xB0" == GLib::IcuUtils::ToUpper("i", "tr"));
-	}
+BOOST_AUTO_TEST_CASE(TurkishI)
+{
+	BOOST_TEST("I" == GLib::IcuUtils::ToUpper("i"));
+	BOOST_TEST("\xC4\xB0" == GLib::IcuUtils::ToUpper("i", "tr"));
+}
 
 BOOST_AUTO_TEST_SUITE_END()

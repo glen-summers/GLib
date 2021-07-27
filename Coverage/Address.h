@@ -11,7 +11,10 @@ class Address
 	mutable bool visited;
 
 public:
-	explicit Address(unsigned char oldData, unsigned int symbolId) : oldData(oldData), visited(), symbolId(symbolId)
+	explicit Address(unsigned char oldData, unsigned int symbolId)
+		: oldData(oldData)
+		, visited()
+		, symbolId(symbolId)
 	{}
 
 	unsigned char OldData() const
@@ -47,4 +50,3 @@ public:
 		fileLines[fileName].emplace(lineNumber, false);
 	}
 };
-

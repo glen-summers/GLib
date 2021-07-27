@@ -11,7 +11,7 @@ struct Xyzzy
 	}
 };
 
-std::ostream & operator << (std::ostream & s, const Xyzzy &)
+std::ostream & operator<<(std::ostream & s, const Xyzzy &)
 {
 	return s << "plover";
 }
@@ -19,7 +19,7 @@ std::ostream & operator << (std::ostream & s, const Xyzzy &)
 struct Xyzzy2
 {};
 
-std::ostream & operator << (std::ostream & s, const Xyzzy2 &)
+std::ostream & operator<<(std::ostream & s, const Xyzzy2 &)
 {
 	return s << "plover2";
 }
@@ -31,12 +31,12 @@ struct CopyCheck
 
 	CopyCheck() = default;
 
-	CopyCheck(const CopyCheck& other)
+	CopyCheck(const CopyCheck & other)
 		: copies(++other.copies)
 		, moves(other.moves)
 	{}
 
-	CopyCheck& operator=(const CopyCheck& other)
+	CopyCheck & operator=(const CopyCheck & other)
 	{
 		if (this != &other)
 		{
@@ -45,7 +45,7 @@ struct CopyCheck
 		return *this;
 	}
 
-	CopyCheck(CopyCheck&& other) noexcept
+	CopyCheck(CopyCheck && other) noexcept
 		: copies(other.copies)
 		, moves(++other.moves)
 	{}

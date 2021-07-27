@@ -16,7 +16,7 @@ class Coverage : public GLib::Win::Debugger
 	static constexpr unsigned int FooFoo = 0xf00f00;
 	static constexpr unsigned int FeeFee = 0xfeefee;
 
-	std::regex nameSpaceRegex{ R"(^(?:[A-Za-z_][A-Za-z_0-9]*::)*)" }; // +some extra unicode chars?
+	std::regex nameSpaceRegex {R"(^(?:[A-Za-z_][A-Za-z_0-9]*::)*)"}; // +some extra unicode chars?
 
 	std::string executable;
 	WideStrings includes;
@@ -47,16 +47,17 @@ public:
 	CoverageData GetCoverageData() const;
 
 private:
-	static WideStrings a2w(const Strings& strings);
-	void AddLine(const std::wstring & fileName, unsigned lineNumber, const GLib::Win::Symbols::SymProcess & symProcess, DWORD64 address, Process & process);
+	static WideStrings a2w(const Strings & strings);
+	void AddLine(const std::wstring & fileName, unsigned lineNumber, const GLib::Win::Symbols::SymProcess & symProcess, DWORD64 address,
+							 Process & process);
 
 	void OnCreateProcess(DWORD processId, DWORD threadId, const CREATE_PROCESS_DEBUG_INFO & info) override;
-	void OnExitProcess(DWORD processId, DWORD threadId, const EXIT_PROCESS_DEBUG_INFO& info) override;
+	void OnExitProcess(DWORD processId, DWORD threadId, const EXIT_PROCESS_DEBUG_INFO & info) override;
 	void OnCreateThread(DWORD processId, DWORD threadId, const CREATE_THREAD_DEBUG_INFO & info) override;
 	void OnExitThread(DWORD processId, DWORD threadId, const EXIT_THREAD_DEBUG_INFO & info) override;
 	DWORD OnException(DWORD processId, DWORD threadId, const EXCEPTION_DEBUG_INFO & info) override;
 
-	void CleanupFunctionNames(const std::string & name, const std::string & typeName,
-	std::string & nameSpace, std::string & className, std::string & functionName) const;
+	void CleanupFunctionNames(const std::string & name, const std::string & typeName, std::string & nameSpace, std::string & className,
+														std::string & functionName) const;
 	void CaptureData(DWORD processId);
 };

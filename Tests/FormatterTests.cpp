@@ -9,9 +9,20 @@
 
 namespace
 {
-	bool IsInvalidFormat(const std::logic_error & e) { return e.what() == std::string("Invalid format string"); }
-	bool IsIndexOutOfRange(const std::logic_error & e) { return e.what() == std::string("IndexOutOfRange"); }
-	bool IsNoArguments(const std::logic_error & e) { return e.what() == std::string("NoArguments"); }
+	bool IsInvalidFormat(const std::logic_error & e)
+	{
+		return e.what() == std::string("Invalid format string");
+	}
+
+	bool IsIndexOutOfRange(const std::logic_error & e)
+	{
+		return e.what() == std::string("IndexOutOfRange");
+	}
+
+	bool IsNoArguments(const std::logic_error & e)
+	{
+		return e.what() == std::string("NoArguments");
+	}
 
 	const auto ukLocale =
 #ifdef __linux__
@@ -23,9 +34,19 @@ namespace
 
 	tm MakeTm(int tm_sec, int tm_min, int tm_hour, int tm_mday, int tm_mon, int tm_year, int tm_wday, int tm_yday, int tm_isdst)
 	{
-		return { tm_sec, tm_min, tm_hour, tm_mday, tm_mon, tm_year, tm_wday, tm_yday, tm_isdst
+		return {tm_sec,
+						tm_min,
+						tm_hour,
+						tm_mday,
+						tm_mon,
+						tm_year,
+						tm_wday,
+						tm_yday,
+						tm_isdst
 #ifdef __linux__
-			,0,0
+						,
+						0,
+						0
 #endif
 		};
 	}
@@ -37,12 +58,12 @@ BOOST_AUTO_TEST_SUITE(FormatterTests)
 
 BOOST_AUTO_TEST_CASE(BasicTest)
 {
-	std::string s = Formatter::Format("{0} {1} {2} {3}", 1, "2", std::string("3"), reinterpret_cast<void*>(4));
-	if constexpr (sizeof(void*) == 8)
+	std::string s = Formatter::Format("{0} {1} {2} {3}", 1, "2", std::string("3"), reinterpret_cast<void *>(4));
+	if constexpr (sizeof(void *) == 8)
 	{
 		BOOST_TEST(s == "1 2 3 0000000000000004");
 	}
-	else if constexpr (sizeof(void*) == 4)
+	else if constexpr (sizeof(void *) == 4)
 	{
 		BOOST_TEST(s == "1 2 3 00000004");
 	}
@@ -134,15 +155,13 @@ BOOST_AUTO_TEST_CASE(TestRepeatedInsert)
 BOOST_AUTO_TEST_CASE(TestSprintfFormatPassThrough)
 {
 	std::string s = Formatter::Format("{0:%#.8X}", 1234);
-	BOOST_TEST("0X000004D2" ==s);
+	BOOST_TEST("0X000004D2" == s);
 }
 
 BOOST_AUTO_TEST_CASE(TestSprintfFormatException)
 {
-	BOOST_CHECK_EXCEPTION(Formatter::Format("{0:x}", 1234), std::logic_error, [](const std::logic_error & e)
-	{
-		return e.what() == std::string("Invalid format : x");
-	});
+	BOOST_CHECK_EXCEPTION(Formatter::Format("{0:x}", 1234), std::logic_error,
+												[](const std::logic_error & e) { return e.what() == std::string("Invalid format : x"); });
 }
 
 BOOST_AUTO_TEST_CASE(TestSprintfFormatLengthNoException)
@@ -155,7 +174,7 @@ BOOST_AUTO_TEST_CASE(TestIntAsFloat)
 {
 	// produces random stuff
 	std::string s = Formatter::Format("{0:%f}", 1234);
-	//BOOST_TEST("1234" == s);
+	// BOOST_TEST("1234" == s);
 }
 
 BOOST_AUTO_TEST_CASE(TestCharLiteral)
@@ -239,13 +258,13 @@ BOOST_AUTO_TEST_CASE(TestLongLong)
 BOOST_AUTO_TEST_CASE(TestLongLongFormat)
 {
 	std::string s = Formatter::Format("{0:%llx}", 0x123456789abcfdefLL);
-	BOOST_TEST("123456789abcfdef" ==  s);
+	BOOST_TEST("123456789abcfdef" == s);
 }
 
 BOOST_AUTO_TEST_CASE(TestULongLong)
 {
 	std::string s = Formatter::Format("{0}", 12345678901234567890ULL);
-	BOOST_TEST("12345678901234567890" ==  s);
+	BOOST_TEST("12345678901234567890" == s);
 }
 
 BOOST_AUTO_TEST_CASE(TestULongLongFormat)
@@ -292,16 +311,16 @@ BOOST_AUTO_TEST_CASE(TestLongDoubleFormat)
 
 BOOST_AUTO_TEST_CASE(TestPointer)
 {
-	if constexpr (sizeof(void*)==8)
+	if constexpr (sizeof(void *) == 8)
 	{
-		auto p = reinterpret_cast<void*>(0x123456789abcfdefULL);
+		auto p = reinterpret_cast<void *>(0x123456789abcfdefULL);
 
 		std::string s = Formatter::Format("{0}", p);
 		BOOST_TEST("123456789abcfdef" == s);
 	}
-	else if constexpr (sizeof(void*) == 4)
+	else if constexpr (sizeof(void *) == 4)
 	{
-		auto p = reinterpret_cast<void*>(0x1234abcdUL);
+		auto p = reinterpret_cast<void *>(0x1234abcdUL);
 		std::string s = Formatter::Format("{0}", p);
 		BOOST_TEST("1234abcd" == s);
 	}
@@ -315,7 +334,7 @@ BOOST_AUTO_TEST_CASE(TestTimePointDefaultFormat)
 {
 	const int offset = 1900;
 	const int yr = 1601;
-	const tm tm = MakeTm( 0,0,0, 1,0, yr - offset, 0,0, 0 );
+	const tm tm = MakeTm(0, 0, 0, 1, 0, yr - offset, 0, 0, 0);
 
 	std::ostringstream s;
 	s.imbue(std::locale(ukLocale));
@@ -325,7 +344,7 @@ BOOST_AUTO_TEST_CASE(TestTimePointDefaultFormat)
 
 BOOST_AUTO_TEST_CASE(TestTimePoint)
 {
-	const tm tm = MakeTm( 0,0,18, 6,10,67, 0,0, 1 );
+	const tm tm = MakeTm(0, 0, 18, 6, 10, 67, 0, 0, 1);
 
 	std::ostringstream s;
 	s.imbue(std::locale(ukLocale));
@@ -358,20 +377,20 @@ BOOST_AUTO_TEST_CASE(CustomTypeFormat)
 
 BOOST_AUTO_TEST_CASE(CustomTypeNonEmptyFormatException)
 {
-	BOOST_CHECK_EXCEPTION(Xyzzy2 plugh; Formatter::Format("{0:lentilCustard}", plugh), std::logic_error, [](const std::logic_error & e)
-	{
-		return e.what() == std::string("Unexpected non-empty format : lentilCustard");
-	});
+	BOOST_CHECK_EXCEPTION(Xyzzy2 plugh; Formatter::Format("{0:lentilCustard}", plugh), std::logic_error,
+																			[](const std::logic_error & e)
+																			{ return e.what() == std::string("Unexpected non-empty format : lentilCustard"); });
 }
 
 BOOST_AUTO_TEST_CASE(MoneyTest)
 {
-	GLib::Money m { 123456.7 };
+	GLib::Money m {123456.7};
 
 	std::ostringstream s;
 	s.imbue(std::locale(ukLocale));
 	Formatter::Format(s, "{0}", m);
-	auto expected = "\xc2\xa3" "1,234.57";
+	auto expected = "\xc2\xa3"
+									"1,234.57";
 	BOOST_TEST(expected == s.str());
 }
 

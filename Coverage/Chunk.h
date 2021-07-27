@@ -28,6 +28,3 @@ struct GLib::Eval::Visitor<Chunk>
 		throw std::runtime_error(std::string("Unknown property : '") + propertyName + '\'');
 	}
 };
-
-
-

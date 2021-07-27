@@ -18,7 +18,7 @@ class Directory
 
 public:
 	Directory(std::string name, std::string link, unsigned int coveredLines, unsigned int coverableLines, unsigned int minCoveragePrecent,
-		unsigned int coveredFunctions, unsigned int coverableFunctions)
+						unsigned int coveredFunctions, unsigned int coverableFunctions)
 		: name(move(name))
 		, link(move(link))
 		, coveredLines(coveredLines)
@@ -45,7 +45,7 @@ public:
 
 	unsigned int CoveragePercent() const
 	{
-		return Percentage(coveredLines,  coverableLines);
+		return Percentage(coveredLines, coverableLines);
 	}
 
 	unsigned int CoveredLines() const

@@ -7,7 +7,7 @@
 #include <unordered_map>
 
 class Process;
-using Threads = std::unordered_map<unsigned int, void*>;
+using Threads = std::unordered_map<unsigned int, void *>;
 using IndexToFunction = std::unordered_map<unsigned long, Function>;
 using Processes = std::unordered_map<unsigned int, Process>;
 
@@ -19,7 +19,8 @@ class Process // ren ProcessInfo
 	IndexToFunction indexToFunction;
 
 public:
-	Process(unsigned int id) : id{id}
+	Process(unsigned int id)
+		: id {id}
 	{}
 
 	const Addresses & Addresses() const
@@ -65,14 +66,11 @@ public:
 	auto AddFunction(ULONG index, const std::string & nameSpace, const std::string & typeName, const std::string & functionName)
 	{
 		// double lookup to allow moving strings?
-		auto ret = indexToFunction.emplace(index, Function{nameSpace, typeName, functionName});
+		auto ret = indexToFunction.emplace(index, Function {nameSpace, typeName, functionName});
 		if (!ret.second)
 		{
-			throw std::runtime_error(GLib::Formatter::Format("Duplicate function id:{0}, {1}:{2}:{3}",
-				index, nameSpace, typeName, functionName));
+			throw std::runtime_error(GLib::Formatter::Format("Duplicate function id:{0}, {1}:{2}:{3}", index, nameSpace, typeName, functionName));
 		}
 		return ret.first;
 	}
 };
-
-

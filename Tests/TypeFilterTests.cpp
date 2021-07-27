@@ -34,22 +34,25 @@ namespace Interfaces
 
 namespace Predicates
 {
-	template <typename T> using IsDerivedFromFoo = GLib::TypePredicates::IsDerivedFrom<T, Interfaces::IFoo>;
+	template <typename T>
+	using IsDerivedFromFoo = GLib::TypePredicates::IsDerivedFrom<T, Interfaces::IFoo>;
 }
 
 namespace Util // move
 {
-	template<typename First, typename... Rest> struct ToTypeId;
+	template <typename First, typename... Rest>
+	struct ToTypeId;
 
-	template<typename First> struct ToTypeId<GLib::Util::TypeList<First>>
+	template <typename First>
+	struct ToTypeId<GLib::Util::TypeList<First>>
 	{
 		static void Append(std::list<std::type_index> & l)
 		{
-			 l.push_back(typeid(First));
+			l.push_back(typeid(First));
 		}
 	};
 
-	template<typename First, typename Second>
+	template <typename First, typename Second>
 	struct ToTypeId<GLib::Util::TypeList<First, Second>>
 	{
 		static void Append(std::list<std::type_index> & l)
@@ -59,7 +62,7 @@ namespace Util // move
 		}
 	};
 
-	template<typename First, typename Second, typename... Rest>
+	template <typename First, typename Second, typename... Rest>
 	struct ToTypeId<GLib::Util::TypeList<First, Second, Rest...>>
 	{
 		static void Append(std::list<std::type_index> & l)
@@ -82,7 +85,7 @@ BOOST_AUTO_TEST_SUITE(TypeFilterTests)
 
 BOOST_AUTO_TEST_CASE(TestTypeListCompare)
 {
-	std::list<std::type_index> expected { typeid(int), typeid(long) };
+	std::list<std::type_index> expected {typeid(int), typeid(long)};
 
 	std::list<std::type_index> actual;
 	Util::ToTypeId<GLib::Util::Tuple<int, long>::Type>::Append(actual);
@@ -93,7 +96,7 @@ BOOST_AUTO_TEST_CASE(TestTypeListCompare)
 BOOST_AUTO_TEST_CASE(TestIntegralFilter)
 {
 	using Result = GLib::Util::TypeFilter<std::is_integral, int, float, long>::TupleType::Type;
-	std::list<std::type_index> expected { typeid(int), typeid(long) };
+	std::list<std::type_index> expected {typeid(int), typeid(long)};
 
 	std::list<std::type_index> actual;
 	Util::ToTypeId<Result>::Append(actual);
@@ -102,9 +105,8 @@ BOOST_AUTO_TEST_CASE(TestIntegralFilter)
 
 BOOST_AUTO_TEST_CASE(TestInterfaceFilter)
 {
-	using Result = GLib::Util::TypeFilter<Predicates::IsDerivedFromFoo,
-			Interfaces::IFoo, Interfaces::IBar, Interfaces::IFoo2>::TupleType::Type;
-	std::list<std::type_index> expected { typeid(Interfaces::IFoo2) };
+	using Result = GLib::Util::TypeFilter<Predicates::IsDerivedFromFoo, Interfaces::IFoo, Interfaces::IBar, Interfaces::IFoo2>::TupleType::Type;
+	std::list<std::type_index> expected {typeid(Interfaces::IFoo2)};
 
 	std::list<std::type_index> actual;
 	Util::ToTypeId<Result>::Append(actual);
@@ -113,9 +115,9 @@ BOOST_AUTO_TEST_CASE(TestInterfaceFilter)
 
 BOOST_AUTO_TEST_CASE(TestSelfFilter)
 {
-	using Result = GLib::Util::SelfTypeFilter<GLib::TypePredicates::HasNoInheritor,
-		Interfaces::IFoo, Interfaces::IFoo2, Interfaces::IBar>::TupleType::Type;
-	std::list<std::type_index> expected { typeid(Interfaces::IFoo2),typeid(Interfaces::IBar) };
+	using Result =
+		GLib::Util::SelfTypeFilter<GLib::TypePredicates::HasNoInheritor, Interfaces::IFoo, Interfaces::IFoo2, Interfaces::IBar>::TupleType::Type;
+	std::list<std::type_index> expected {typeid(Interfaces::IFoo2), typeid(Interfaces::IBar)};
 
 	std::list<std::type_index> actual;
 	Util::ToTypeId<Result>::Append(actual);

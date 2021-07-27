@@ -36,10 +36,10 @@ template <typename T>
 struct DeleteCounter
 {
 	DeleteCounter() = default;
-	DeleteCounter(const DeleteCounter& other) = default;
-	DeleteCounter(DeleteCounter&& other) noexcept = default;
-	DeleteCounter& operator=(const DeleteCounter& other) = default;
-	DeleteCounter& operator=(DeleteCounter&& other) noexcept = default;
+	DeleteCounter(const DeleteCounter & other) = default;
+	DeleteCounter(DeleteCounter && other) noexcept = default;
+	DeleteCounter & operator=(const DeleteCounter & other) = default;
+	DeleteCounter & operator=(DeleteCounter && other) noexcept = default;
 
 	static void Reset()
 	{
@@ -73,7 +73,8 @@ class ImplementsITest1 final : public GLib::Win::Unknown<ImplementsITest1, ITest
 	}
 };
 
-class ImplementsITest1AndITest2 final : public GLib::Win::Unknown<ImplementsITest1AndITest2, ITest1, ITest2>, public DeleteCounter<ImplementsITest1AndITest2>
+class ImplementsITest1AndITest2 final : public GLib::Win::Unknown<ImplementsITest1AndITest2, ITest1, ITest2>,
+																				public DeleteCounter<ImplementsITest1AndITest2>
 {
 	GLIB_COM_RULE_OF_FIVE(ImplementsITest1AndITest2)
 
@@ -91,8 +92,8 @@ class ImplementsITest1AndITest2 final : public GLib::Win::Unknown<ImplementsITes
 class ImplementsITest1ExtendedAndITest1ExtendedAlt;
 
 class ImplementsITest1ExtendedAndITest1ExtendedAlt final
-	: public GLib::Win::Unknown<ImplementsITest1ExtendedAndITest1ExtendedAlt, ITest1Extended, ITest1, ITest1ExtendedAlt>
-	, public DeleteCounter<ImplementsITest1ExtendedAndITest1ExtendedAlt>
+	: public GLib::Win::Unknown<ImplementsITest1ExtendedAndITest1ExtendedAlt, ITest1Extended, ITest1, ITest1ExtendedAlt>,
+		public DeleteCounter<ImplementsITest1ExtendedAndITest1ExtendedAlt>
 {
 	GLIB_COM_RULE_OF_FIVE(ImplementsITest1ExtendedAndITest1ExtendedAlt)
 
@@ -119,10 +120,9 @@ namespace GLib
 		namespace Detail
 		{
 			template <>
-			inline ITest1 * Cast<ITest1, ImplementsITest1ExtendedAndITest1ExtendedAlt>
-				(ImplementsITest1ExtendedAndITest1ExtendedAlt * t)
+			inline ITest1 * Cast<ITest1, ImplementsITest1ExtendedAndITest1ExtendedAlt>(ImplementsITest1ExtendedAndITest1ExtendedAlt * t)
 			{
-				return static_cast<ITest1*>(static_cast<ITest1Extended*>(t));
+				return static_cast<ITest1 *>(static_cast<ITest1Extended *>(t));
 			}
 		}
 	}

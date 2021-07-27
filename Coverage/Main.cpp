@@ -11,7 +11,7 @@
 
 using namespace std::string_literals;
 
-int main(int argc, char *argv[])
+int main(int argc, char * argv[])
 {
 	int errorCode = 0;
 
@@ -36,13 +36,13 @@ Coverage c:\Build\Main.exe C:\Report -i C:\MainCode C:\Utils\ -x C:\ExternalCode
 			throw std::runtime_error(syntax);
 		}
 
-		GLib::Span<char *> const args { argv+1, static_cast<std::ptrdiff_t>(argc)-1 };
+		GLib::Span<char *> const args {argv + 1, static_cast<std::ptrdiff_t>(argc) - 1};
 
 		auto it = args.begin();
 		auto end = args.end();
 		const auto * const executable = *it++;
 		const auto * const reportPath = *it++;
-		bool debugChildProcesses{};
+		bool debugChildProcesses {};
 
 		Strings includes;
 		Strings excludes;
@@ -81,20 +81,20 @@ Coverage c:\Build\Main.exe C:\Report -i C:\MainCode C:\Utils\ -x C:\ExternalCode
 		}
 
 		const GLib::Flog::ScopeLog & scope = {GLib::Flog::LogManager::GetLog("Main"), GLib::Flog::Level::Info, "Total"};
-		(void)scope;
+		(void) scope;
 
 		Coverage dbg(executable, debugChildProcesses, includes, excludes);
 		constexpr unsigned TimeoutMilliseconds = 1000;
-		while(dbg.ProcessEvents(TimeoutMilliseconds))
+		while (dbg.ProcessEvents(TimeoutMilliseconds))
 		{}
 
 		HtmlReport report(executable, reportPath, dbg.GetCoverageData());
-		(void)report;
+		(void) report;
 	}
 	catch (const std::exception & e)
 	{
 		GLib::Flog::LogManager::GetLog("Main").Error(e.what());
-		std::cout << "\x1b[31m" << "\x1b[1m" << e.what() << "\x1b[m" << '\n';
+		std::cout << "\x1b[31m\x1b[1m" << e.what() << "\x1b[m" << '\n';
 
 		errorCode = 1;
 	}

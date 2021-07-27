@@ -19,12 +19,15 @@ BOOST_AUTO_TEST_CASE(LocalTimeZero)
 	auto tz = GLib::Compat::GetEnv("TZ");
 	GLib::Compat::SetEnv("TZ", "GMST0GMDT-1,M3.3.0,M10.1.0");
 	GLib::Compat::TzSet();
-	SCOPE(_, [&]() noexcept
-	{
-		if (tz) GLib::Compat::SetEnv("TZ", tz->c_str());
-		else GLib::Compat::UnsetEnv("TZ");
-		GLib::Compat::TzSet();
-	});
+	SCOPE(_,
+				[&]() noexcept
+				{
+					if (tz)
+						GLib::Compat::SetEnv("TZ", tz->c_str());
+					else
+						GLib::Compat::UnsetEnv("TZ");
+					GLib::Compat::TzSet();
+				});
 
 	tm tm {};
 	GLib::Compat::LocalTime(tm, 0);
@@ -45,12 +48,19 @@ BOOST_AUTO_TEST_CASE(LocalTimeSpecific)
 	auto tz = GLib::Compat::GetEnv("TZ");
 	GLib::Compat::SetEnv("TZ", "CST");
 	GLib::Compat::TzSet();
-	SCOPE(_, [&]() noexcept
-	{
-		if (tz) GLib::Compat::SetEnv("TZ", tz->c_str());
-		else GLib::Compat::UnsetEnv("TZ");
-		GLib::Compat::TzSet();
-	});
+	SCOPE(_,
+				[&]() noexcept
+				{
+					if (tz)
+					{
+						GLib::Compat::SetEnv("TZ", tz->c_str());
+					}
+					else
+					{
+						GLib::Compat::UnsetEnv("TZ");
+					}
+					GLib::Compat::TzSet();
+				});
 
 	tm tm {};
 	GLib::Compat::LocalTime(tm, 1569056285);
@@ -84,15 +94,9 @@ BOOST_AUTO_TEST_CASE(GmTime)
 
 BOOST_AUTO_TEST_CASE(StrError)
 {
-	GLIB_CHECK_RUNTIME_EXCEPTION(
-	{
-		GLib::Compat::AssertTrue(false, "error", ENOENT);
-	}, "error : No such file or directory");
+	GLIB_CHECK_RUNTIME_EXCEPTION({ GLib::Compat::AssertTrue(false, "error", ENOENT); }, "error : No such file or directory");
 
-	GLIB_CHECK_RUNTIME_EXCEPTION(
-	{
-		GLib::Compat::AssertTrue(false, "error", ESRCH);
-	}, "error : No such process");
+	GLIB_CHECK_RUNTIME_EXCEPTION({ GLib::Compat::AssertTrue(false, "error", ESRCH); }, "error : No such process");
 
 	GLib::Compat::AssertTrue(true, "no error", 0);
 }
@@ -107,7 +111,10 @@ BOOST_AUTO_TEST_CASE(ProcessName)
 {
 	auto name = GLib::Compat::ProcessName();
 	auto exe = name.rfind(".exe");
-	if (exe == name.size() - 4) name.erase(exe);
+	if (exe == name.size() - 4)
+	{
+		name.erase(exe);
+	}
 	BOOST_TEST("Tests" == name);
 }
 

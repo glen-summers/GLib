@@ -27,25 +27,19 @@ namespace GLib::Xml
 
 	inline bool operator==(const Element & e1, const Element & e2)
 	{
-		if (e1.Type()!= e2.Type() ||
-			e1.QName() != e2.QName() ||
-			e1.NameSpace() != e2.NameSpace() ||
-			e1.Text() != e2.Text())
+		if (e1.Type() != e2.Type() || e1.QName() != e2.QName() || e1.NameSpace() != e2.NameSpace() || e1.Text() != e2.Text())
 		{
 			return false;
 		}
 
-		for (auto it1 = e1.Attributes().begin(), it2=e2.Attributes().begin();
-			it1!=e1.Attributes().begin() && it2!=e2.Attributes().begin();
-			++it1, ++it2)
+		for (auto it1 = e1.Attributes().begin(), it2 = e2.Attributes().begin(); it1 != e1.Attributes().begin() && it2 != e2.Attributes().begin();
+				 ++it1, ++it2)
 		{
-			if (it1==e1.Attributes().end() || it2==e2.Attributes().end())
+			if (it1 == e1.Attributes().end() || it2 == e2.Attributes().end())
 			{
 				return false;
 			}
-			if ((*it1).name != (*it2).name ||
-				(*it1).nameSpace != (*it2).nameSpace ||
-				(*it1).value != (*it2).value)
+			if ((*it1).name != (*it2).name || (*it1).nameSpace != (*it2).nameSpace || (*it1).value != (*it2).value)
 			{
 				return false;
 			}
@@ -61,16 +55,12 @@ namespace GLib::Xml
 
 	inline std::ostream & operator<<(std::ostream & s, const Element & e)
 	{
-		s
-			<< "NameSpace: [" << e.NameSpace()
-			<< "], Name: [" << e.Name()
-			<< "], type : [" << (int)e.Type()
-			<< "], text : [" << e.Text() << ']';
+		s << "NameSpace: [" << e.NameSpace() << "], Name: [" << e.Name() << "], type : [" << (int) e.Type() << "], text : [" << e.Text() << ']';
 
 		if (!e.Attributes().empty())
 		{
 			s << std::endl;
-			for(const auto & a : e.Attributes())
+			for (const auto & a : e.Attributes())
 			{
 				s << "Attr: [" << a.nameSpace << "]:[" << a.name << "]=[" << a.value << ']' << std::endl;
 			}
@@ -84,7 +74,7 @@ namespace GLib::Xml
 		{
 			for (const auto & a : e.Attributes())
 			{
-				(void)a;
+				(void) a;
 			}
 		}
 	}

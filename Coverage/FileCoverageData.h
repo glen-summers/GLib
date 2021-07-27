@@ -35,7 +35,7 @@ public:
 
 	void AddFunction(const Function & addedFunction)
 	{
-		bool accumulated{};
+		bool accumulated {};
 		auto lowerIt = functions.lower_bound(addedFunction);
 		if (lowerIt != functions.end())
 		{
@@ -78,7 +78,7 @@ public:
 
 	unsigned int CoveredFunctions() const
 	{
-		unsigned int value{};
+		unsigned int value {};
 		for (const auto & f : functions) // improve
 		{
 			if (f.CoveredLines() != 0)
@@ -99,4 +99,3 @@ public:
 		return lineCoverage;
 	}
 };
-

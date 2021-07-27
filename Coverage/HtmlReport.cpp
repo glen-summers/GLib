@@ -49,7 +49,7 @@ HtmlReport::HtmlReport(std::string testName, const std::filesystem::path & htmlP
 	, functionsTemplate(LoadHtml(IDR_FUNCTIONS))
 {
 	GLib::Flog::ScopeLog scopeLog(log, GLib::Flog::Level::Info, "HtmlReport");
-	(void)scopeLog;
+	(void) scopeLog;
 
 	Strings drives;
 	for (const auto & rootPath : rootPaths)
@@ -69,7 +69,7 @@ HtmlReport::HtmlReport(std::string testName, const std::filesystem::path & htmlP
 		if (multipleDrives)
 		{
 			auto drive = p2a(rootPath.root_name()).substr(0, 1);
-			subPath = std::filesystem::path{drive} / subPath;
+			subPath = std::filesystem::path {drive} / subPath;
 		}
 		GenerateSourceFile(subPath, data);
 		index[subPath.parent_path()].push_back(data);
@@ -86,7 +86,7 @@ std::filesystem::path HtmlReport::Initialise(const std::filesystem::path & path)
 	create_directories(path);
 	auto cssPath = path / "coverage.css";
 	std::ofstream css(cssPath);
-	if(!css)
+	if (!css)
 	{
 		throw std::runtime_error("Unable to create file");
 	}
@@ -97,7 +97,7 @@ std::filesystem::path HtmlReport::Initialise(const std::filesystem::path & path)
 std::set<std::filesystem::path> HtmlReport::RootPaths(const CoverageData & data)
 {
 	std::set<std::filesystem::path> rootPaths;
-	for (const auto & [path,_] : data)
+	for (const auto & [path, _] : data)
 	{
 		rootPaths.insert(path.parent_path());
 	}
@@ -107,23 +107,23 @@ std::set<std::filesystem::path> HtmlReport::RootPaths(const CoverageData & data)
 
 void HtmlReport::GenerateRootIndex() const
 {
-	unsigned int totalCoveredLines{};
-	unsigned int totalCoverableLines{};
-	unsigned int totalCoveredFunctions{};
-	unsigned int totalCoverableFunctions{};
+	unsigned int totalCoveredLines {};
+	unsigned int totalCoverableLines {};
+	unsigned int totalCoveredFunctions {};
+	unsigned int totalCoverableFunctions {};
 
 	std::vector<Directory> directories;
 
-	for (const auto & [name, children]: index)
+	for (const auto & [name, children] : index)
 	{
 		const auto & link = name / "index.html";
 
-		unsigned int coveredLines{};
-		unsigned int coverableLines{};
-		unsigned int minChildPercent{HundredPercent};
+		unsigned int coveredLines {};
+		unsigned int coverableLines {};
+		unsigned int minChildPercent {HundredPercent};
 
-		unsigned int coveredFunctions{};
-		unsigned int coverableFunctions{};
+		unsigned int coveredFunctions {};
+		unsigned int coverableFunctions {};
 		// minChildFunctionCover?
 
 		for (const FileCoverageData & data : children)
@@ -138,8 +138,7 @@ void HtmlReport::GenerateRootIndex() const
 			coverableFunctions += data.CoverableFunctions();
 		}
 
-		directories.emplace_back(p2a(name), p2a(link), coveredLines, coverableLines, minChildPercent,
-			coveredFunctions, coverableFunctions);
+		directories.emplace_back(p2a(name), p2a(link), coveredLines, coverableLines, minChildPercent, coveredFunctions, coverableFunctions);
 
 		totalCoveredLines += coveredLines;
 		totalCoverableLines += coverableLines;
@@ -187,10 +186,10 @@ void HtmlReport::GenerateIndices() const
 	{
 		std::vector<Directory> directories;
 
-		unsigned int totalCoveredFunctions{};
-		unsigned int totalCoverableFunctions{};
-		unsigned int totalCoveredLines{};
-		unsigned int totalCoverableLines{};
+		unsigned int totalCoveredFunctions {};
+		unsigned int totalCoverableFunctions {};
+		unsigned int totalCoveredLines {};
+		unsigned int totalCoverableLines {};
 
 		for (const FileCoverageData & data : children)
 		{
@@ -211,8 +210,8 @@ void HtmlReport::GenerateIndices() const
 		for (const FileCoverageData & data : children)
 		{
 			std::string text = p2a(data.Path().filename());
-			directories.emplace_back(text, text + ".html", data.CoveredLines(), data.CoverableLines(), 0,
-				data.CoveredFunctions(), data.CoverableFunctions());
+			directories.emplace_back(text, text + ".html", data.CoveredLines(), data.CoverableLines(), 0, data.CoveredFunctions(),
+															 data.CoverableFunctions());
 		}
 
 		auto path = htmlPath / subPath;
@@ -274,7 +273,7 @@ void HtmlReport::GenerateSourceFile(std::filesystem::path & subPath, const FileC
 		try
 		{
 			std::stringstream tmp;
-			Htmlify(std::string_view{buffer.str()}, tmp);
+			Htmlify(std::string_view {buffer.str()}, tmp);
 			source = tmp.str();
 		}
 		catch (const std::exception & e)
@@ -286,9 +285,9 @@ void HtmlReport::GenerateSourceFile(std::filesystem::path & subPath, const FileC
 
 	std::vector<Line> lines;
 
-	for (const auto & sourceLine : GLib::Util::Splitter{source, "\n"})
+	for (const auto & sourceLine : GLib::Util::Splitter {source, "\n"})
 	{
-		auto lineNumber = static_cast<unsigned int>(lines.size()+1);
+		auto lineNumber = static_cast<unsigned int>(lines.size() + 1);
 		LineCover cover {};
 		auto it = lc.find(lineNumber);
 		if (it != lc.end())
@@ -316,7 +315,7 @@ void HtmlReport::GenerateSourceFile(std::filesystem::path & subPath, const FileC
 
 	std::vector<Chunk> chunks;
 	chunks.push_back({LineCover::None, EffectiveHeaderLines * ratio});
-	for (auto it = lines.begin(), end = lines.end(), next = end; it!=end; it = next)
+	for (auto it = lines.begin(), end = lines.end(), next = end; it != end; it = next)
 	{
 		next = GLib::Util::ConsecutiveFind(it, end, pred);
 		auto size = static_cast<float>(std::distance(it, next));
@@ -361,17 +360,18 @@ void HtmlReport::GenerateSourceFile(std::filesystem::path & subPath, const FileC
 			if (file == sourceFile)
 			{
 				unsigned int oneBasedLine = l.begin()->first;
-				const unsigned int functionOffset = 1; // 0 can causes out of range for debug globale delete, todo remove this and replace with jscript offset on navigate
+				const unsigned int functionOffset =
+					1; // 0 can causes out of range for debug globale delete, todo remove this and replace with jscript offset on navigate
 
-				unsigned int zeroBasedLine{};
+				unsigned int zeroBasedLine {};
 				if (oneBasedLine >= functionOffset)
 				{
 					zeroBasedLine = oneBasedLine - 1 - functionOffset;
 				}
 
 				lines[zeroBasedLine].hasLink = true;
-				funcs.emplace(f.NameSpace(), f.ClassName(), f.FunctionName(), zeroBasedLine+1, static_cast<unsigned int>(f.CoveredLines()),
-					static_cast<unsigned int>(f.AllLines()));
+				funcs.emplace(f.NameSpace(), f.ClassName(), f.FunctionName(), zeroBasedLine + 1, static_cast<unsigned int>(f.CoveredLines()),
+											static_cast<unsigned int>(f.AllLines()));
 			}
 		}
 	}
@@ -383,7 +383,7 @@ void HtmlReport::GenerateSourceFile(std::filesystem::path & subPath, const FileC
 		std::filesystem::path tmp = targetPath;
 		tmp += L".html";
 		std::ofstream out(tmp);
-		if(!out)
+		if (!out)
 		{
 			throw std::runtime_error("Unable to create file");
 		}
@@ -394,7 +394,7 @@ void HtmlReport::GenerateSourceFile(std::filesystem::path & subPath, const FileC
 		std::filesystem::path tmp = targetPath;
 		tmp += L".functions.html";
 		std::ofstream out(tmp);
-		if(!out)
+		if (!out)
 		{
 			throw std::runtime_error("Unable to create file");
 		}

@@ -19,7 +19,7 @@ class MainWindow : public Window
 	inline static GLib::Flog::Log const log = GLib::Flog::LogManager::GetLog<MainWindow>();
 
 	D2d::Factory factory;
-	D2d::Renderer renderer{factory};
+	D2d::Renderer renderer {factory};
 	unsigned int const exitTimeSeconds;
 
 public:
@@ -28,7 +28,7 @@ public:
 		, exitTimeSeconds(exitTimeSeconds)
 	{
 		log.Info("Ctor");
-		SetTimer(std::chrono::seconds{exitTimeSeconds});
+		SetTimer(std::chrono::seconds {exitTimeSeconds});
 	}
 
 protected:
@@ -57,7 +57,7 @@ protected:
 	{
 		log.Info("OnPaint");
 		Painter p = GetPainter();
-		(void)p;
+		(void) p;
 
 		renderer.Verify(Handle(), ClientSize());
 		renderer.Begin();

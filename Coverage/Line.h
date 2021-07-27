@@ -51,4 +51,3 @@ struct GLib::Eval::Visitor<Line>
 		throw std::runtime_error(std::string("Unknown property : '") + propertyName + '\'');
 	}
 };
-
