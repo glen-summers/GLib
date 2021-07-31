@@ -42,8 +42,9 @@ namespace GLib::Cpp
 		using pointer = void;
 		using reference = void;
 
-		Iterator(std::string_view::const_iterator begin, std::string_view::const_iterator end)
-			: ptr(begin)
+		Iterator(std::string_view::const_iterator begin, std::string_view::const_iterator end, bool emitWhitespace)
+			: engine(emitWhitespace)
+			, ptr(begin)
 			, end(end)
 			, lastPtr(begin)
 		{
@@ -172,6 +173,7 @@ namespace GLib::Cpp
 
 				if (newState == State::None)
 				{
+
 					switch (oldState)
 					{
 						case State::CommentAsterix:
@@ -223,21 +225,23 @@ namespace GLib::Cpp
 	class Holder
 	{
 		std::string_view value;
+		bool emitWhitespace;
 
 	public:
-		Holder(std::string_view value)
+		Holder(std::string_view value, bool emitWhitespace = true)
 			: value(value)
+			, emitWhitespace(emitWhitespace)
 		{}
 
 		Iterator begin() const
 		{
-			return {value.cbegin(), value.cend()};
+			return {value.cbegin(), value.cend(), emitWhitespace};
 		}
 
 		Iterator end() const
 		{
 			(void) this;
-			return {};
+			return {value.cend(), value.cend(), emitWhitespace};
 		}
 	};
 }

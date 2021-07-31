@@ -24,6 +24,7 @@ void Parse(const Holder & code)
 	for (const auto & x : code)
 	{
 		(void) x;
+		//std::cout << x.first << " : " << x.second << std::endl;
 	}
 }
 
@@ -52,6 +53,15 @@ BOOST_AUTO_TEST_CASE(Code1)
 	Holder code {R"(void foo)"};
 
 	std::vector<Fragment> expected {{State::Code, "void"}, {State::WhiteSpace, " "}, {State::Code, "foo"}};
+
+	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), code.begin(), code.end());
+}
+
+BOOST_AUTO_TEST_CASE(CodeNoWs)
+{
+	Holder code {R"(void foo)", false};
+
+	std::vector<Fragment> expected {{State::Code, "void foo"}};
 
 	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), code.begin(), code.end());
 }

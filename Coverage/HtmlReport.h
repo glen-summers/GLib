@@ -22,9 +22,10 @@ class HtmlReport
 	std::string fileTemplate;
 	std::string functionsTemplate;
 	std::map<std::filesystem::path, std::list<FileCoverageData>> index;
+	bool showWhiteSpace;
 
 public:
-	HtmlReport(std::string testName, const std::filesystem::path & htmlPath, const CoverageData & coverageData);
+	HtmlReport(std::string testName, const std::filesystem::path & htmlPath, const CoverageData & coverageData, bool showWhiteSpace);
 
 private:
 	void GenerateRootIndex() const;

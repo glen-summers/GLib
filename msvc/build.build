@@ -37,7 +37,7 @@
 		<TestExecutable>$(OutputPath)\$(TestProject).exe</TestExecutable>
 		<DebugTestExecutable>$(PlatformOut)\Debug\$(TestProject).exe</DebugTestExecutable>
 		<CoverageExecutable>$(OutputPath)\Coverage.exe</CoverageExecutable>
-		<CoverageArgs>-i @(CoverageInclude, ' -i ') -x @(CoverageExclude, ' -x ') -sub</CoverageArgs>
+		<CoverageArgs>-i @(CoverageInclude, ' -i ') -x @(CoverageExclude, ' -x ') -sub -ws</CoverageArgs>
 		<Downloads>$(Out)\downloads</Downloads>
 		<VolumeShare>$(Out)\DockerShare\:/src/GLib/out</VolumeShare>
 	</PropertyGroup>

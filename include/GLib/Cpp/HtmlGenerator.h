@@ -105,6 +105,8 @@ inline void Htmlify(const GLib::Cpp::Holder & code, std::ostream & out)
 
 	auto alphaNumUnd = [](unsigned char c) { return std::isalnum(c) != 0 || c == '_'; };
 	auto whitespace = [](unsigned char c) { return std::isspace(c) != 0; };
+	auto escape = [&](std::string_view value) { GLib::Xml::Utils::Escape(value, out); };
+	auto vis = [&](std::string_view v) { VisibleWhitespace(v, out); };
 
 	for (const auto & f : code)
 	{
@@ -124,53 +126,47 @@ inline void Htmlify(const GLib::Cpp::Holder & code, std::ostream & out)
 					}
 					else
 					{
-						GLib::Xml::Utils::Escape(value, out);
+						escape(value);
 					}
 				},
-				[&](std::string_view value) { GLib::Xml::Utils::Escape(value, out); });
+				escape);
 
 			continue;
 		}
 
 		auto it = styles.find(f.first);
+		if (it == styles.end())
 		{
-			if (it == styles.end())
+			escape(f.second);
+			continue;
+		}
+
+		auto splitter = GLib::Util::SplitterView(f.second, "\n");
+		for (auto sit = splitter.begin(), end = splitter.end(); sit != end;)
+		{
+			GLib::Cpp::State state = it->first;
+			std::string_view value = *sit;
+
+			if (!value.empty())
 			{
-				GLib::Xml::Utils::Escape(f.second, out);
-				continue;
+				OpenSpan(it->second, out);
+				if (state == GLib::Cpp::State::WhiteSpace)
+				{
+					vis(value);
+				}
+				else
+				{
+					GLib::Util::Split(value, whitespace, vis, escape);
+				}
+				CloseSpan(out);
 			}
 
-			auto splitter = GLib::Util::SplitterView(f.second, "\n");
-			for (auto sit = splitter.begin(), end = splitter.end(); sit != end;)
+			if (++sit == end)
 			{
-				GLib::Cpp::State state = it->first;
-				std::string_view value = *sit;
-
-				if (!value.empty())
-				{
-					OpenSpan(it->second, out);
-
-					if (state == GLib::Cpp::State::WhiteSpace) // could now just remove whitespace state and use below split
-					{
-						VisibleWhitespace(value, out);
-					}
-					else
-					{
-						GLib::Util::Split(
-							value, whitespace, [&](std::string_view v) { VisibleWhitespace(v, out); },
-							[&](std::string_view v) { GLib::Xml::Utils::Escape(v, out); });
-					}
-
-					CloseSpan(out);
-				}
-
-				if (++sit == end)
-				{
-					break;
-				}
-
-				out << std::endl;
+				break;
 			}
+
+			out << std::endl;
 		}
 	}
 }

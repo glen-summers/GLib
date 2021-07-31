@@ -48,7 +48,8 @@ namespace GLib::Cpp
 
 		using StateFunction = State (StateEngine::*)(char) const;
 
-		State state;
+		bool emitWhiteSpace;
+		State state = State::None;
 		StateFunction stateFunction;
 		char lastChar {};
 
@@ -58,9 +59,9 @@ namespace GLib::Cpp
 		mutable bool stringEscape {};
 
 	public:
-		explicit StateEngine(State state = State::None)
-			: state(state)
-			, stateFunction(stateFunctions.at(static_cast<int>(state)))
+		explicit StateEngine(bool emitWhiteSpace)
+			: emitWhiteSpace {emitWhiteSpace}
+			, stateFunction {stateFunctions.at(static_cast<int>(state))}
 		{
 			rawStringPrefix.reserve(MaxPrefixSize);
 		}
@@ -83,9 +84,9 @@ namespace GLib::Cpp
 			return (static_cast<unsigned char>(c) & ContinuationMask) != 0;
 		}
 
-		static bool IsWhiteSpace(char c)
+		bool IsWhiteSpace(char c) const
 		{
-			return !IsContinuation(c) && std::isspace(c) != 0;
+			return emitWhiteSpace && !IsContinuation(c) && std::isspace(c) != 0;
 		}
 
 		void SetState(State newState)
@@ -143,7 +144,7 @@ namespace GLib::Cpp
 
 			if (IsWhiteSpace(c))
 			{
-				return State::WhiteSpace;
+				return emitWhiteSpace ? State::WhiteSpace : state;
 			}
 
 			return State::Code;
@@ -327,7 +328,7 @@ namespace GLib::Cpp
 
 		State Code(char c) const
 		{
-			if (IsWhiteSpace(c))
+			if (emitWhiteSpace && IsWhiteSpace(c))
 			{
 				return State::WhiteSpace;
 			}
@@ -352,6 +353,11 @@ namespace GLib::Cpp
 			if (c == SingleQuote && (std::isxdigit(lastChar) == 0))
 			{
 				return State::CharacterLiteral;
+			}
+
+			if (c == '\n')
+			{
+				return State::None;
 			}
 
 			return state;

@@ -37,7 +37,7 @@ std::string GetDateTime(time_t t)
 	return os.str();
 }
 
-HtmlReport::HtmlReport(std::string testName, const std::filesystem::path & htmlPath, const CoverageData & coverageData)
+HtmlReport::HtmlReport(std::string testName, const std::filesystem::path & htmlPath, const CoverageData & coverageData, bool showWhiteSpace)
 	: testName(move(testName))
 	, time(GetDateTime(std::time(nullptr)))
 	, htmlPath(htmlPath)
@@ -47,6 +47,7 @@ HtmlReport::HtmlReport(std::string testName, const std::filesystem::path & htmlP
 	, dirTemplate(LoadHtml(IDR_DIRECTORY))
 	, fileTemplate(LoadHtml(IDR_FILE))
 	, functionsTemplate(LoadHtml(IDR_FUNCTIONS))
+	, showWhiteSpace(showWhiteSpace)
 {
 	GLib::Flog::ScopeLog scopeLog(log, GLib::Flog::Level::Info, "HtmlReport");
 
@@ -272,7 +273,7 @@ void HtmlReport::GenerateSourceFile(std::filesystem::path & subPath, const FileC
 		try
 		{
 			std::stringstream tmp;
-			Htmlify(std::string_view {buffer.str()}, tmp);
+			Htmlify({std::string_view {buffer.str()}, showWhiteSpace}, tmp);
 			source = tmp.str();
 		}
 		catch (const std::exception & e)
