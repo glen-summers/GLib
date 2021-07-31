@@ -57,7 +57,6 @@ protected:
 	{
 		log.Info("OnPaint");
 		Painter p = GetPainter();
-		(void) p;
 
 		renderer.Verify(Handle(), ClientSize());
 		renderer.Begin();

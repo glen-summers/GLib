@@ -114,7 +114,6 @@ BOOST_AUTO_TEST_CASE(TestOneScope)
 	log.Info("Start");
 	{
 		GLib::Flog::ScopeLog scope1(log, GLib::Flog::Level::Info, "Scoop");
-		(void) scope1;
 	}
 	log.Info("End");
 
@@ -133,7 +132,6 @@ BOOST_AUTO_TEST_CASE(TestOneScopeWithInnerLog)
 	{
 		GLib::Flog::ScopeLog scope1(log, GLib::Flog::Level::Info, "Scoop");
 		log.Info("Middle");
-		(void) scope1;
 	}
 	log.Info("End");
 

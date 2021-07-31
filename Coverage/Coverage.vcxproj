@@ -147,7 +147,6 @@
     <ClInclude Include="Chunk.h" />
     <ClInclude Include="Coverage.h" />
     <ClInclude Include="CoverageLevel.h" />
-    <ClInclude Include="CppHtmlGenerator.h" />
     <ClInclude Include="Directory.h" />
     <ClInclude Include="FileCoverageData.h" />
     <ClInclude Include="Function.h" />

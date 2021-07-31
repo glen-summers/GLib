@@ -16,9 +16,14 @@ namespace GLib::Xml::Utils
 
 	using Entity = std::pair<std::string_view, char>;
 
+	static constexpr Entity Quot {"&quot;", '\"'};
+	static constexpr Entity Amp {"&amp;", '&'};
+	static constexpr Entity Apos {"&apos;", '\''};
+	static constexpr Entity Lt {"&lt;", '<'};
+	static constexpr Entity Gt {"&gt;", '>'};
+
 	static constexpr auto EntitySize = 5;
-	static constexpr std::array<Entity, EntitySize> entities {Entity {"&quot;", '\"'}, Entity {"&amp;", '&'}, Entity {"&apos;", '\''},
-																														Entity {"&lt;", '<'}, Entity {"&gt;", '>'}};
+	static constexpr std::array<Entity, EntitySize> entities {Quot, Amp, Apos, Lt, Gt};
 
 	inline std::ostream & Escape(std::string_view value, std::ostream & out)
 	{

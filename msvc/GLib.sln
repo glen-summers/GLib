@@ -29,7 +29,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{460AF721
 		..\go.sh = ..\go.sh
 		process.tasks = process.tasks
 		tidy.build = tidy.build
-		versions.build = versions.build
 	EndProjectSection
 EndProject
 Global

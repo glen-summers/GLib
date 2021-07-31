@@ -255,10 +255,10 @@ namespace GLib::Html
 
 				for (const Xml::Attribute & a : attributes)
 				{
-					std::string_view nameSpacePrefix;
-					if (Xml::NameSpaceManager::CheckForDeclaration(a.name, nameSpacePrefix))
+					std::string_view prefix = Xml::NameSpaceManager::CheckForDeclaration(a.name);
+					if (!prefix.empty())
 					{
-						auto ns = manager.Get(nameSpacePrefix);
+						std::string_view ns = manager.Get(prefix);
 						if (ns == NameSpace)
 						{
 							continue;
@@ -283,11 +283,11 @@ namespace GLib::Html
 			}
 			else
 			{
-				const auto * p = e.OuterXml().data();
+				const char * p = e.OuterXml().data();
 				for (const Xml::Attribute & a : attributes)
 				{
-					std::string_view prefix;
-					if (Xml::NameSpaceManager::CheckForDeclaration(a.name, prefix))
+					std::string_view prefix = Xml::NameSpaceManager::CheckForDeclaration(a.name);
+					if (!prefix.empty())
 					{
 						if (manager.Get(prefix) == NameSpace)
 						{
@@ -325,7 +325,7 @@ namespace GLib::Html
 					throw std::runtime_error("Error in if value : " + std::string(condition));
 				}
 
-				auto result = evaluator.Evaluate(m[1]);
+				std::string result = evaluator.Evaluate(m[1]);
 				if (result == "false")
 				{
 					return;
@@ -344,7 +344,7 @@ namespace GLib::Html
 													{
 														evaluator.Push(node.Variable(), value);
 
-														for (const auto & child : node.Children())
+														for (const Node & child : node.Children())
 														{
 															Generate(child, out);
 														}
@@ -380,7 +380,7 @@ namespace GLib::Html
 				}
 			}
 
-			for (const auto & child : node.Children())
+			for (const Node & child : node.Children())
 			{
 				Generate(child, out);
 			}

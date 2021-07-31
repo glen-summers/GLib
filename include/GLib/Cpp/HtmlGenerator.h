@@ -47,14 +47,14 @@ inline void CloseSpan(std::ostream & s)
 	s << "</span>";
 }
 
-inline void Span(Style cls, const std::string_view & value, std::ostream & s)
+inline void Span(Style cls, std::string_view value, std::ostream & s)
 {
 	OpenSpan(cls, s);
 	s << value;
 	CloseSpan(s);
 }
 
-inline bool IsKeyword(const std::string_view & value)
+inline bool IsKeyword(std::string_view value)
 {
 	// clang-format off
 	static const std::unordered_set<std::string_view> keywords
@@ -74,7 +74,7 @@ inline bool IsKeyword(const std::string_view & value)
 	return keywords.find(value) != keywords.end();
 }
 
-inline bool IsCommonType(const std::string_view & value)
+inline bool IsCommonType(std::string_view value)
 {
 	// clang-format off
 	static const std::unordered_set<std::string_view> types
@@ -112,7 +112,7 @@ inline void Htmlify(const GLib::Cpp::Holder & code, std::ostream & out)
 		{
 			GLib::Util::Split(
 				f.second, alphaNumUnd,
-				[&](const std::string_view & value)
+				[&](std::string_view value)
 				{
 					if (IsKeyword(value))
 					{
@@ -127,7 +127,7 @@ inline void Htmlify(const GLib::Cpp::Holder & code, std::ostream & out)
 						GLib::Xml::Utils::Escape(value, out);
 					}
 				},
-				[&](const std::string_view & value) { GLib::Xml::Utils::Escape(value, out); });
+				[&](std::string_view value) { GLib::Xml::Utils::Escape(value, out); });
 
 			continue;
 		}
@@ -144,7 +144,7 @@ inline void Htmlify(const GLib::Cpp::Holder & code, std::ostream & out)
 			for (auto sit = splitter.begin(), end = splitter.end(); sit != end;)
 			{
 				GLib::Cpp::State state = it->first;
-				const std::string_view & value = *sit;
+				std::string_view value = *sit;
 
 				if (!value.empty())
 				{

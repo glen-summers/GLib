@@ -118,7 +118,7 @@ namespace GLib::Win
 				case CREATE_PROCESS_DEBUG_EVENT:
 				{
 					auto pi = Detail::CreateProcessInfo(debugEvent);
-					SCOPE(_, [&]() noexcept { ::CloseHandle(pi.hFile); });
+					Handle handle {pi.hFile};
 					OnCreateProcess(processId, threadId, pi);
 					break;
 				}
@@ -143,7 +143,8 @@ namespace GLib::Win
 
 				case LOAD_DLL_DEBUG_EVENT:
 				{
-					SCOPE(_, [&]() noexcept { ::CloseHandle(Detail::LoadDll(debugEvent).hFile); });
+					Handle handle {Detail::LoadDll(debugEvent).hFile};
+
 					OnLoadDll(processId, threadId, Detail::LoadDll(debugEvent));
 					break;
 				}

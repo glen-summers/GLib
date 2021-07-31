@@ -142,7 +142,6 @@ BOOST_AUTO_TEST_CASE(TestProcess)
 	{
 		auto scopedTerminator = p.ScopedTerminator();
 		BOOST_TEST(p.IsRunning());
-		(void) scopedTerminator;
 	}
 
 	BOOST_TEST(!p.IsRunning());

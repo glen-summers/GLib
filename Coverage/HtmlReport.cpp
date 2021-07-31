@@ -49,7 +49,6 @@ HtmlReport::HtmlReport(std::string testName, const std::filesystem::path & htmlP
 	, functionsTemplate(LoadHtml(IDR_FUNCTIONS))
 {
 	GLib::Flog::ScopeLog scopeLog(log, GLib::Flog::Level::Info, "HtmlReport");
-	(void) scopeLog;
 
 	Strings drives;
 	for (const auto & rootPath : rootPaths)
@@ -360,8 +359,9 @@ void HtmlReport::GenerateSourceFile(std::filesystem::path & subPath, const FileC
 			if (file == sourceFile)
 			{
 				unsigned int oneBasedLine = l.begin()->first;
-				const unsigned int functionOffset =
-					1; // 0 can causes out of range for debug globale delete, todo remove this and replace with jscript offset on navigate
+
+				// 0 can causes out of range for debug globale delete, todo remove this and replace with jscript offset on navigate
+				const unsigned int functionOffset = 1;
 
 				unsigned int zeroBasedLine {};
 				if (oneBasedLine >= functionOffset)

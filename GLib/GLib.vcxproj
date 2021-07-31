@@ -148,6 +148,7 @@
     <ClInclude Include="..\include\GLib\CompatLinux.h" />
     <ClInclude Include="..\include\GLib\CompatWindows.h" />
     <ClInclude Include="..\include\GLib\ConsecutiveFind.h" />
+    <ClInclude Include="..\include\GLib\Cpp\HtmlGenerator.h" />
     <ClInclude Include="..\include\GLib\Cpp\Iterator.h" />
     <ClInclude Include="..\include\GLib\Cpp\StateEngine.h" />
     <ClInclude Include="..\include\GLib\cvt.h" />

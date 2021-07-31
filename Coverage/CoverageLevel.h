@@ -31,6 +31,7 @@ inline std::ostream & operator<<(std::ostream & s, enum CoverageLevel coverageLe
 		case CoverageLevel::Green:
 			s << "green";
 			break;
+
 		default:;
 	}
 	return s;

@@ -72,7 +72,7 @@ namespace GLib::Win
 		{
 			// clang-format off
 			constexpr unsigned int Messages = 1024;
-			static auto msgs = std::array<const char *, Messages>
+			static auto msgs = std::array<std::string_view, Messages>
 			{
 				"WM_NULL",
 				"WM_CREATE",

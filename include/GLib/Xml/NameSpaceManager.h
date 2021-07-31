@@ -20,14 +20,9 @@ namespace GLib::Xml
 			return value.compare(0, Attribute.size(), Attribute) == 0;
 		}
 
-		static bool CheckForDeclaration(std::string_view value, std::string_view & prefix) // argh
+		static std::string_view CheckForDeclaration(std::string_view value)
 		{
-			bool check = IsDeclaration(value);
-			if (check)
-			{
-				prefix = value.substr(Attribute.size());
-			}
-			return check;
+			return IsDeclaration(value) ? value.substr(Attribute.size()) : std::string_view {};
 		}
 
 		std::string_view Get(std::string_view prefix) const
@@ -43,8 +38,8 @@ namespace GLib::Xml
 		// rename?
 		void Push(std::string_view qualifiedName, std::string_view value, size_t depth)
 		{
-			std::string_view prefix;
-			if (!CheckForDeclaration(qualifiedName, prefix))
+			std::string_view prefix = CheckForDeclaration(qualifiedName);
+			if (prefix.empty())
 			{
 				return;
 			}

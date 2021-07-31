@@ -48,9 +48,6 @@
     <ClInclude Include="resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="CppHtmlGenerator.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Directory.h">
       <Filter>TemplateTypes</Filter>
     </ClInclude>

@@ -91,7 +91,6 @@ void Coverage::OnCreateProcess(DWORD processId, DWORD threadId, const CREATE_PRO
 	OnCreateThread(processId, threadId, threadInfo);
 
 	GLib::Flog::ScopeLog scopeLog(log, GLib::Flog::Level::Info, "EnumLines");
-	(void) scopeLog;
 
 	Symbols().Lines([&](PSRCCODEINFOW lineInfo)
 									{ AddLine(static_cast<const wchar_t *>(lineInfo->FileName), lineInfo->LineNumber, process, lineInfo->Address, it->second); },
@@ -101,7 +100,6 @@ void Coverage::OnCreateProcess(DWORD processId, DWORD threadId, const CREATE_PRO
 void Coverage::CaptureData(DWORD processId)
 {
 	GLib::Flog::ScopeLog scopeLog(log, GLib::Flog::Level::Info, "CaptureData");
-	(void) scopeLog;
 
 	const GLib::Win::Symbols::SymProcess & symProcess = Symbols().GetProcess(processId);
 	auto pit = processes.find(processId);
@@ -189,7 +187,6 @@ DWORD Coverage::OnException(DWORD processId, DWORD threadId, const EXCEPTION_DEB
 CoverageData Coverage::GetCoverageData() const
 {
 	GLib::Flog::ScopeLog scopeLog(log, GLib::Flog::Level::Info, "GetCoverageData");
-	(void) scopeLog;
 
 	CaseInsensitiveMap<wchar_t, Functions> fileNameToFunctionMap;
 

@@ -36,12 +36,13 @@ Coverage c:\Build\Main.exe C:\Report -i C:\MainCode C:\Utils\ -x C:\ExternalCode
 			throw std::runtime_error(syntax);
 		}
 
-		GLib::Span<char *> const args {argv + 1, static_cast<std::ptrdiff_t>(argc) - 1};
+		GLib::Span<char *> const args {argv, argc};
 
 		auto it = args.begin();
 		auto end = args.end();
-		const auto * const executable = *it++;
-		const auto * const reportPath = *it++;
+		++it;
+		const char * const executable = *it++;
+		const char * const reportPath = *it++;
 		bool debugChildProcesses {};
 
 		Strings includes;
@@ -80,8 +81,7 @@ Coverage c:\Build\Main.exe C:\Report -i C:\MainCode C:\Utils\ -x C:\ExternalCode
 			}
 		}
 
-		const GLib::Flog::ScopeLog & scope = {GLib::Flog::LogManager::GetLog("Main"), GLib::Flog::Level::Info, "Total"};
-		(void) scope;
+		GLib::Flog::ScopeLog scope {GLib::Flog::LogManager::GetLog("Main"), GLib::Flog::Level::Info, "Total"};
 
 		Coverage dbg(executable, debugChildProcesses, includes, excludes);
 		constexpr unsigned TimeoutMilliseconds = 1000;
@@ -89,7 +89,6 @@ Coverage c:\Build\Main.exe C:\Report -i C:\MainCode C:\Utils\ -x C:\ExternalCode
 		{}
 
 		HtmlReport report(executable, reportPath, dbg.GetCoverageData());
-		(void) report;
 	}
 	catch (const std::exception & e)
 	{
