@@ -82,20 +82,20 @@ namespace GLib::Win
 
 			HKEY get() const
 			{
-				return reinterpret_cast<HKEY>(value);
+				return Util::Detail::WindowsCast<HKEY>(value);
 			}
 		};
 
 		template <typename T>
 		BYTE * ToBytes(T * value)
 		{
-			return reinterpret_cast<BYTE *>(value);
+			return Util::Detail::WindowsCast<BYTE *>(value);
 		}
 
 		template <typename T>
 		const BYTE * ToBytes(const T * value)
 		{
-			return reinterpret_cast<const BYTE *>(value);
+			return Util::Detail::WindowsCast<const BYTE *>(value);
 		}
 
 		inline bool Found(LSTATUS result, std::string_view message)
@@ -271,8 +271,8 @@ namespace GLib::Win
 	namespace RegistryKeys
 	{
 		// STRICT means HKEY_CLASSES_ROOT etc have value of struct Key__* and cant be used in constexpr, so copying definitions
-		inline static constexpr RegistryKey ClassesRoot = RootKey((ULONG_PTR)(HKEY_CLASSES_ROOT));
-		inline static constexpr RegistryKey CurrentUser = RootKey((ULONG_PTR)(HKEY_CURRENT_USER));
-		inline static constexpr RegistryKey LocalMachine = RootKey((ULONG_PTR)(HKEY_LOCAL_MACHINE));
+		inline static constexpr RegistryKey ClassesRoot = RootKey(Detail::ClassesRoot);
+		inline static constexpr RegistryKey CurrentUser = RootKey(Detail::CurrentUser);
+		inline static constexpr RegistryKey LocalMachine = RootKey(Detail::LocalMachine);
 	}
 }

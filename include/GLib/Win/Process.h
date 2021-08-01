@@ -14,12 +14,12 @@ namespace GLib::Win
 	{
 		inline const void * ToAddress(uint64_t value)
 		{
-			return reinterpret_cast<const void *>(value);
+			return Util::Detail::WindowsCast<const void *>(value);
 		}
 
 		inline void * ToPseudoWritableAddress(uint64_t value)
 		{
-			return reinterpret_cast<void *>(value);
+			return Util::Detail::WindowsCast<void *>(value);
 		}
 
 		inline bool Terminate(HANDLE process, UINT terminationExitCode) noexcept
@@ -65,7 +65,7 @@ namespace GLib::Win
 
 		static HMODULE CurrentModule()
 		{
-			return reinterpret_cast<HMODULE>(&__ImageBase);
+			return Util::Detail::WindowsCast<HMODULE>(&__ImageBase);
 		}
 
 		Process(Handle handle)

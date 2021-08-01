@@ -200,7 +200,8 @@ BOOST_AUTO_TEST_CASE(RegistryCreateKey)
 	constexpr const char TestKey[] = "Software\\CrapolaCppUnitTests";
 
 	auto key = rootKey.CreateSubKey(TestKey);
-	SCOPE(Delete, [&]() { rootKey.DeleteSubKey(TestKey); });
+
+	auto scopedDelete = GLib::Detail::Scope([&]() { rootKey.DeleteSubKey(TestKey); });
 
 	BOOST_TEST(rootKey.KeyExists(TestKey));
 	key.SetInt32("Int32Value", 1234567890);

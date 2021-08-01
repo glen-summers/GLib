@@ -56,7 +56,7 @@ namespace GLib::Win
 
 			if (message == WM_NOTIFY) // check
 			{
-				const NMHDR & hdr = *reinterpret_cast<const NMHDR *>(lParam);
+				const NMHDR & hdr = *Util::Detail::WindowsCast<const NMHDR *>(lParam);
 				Debug::Write("Msg: WM_NOTIFY {0,-20} {1,-20}[hw:{2}] : From Hw:{3} Id:{4}, Code:{5:%8x}", sourceName, className, hWnd, hdr.hwndFrom,
 										 hdr.idFrom, hdr.code);
 				return;

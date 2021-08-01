@@ -15,6 +15,13 @@ namespace GLib::Win::FileSystem
 	namespace Detail
 	{
 		constexpr auto MaximumPathLength = 32768U;
+
+		enum FileFlags : DWORD
+		{
+			access = GENERIC_READ | GENERIC_WRITE,												// NOLINT baad macros
+			create = CREATE_ALWAYS,																				// NOLINT
+			flags = FILE_ATTRIBUTE_TEMPORARY | FILE_FLAG_DELETE_ON_CLOSE, // NOLINT
+		};
 	}
 
 	// return an iterator?
@@ -140,11 +147,7 @@ namespace GLib::Win::FileSystem
 
 	inline Handle CreateAutoDeleteFile(const std::string & name)
 	{
-		DWORD access = GENERIC_READ | GENERIC_WRITE;
-		DWORD create = CREATE_ALWAYS;
-		DWORD flags = FILE_ATTRIBUTE_TEMPORARY | FILE_FLAG_DELETE_ON_CLOSE;
-
-		HANDLE h = ::CreateFileW(Cvt::a2w(name).c_str(), access, 0, nullptr, create, flags, nullptr);
+		HANDLE h = ::CreateFileW(Cvt::a2w(name).c_str(), Detail::access, 0, nullptr, Detail::create, Detail::flags, nullptr);
 		Util::AssertTrue(h != nullptr, "CreateFileW");
 		return Handle(h);
 	}

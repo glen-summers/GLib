@@ -47,7 +47,8 @@ BOOST_AUTO_TEST_CASE(LogLevel)
 	auto log = GLib::Flog::LogManager::GetLog<Fred>();
 
 	auto currentLevel = GLib::Flog::LogManager::SetLevel(GLib::Flog::Level::Error);
-	SCOPE(_, [=]() { GLib::Flog::LogManager::SetLevel(currentLevel); });
+
+	auto scope = GLib::Detail::Scope([=]() { GLib::Flog::LogManager::SetLevel(currentLevel); });
 
 	log.Info("info");
 	log.Error("error");
@@ -65,7 +66,8 @@ BOOST_AUTO_TEST_CASE(LogFileSize)
 	log.Info("Start");
 	auto path1 = GLib::Flog::LogManager::GetLogPath();
 	auto currentSize = GLib::Flog::LogManager::SetMaxFileSize(1024);
-	SCOPE(_, [=]() { GLib::Flog::LogManager::SetMaxFileSize(currentSize); });
+
+	auto scope = GLib::Detail::Scope([=]() { GLib::Flog::LogManager::SetMaxFileSize(currentSize); });
 
 	log.Info(std::string(100, 'x'));
 	BOOST_TEST(path1 == GLib::Flog::LogManager::GetLogPath());

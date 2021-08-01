@@ -24,7 +24,7 @@ void Parse(const Holder & code)
 	for (const auto & x : code)
 	{
 		(void) x;
-		//std::cout << x.first << " : " << x.second << std::endl;
+		// std::cout << x.first << " : " << x.second << std::endl;
 	}
 }
 

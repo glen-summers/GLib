@@ -30,39 +30,33 @@ namespace GLib::Win
 
 	namespace Detail
 	{
-		template <typename T1, typename T2>
-		T1 Munge(T2 t2)
-		{
-			return reinterpret_cast<T1>(t2);
-		}
-
 		constexpr unsigned int HRedraw = CS_HREDRAW;
 		constexpr unsigned int VRedraw = CS_VREDRAW;
-		constexpr unsigned int OverlappedWindow = WS_OVERLAPPEDWINDOW;
+		constexpr unsigned int OverlappedWindow = WS_OVERLAPPEDWINDOW; // NOLINT(hicpp-signed-bitwise) baad macro
 
 		inline auto MakeIntResource(int id)
 		{
-			return MAKEINTRESOURCEW(id);
+			return MAKEINTRESOURCEW(id); // NOLINT(cppcoreguidelines-pro-type-cstyle-cast) baad macro
 		}
 
 		inline WORD LoWord(WPARAM param)
 		{
-			return LOWORD(param);
+			return LOWORD(param); // NOLINT(hicpp-signed-bitwise) baad macro
 		}
 
 		inline WORD HiWord(WPARAM param)
 		{
-			return HIWORD(param);
+			return HIWORD(param); // NOLINT(hicpp-signed-bitwise) baad macro
 		}
 
 		inline Point PointFromParam(LPARAM param)
 		{
-			return {GET_X_LPARAM(param), GET_Y_LPARAM(param)};
+			return {GET_X_LPARAM(param), GET_Y_LPARAM(param)}; // NOLINT(hicpp-signed-bitwise) baad macro
 		}
 
 		inline short WheelData(WPARAM param)
 		{
-			return GET_WHEEL_DELTA_WPARAM(param);
+			return GET_WHEEL_DELTA_WPARAM(param); // NOLINT(hicpp-signed-bitwise) baad macro
 		}
 
 		inline Size SizeFromParam(LPARAM param)
@@ -72,7 +66,7 @@ namespace GLib::Win
 
 		inline HINSTANCE Instance()
 		{
-			return Detail::Munge<HINSTANCE>(&__ImageBase);
+			return Util::Detail::WindowsCast<HINSTANCE>(&__ImageBase);
 		}
 
 		struct WindowDestroyer
@@ -118,8 +112,8 @@ namespace GLib::Win
 					0,
 					instance,
 					i,
-					::LoadCursorW(nullptr, IDC_ARROW),
-					Detail::Munge<HBRUSH>(size_t {COLOR_WINDOW} + 1),
+					::LoadCursorW(nullptr, IDC_ARROW), // NOLINT(cppcoreguidelines-pro-type-cstyle-cast) baad macro
+					Util::Detail::WindowsCast<HBRUSH>(size_t {COLOR_WINDOW} + 1),
 					MakeIntResource(menu),
 					className.c_str()
 					// hIconSm etc.
@@ -133,13 +127,13 @@ namespace GLib::Win
 		inline void AssociateHandle(Window * value, HWND handle)
 		{
 			::SetLastError(ERROR_SUCCESS); // SetWindowLongPtr does not set last error on success
-			auto ret = ::SetWindowLongPtr(handle, GWLP_USERDATA, Detail::Munge<LONG_PTR>(value));
+			auto ret = ::SetWindowLongPtr(handle, GWLP_USERDATA, Util::Detail::WindowsCast<LONG_PTR>(value));
 			Util::AssertTrue(ret != 0 || ::GetLastError() == ERROR_SUCCESS, "SetWindowLongPtr");
 		}
 
 		inline Window * FromHandle(HWND hWnd)
 		{
-			return Detail::Munge<Window *>(::GetWindowLongPtr(hWnd, GWLP_USERDATA));
+			return Util::Detail::WindowsCast<Window *>(::GetWindowLongPtr(hWnd, GWLP_USERDATA));
 		}
 
 		inline WindowHandle Create(DWORD style, int icon, int menu, const std::string & title, WNDPROC proc, Window * param)
@@ -319,7 +313,7 @@ namespace GLib::Win
 
 				case WM_GETMINMAXINFO:
 				{
-					return OnGetMinMaxInfo(*Detail::Munge<MINMAXINFO *>(lParam));
+					return OnGetMinMaxInfo(*Util::Detail::WindowsCast<MINMAXINFO *>(lParam));
 				}
 
 				case WM_COMMAND:
@@ -355,7 +349,7 @@ namespace GLib::Win
 
 				case WM_NOTIFY:
 				{
-					return OnNotify(*Detail::Munge<const NMHDR *>(lParam));
+					return OnNotify(*Util::Detail::WindowsCast<const NMHDR *>(lParam));
 				}
 
 				case WM_CHAR:
@@ -401,7 +395,7 @@ namespace GLib::Win
 
 				case WM_GETDLGCODE:
 				{
-					return OnGetDlgCode(static_cast<int>(wParam), *Detail::Munge<MSG *>(lParam), result);
+					return OnGetDlgCode(static_cast<int>(wParam), *Util::Detail::WindowsCast<MSG *>(lParam), result);
 				}
 
 				case WM_TIMER:

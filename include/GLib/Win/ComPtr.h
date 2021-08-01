@@ -20,7 +20,7 @@ namespace GLib::Win
 
 	namespace ComPtrDetail
 	{
-		constexpr DWORD ContextAll = CLSCTX_ALL;
+		constexpr DWORD ContextAll = CLSCTX_ALL; // NOLINT(hicpp-signed-bitwise) baad macro
 
 		template <typename T>
 		class Restricted : public T
@@ -63,10 +63,10 @@ namespace GLib::Win
 		friend class ComPtr;
 
 		template <typename U>
-		friend U * Get(ComPtr<U> & p) noexcept; // NOLINT(bug: clang-tidy deletes this line)
+		friend U * Get(ComPtr<U> & p) noexcept; // NOLINT(readability-redundant-declaration) (bug: needed but clang-tidy -fix deletes this line)
 
 		template <typename U>
-		friend const U * Get(const ComPtr<U> & p) noexcept; // NOLINT(bug: clang-tidy deletes this)
+		friend const U * Get(const ComPtr<U> & p) noexcept; // NOLINT(readability-redundant-declaration) (bug: needed but clang-tidy -fix deletes this)
 
 		T * p {};
 
@@ -109,7 +109,7 @@ namespace GLib::Win
 			return *this;
 		}
 
-		ComPtr & operator=(const ComPtr & right) noexcept
+		ComPtr & operator=(const ComPtr & right) noexcept // NOLINT does not handle self-assignment, clang-tidy bug?
 		{
 			ComPtr {right}.Swap(*this);
 			return *this;

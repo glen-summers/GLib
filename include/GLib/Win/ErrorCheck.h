@@ -9,18 +9,24 @@
 
 #include <sstream>
 
-EXTERN_C IMAGE_DOS_HEADER __ImageBase;
+EXTERN_C IMAGE_DOS_HEADER
+	__ImageBase; // NOLINT(bugprone-reserved-identifier,cert-dcl37-c,cert-dcl51-cpp,cppcoreguidelines-avoid-non-const-global-variables) required
 
 namespace GLib::Win::Util
 {
 	namespace Detail
 	{
+		inline bool IsError(DWORD value)
+		{
+			return IS_ERROR(value); // NOLINT(hicpp-signed-bitwise) baad macro
+		}
+
 		inline std::string FormatErrorMessage(std::string_view message, DWORD error, const wchar_t * moduleName = {})
 		{
 			std::ostringstream stm;
 			stm << message << " : ";
 			Util::FormatErrorMessage(stm, error, moduleName);
-			if (IS_ERROR(error))
+			if (IsError(error))
 			{
 				stm << std::hex;
 			}

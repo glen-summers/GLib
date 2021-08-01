@@ -48,9 +48,9 @@ namespace GLib::Cpp
 
 		using StateFunction = State (StateEngine::*)(char) const;
 
-		bool emitWhiteSpace;
-		State state = State::None;
-		StateFunction stateFunction;
+		bool emitWhiteSpace {};
+		State state {};
+		StateFunction stateFunction {};
 		char lastChar {};
 
 		mutable std::string rawStringPrefix;
@@ -59,9 +59,12 @@ namespace GLib::Cpp
 		mutable bool stringEscape {};
 
 	public:
+		StateEngine() = default;
+
 		explicit StateEngine(bool emitWhiteSpace)
 			: emitWhiteSpace {emitWhiteSpace}
-			, stateFunction {stateFunctions.at(static_cast<int>(state))}
+			, state {State::None}
+			, stateFunction {&StateEngine::None}
 		{
 			rawStringPrefix.reserve(MaxPrefixSize);
 		}

@@ -5,7 +5,7 @@
 #include <GLib/compat.h>
 #include <GLib/scope.h>
 
-#define _NO_CVCONST_H
+#define _NO_CVCONST_H // NOLINT (bugprone-reserved-identifier) required
 #include <DbgHelp.h>
 #pragma comment(lib, "DbgHelp.lib")
 
@@ -37,7 +37,7 @@ namespace GLib::Win::Symbols
 
 		inline ULONG64 ConvertBase(void * baseValue)
 		{
-			return reinterpret_cast<ULONG64>(baseValue);
+			return Util::Detail::WindowsCast<ULONG64>(baseValue);
 		}
 	}
 

@@ -19,15 +19,16 @@ BOOST_AUTO_TEST_CASE(LocalTimeZero)
 	auto tz = GLib::Compat::GetEnv("TZ");
 	GLib::Compat::SetEnv("TZ", "GMST0GMDT-1,M3.3.0,M10.1.0");
 	GLib::Compat::TzSet();
-	SCOPE(_,
-				[&]() noexcept
-				{
-					if (tz)
-						GLib::Compat::SetEnv("TZ", tz->c_str());
-					else
-						GLib::Compat::UnsetEnv("TZ");
-					GLib::Compat::TzSet();
-				});
+
+	auto scope = GLib::Detail::Scope(
+		[&]() noexcept
+		{
+			if (tz)
+				GLib::Compat::SetEnv("TZ", tz->c_str());
+			else
+				GLib::Compat::UnsetEnv("TZ");
+			GLib::Compat::TzSet();
+		});
 
 	tm tm {};
 	GLib::Compat::LocalTime(tm, 0);
@@ -48,19 +49,20 @@ BOOST_AUTO_TEST_CASE(LocalTimeSpecific)
 	auto tz = GLib::Compat::GetEnv("TZ");
 	GLib::Compat::SetEnv("TZ", "CST");
 	GLib::Compat::TzSet();
-	SCOPE(_,
-				[&]() noexcept
-				{
-					if (tz)
-					{
-						GLib::Compat::SetEnv("TZ", tz->c_str());
-					}
-					else
-					{
-						GLib::Compat::UnsetEnv("TZ");
-					}
-					GLib::Compat::TzSet();
-				});
+
+	auto scope = GLib::Detail::Scope(
+		[&]() noexcept
+		{
+			if (tz)
+			{
+				GLib::Compat::SetEnv("TZ", tz->c_str());
+			}
+			else
+			{
+				GLib::Compat::UnsetEnv("TZ");
+			}
+			GLib::Compat::TzSet();
+		});
 
 	tm tm {};
 	GLib::Compat::LocalTime(tm, 1569056285);

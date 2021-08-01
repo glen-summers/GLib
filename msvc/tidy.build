@@ -28,6 +28,9 @@
 		<TidyCheck Include="-google-explicit-constructor"/>
 		<TidyCheck Include="-hicpp-explicit-conversions"/>
 
+		<!--suppress warnings from windows resource files-->
+		<TidyCheck Include="-cppcoreguidelines-macro-usage"/>
+
 		<!--new ignores todo fix-->
 		<TidyCheck Include="-fuchsia-default-arguments-calls"/>
 		<TidyCheck Include="-fuchsia-default-arguments-declarations"/>
@@ -60,18 +63,8 @@
 	<Target Name="Tidy" DependsOnTargets="FindTidy">
 		<ItemGroup>
 			<FileToCheck Include="$(Source)/GLib/**/*.cpp"/>
-			<!--FileToCheck Include="$(Source)/GLib/**/*.h"/-->
-
 			<FileToCheck Include="$(Source)/Coverage/**/*.cpp"/>
-			<!--FileToCheck Include="$(Source)/Coverage/**/*.h" Exclude="$(Source)/Coverage/resource.h"/-->
-
 			<FileToCheck Include="$(Source)/TestApp/**/*.cpp"/>
-			<!--FileToCheck Include="$(Source)/TestApp/**/*.h" Exclude="$(Source)/TestApp/resource.h"/-->
-
-			<!--FileToCheck Include="$(Source)/Tests/**/*.cpp"/-->
-			<!--FileToCheck Include="$(Source)/Tests/**/*.h" Exclude="$(Source)/TestApp/resource.h"/-->
-
-			<!--FileToCheck Include="$(Source)/include/**/*.h" Exclude="$(Source)/include/GLib/CompatLinux.h"/-->
 
 			<Relative Include="$([MSBuild]::MakeRelative($(Source), %(FileToCheck.FullPath)))"/>
 		</ItemGroup>
@@ -83,7 +76,7 @@
 	<Target Name="TidyTests" DependsOnTargets="FindTidy"> <!-- check -->
 		<ItemGroup>
 			<FileToCheck Include="$(Source)/Tests/**/*.cpp"/>
-			<FileToCheck Include="$(Source)/Tests/**/*.h"/>
+			<!--FileToCheck Include="$(Source)/Tests/**/*.h"/-->
 			<Relative Include="$([MSBuild]::MakeRelative($(Source), %(FileToCheck.FullPath)))"/>
 		</ItemGroup>
 

@@ -1,25 +1,23 @@
 
 #include "MainWindow.h"
-
 #include <GLib/Win/ComUtils.h>
 #include <GLib/split.h>
-
 #pragma comment(lib, "Comctl32.lib")
 #pragma comment(linker, "\"/manifestdependency:type='win32' \
 name='Microsoft.Windows.Common-Controls' version='6.0.0.0' \
 processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 
-int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prevInstance, _In_ LPWSTR cmdLine, _In_ int cmdShow)
+int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPWSTR lpCmdLine, _In_ int nShowCmd)
 {
-	(void) prevInstance;
+	(void) hPrevInstance;
 
 	int returnValue {};
-	GLib::Flog::Log log = GLib::Flog::LogManager::GetLog("Main");
+	const GLib::Flog::Log & log = GLib::Flog::LogManager::GetLog("Main");
 
 	try
 	{
 		GLib::Win::Mta com;
-		auto cmd = GLib::Cvt::w2a(cmdLine);
+		auto cmd = GLib::Cvt::w2a(lpCmdLine);
 		log.Info("Cmd: [{0}]", cmd);
 
 		GLib::Util::Splitter split {cmd, " "};
@@ -36,12 +34,15 @@ int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prevInstance, 
 		}
 
 		log.Info("Create");
-		MainWindow window(instance, {1024, 768}, exitTime);
 
-		log.Info("show: {0}", cmdShow);
-		if (cmdShow != 0)
+		const int width = 1024;
+		const int height = 768;
+		TestApp::MainWindow window(hInstance, {width, height}, exitTime);
+
+		log.Info("show: {0}", nShowCmd);
+		if (nShowCmd != 0)
 		{
-			window.Show(cmdShow);
+			window.Show(nShowCmd);
 		}
 		log.Info("Pump");
 		returnValue = window.PumpMessages();

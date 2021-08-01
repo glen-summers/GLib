@@ -1,5 +1,6 @@
 #pragma once
 
+#include <GLib/Win/FormatErrorMessage.h>
 #include <GLib/Win/Symbols.h>
 
 #include <GLib/Span.h>
@@ -12,6 +13,7 @@ namespace GLib::Win::Symbols
 	// https://blogs.msdn.microsoft.com/oldnewthing/20100730-00/?p=13273
 
 	using namespace std::string_view_literals;
+	using Util::Detail::WindowsCast;
 
 	namespace Detail
 	{
@@ -33,12 +35,6 @@ namespace GLib::Win::Symbols
 			return NativeTryCatch([&]() { return *(exceptionInfo.ContextRecord); });
 		}
 
-		template <typename T1, typename T2>
-		T1 Munge(T2 t2)
-		{
-			return reinterpret_cast<T1>(t2);
-		}
-
 		struct Vbase
 		{
 			Vbase() = delete;
@@ -54,7 +50,7 @@ namespace GLib::Win::Symbols
 			return NativeTryCatch(
 				[&]()
 				{
-					const Vbase & q = *Munge<Vbase *>(ei[1]);
+					const Vbase & q = *WindowsCast<Vbase *>(ei[1]);
 					const type_info & t = typeid(q);
 					name = t.name();
 					return true;
@@ -80,13 +76,13 @@ namespace GLib::Win::Symbols
 #error unexpected target
 #endif
 
-					const auto throwInfo = GLib::MakeSpan<DWORD>(Munge<const DWORD *>(ei[throwInfoIndex]), catchableOffsetIndex + 1);
+					const auto throwInfo = GLib::MakeSpan<DWORD>(WindowsCast<const DWORD *>(ei[throwInfoIndex]), catchableOffsetIndex + 1);
 					const DWORD catchableOffset = throwInfo[catchableOffsetIndex];
-					const auto catchables = GLib::MakeSpan<DWORD>(Munge<const DWORD *>(hinstance + catchableOffset), catchablesOffsetIndex + 1);
+					const auto catchables = GLib::MakeSpan<DWORD>(WindowsCast<const DWORD *>(hinstance + catchableOffset), catchablesOffsetIndex + 1);
 					const DWORD catchablesOffset = catchables[catchablesOffsetIndex];
-					const auto catchablesTypes = GLib::MakeSpan<DWORD>(Munge<const DWORD *>(hinstance + catchablesOffset), typeInfoOffsetIndex + 1);
+					const auto catchablesTypes = GLib::MakeSpan<DWORD>(WindowsCast<const DWORD *>(hinstance + catchablesOffset), typeInfoOffsetIndex + 1);
 					const DWORD typeInfoOffset = catchablesTypes[typeInfoOffsetIndex];
-					name = Munge<const type_info *>(hinstance + typeInfoOffset)->name();
+					name = WindowsCast<const type_info *>(hinstance + typeInfoOffset)->name();
 					return true;
 				});
 		}
@@ -167,11 +163,11 @@ namespace GLib::Win::Symbols
 				}
 
 				MEMORY_BASIC_INFORMATION mb {};
-				if (::VirtualQueryEx(process.Handle(), Munge<PVOID>(address), &mb, sizeof mb) != 0)
+				if (::VirtualQueryEx(process.Handle(), WindowsCast<PVOID>(address), &mb, sizeof mb) != 0)
 				{
 					auto * module = static_cast<HMODULE>(mb.AllocationBase);
 					std::string moduleName = FileSystem::PathOfModule(module);
-					Formatter::Format(s, "{0,-30} + 0x{1:%08X}\n", moduleName, static_cast<DWORD_PTR>(address) - Munge<DWORD_PTR>(mb.AllocationBase));
+					Formatter::Format(s, "{0,-30} + 0x{1:%08X}\n", moduleName, static_cast<DWORD_PTR>(address) - WindowsCast<DWORD_PTR>(mb.AllocationBase));
 				}
 
 				DWORD inlineTrace = ::SymAddrIncludeInlineTrace(process.Handle(), address);
@@ -202,7 +198,7 @@ namespace GLib::Win::Symbols
 			case STATUS_ACCESS_VIOLATION:
 			{
 				auto msg = info[0] == 0 ? "reading"sv : "writing"sv;
-				Formatter::Format(s, " : Access violation {0} address {1}\n", msg, Detail::Munge<PVOID>(info[1]));
+				Formatter::Format(s, " : Access violation {0} address {1}\n", msg, WindowsCast<PVOID>(info[1]));
 				break;
 			}
 
@@ -229,7 +225,7 @@ namespace GLib::Win::Symbols
 						{
 							s << ", ";
 						}
-						s << Detail::Munge<PVOID>(info[i]);
+						s << WindowsCast<PVOID>(info[i]);
 					}
 					s << std::endl;
 				}
