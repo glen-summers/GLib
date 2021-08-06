@@ -55,7 +55,8 @@ namespace GLib::Xml
 
 	inline std::ostream & operator<<(std::ostream & s, const Element & e)
 	{
-		s << "NameSpace: [" << e.NameSpace() << "], Name: [" << e.Name() << "], type : [" << (int) e.Type() << "], text : [" << e.Text() << ']';
+		s << "NameSpace: [" << e.NameSpace() << "], Name: [" << e.Name() << "], type : [" << static_cast<unsigned int>(e.Type()) << "], text : ["
+			<< e.Text() << ']';
 
 		if (!e.Attributes().empty())
 		{

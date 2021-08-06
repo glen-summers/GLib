@@ -25,7 +25,7 @@ using GLib::Cvt::p2a;
 
 std::string LoadHtml(unsigned int id)
 {
-	return GLib::Win::LoadResourceString(nullptr, id, RT_HTML);
+	return GLib::Win::LoadResourceString(nullptr, id, RT_HTML); // NOLINT(cppcoreguidelines-pro-type-cstyle-cast) baad macro
 }
 
 std::string GetDateTime(time_t t)

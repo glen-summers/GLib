@@ -47,6 +47,8 @@ namespace GLib::Xml
 
 		Element element;
 		std::stack<std::string_view> elementStack;
+		unsigned int line {};
+		unsigned int pos {};
 
 	public:
 		using iterator_category = std::forward_iterator_tag;
@@ -93,7 +95,7 @@ namespace GLib::Xml
 		}
 
 	private:
-		[[noreturn]] static void IllegalCharacter(char c)
+		[[noreturn]] static void IllegalCharacter(char c, unsigned int lineNumber, unsigned int characterOffset)
 		{
 			std::ostringstream s;
 			s << "Illegal character: ";
@@ -102,7 +104,9 @@ namespace GLib::Xml
 				s << '\'' << c << "' ";
 			}
 
-			s << "(0x" << std::hex << static_cast<unsigned>(c) << std::dec << ")"; // +lineNumber?
+			s << "(0x" << std::hex << static_cast<unsigned>(c) << std::dec << ")"
+				<< " at line: " << lineNumber << ", offset: " << characterOffset;
+
 			throw std::runtime_error(s.str());
 		}
 
@@ -132,11 +136,21 @@ namespace GLib::Xml
 
 				const auto oldPtr = ptr;
 				const auto oldState = engine.GetState();
-				const auto newState = engine.Push(*ptr);
+				const char character = *ptr;
+				const auto newState = engine.Push(character);
+
 				if (newState == Xml::State::Error)
 				{
-					IllegalCharacter(*ptr);
+					IllegalCharacter(character, line, pos);
 				}
+				++pos;
+
+				if (character == '\n')
+				{
+					++line;
+					pos = 0;
+				}
+
 				++ptr;
 
 				if (newState != oldState)
@@ -300,7 +314,7 @@ namespace GLib::Xml
 					if (element.qName != top)
 					{
 						std::ostringstream s;
-						s << "Element mismatch: " << element.qName << " != " << top;
+						s << "Element mismatch: " << element.qName << " != " << top << ", at line: " << line << ", offset: " << pos;
 						throw std::runtime_error(s.str());
 					}
 					if (element.depth == 1)

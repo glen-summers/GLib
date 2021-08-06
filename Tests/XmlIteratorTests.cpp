@@ -140,7 +140,7 @@ BOOST_AUTO_TEST_CASE(XmlDeclMustBeFirst)
 <?xml version="1.0"?>
 <xml/>)";
 
-	GLIB_CHECK_RUNTIME_EXCEPTION({ Xml::Parse(xml); }, "Illegal character: '?' (0x3f)");
+	GLIB_CHECK_RUNTIME_EXCEPTION({ Xml::Parse(xml); }, "Illegal character: '?' (0x3f) at line: 1, offset: 1");
 }
 
 BOOST_AUTO_TEST_CASE(DefaultNameSpaceToDo)
@@ -275,7 +275,7 @@ BOOST_AUTO_TEST_CASE(DocTypeTwiceIsError)
 <!DOCTYPE blah>
 <Xml/>)"};
 
-	GLIB_CHECK_RUNTIME_EXCEPTION({ Xml::Parse(xml); }, "Illegal character: 'D' (0x44)");
+	GLIB_CHECK_RUNTIME_EXCEPTION({ Xml::Parse(xml); }, "Illegal character: 'D' (0x44) at line: 1, offset: 2");
 }
 
 BOOST_AUTO_TEST_CASE(CData)
@@ -312,17 +312,17 @@ BOOST_AUTO_TEST_CASE(ExtraContentAtEndThrows)
 
 BOOST_AUTO_TEST_CASE(TextNodeAtRootThrows)
 {
-	GLIB_CHECK_RUNTIME_EXCEPTION({ Xml::Parse("baad"); }, "Illegal character: 'b' (0x62)");
+	GLIB_CHECK_RUNTIME_EXCEPTION({ Xml::Parse("baad"); }, "Illegal character: 'b' (0x62) at line: 0, offset: 0");
 }
 
 BOOST_AUTO_TEST_CASE(MismatchedElementsThrows)
 {
-	GLIB_CHECK_RUNTIME_EXCEPTION({ Xml::Parse("<root></notRoot>"); }, "Element mismatch: notRoot != root");
+	GLIB_CHECK_RUNTIME_EXCEPTION({ Xml::Parse("<root></notRoot>"); }, "Element mismatch: notRoot != root, at line: 0, offset: 16");
 }
 
 BOOST_AUTO_TEST_CASE(MissingAttrSpaceThrows)
 {
-	GLIB_CHECK_RUNTIME_EXCEPTION({ Xml::Parse("<root at1='val1'at2='val2'/>"); }, "Illegal character: 'a' (0x61)");
+	GLIB_CHECK_RUNTIME_EXCEPTION({ Xml::Parse("<root at1='val1'at2='val2'/>"); }, "Illegal character: 'a' (0x61) at line: 0, offset: 16");
 }
 
 BOOST_AUTO_TEST_CASE(NotClosed)
@@ -352,34 +352,34 @@ BOOST_AUTO_TEST_CASE(BaadColons)
 
 BOOST_AUTO_TEST_CASE(MalformedComments)
 {
-	GLIB_CHECK_RUNTIME_EXCEPTION({ Xml::Parse("<!- Comment1 --><Xml/>"); }, "Illegal character: ' ' (0x20)");
-	GLIB_CHECK_RUNTIME_EXCEPTION({ Xml::Parse("<Xml><!- Comment1 --></Xml>"); }, "Illegal character: ' ' (0x20)");
-	GLIB_CHECK_RUNTIME_EXCEPTION({ Xml::Parse("<Xml><!-- Comment1 -- --></Xml>"); }, "Illegal character: ' ' (0x20)");
+	GLIB_CHECK_RUNTIME_EXCEPTION({ Xml::Parse("<!- Comment1 --><Xml/>"); }, "Illegal character: ' ' (0x20) at line: 0, offset: 3");
+	GLIB_CHECK_RUNTIME_EXCEPTION({ Xml::Parse("<Xml><!- Comment1 --></Xml>"); }, "Illegal character: ' ' (0x20) at line: 0, offset: 8");
+	GLIB_CHECK_RUNTIME_EXCEPTION({ Xml::Parse("<Xml><!-- Comment1 -- --></Xml>"); }, "Illegal character: ' ' (0x20) at line: 0, offset: 21");
 	GLIB_CHECK_RUNTIME_EXCEPTION({ Xml::Parse("<Xml><!-- Comment1 -></Xml>"); }, "Xml not closed");
 }
 
 BOOST_AUTO_TEST_CASE(ElementEndError)
 {
-	GLIB_CHECK_RUNTIME_EXCEPTION({ Xml::Parse("<x!"); }, "Illegal character: '!' (0x21)");
-	GLIB_CHECK_RUNTIME_EXCEPTION({ Xml::Parse("<x !"); }, "Illegal character: '!' (0x21)");
-	GLIB_CHECK_RUNTIME_EXCEPTION({ Xml::Parse("<x/!"); }, "Illegal character: '!' (0x21)");
-	GLIB_CHECK_RUNTIME_EXCEPTION({ Xml::Parse("<x></!"); }, "Illegal character: '!' (0x21)");
-	GLIB_CHECK_RUNTIME_EXCEPTION({ Xml::Parse("<x></x!"); }, "Illegal character: '!' (0x21)");
-	GLIB_CHECK_RUNTIME_EXCEPTION({ Xml::Parse("<x></x !"); }, "Illegal character: '!' (0x21)");
+	GLIB_CHECK_RUNTIME_EXCEPTION({ Xml::Parse("<x!"); }, "Illegal character: '!' (0x21) at line: 0, offset: 2");
+	GLIB_CHECK_RUNTIME_EXCEPTION({ Xml::Parse("<x !"); }, "Illegal character: '!' (0x21) at line: 0, offset: 3");
+	GLIB_CHECK_RUNTIME_EXCEPTION({ Xml::Parse("<x/!"); }, "Illegal character: '!' (0x21) at line: 0, offset: 3");
+	GLIB_CHECK_RUNTIME_EXCEPTION({ Xml::Parse("<x></!"); }, "Illegal character: '!' (0x21) at line: 0, offset: 5");
+	GLIB_CHECK_RUNTIME_EXCEPTION({ Xml::Parse("<x></x!"); }, "Illegal character: '!' (0x21) at line: 0, offset: 6");
+	GLIB_CHECK_RUNTIME_EXCEPTION({ Xml::Parse("<x></x !"); }, "Illegal character: '!' (0x21) at line: 0, offset: 7");
 }
 
 BOOST_AUTO_TEST_CASE(AttributeNameError)
 {
-	GLIB_CHECK_RUNTIME_EXCEPTION({ Xml::Parse("<x a!='1' />"); }, "Illegal character: '!' (0x21)");
-	GLIB_CHECK_RUNTIME_EXCEPTION({ Xml::Parse("<x a !='1' />"); }, "Illegal character: '!' (0x21)");
+	GLIB_CHECK_RUNTIME_EXCEPTION({ Xml::Parse("<x a!='1' />"); }, "Illegal character: '!' (0x21) at line: 0, offset: 4");
+	GLIB_CHECK_RUNTIME_EXCEPTION({ Xml::Parse("<x a !='1' />"); }, "Illegal character: '!' (0x21) at line: 0, offset: 5");
 }
 
 BOOST_AUTO_TEST_CASE(AttributeValueError)
 {
-	GLIB_CHECK_RUNTIME_EXCEPTION({ Xml::Parse("<x a = !'1' />"); }, "Illegal character: '!' (0x21)");
+	GLIB_CHECK_RUNTIME_EXCEPTION({ Xml::Parse("<x a = !'1' />"); }, "Illegal character: '!' (0x21) at line: 0, offset: 7");
 
-	GLIB_CHECK_RUNTIME_EXCEPTION({ Xml::Parse("<x a='<' />"); }, "Illegal character: '<' (0x3c)");
-	GLIB_CHECK_RUNTIME_EXCEPTION({ Xml::Parse(R"(<x a="<" />)"); }, "Illegal character: '<' (0x3c)");
+	GLIB_CHECK_RUNTIME_EXCEPTION({ Xml::Parse("<x a='<' />"); }, "Illegal character: '<' (0x3c) at line: 0, offset: 6");
+	GLIB_CHECK_RUNTIME_EXCEPTION({ Xml::Parse(R"(<x a="<" />)"); }, "Illegal character: '<' (0x3c) at line: 0, offset: 6");
 
 	GLIB_CHECK_RUNTIME_EXCEPTION({ Xml::Parse("<x a='&' />"); }, "Xml not closed");
 	GLIB_CHECK_RUNTIME_EXCEPTION({ Xml::Parse(R"(<x a="&" />)"); }, "Xml not closed");

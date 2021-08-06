@@ -11,9 +11,11 @@
 
 using namespace std::string_literals;
 
-int main(int argc, char * argv[])
+int main(int argc, char * argv[]) // NOLINT(bugprone-exception-escape) potential exception from catch block
 {
+	auto log = GLib::Flog::LogManager::GetLog("Main");
 	int errorCode = 0;
+	std::string errorMessage;
 
 	try
 	{
@@ -83,7 +85,7 @@ Coverage c:\Build\Main.exe C:\Report -ws -i C:\MainCode C:\Utils\ -x C:\External
 			}
 		}
 
-		GLib::Flog::ScopeLog scope {GLib::Flog::LogManager::GetLog("Main"), GLib::Flog::Level::Info, "Total"};
+		GLib::Flog::ScopeLog scope {log, GLib::Flog::Level::Info, "Total"};
 
 		Coverage dbg(executable, debugChildProcesses, includes, excludes);
 		constexpr unsigned TimeoutMilliseconds = 1000;
@@ -94,10 +96,12 @@ Coverage c:\Build\Main.exe C:\Report -ws -i C:\MainCode C:\Utils\ -x C:\External
 	}
 	catch (const std::exception & e)
 	{
-		GLib::Flog::LogManager::GetLog("Main").Error(e.what());
-		std::cout << "\x1b[31m\x1b[1m" << e.what() << "\x1b[m" << '\n';
-
 		errorCode = 1;
+		errorMessage = e.what();
 	}
+
+	log.Error("Error : {0} : {1}", errorCode, errorMessage);
+	std::cout << "\x1b[31m\x1b[1m" << errorMessage << "\x1b[m" << std::endl;
+
 	return errorCode;
 }

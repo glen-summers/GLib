@@ -1,7 +1,7 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" xmlns:gl="glib">
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:gl="glib">
 <head>
-	<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 	<title gl:text="Coverage - ${title}">Coverage - Source</title>
 	<link rel="stylesheet" type="text/css" href="coverage.css" gl:href="${styleSheet}" />
 </head>
@@ -44,22 +44,23 @@
 		<table class="source">
 			<tr gl:each="line : ${lines}" class="cov" gl:class="${line.cover}">
 				<td gl:if="${line.hasLink}">
-					<pre><code><a id="1" gl:id="${line.number}"><span class="line" gl:text="[${line.paddedNumber}]">[1]</span></a><span gl:text="${line.text}">covered code</span></code></pre>
+					<pre><code><a id="1" gl:id="${line.number}"><span class="line" gl:text="[${line.paddedNumber}]">[ 1]</span></a><span gl:text="${line.text}">covered code</span></code></pre>
 				</td>
 				<td gl:if="${line.hasNoLink}">
-					<pre><code><span class="line" gl:text="[${line.paddedNumber}]">[1]</span><span gl:text="${line.text}">covered code</span></code></pre>
+					<pre><code><span class="line" gl:text="[${line.paddedNumber}]">[ 1]</span><span gl:text="${line.text}">covered code</span></code></pre>
 				</td>
 			</tr>
 
 			<gl:block if="false">
-				<tr class="ncov"><td><pre><code><a id="2"><span class="line">[2]</span></a>not covered code</code></pre></td></tr>
-				<tr><td><pre><code><a id="3"><span class="line">[3]</span></a>no code line</code></pre></td></tr>
-				<tr><td><pre><code><a id="4"><span class="line">[4]</span></a><span class="c">/*keyword   */</span><span class="k">	auto class template</span></code></pre></td></tr>
-				<tr><td><pre><code><a id="5"><span class="line">[5]</span></a><span class="c">/*type      */</span><span class="t">	int long vector</span></code></pre></td></tr>
-				<tr><td><pre><code><a id="6"><span class="line">[6]</span></a><span class="c">/*comment   */</span></code></pre></td></tr>
-				<tr><td><pre><code><a id="7"><span class="line">[7]</span></a><span class="c">/*whitespace*/</span><span class="w">	&#x00B7; &#x2192;</span></code></pre></td></tr>
-				<tr><td><pre><code><a id="8"><span class="line">[8]</span></a><span class="c">/*string    */</span><span class="s">	"value"</span></code></pre></td></tr>
-				<tr><td><pre><code><a id="9"><span class="line">[9]</span></a><span class="c">/*directive */</span><span class="d">	#include</span></code></pre></td></tr>
+				<tr class="ncov"><td><pre><code><a id="2"><span class="line">[ 2]</span></a>not covered code</code></pre></td></tr>
+				<tr><td><pre><code><a id="3"><span class="line">[ 3]</span></a>no code line</code></pre></td></tr>
+				<tr><td><pre><code><a id="4"><span class="line">[ 4]</span></a><span class="c">/*keyword   */</span><span class="k">auto class template</span></code></pre></td></tr>
+				<tr><td><pre><code><a id="5"><span class="line">[ 5]</span></a><span class="c">/*type      */</span><span class="t">int long vector</span></code></pre></td></tr>
+				<tr><td><pre><code><a id="6"><span class="line">[ 6]</span></a><span class="c">/*comment   */</span></code></pre></td></tr>
+				<tr><td><pre><code><a id="7"><span class="line">[ 7]</span></a><span class="c">/*whitespace*/</span><span class="w">&#x00B7; &#x2192;</span></code></pre></td></tr>
+				<tr><td><pre><code><a id="8"><span class="line">[ 8]</span></a><span class="c">/*tab2      */</span><span class="w">&#x00B7;&#x00B7;&#x00B7;&#x00B7;</span>foo<span class="w2">&#x2192</span>bar</code></pre></td></tr>
+				<tr><td><pre><code><a id="9"><span class="line">[ 9]</span></a><span class="c">/*string    */</span><span class="s">"value"</span></code></pre></td></tr>
+				<tr><td><pre><code><a id="10"><span class="line">[10]</span></a><span class="c">/*directive */</span><span class="d">#include</span></code></pre></td></tr>
 			</gl:block>
 		</table>
 
