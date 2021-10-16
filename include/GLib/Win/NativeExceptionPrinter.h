@@ -3,8 +3,9 @@
 #include <GLib/Win/FormatErrorMessage.h>
 #include <GLib/Win/Symbols.h>
 
-#include <GLib/Span.h>
 #include <GLib/formatter.h>
+
+#include <span>
 
 namespace GLib::Win::Symbols
 {
@@ -45,7 +46,7 @@ namespace GLib::Win::Symbols
 			virtual ~Vbase() = delete;
 		};
 
-		inline bool GetCPlusPlusExceptionName(const Span<ULONG_PTR> & ei, std::string & name)
+		inline bool GetCPlusPlusExceptionName(const std::span<const ULONG_PTR> & ei, std::string & name)
 		{
 			return NativeTryCatch(
 				[&]()
@@ -57,7 +58,7 @@ namespace GLib::Win::Symbols
 				});
 		}
 
-		inline bool GetCPlusPlusExceptionNameEx(const Span<ULONG_PTR> & ei, std::string & name)
+		inline bool GetCPlusPlusExceptionNameEx(const std::span<const ULONG_PTR> & ei, std::string & name)
 		{
 			return NativeTryCatch(
 				[&]()
@@ -70,19 +71,24 @@ namespace GLib::Win::Symbols
 
 #if defined(_M_IX86)
 					ULONG_PTR hinstance = 0;
+					(void) instanceOffset64;
 #elif defined(_M_X64)
 					ULONG_PTR hinstance = ei[instanceOffset64];
 #elif
 #error unexpected target
 #endif
 
-					const auto throwInfo = GLib::MakeSpan<DWORD>(WindowsCast<const DWORD *>(ei[throwInfoIndex]), catchableOffsetIndex + 1);
-					const DWORD catchableOffset = throwInfo[catchableOffsetIndex];
-					const auto catchables = GLib::MakeSpan<DWORD>(WindowsCast<const DWORD *>(hinstance + catchableOffset), catchablesOffsetIndex + 1);
-					const DWORD catchablesOffset = catchables[catchablesOffsetIndex];
-					const auto catchablesTypes = GLib::MakeSpan<DWORD>(WindowsCast<const DWORD *>(hinstance + catchablesOffset), typeInfoOffsetIndex + 1);
-					const DWORD typeInfoOffset = catchablesTypes[typeInfoOffsetIndex];
+					std::span<const DWORD> const throwInfo {WindowsCast<const DWORD *>(ei[throwInfoIndex]), catchableOffsetIndex + 1};
+
+					DWORD const catchableOffset {throwInfo[catchableOffsetIndex]};
+					std::span<const DWORD> const catchables {WindowsCast<const DWORD *>(hinstance + catchableOffset), catchablesOffsetIndex + 1};
+
+					DWORD const catchablesOffset {catchables[catchablesOffsetIndex]};
+					std::span<const DWORD> const catchablesTypes {WindowsCast<const DWORD *>(hinstance + catchablesOffset), typeInfoOffsetIndex + 1};
+					DWORD const typeInfoOffset {catchablesTypes[typeInfoOffsetIndex]};
+
 					name = WindowsCast<const type_info *>(hinstance + typeInfoOffset)->name();
+
 					return true;
 				});
 		}
@@ -186,12 +192,10 @@ namespace GLib::Win::Symbols
 	inline void Print(std::ostream & s, const EXCEPTION_POINTERS * exceptionInfo, unsigned int maxFrames)
 	{
 		constexpr DWORD CPLUSPLUS_EXCEPTION_NUMBER = 0xe06d7363;
-
 		const EXCEPTION_RECORD & er = *(exceptionInfo->ExceptionRecord);
+		std::span<const ULONG_PTR> const info {er.ExceptionInformation, EXCEPTION_MAXIMUM_PARAMETERS};
 
 		Formatter::Format(s, "Unhandled exception at {0} (code: {1:%08X})", er.ExceptionAddress, er.ExceptionCode);
-
-		auto info = MakeSpan(static_cast<const ULONG_PTR *>(er.ExceptionInformation), EXCEPTION_MAXIMUM_PARAMETERS);
 
 		switch (er.ExceptionCode)
 		{

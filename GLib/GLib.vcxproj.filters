@@ -191,9 +191,6 @@
     <ClInclude Include="..\include\GLib\Win\Local.h">
       <Filter>Include Files\Win</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\GLib\Span.h">
-      <Filter>Include Files\Util</Filter>
-    </ClInclude>
     <ClInclude Include="Manipulator.h">
       <Filter>Header Files</Filter>
     </ClInclude>

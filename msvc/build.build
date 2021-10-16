@@ -47,23 +47,7 @@
 	</Target>
 
 	<Target Name="Clean">
-		<Exec Command='del /F /Q /S "$(Out)"' Condition="Exists($(Out))"/>
-
-		<ItemGroup>
-			<FileToDelete Include="$(Source)/**/Debug/**/*"/>
-			<FileToDelete Include="$(Source)/**/Release/**/*"/>
-			<FileToDelete Include="$(Source)/**/ipch/**/*"/>
-			<FileToDelete Include="$(Source)/lib/*"/>
-		</ItemGroup>
-		<Delete Files="%(FileToDelete.Identity)"/>
-
-		<ItemGroup>
-			<Directories Include="$([System.IO.Directory]::GetDirectories('$(Source)', '*', System.IO.SearchOption.AllDirectories))" />
-			<Directories>
-				<Files>$([System.IO.Directory]::GetFiles("%(Directories.Identity)", "*", System.IO.SearchOption.AllDirectories).get_Length())</Files>
-			</Directories>
-		</ItemGroup>
-		<RemoveDir Directories="@(Directories)" Condition="%(Files)=='0'" />
+		<Exec Command='git clean -fdX "$(Root)"'/>
 	</Target>
 
 	<Target Name="Deps">

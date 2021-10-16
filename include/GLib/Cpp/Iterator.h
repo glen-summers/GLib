@@ -104,12 +104,7 @@ namespace GLib::Cpp
 			bool ret = false;
 			if (yieldValue != lastPtr)
 			{
-				// c++17 version
-				fragment = {state, {&(*lastPtr)[0], static_cast<size_t>(yieldValue - *lastPtr)}};
-
-				// c++20 version
-				// fragment = {state, {*lastPtr, yieldValue}}; // current clang tidy gets: error G5C7C4CC9: no viable overloaded '='
-
+				fragment = {state, {*lastPtr, yieldValue}};
 				ret = true;
 			}
 			lastPtr = yieldValue;
@@ -173,7 +168,6 @@ namespace GLib::Cpp
 
 				if (newState == State::None)
 				{
-
 					switch (oldState)
 					{
 						case State::CommentAsterix:

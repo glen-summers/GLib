@@ -1,7 +1,7 @@
 @echo off & cls & setlocal
 
 ::[minInclude, maxExclude)
-set vsVersion=[16^^^^,17^^^^)
+set vsVersion=[17^^^^,18^^^^)
 set buildFile=%~dp0msvc\build.build
 set requires=Microsoft.Component.MSBuild^
  Microsoft.VisualStudio.Component.VC.Tools.x86.x64^

@@ -1,7 +1,8 @@
-FROM ubuntu:20.04 AS cpp
+FROM ubuntu:21.04 AS cpp
 LABEL description="C++ utils etc."
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
 	build-essential \
+	g++-11 \
 	cmake \
 	libicu-dev \
 	lcov \
@@ -9,6 +10,7 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install --no-instal
 	wget \
 	p7zip-full \
 	&& rm -rf /var/lib/apt/lists/* \
+	&& update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-11 11 \
 	&& mkdir /src
 
 FROM cpp AS cpp-boost
@@ -35,8 +37,10 @@ COPY /GLib $dir/GLib
 COPY /include $dir/include
 COPY /Tests $dir/Tests
 COPY /Coverage/SymbolNameUtils.h $dir/Coverage/SymbolNameUtils.h
+RUN /src/GLib/go.sh
 CMD ["/bin/bash"]
 
 FROM glib AS glib-coverage
 LABEL description="GLib Coverage Build"
+RUN /src/GLib/go.sh coverage
 CMD ["/bin/bash"]

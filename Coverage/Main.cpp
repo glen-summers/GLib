@@ -4,10 +4,10 @@
 #include "FileCoverageData.h"
 #include "HtmlReport.h"
 
-#include <GLib/Span.h>
 #include <GLib/flogging.h>
 
 #include <iostream>
+#include <span>
 
 using namespace std::string_literals;
 
@@ -40,7 +40,7 @@ Coverage c:\Build\Main.exe C:\Report -ws -i C:\MainCode C:\Utils\ -x C:\External
 			return errorCode;
 		}
 
-		GLib::Span<char *> const args {argv, argc};
+		std::span<char *> const args {argv, static_cast<size_t>(argc)};
 
 		auto it = args.begin();
 		auto end = args.end();

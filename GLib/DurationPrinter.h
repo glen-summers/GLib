@@ -12,17 +12,16 @@ inline std::ostream & operator<<(std::ostream & s, std::chrono::nanoseconds dura
 		return s << std::setprecision(1) << std::fixed << std::chrono::duration<double>(duration).count() * ToMilliseconds << "ms";
 	}
 
-	constexpr auto HoursInAnEarthDay = 24; // until c++20 days constant
-	using days = std::chrono::duration<long, std::ratio_multiply<std::chrono::hours::period, std::ratio<HoursInAnEarthDay>>>;
-	auto day = std::chrono::duration_cast<days>(duration);
+	auto day = std::chrono::duration_cast<std::chrono::days>(duration);
 	duration -= day;
 	auto hours = std::chrono::duration_cast<std::chrono::hours>(duration);
 	duration -= hours;
 	auto minutes = std::chrono::duration_cast<std::chrono::minutes>(duration);
 	duration -= minutes;
+	auto seconds = std::chrono::duration_cast<std::chrono::seconds>(duration);
+	duration -= seconds;
+	auto milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
 
-	constexpr auto NanosecondsToMilliseconds = 1000000;
-	long long milliseconds = duration.count() / NanosecondsToMilliseconds;
 	int effectiveDigits = 3;
 	while (effectiveDigits > 0)
 	{
@@ -40,11 +39,15 @@ inline std::ostream & operator<<(std::ostream & s, std::chrono::nanoseconds dura
 
 	if (day.count() != 0)
 	{
-		s << day.count() << ".";
+		s << day.count() << '.';
 	}
-	s << hours.count() << ":";
-	s << minutes.count() << ":";
 
-	const auto NanosecondsToSeconds = 1e9;
-	return s << std::setprecision(effectiveDigits) << std::fixed << duration.count() / NanosecondsToSeconds;
+	s << hours.count() << ':' << minutes.count() << ':' << seconds.count();
+
+	if (milliseconds != 0)
+	{
+		s << '.' << std::setprecision(effectiveDigits) << std::fixed << milliseconds;
+	}
+
+	return s;
 }

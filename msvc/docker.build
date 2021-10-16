@@ -2,10 +2,10 @@
 	<Import Project="process.tasks"/>
 
 	<PropertyGroup>
-		<ReferenceVer>v4.8</ReferenceVer>
+		<ReferenceVer>v4.7</ReferenceVer>
 		<DockerServiceName>com.docker.service</DockerServiceName>
 		<DockerDesktop>"$(ProgramW6432)\Docker\Docker\Docker Desktop.exe"</DockerDesktop>
-		<TimeoutSeconds>5</TimeoutSeconds>
+		<TimeoutSeconds>60</TimeoutSeconds>
 	</PropertyGroup>
 
 	<PropertyGroup>
@@ -26,7 +26,7 @@
 		<!-- idempotent-->
 		<StartExecutable Name="$(DockerDesktop)"/>
 
-		<WaitForSuccess Name="docker" Args="ps" WaitSeconds="5" TimeoutSeconds="30">
+		<WaitForSuccess Name="docker" Args="ps" WaitSeconds="5" TimeoutSeconds="$(TimeoutSeconds)">
 			<Output TaskParameter="Result" PropertyName="Status"/>
 		</WaitForSuccess>
 		<Error Text="Timeout waiting for docker command" Condition="'$(Status)'!='True'"/>

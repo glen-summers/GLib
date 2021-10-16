@@ -54,7 +54,7 @@
 			<TidySig>VC\Tools\Llvm\x64\bin\clang-tidy.exe</TidySig>
 			<TidyFound>$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildBinPath), $(TidySig)))</TidyFound>
 			<Tidy>$(TidyFound)\$(TidySig)</Tidy>
-			<TidyCmd>@(TidyFlags, ' ') -checks=@(TidyCheck, ',') --header-filter=^.*\\GLib\\.*$ -- -I@(TidyInclude, ' -I') -std=c++17 -D@(TidyDefine, ' -D') -x c++ -W@(TidyIgnoreWarning, ',')</TidyCmd>
+			<TidyCmd>@(TidyFlags, ' ') -checks=@(TidyCheck, ',') --header-filter=^.*\\GLib\\.*$ -- -I@(TidyInclude, ' -I') -std=c++20 -D@(TidyDefine, ' -D') -x c++ -W@(TidyIgnoreWarning, ',')</TidyCmd>
 		</PropertyGroup>
 		<Error Text="Clang Tidy not found" Condition="'$(TidyFound)' == ''"/>
 		<Message Text="TidyCmd = $(TidyCmd)"/>

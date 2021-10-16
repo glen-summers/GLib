@@ -21,7 +21,10 @@ BOOST_AUTO_TEST_SUITE(FlogTests)
 BOOST_AUTO_TEST_CASE(Duration)
 {
 	BOOST_TEST("578.9ms" == ToString(std::chrono::microseconds {578912}));
+	BOOST_TEST("0:0:1.2" == ToString(std::chrono::milliseconds {1200}));
+	BOOST_TEST("0:0:1.23" == ToString(std::chrono::milliseconds {1230}));
 	BOOST_TEST("0:0:1.234" == ToString(std::chrono::milliseconds {1234}));
+	BOOST_TEST("0:0:2" == ToString(std::chrono::seconds {2}));
 	BOOST_TEST("0:34:13" == ToString(std::chrono::seconds {34 * 60 + 13}));
 	BOOST_TEST("9:34:13" == ToString(std::chrono::seconds {9 * 3600 + 34 * 60 + 13}));
 	BOOST_TEST("1.9:34:13" == ToString(std::chrono::seconds {33 * 3600 + 34 * 60 + 13}));

@@ -1,12 +1,12 @@
 #ifndef FORMATTER_H
 #define FORMATTER_H
 
-#include <GLib/Span.h>
 #include <GLib/printfformatpolicy.h>
 
 #include <array>
 #include <functional>
 #include <iomanip>
+#include <span>
 #include <sstream>
 
 // namespace Formatter?
@@ -43,7 +43,7 @@ namespace GLib
 			}
 		}
 
-		inline std::ostream & AppendFormatHelper(std::ostream & str, std::string_view view, const Span<StreamFunction> & args)
+		inline std::ostream & AppendFormatHelper(std::ostream & str, std::string_view view, const std::span<StreamFunction> & args)
 		{
 			constexpr auto DecimalShift = 10;
 			char ch = {};

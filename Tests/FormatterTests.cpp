@@ -14,11 +14,6 @@ namespace
 		return e.what() == std::string("Invalid format string");
 	}
 
-	bool IsIndexOutOfRange(const std::logic_error & e)
-	{
-		return e.what() == std::string("IndexOutOfRange");
-	}
-
 	bool IsNoArguments(const std::logic_error & e)
 	{
 		return e.what() == std::string("NoArguments");
@@ -130,11 +125,6 @@ BOOST_AUTO_TEST_CASE(TestInvalidTrailingFormatBrace)
 BOOST_AUTO_TEST_CASE(TestInvalidCharacterAfterIndex)
 {
 	BOOST_CHECK_EXCEPTION(Formatter::Format("{0x", 0), std::logic_error, IsInvalidFormat);
-}
-
-BOOST_AUTO_TEST_CASE(TestInvalidIndex)
-{
-	BOOST_CHECK_EXCEPTION(Formatter::Format("{1}", 0), std::logic_error, IsIndexOutOfRange);
 }
 
 BOOST_AUTO_TEST_CASE(TestSpacesOk)
