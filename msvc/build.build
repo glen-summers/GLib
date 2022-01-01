@@ -163,7 +163,7 @@ git commit --no-edit --all --verbose --message init
 	<Target Name="Docker" DependsOnTargets="StartDocker">
 		<Exec WorkingDirectory="$(Root)" Command="
 docker build --file dockerFile --target glib --tag glib .
-docker container run --rm -v $(VolumeShare) glib /src/GLib/go.sh
+docker container run -t --rm -v $(VolumeShare) glib /src/GLib/go.sh
 "/>
 	</Target>
 
@@ -172,7 +172,7 @@ docker container run --rm -v $(VolumeShare) glib /src/GLib/go.sh
 	<Target Name="DockerCoverage" DependsOnTargets="StartDocker">
 		<Exec WorkingDirectory="$(Root)" Command="
 docker build --file dockerFile --target glib-coverage --tag glib-coverage .
-docker container run --rm -v $(VolumeShare) glib-coverage /src/GLib/go.sh coverage
+docker container run -t --rm -v $(VolumeShare) glib-coverage /src/GLib/go.sh coverage
 start $(out)\DockerShare\cmake\build\Debug\TestsCoverage\index.html
 "/>
 		<!-- todo copy out raw coverage files and merge with windows coverage-->

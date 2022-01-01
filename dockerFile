@@ -1,34 +1,32 @@
-FROM ubuntu:21.04 AS cpp
+FROM ubuntu:21.10 AS cpp
 LABEL description="C++ utils etc."
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
+	ca-certificates \
 	build-essential \
-	g++-11 \
+	gcc-11 g++-11 \
 	cmake \
 	libicu-dev \
 	lcov \
 	git \
 	wget \
 	p7zip-full \
-	&& rm -rf /var/lib/apt/lists/* \
-	&& update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-11 11 \
-	&& mkdir /src
+	&& rm -rf /var/lib/apt/lists/*
 
-FROM cpp AS cpp-boost
+FROM cpp AS glib-boost
 LABEL description="C++ build with boost-test"
-RUN apt-get update && apt-get install -y ca-certificates \
-	&& cd /src \
-	&& mkdir ./ExternalDependencies \
-	&& git clone https://github.com/glen-summers/BoostModularBuild.git \
-	&& ./BoostModularBuild/go.sh build test \
-	&& rm -r ./BoostModularBuild
+ENV HOME /src
+RUN mkdir -p ${HOME}/tmp ${HOME}/ExternalDependencies \
+	&& git clone https://github.com/glen-summers/BoostModularBuild.git ${HOME}/tmp \
+	&& ${HOME}/tmp/go.sh build test \
+	&& rm -r ${HOME}/tmp
 
-FROM cpp-boost AS glib
+FROM glib-boost AS glib
 LABEL description="GLib source"
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y locales dos2unix \
 	&& locale-gen en_GB.UTF-8 \
 	&& update-locale LANG=en_GB.UTF-8
 ENV LANG en_GB.UTF-8
-ARG dir=/src/GLib
+ARG dir=${HOME}/GLib
 RUN mkdir -p $dir
 COPY /go.sh $dir
 COPY /CMakeLists.txt $dir
@@ -36,11 +34,11 @@ COPY /cmake $dir/cmake
 COPY /GLib $dir/GLib
 COPY /include $dir/include
 COPY /Tests $dir/Tests
-COPY /Coverage/SymbolNameUtils.h $dir/Coverage/SymbolNameUtils.h
-RUN /src/GLib/go.sh
+COPY /Coverage/SymbolNameUtils.h $dir/Coverage/
+RUN ${HOME}/GLib/go.sh
 CMD ["/bin/bash"]
 
 FROM glib AS glib-coverage
 LABEL description="GLib Coverage Build"
-RUN /src/GLib/go.sh coverage
+RUN ${HOME}/GLib/go.sh coverage
 CMD ["/bin/bash"]

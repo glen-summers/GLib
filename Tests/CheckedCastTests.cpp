@@ -22,17 +22,6 @@ namespace
 
 BOOST_AUTO_TEST_SUITE(CheckedCastTests)
 
-BOOST_AUTO_TEST_CASE(DetailTest)
-{
-	BOOST_TEST(true == (Detail::Flags<int, short>::SameSign));
-	BOOST_TEST(true == (Detail::Flags<short, int>::SameSign));
-	BOOST_TEST(true == (Detail::Flags<int, unsigned int>::TargetSmaller));
-	BOOST_TEST(false == (Detail::Flags<unsigned int, int>::SameSign));
-	BOOST_TEST(false == (Detail::Flags<int, unsigned int>::SameSign));
-	BOOST_TEST(false == (Detail::Flags<int, short>::TargetSmaller));
-	BOOST_TEST(false == (Detail::Flags<int, unsigned short>::TargetSmaller));
-}
-
 BOOST_AUTO_TEST_CASE(SameType)
 {
 	BOOST_TEST(std::numeric_limits<int>::max() == checked_cast<int>(std::numeric_limits<int>::max()));
