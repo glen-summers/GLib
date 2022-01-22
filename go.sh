@@ -1,7 +1,5 @@
 #!/bin/bash
 
-BoostBuilderVer="1.73.0"
-
 error_exit() {
 	echo "$1" 1>&2
 	exit 1
@@ -67,8 +65,9 @@ Coverage() {
 
 RootDir=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 Configuration=Release
+BoostBuilderVer=`cat ${RootDir}/boost.version`
+echo Boost=${BoostBuilderVer}
 
-clear
 echo "${RootDir}/go.sh $1..."
 case "$1" in
 

@@ -4,9 +4,8 @@
 
 	<PropertyGroup>
 		<Root>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)\..'))</Root>
-		<BoostBuilderVer>1.73.0</BoostBuilderVer>
-		<BoostBuilderUrl>https://github.com/glen-summers/BoostModularBuild/archive/v$(BoostBuilderVer).tar.gz</BoostBuilderUrl>
-		<BoostBuilderName>BoostModularBuild-$(BoostBuilderVer)</BoostBuilderName>
+		<BoostBuilderUrl>https://github.com/glen-summers/BoostModularBuild/archive/v$(BoostVer).tar.gz</BoostBuilderUrl>
+		<BoostBuilderName>BoostModularBuild-$(BoostVer)</BoostBuilderName>
 	</PropertyGroup>
 
 	<PropertyGroup>

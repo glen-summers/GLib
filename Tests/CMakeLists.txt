@@ -1,10 +1,10 @@
 cmake_minimum_required(VERSION 3.14)
 
-set(BOOST_VER boost_1_73_0_TEST)
-set(BOOST_SIG ExternalDependencies/${BOOST_VER})
-set(BOOST_ITEM boost/test/unit_test.hpp)
-
 include(../cmake/common.cmake)
+
+string(REPLACE "." "_" BOOST_VER_UND "${BOOST_VER}")
+set(BOOST_SIG "ExternalDependencies/boost_${BOOST_VER_UND}_test")
+set(BOOST_ITEM boost/test/unit_test.hpp)
 
 # not working...
 #if(UNIX)

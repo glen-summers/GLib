@@ -28,6 +28,7 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install --no-instal
 ENV LANG en_GB.UTF-8
 ARG dir=${HOME}/GLib
 RUN mkdir -p $dir
+COPY /boost.version $dir
 COPY /go.sh $dir
 COPY /CMakeLists.txt $dir
 COPY /cmake $dir/cmake

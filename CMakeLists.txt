@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.12.4)
 
 include(ExternalProject)
 
+file (STRINGS "boost.version" BOOST_VER)
+
 project(GLib VERSION 1.0.0 DESCRIPTION "GLib project")
 enable_testing()
 

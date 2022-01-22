@@ -3,11 +3,13 @@
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
-    <BoostVer>boost_1_73_0_TEST</BoostVer>
-    <BoostSig>ExternalDependencies\$(BoostVer)</BoostSig>
+    <BoostVer>$([System.IO.File]::ReadAllText($(MSBuildProjectDirectory)\..\boost.version))</BoostVer>
+    <BoostVerTest>boost_$(BoostVer)_test</BoostVerTest>
+    <BoostVerUnd>$([System.String]::Copy('$(BoostVerTest)').Replace('.', '_'))</BoostVerUnd>
+    <BoostSig>ExternalDependencies\$(BoostVerUnd)</BoostSig>
     <BoostItem>boost\test\unit_test.hpp</BoostItem>
     <ExtDeps>$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), "$(BoostSig)/$(BoostItem)"))</ExtDeps>
-    <Boost>$(ExtDeps)\ExternalDependencies\$(BoostVer)</Boost>
+    <Boost>$(ExtDeps)\ExternalDependencies\$(BoostVerUnd)</Boost>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
