@@ -50,28 +50,16 @@ namespace GLib::Win::Util
 		{
 		public:
 			template <typename T>
-			static bool AssertTrue(T value, std::string_view message, DWORD errorCode)
-			{
-				static_assert(false, "Invalid check parameter, only bool and BOOL allowed");
-			}
+			static bool AssertTrue(T value, std::string_view message, DWORD errorCode) = delete;
+			
+			template <typename T>
+			static bool WarnAssertTrue(T value, std::string_view message, DWORD errorCode) = delete;
+			
+			template <typename T>
+			static bool AssertSuccess(T value, std::string_view message) = delete;
 
 			template <typename T>
-			static bool WarnAssertTrue(T value, std::string_view message, DWORD errorCode)
-			{
-				static_assert(false, "Invalid check parameter, only bool and BOOL allowed");
-			}
-
-			template <typename T>
-			static bool AssertSuccess(T value, std::string_view message)
-			{
-				static_assert(false, "Invalid check parameter, only DWORD allowed");
-			}
-
-			template <typename T>
-			static bool WarnAssertSuccess(T value, std::string_view message)
-			{
-				static_assert(false, "Invalid check parameter, only DWORD and LSTATUS allowed");
-			}
+			static bool WarnAssertSuccess(T value, std::string_view message) = delete;
 
 			static bool AssertTrue(bool result, std::string_view message, DWORD errorCode)
 			{

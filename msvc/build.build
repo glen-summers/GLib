@@ -1,6 +1,5 @@
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="Current">
 	<Import Project="Default.props"/>
-	<Import Project="docker.build"/>
 
 	<PropertyGroup>
 		<Root>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)\..'))</Root>
@@ -159,22 +158,33 @@ git commit --no-edit --all --verbose --message init
 		<Exec Command="git push --force --verbose $(ReportsRepo)" WorkingDirectory="$(Out)\HtmlReport"/>
 	</Target>
 
-	<Target Name="Docker" DependsOnTargets="StartDocker">
+	<Target Name="Docker">
 		<Exec WorkingDirectory="$(Root)" Command="
 docker build --file dockerFile --target glib --tag glib .
 docker container run -t --rm -v $(VolumeShare) glib /src/GLib/go.sh
 "/>
 	</Target>
 
-	<Target Name="Stop" DependsOnTargets="StopDocker"/>
-
-	<Target Name="DockerCoverage" DependsOnTargets="StartDocker">
+	<Target Name="DockerCoverage">
 		<Exec WorkingDirectory="$(Root)" Command="
 docker build --file dockerFile --target glib-coverage --tag glib-coverage .
 docker container run -t --rm -v $(VolumeShare) glib-coverage /src/GLib/go.sh coverage
 start $(out)\DockerShare\cmake\build\Debug\TestsCoverage\index.html
 "/>
 		<!-- todo copy out raw coverage files and merge with windows coverage-->
+	</Target>
+
+	<Target Name="DockerInfo">
+		<Exec Command="docker --version"/>
+		<Exec Command="docker image ls"/>
+	</Target>
+
+	<Target Name="DockerPurge">
+		<Exec Command="docker ps --quiet"/>
+		<Exec Command="docker system prune --all --force"/>
+		<Exec Command="docker images -f dangling=true"/>
+		<Exec Command="docker image ls --all"/>
+		<Exec Command="docker ps --all"/>
 	</Target>
 
 	<!-- fwds if exist? maybe split out-->

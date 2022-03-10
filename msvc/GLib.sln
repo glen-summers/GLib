@@ -24,7 +24,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{460AF721
 		build.build = build.build
 		..\cmake\common.cmake = ..\cmake\common.cmake
 		Default.props = Default.props
-		docker.build = docker.build
 		format.build = format.build
 		..\go.cmd = ..\go.cmd
 		..\go.sh = ..\go.sh
