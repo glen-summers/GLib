@@ -1,9 +1,8 @@
-#ifndef PRINTF_FORMAT_POLICY_H
-#define PRINTF_FORMAT_POLICY_H
+#pragma once
 
-#include <GLib/compat.h>
-#include <GLib/cvt.h>
-#include <GLib/stackorheap.h>
+#include <GLib/Compat.h>
+#include <GLib/Cvt.h>
+#include <GLib/StackOrHeap.h>
 
 #include <iomanip>
 #include <ostream>
@@ -193,5 +192,3 @@ namespace GLib
 		};
 	}
 }
-
-#endif // PRINTF_FORMAT_POLICY_H

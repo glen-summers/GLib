@@ -1,7 +1,7 @@
 
 #include "MainWindow.h"
 #include <GLib/Win/ComUtils.h>
-#include <GLib/split.h>
+#include <GLib/Split.h>
 #pragma comment(lib, "Comctl32.lib")
 #pragma comment(linker, "\"/manifestdependency:type='win32' \
 name='Microsoft.Windows.Common-Controls' version='6.0.0.0' \

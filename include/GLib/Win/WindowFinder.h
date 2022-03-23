@@ -1,7 +1,7 @@
 #pragma once
 
 #include <GLib/Win/ErrorCheck.h>
-#include <GLib/stackorheap.h>
+#include <GLib/StackOrHeap.h>
 
 #include <functional>
 
@@ -32,7 +32,7 @@ namespace GLib::Win
 		static BOOL CALLBACK EnumWindowsCallback(HWND handle, LPARAM param) noexcept
 		{
 			// todo setlasterror when return false
-			return (*reinterpret_cast<const WindowEnumerator *>(param)) (handle) ? TRUE : FALSE;
+			return (*reinterpret_cast<const WindowEnumerator *>(param))(handle);
 		}
 
 	public:

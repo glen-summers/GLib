@@ -2,7 +2,7 @@
 
 #include <Windows.h>
 
-#include <GLib/cvt.h>
+#include <GLib/Cvt.h>
 
 #include <ostream>
 #include <string_view>

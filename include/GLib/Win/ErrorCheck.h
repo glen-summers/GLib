@@ -51,10 +51,10 @@ namespace GLib::Win::Util
 		public:
 			template <typename T>
 			static bool AssertTrue(T value, std::string_view message, DWORD errorCode) = delete;
-			
+
 			template <typename T>
 			static bool WarnAssertTrue(T value, std::string_view message, DWORD errorCode) = delete;
-			
+
 			template <typename T>
 			static bool AssertSuccess(T value, std::string_view message) = delete;
 

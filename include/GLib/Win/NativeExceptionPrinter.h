@@ -3,7 +3,7 @@
 #include <GLib/Win/FormatErrorMessage.h>
 #include <GLib/Win/Symbols.h>
 
-#include <GLib/formatter.h>
+#include <GLib/Formatter.h>
 
 #include <span>
 

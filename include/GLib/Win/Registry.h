@@ -1,7 +1,7 @@
 #pragma once
 
 #include <GLib/Win/ErrorCheck.h>
-#include <GLib/stackorheap.h>
+#include <GLib/StackOrHeap.h>
 
 #define STRINGIFY2(X) #X
 #define STRINGIFY(X) STRINGIFY2(X)

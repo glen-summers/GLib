@@ -4,7 +4,7 @@
 #include <GLib/Win/Handle.h>
 
 #include <GLib/IcuUtils.h>
-#include <GLib/stackorheap.h>
+#include <GLib/StackOrHeap.h>
 
 #include <map>
 #include <vector>

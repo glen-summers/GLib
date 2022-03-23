@@ -2,7 +2,7 @@
 
 #include "Function.h"
 
-#include <GLib/formatter.h>
+#include <GLib/Formatter.h>
 
 #include <unordered_map>
 

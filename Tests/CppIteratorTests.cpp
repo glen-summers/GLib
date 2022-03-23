@@ -4,7 +4,7 @@
 
 #include "TestUtils.h"
 
-#include "GLib/compat.h"
+#include "GLib/Compat.h"
 #include "GLib/Cpp/HtmlGenerator.h"
 
 #include <fstream>

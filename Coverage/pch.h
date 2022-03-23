@@ -1,6 +1,6 @@
 #ifndef PCH_H
 #define PCH_H
 
-#include <windows.h>
+#include <Windows.h>
 
 #endif // PCH_H

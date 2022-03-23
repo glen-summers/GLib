@@ -1,8 +1,10 @@
 #pragma once
 
+#if defined(_WIN32) && defined(_MSC_VER)
+
 #include <GLib/Win/FileSystem.h>
-#include <GLib/cvt.h>
-#include <GLib/stackorheap.h>
+#include <GLib/Cvt.h>
+#include <GLib/StackOrHeap.h>
 
 #include <array>
 #include <ctime>
@@ -105,3 +107,5 @@ namespace GLib::Compat
 		::_tzset();
 	}
 }
+
+#endif

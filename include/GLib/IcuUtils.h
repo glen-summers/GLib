@@ -1,6 +1,6 @@
 #pragma once
 
-#include <GLib/stackorheap.h>
+#include <GLib/StackOrHeap.h>
 
 #include <memory>
 #include <stdexcept>

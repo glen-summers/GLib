@@ -1,5 +1,7 @@
 #pragma once
 
+#if defined(__linux__) && defined(__GNUG__)
+
 #include <algorithm>
 #include <experimental/filesystem>
 #include <fstream>
@@ -11,7 +13,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#include <GLib/cvt.h>
+#include <GLib/Cvt.h>
 
 namespace GLib::Compat
 {
@@ -99,3 +101,5 @@ namespace GLib::Compat
 		::tzset();
 	}
 }
+
+#endif

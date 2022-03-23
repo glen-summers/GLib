@@ -1,6 +1,6 @@
 
-#include <GLib/compat.h>
-#include <GLib/scope.h>
+#include <GLib/Compat.h>
+#include <GLib/Scope.h>
 
 #include <boost/test/unit_test.hpp>
 

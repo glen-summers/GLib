@@ -1,5 +1,4 @@
-#ifndef STACK_OR_HEAP_H
-#define STACK_OR_HEAP_H
+#pragma once
 
 #include <array>
 #include <variant>
@@ -71,4 +70,3 @@ namespace GLib::Util
 	using CharBuffer = Util::StackOrHeap<char, DefaultStackReserveSize>;
 	using WideCharBuffer = Util::StackOrHeap<wchar_t, DefaultStackReserveSize>;
 }
-#endif // STACK_OR_HEAP_H

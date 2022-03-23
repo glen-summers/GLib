@@ -16,7 +16,7 @@
 #include <GLib/Html/TemplateEngine.h>
 #include <GLib/Win/Resources.h>
 #include <GLib/Xml/Printer.h>
-#include <GLib/formatter.h>
+#include <GLib/Formatter.h>
 
 #include <fstream>
 #include <set>

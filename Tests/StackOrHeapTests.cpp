@@ -1,5 +1,5 @@
 
-#include <GLib/stackorheap.h>
+#include <GLib/StackOrHeap.h>
 
 #include <boost/test/unit_test.hpp>
 

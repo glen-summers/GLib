@@ -2,14 +2,14 @@
 
 #include <Windows.h>
 
-#include <Commctrl.h>
+#include <CommCtrl.h>
 
 #include <GLib/Win/D2d.h>
 #include <GLib/Win/DebugWrite.h>
 #include <GLib/Win/Painter.h>
 #include <GLib/Win/Window.h>
 
-#include <GLib/flogging.h>
+#include <GLib/Flogging.h>
 
 #include "resource.h"
 

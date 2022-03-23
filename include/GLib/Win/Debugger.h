@@ -5,8 +5,8 @@
 #include <GLib/Win/Process.h>
 #include <GLib/Win/Symbols.h>
 
-#include <GLib/scope.h>
-#include <GLib/split.h>
+#include <GLib/Scope.h>
+#include <GLib/Split.h>
 
 #include <optional>
 

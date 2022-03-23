@@ -1,5 +1,5 @@
 
-#include <GLib/scope.h>
+#include <GLib/Scope.h>
 
 #include <boost/test/unit_test.hpp>
 

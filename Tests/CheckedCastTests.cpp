@@ -1,5 +1,5 @@
 
-#include <GLib/checked_cast.h>
+#include <GLib/CheckedCast.h>
 
 #include <boost/test/unit_test.hpp>
 

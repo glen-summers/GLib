@@ -1,7 +1,6 @@
-#ifndef FORMATTER_H
-#define FORMATTER_H
+#pragma once
 
-#include <GLib/printfformatpolicy.h>
+#include <GLib/PrintfFormatPolicy.h>
 
 #include <array>
 #include <functional>
@@ -285,5 +284,3 @@ namespace GLib
 
 	using Formatter = FormatterT<FormatterPolicy::Printf>;
 }
-
-#endif // FORMATTER_H

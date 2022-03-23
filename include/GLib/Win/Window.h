@@ -4,13 +4,13 @@
 
 #include <GLib/Win/ErrorCheck.h>
 #include <GLib/Win/Painter.h>
-#include <GLib/checked_cast.h>
+#include <GLib/CheckedCast.h>
 
 #ifdef GLIB_DEBUG_MESSAGES
 #include <GLib/Win/MessageDebug.h>
 #endif
 
-#include <GLib/formatter.h>
+#include <GLib/Formatter.h>
 
 #include <functional>
 #include <memory>

@@ -4,7 +4,7 @@
 #include <GLib/Win/FileSystem.h>
 #include <GLib/Win/Handle.h>
 
-#include <GLib/checked_cast.h>
+#include <GLib/CheckedCast.h>
 
 #include <chrono>
 

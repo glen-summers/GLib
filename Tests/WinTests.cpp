@@ -5,7 +5,7 @@
 
 #include <Windows.h>
 
-#include <GLib/Win/Aut/UIAut.h>
+#include <GLib/Win/Automation.h>
 #include <GLib/Win/ComUtils.h>
 #include <GLib/Win/DebugStream.h>
 #include <GLib/Win/DebugWrite.h>

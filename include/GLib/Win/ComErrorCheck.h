@@ -9,7 +9,7 @@
 #include <GLib/Win/DebugStream.h>
 #endif
 
-#include <GLib/scope.h>
+#include <GLib/Scope.h>
 
 #include <sstream>
 

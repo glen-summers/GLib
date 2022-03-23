@@ -1,10 +1,9 @@
-#ifndef FILE_LOGGER_H
-#define FILE_LOGGER_H
+#pragma once
 
-#include "logstate.h"
-#include "streaminfo.h"
+#include "LogState.h"
+#include "StreamInfo.h"
 
-#include <GLib/flogging.h>
+#include <GLib/Flogging.h>
 
 #include <mutex>
 
@@ -71,5 +70,3 @@ private:
 	static void CommitBuffer(GLib::Flog::Level level, std::string_view prefix);
 	static void ScopeEnd(std::string_view prefix);
 };
-
-#endif // FILE_LOGGER_H

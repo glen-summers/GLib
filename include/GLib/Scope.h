@@ -1,5 +1,4 @@
-#ifndef SCOPE_H
-#define SCOPE_H
+#pragma once
 
 #include <utility>
 
@@ -32,5 +31,3 @@ namespace GLib::Detail
 		return Detail::ScopedFunction<Function>(std::forward<Function>(exit));
 	}
 }
-
-#endif // SCOPE_H

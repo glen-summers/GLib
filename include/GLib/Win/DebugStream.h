@@ -2,9 +2,9 @@
 
 #include <Windows.h>
 
-#include <GLib/cvt.h>
-#include <GLib/genericoutstream.h>
-#include <GLib/vectorstreambuffer.h>
+#include <GLib/Cvt.h>
+#include <GLib/GenericOutStream.h>
+#include <GLib/VectorStreamBuffer.h>
 
 namespace GLib::Win::Debug
 {

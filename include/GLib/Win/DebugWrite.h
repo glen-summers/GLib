@@ -1,7 +1,7 @@
 #pragma once
 
 #include <GLib/Win/DebugStream.h>
-#include <GLib/formatter.h>
+#include <GLib/Formatter.h>
 
 namespace GLib::Win::Debug
 {

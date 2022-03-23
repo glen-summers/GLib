@@ -4,7 +4,7 @@
 #include "Process.h"
 
 #include <GLib/Win/Debugger.h>
-#include <GLib/flogging.h>
+#include <GLib/Flogging.h>
 
 #include <regex>
 

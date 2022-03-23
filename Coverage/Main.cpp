@@ -4,7 +4,7 @@
 #include "FileCoverageData.h"
 #include "HtmlReport.h"
 
-#include <GLib/flogging.h>
+#include <GLib/Flogging.h>
 
 #include <iostream>
 #include <span>

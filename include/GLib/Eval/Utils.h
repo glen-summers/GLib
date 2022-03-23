@@ -1,6 +1,6 @@
 #pragma once
 
-#include <GLib/compat.h>
+#include <GLib/Compat.h>
 
 #include <sstream>
 #include <string>

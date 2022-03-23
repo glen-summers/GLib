@@ -143,35 +143,35 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\include\GLib\checked_cast.h" />
-    <ClInclude Include="..\include\GLib\compat.h" />
+    <ClInclude Include="..\include\GLib\CheckedCast.h" />
+    <ClInclude Include="..\include\GLib\Compat.h" />
     <ClInclude Include="..\include\GLib\CompatLinux.h" />
     <ClInclude Include="..\include\GLib\CompatWindows.h" />
     <ClInclude Include="..\include\GLib\ConsecutiveFind.h" />
     <ClInclude Include="..\include\GLib\Cpp\HtmlGenerator.h" />
     <ClInclude Include="..\include\GLib\Cpp\Iterator.h" />
     <ClInclude Include="..\include\GLib\Cpp\StateEngine.h" />
-    <ClInclude Include="..\include\GLib\cvt.h" />
+    <ClInclude Include="..\include\GLib\Cvt.h" />
     <ClInclude Include="..\include\GLib\Eval\Collection.h" />
     <ClInclude Include="..\include\GLib\Eval\Evaluator.h" />
     <ClInclude Include="..\include\GLib\Eval\Utils.h" />
     <ClInclude Include="..\include\GLib\Eval\Value.h" />
-    <ClInclude Include="..\include\GLib\flogging.h" />
-    <ClInclude Include="..\include\GLib\formatter.h" />
-    <ClInclude Include="..\include\GLib\genericoutstream.h" />
+    <ClInclude Include="..\include\GLib\Flogging.h" />
+    <ClInclude Include="..\include\GLib\Formatter.h" />
+    <ClInclude Include="..\include\GLib\GenericOutStream.h" />
     <ClInclude Include="..\include\GLib\Html\Node.h" />
     <ClInclude Include="..\include\GLib\Html\TemplateEngine.h" />
     <ClInclude Include="..\include\GLib\IcuUtils.h" />
     <ClInclude Include="..\include\GLib\NoCase.h" />
     <ClInclude Include="..\include\GLib\PairHash.h" />
-    <ClInclude Include="..\include\GLib\printfformatpolicy.h" />
-    <ClInclude Include="..\include\GLib\scope.h" />
-    <ClInclude Include="..\include\GLib\split.h" />
-    <ClInclude Include="..\include\GLib\stackorheap.h" />
+    <ClInclude Include="..\include\GLib\PrintfFormatPolicy.h" />
+    <ClInclude Include="..\include\GLib\Scope.h" />
+    <ClInclude Include="..\include\GLib\Split.h" />
+    <ClInclude Include="..\include\GLib\StackOrHeap.h" />
     <ClInclude Include="..\include\GLib\TypeFilter.h" />
     <ClInclude Include="..\include\GLib\TypePredicates.h" />
-    <ClInclude Include="..\include\GLib\vectorstreambuffer.h" />
-    <ClInclude Include="..\include\GLib\Win\Aut\UIAut.h" />
+    <ClInclude Include="..\include\GLib\VectorStreamBuffer.h" />
+    <ClInclude Include="..\include\GLib\Win\Automation.h" />
     <ClInclude Include="..\include\GLib\Win\Bstr.h" />
     <ClInclude Include="..\include\GLib\Win\ComErrorCheck.h" />
     <ClInclude Include="..\include\GLib\Win\ComException.h" />
@@ -208,19 +208,19 @@
     <ClInclude Include="..\include\GLib\Xml\Printer.h" />
     <ClInclude Include="..\include\GLib\Xml\StateEngine.h" />
     <ClInclude Include="..\include\GLib\Xml\Utils.h" />
-    <ClInclude Include="filelogger.h" />
-    <ClInclude Include="fwd.h" />
-    <ClInclude Include="logstate.h" />
-    <ClInclude Include="scope.h" />
+    <ClInclude Include="FileLogger.h" />
+    <ClInclude Include="Fwd.h" />
+    <ClInclude Include="LogState.h" />
+    <ClInclude Include="Scope.h" />
     <ClInclude Include="pch.h" />
-    <ClInclude Include="streaminfo.h" />
+    <ClInclude Include="StreamInfo.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="Manipulator.h" />
     <ClInclude Include="DurationPrinter.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="filelogger.cpp" />
-    <ClCompile Include="log.cpp" />
+    <ClCompile Include="FileLogger.cpp" />
+    <ClCompile Include="Log.cpp" />
     <ClCompile Include="LogManager.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

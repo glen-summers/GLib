@@ -1,8 +1,8 @@
 #ifndef FLOGGING_H
 #define FLOGGING_H
 
-#include <GLib/formatter.h>
-#include <GLib/genericoutstream.h>
+#include <GLib/Formatter.h>
+#include <GLib/GenericOutStream.h>
 
 #include <string>
 #include <utility>

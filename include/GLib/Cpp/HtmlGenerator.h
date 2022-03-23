@@ -2,7 +2,7 @@
 
 #include <GLib/Cpp/Iterator.h>
 #include <GLib/Xml/Utils.h>
-#include <GLib/split.h>
+#include <GLib/Split.h>
 
 #include <cctype>
 #include <unordered_map>

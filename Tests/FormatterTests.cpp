@@ -1,5 +1,5 @@
 
-#include <GLib/formatter.h>
+#include <GLib/Formatter.h>
 
 #include <boost/test/unit_test.hpp>
 

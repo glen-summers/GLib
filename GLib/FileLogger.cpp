@@ -1,11 +1,11 @@
 #include "pch.h"
 
-#include "filelogger.h"
+#include "FileLogger.h"
 
 #include "DurationPrinter.h"
 #include "Manipulator.h"
 
-#include <GLib/compat.h>
+#include <GLib/Compat.h>
 
 #include <sstream>
 #include <thread>

@@ -1,8 +1,8 @@
 #include "pch.h"
 
-#include "filelogger.h"
+#include "FileLogger.h"
 
-#include <GLib/compat.h>
+#include <GLib/Compat.h>
 
 using GLib::Flog::LogManager;
 

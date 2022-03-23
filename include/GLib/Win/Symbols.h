@@ -2,8 +2,8 @@
 
 #include <GLib/Win/Local.h>
 #include <GLib/Win/Process.h>
-#include <GLib/compat.h>
-#include <GLib/scope.h>
+#include <GLib/Compat.h>
+#include <GLib/Scope.h>
 
 #define _NO_CVCONST_H // NOLINT (bugprone-reserved-identifier) required
 #include <DbgHelp.h>

@@ -3,7 +3,7 @@
 #include <GLib/Win/Bstr.h>
 #include <GLib/Win/ComPtr.h>
 
-#include <uiautomation.h>
+#include <UIAutomation.h>
 
 namespace GLib::Win::Aut
 {

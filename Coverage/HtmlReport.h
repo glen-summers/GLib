@@ -2,7 +2,7 @@
 
 #include "Types.h"
 
-#include <GLib/flogging.h>
+#include <GLib/Flogging.h>
 
 #include <list>
 

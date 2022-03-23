@@ -3,8 +3,8 @@ cmake_minimum_required(VERSION 3.12.4)
 include(../cmake/common.cmake)
 
 add_library(GLib STATIC
-	filelogger.cpp
-	log.cpp
+	FileLogger.cpp
+	Log.cpp
 	LogManager.cpp
 )
 

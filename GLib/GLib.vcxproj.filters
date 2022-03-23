@@ -33,22 +33,13 @@
     <Filter Include="Include Files\Html">
       <UniqueIdentifier>{b866b8d8-3d8c-4511-9c2b-6e4d28e7d654}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Include Files\Win\Aut">
-      <UniqueIdentifier>{6e2f4462-d247-4256-a432-c0b1ca0f99df}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="targetver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="filelogger.h">
+    <ClInclude Include="FileLogger.h">
       <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\GLib\flogging.h">
-      <Filter>Include Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\GLib\cvt.h">
-      <Filter>Include Files</Filter>
     </ClInclude>
     <ClInclude Include="..\include\GLib\win\Process.h">
       <Filter>Include Files\Win</Filter>
@@ -62,26 +53,20 @@
     <ClInclude Include="..\include\GLib\Win\ErrorCheck.h">
       <Filter>Include Files\Win</Filter>
     </ClInclude>
-    <ClInclude Include="streaminfo.h">
+    <ClInclude Include="StreamInfo.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\GLib\compat.h">
-      <Filter>Include Files</Filter>
-    </ClInclude>
-    <ClInclude Include="scope.h">
+    <ClInclude Include="Scope.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="fwd.h">
+    <ClInclude Include="Fwd.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="logstate.h">
+    <ClInclude Include="LogState.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="pch.h">
       <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\GLib\scope.h">
-      <Filter>Include Files</Filter>
     </ClInclude>
     <ClInclude Include="..\include\GLib\Win\FileSystem.h">
       <Filter>Include Files\Win</Filter>
@@ -131,28 +116,13 @@
     <ClInclude Include="..\include\GLib\Xml\Iterator.h">
       <Filter>Include Files\Xml</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\GLib\checked_cast.h">
-      <Filter>Include Files\Util</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\GLib\genericoutstream.h">
-      <Filter>Include Files\Util</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\GLib\split.h">
-      <Filter>Include Files\Util</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\GLib\stackorheap.h">
-      <Filter>Include Files\Util</Filter>
-    </ClInclude>
     <ClInclude Include="..\include\GLib\TypeFilter.h">
       <Filter>Include Files\Util</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\GLib\vectorstreambuffer.h">
-      <Filter>Include Files\Util</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\GLib\formatter.h">
+    <ClInclude Include="..\include\GLib\Formatter.h">
       <Filter>Include Files\Formatter</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\GLib\printfformatpolicy.h">
+    <ClInclude Include="..\include\GLib\PrintfFormatPolicy.h">
       <Filter>Include Files\Formatter</Filter>
     </ClInclude>
     <ClInclude Include="..\include\GLib\Eval\Collection.h">
@@ -254,27 +224,54 @@
     <ClInclude Include="..\include\GLib\Win\D2d.h">
       <Filter>Include Files\Win</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\GLib\Win\Aut\UIAut.h">
-      <Filter>Include Files\Win\Aut</Filter>
-    </ClInclude>
     <ClInclude Include="..\include\GLib\Win\MessageDebug.h">
       <Filter>Include Files\Win</Filter>
     </ClInclude>
     <ClInclude Include="..\include\GLib\Cpp\HtmlGenerator.h">
       <Filter>Include Files\Cpp</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\GLib\CheckedCast.h">
+      <Filter>Include Files\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\GLib\GenericOutStream.h">
+      <Filter>Include Files\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\GLib\Split.h">
+      <Filter>Include Files\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\GLib\StackOrHeap.h">
+      <Filter>Include Files\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\GLib\VectorStreamBuffer.h">
+      <Filter>Include Files\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\GLib\Win\Automation.h">
+      <Filter>Include Files\Win</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\GLib\Compat.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\GLib\Cvt.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\GLib\Scope.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\GLib\Flogging.h">
+      <Filter>Include Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="filelogger.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="log.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="LogManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="pch.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="FileLogger.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Log.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
