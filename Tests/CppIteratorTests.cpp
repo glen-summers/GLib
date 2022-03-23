@@ -23,8 +23,11 @@ void Parse(const Holder & code)
 {
 	for (const auto & x : code)
 	{
-		(void) x;
-		// std::cout << x.first << " : " << x.second << std::endl;
+#ifdef CPP_DIAGS
+		std::cout << x.first << " : " << x.second << std::endl;
+#else
+		static_cast<void>(x);
+#endif
 	}
 }
 
@@ -577,7 +580,7 @@ BOOST_AUTO_TEST_CASE(SymbolNameError)
 
 BOOST_AUTO_TEST_CASE(UnterminatedBug)
 {
-	std::string_view code = R"(//\)"; // test conpilers have no error
+	std::string_view code = R"(//\)"; // test compilers have no error
 	std::ostringstream stm;
 	GLIB_CHECK_RUNTIME_EXCEPTION({ Htmlify(code, stm); }, "Termination error, State: CommentLine, StartLine: 1");
 }

@@ -23,7 +23,7 @@ namespace GLib::Xml::Utils
 	static constexpr Entity Gt {"&gt;", '>'};
 
 	static constexpr auto EntitySize = 5;
-	static constexpr std::array<Entity, EntitySize> entities {Quot, Amp, Apos, Lt, Gt};
+	static constexpr std::array<Entity, EntitySize> Entities {Quot, Amp, Apos, Lt, Gt};
 
 	inline std::ostream & Escape(std::string_view value, std::ostream & out)
 	{
@@ -31,7 +31,7 @@ namespace GLib::Xml::Utils
 		{
 			std::string_view replacement;
 			size_t pos = std::string::npos;
-			for (const auto & [escaped, unescaped] : entities)
+			for (const auto & [escaped, unescaped] : Entities)
 			{
 				size_t const find = value.find(unescaped, startPos);
 				if (find != std::string::npos && find < pos)

@@ -9,10 +9,10 @@
 
 #include <fstream>
 
-WideStrings Coverage::a2w(const Strings & strings)
+WideStrings Coverage::A2W(const Strings & strings)
 {
 	WideStrings wideStrings;
-	std::transform(strings.begin(), strings.end(), std::inserter(wideStrings, wideStrings.begin()), GLib::Cvt::a2w);
+	std::transform(strings.begin(), strings.end(), std::inserter(wideStrings, wideStrings.begin()), GLib::Cvt::A2W);
 	return wideStrings;
 }
 
@@ -20,7 +20,7 @@ void Coverage::AddLine(const std::wstring & fileName, unsigned lineNumber, const
 											 Process & process)
 {
 	// filter out unknown source lines, looks like these cause the out of memory exceptions in ReportGenerator
-	if (lineNumber == FooFoo || lineNumber == FeeFee)
+	if (lineNumber == fooFoo || lineNumber == feeFee)
 	{
 		return;
 	}
@@ -92,8 +92,7 @@ void Coverage::OnCreateProcess(DWORD processId, DWORD threadId, const CREATE_PRO
 
 	GLib::Flog::ScopeLog scopeLog(log, GLib::Flog::Level::Info, "EnumLines");
 
-	Symbols().Lines([&](PSRCCODEINFOW lineInfo)
-									{ AddLine(static_cast<const wchar_t *>(lineInfo->FileName), lineInfo->LineNumber, process, lineInfo->Address, it->second); },
+	Symbols().Lines([&](PSRCCODEINFOW lineInfo) { AddLine(lineInfo->FileName, lineInfo->LineNumber, process, lineInfo->Address, it->second); },
 									process.Handle(), info.lpBaseOfImage);
 }
 
@@ -109,7 +108,7 @@ void Coverage::CaptureData(DWORD processId)
 	}
 	Process & process = pit->second;
 
-	for (const auto & [addrValue, address] : process.Addresses())
+	for (const auto & [addressValue, address] : process.Addresses())
 	{
 		auto symbolId = address.SymbolId();
 		auto symbol = symProcess.GetSymbolFromIndex(symbolId);
@@ -169,7 +168,7 @@ DWORD Coverage::OnException(DWORD processId, DWORD threadId, const EXCEPTION_DEB
 			HANDLE threadHandle = process.FindThread(threadId);
 
 			CONTEXT ctx {};
-			ctx.ContextFlags = CONTEXT_ALL; // NOLINT(hicpp-signed-bitwise) baad macro
+			ctx.ContextFlags = CONTEXT_ALL; // NOLINT(hicpp-signed-bitwise) bad macro
 			GLib::Win::Util::AssertTrue(::GetThreadContext(threadHandle, &ctx), "GetThreadContext");
 #ifdef _WIN64
 			--ctx.Rip;

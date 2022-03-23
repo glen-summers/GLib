@@ -20,7 +20,7 @@ namespace GLib::Win
 
 	namespace ComPtrDetail
 	{
-		constexpr DWORD ContextAll = CLSCTX_ALL; // NOLINT(hicpp-signed-bitwise) baad macro
+		constexpr DWORD ContextAll = CLSCTX_ALL; // NOLINT(hicpp-signed-bitwise) bad macro
 
 		template <typename T>
 		class Restricted : public T

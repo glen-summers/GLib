@@ -84,7 +84,6 @@ namespace GLib::Xml
 			return depth;
 		}
 
-		// haxor
 		std::string_view Text() const
 		{
 			return text;

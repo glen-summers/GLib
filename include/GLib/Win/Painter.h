@@ -10,7 +10,6 @@ namespace GLib::Win
 	{
 		struct PaintEnder
 		{
-			using pointer = const PaintInfo *;
 			void operator()(const PaintInfo * info) const;
 		};
 
@@ -19,14 +18,14 @@ namespace GLib::Win
 
 	struct PaintInfo
 	{
-		PAINTSTRUCT ps;
-		HWND wnd;
-		HDC dc;
+		PAINTSTRUCT PaintStruct;
+		HWND Window;
+		HDC DeviceContext;
 	};
 
 	inline void Detail::PaintEnder::operator()(const PaintInfo * info) const
 	{
-		Util::WarnAssertTrue(::EndPaint(info->wnd, &info->ps), "EndPaint");
+		Util::WarnAssertTrue(::EndPaint(info->Window, &info->PaintStruct), "EndPaint");
 	}
 
 	class Painter

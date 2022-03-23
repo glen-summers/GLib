@@ -21,12 +21,10 @@ namespace TestApp
 
 		GLib::Win::D2d::Factory factory;
 		GLib::Win::D2d::Renderer renderer {factory};
-		unsigned int const exitTimeSeconds;
 
 	public:
 		MainWindow(HINSTANCE /*instance*/, const GLib::Win::Size & /*size*/, unsigned int exitTimeSeconds)
 			: Window(0, IDR_MENU, IDR_ACCELERATOR, "TestApp")
-			, exitTimeSeconds(exitTimeSeconds)
 		{
 			log.Info("Ctor");
 			SetTimer(std::chrono::seconds {exitTimeSeconds});
@@ -40,7 +38,7 @@ namespace TestApp
 				case ID_HELP_ABOUT:
 				{
 					int button {};
-					auto * icon = TD_INFORMATION_ICON; // NOLINT(cppcoreguidelines-pro-type-cstyle-cast) baad macro
+					auto * icon = TD_INFORMATION_ICON; // NOLINT(cppcoreguidelines-pro-type-cstyle-cast) bad macro
 					GLib::Win::WarnHr(::TaskDialog(Handle(), Instance(), L"About", L"Main", L"Sub", TDCBF_CLOSE_BUTTON, icon, &button), "TaskDialog");
 					break;
 				}

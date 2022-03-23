@@ -66,7 +66,6 @@ BOOST_AUTO_TEST_CASE(NestedPropertyForEach)
 	User user {"Fred", 42, {"Computing", "Busses"}};
 	evaluator.Set("user", user);
 
-	std::vector<std::string> result;
 	std::ostringstream s;
 	evaluator.ForEach("user.hobbies", [&](const GLib::Eval::ValueBase & value) { s << value.ToString() << ','; });
 

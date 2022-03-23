@@ -10,8 +10,8 @@
 
 class LogState
 {
-	static constexpr auto DefaultCapacity = 256;
-	using StreamType = GLib::Util::GenericOutStream<char, GLib::Util::VectorStreamBuffer<char, DefaultCapacity>>;
+	static constexpr auto defaultCapacity = 256;
+	using StreamType = GLib::Util::GenericOutStream<char, GLib::Util::VectorStreamBuffer<char, defaultCapacity>>;
 
 	mutable std::stack<Scope> scopes;
 	mutable int depth {};

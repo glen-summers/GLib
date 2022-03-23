@@ -9,7 +9,7 @@ namespace GLib::Xml
 {
 	class NameSpaceManager
 	{
-		static constexpr std::string_view Attribute = "xmlns:";
+		static constexpr std::string_view xmlNameSpace = "xmlns:";
 
 		std::unordered_map<std::string_view, std::string_view> nameSpaces;
 		std::stack<std::pair<size_t, std::pair<std::string_view, std::string_view>>> nameSpaceStack;
@@ -17,12 +17,12 @@ namespace GLib::Xml
 	public:
 		static bool IsDeclaration(std::string_view value)
 		{
-			return value.compare(0, Attribute.size(), Attribute) == 0;
+			return value.compare(0, xmlNameSpace.size(), xmlNameSpace) == 0;
 		}
 
 		static std::string_view CheckForDeclaration(std::string_view value)
 		{
-			return IsDeclaration(value) ? value.substr(Attribute.size()) : std::string_view {};
+			return IsDeclaration(value) ? value.substr(xmlNameSpace.size()) : std::string_view {};
 		}
 
 		std::string_view Get(std::string_view prefix) const

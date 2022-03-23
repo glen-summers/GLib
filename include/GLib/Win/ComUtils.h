@@ -6,35 +6,35 @@ namespace GLib::Win
 {
 	namespace Detail
 	{
-		struct ComUninitialiser
+		struct ComUnInitialise
 		{
 			void operator()(void * unused) const noexcept
 			{
-				(void) unused;
-				::CoUninitialize();
+				static_cast<void>(unused);
+				CoUninitialize();
 			}
 		};
 
 		enum class Apartment : unsigned long
 		{
-			Multithreaded = COINITBASE_MULTITHREADED,
-			Singlethreaded = COINIT_APARTMENTTHREADED
+			MultiThreaded = COINITBASE_MULTITHREADED,
+			SingleThreaded = COINIT_APARTMENTTHREADED
 		};
 	}
 
-	template <Detail::Apartment appartment>
-	class ComInitialiser
+	template <Detail::Apartment Apartment>
+	class ComInitialise
 	{
-		std::unique_ptr<void, Detail::ComUninitialiser> com;
+		std::unique_ptr<void, Detail::ComUnInitialise> com;
 
 	public:
-		ComInitialiser()
+		ComInitialise()
 			: com {this}
 		{
-			CheckHr(::CoInitializeEx(nullptr, static_cast<DWORD>(appartment)), "CoInitializeEx");
+			CheckHr(CoInitializeEx(nullptr, static_cast<DWORD>(Apartment)), "CoInitializeEx");
 		}
 	};
 
-	using Mta = ComInitialiser<Detail::Apartment::Multithreaded>;
-	using Sta = ComInitialiser<Detail::Apartment::Singlethreaded>;
+	using Mta = ComInitialise<Detail::Apartment::MultiThreaded>;
+	using Sta = ComInitialise<Detail::Apartment::SingleThreaded>;
 }

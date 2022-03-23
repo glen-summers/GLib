@@ -30,7 +30,7 @@ namespace GLib::Win
 
 		inline VARIANT Create(const std::string & value)
 		{
-			auto * bstr = ::SysAllocString(Cvt::a2w(value).c_str());
+			auto * bstr = ::SysAllocString(Cvt::A2W(value).c_str());
 			if (bstr == nullptr)
 			{
 				throw std::runtime_error("SysAllocString");
@@ -39,7 +39,7 @@ namespace GLib::Win
 			VARIANT v;
 			::VariantInit(&v);
 			Vt(v) = VT_BSTR;
-			Bstr(v) = ::SysAllocString(Cvt::a2w(value).c_str());
+			Bstr(v) = ::SysAllocString(Cvt::A2W(value).c_str());
 			return v;
 		}
 
@@ -95,10 +95,9 @@ namespace GLib::Win
 		{
 			VARIANT tmp {};
 			CheckHr(::VariantChangeType(&tmp, &v, 0, VT_BSTR), "VariantChangeType");
-			return Cvt::w2a(Detail::Bstr(tmp));
+			return Cvt::W2A(Detail::Bstr(tmp));
 		}
 
-		// swapicle
 		Variant & operator=(const Variant & other)
 		{
 			Variant {other}.Swap(*this);

@@ -160,13 +160,16 @@ git commit --no-edit --all --verbose --message init
 
 	<Target Name="Docker">
 		<Exec WorkingDirectory="$(Root)" Command="
+set DOCKER_SCAN_SUGGEST=false
 docker build --file dockerFile --target glib --tag glib .
 docker container run -t --rm -v $(VolumeShare) glib /src/GLib/go.sh
+docker system df
 "/>
 	</Target>
 
 	<Target Name="DockerCoverage">
 		<Exec WorkingDirectory="$(Root)" Command="
+set DOCKER_SCAN_SUGGEST=false
 docker build --file dockerFile --target glib-coverage --tag glib-coverage .
 docker container run -t --rm -v $(VolumeShare) glib-coverage /src/GLib/go.sh coverage
 start $(out)\DockerShare\cmake\build\Debug\TestsCoverage\index.html

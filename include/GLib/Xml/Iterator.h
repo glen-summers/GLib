@@ -15,7 +15,7 @@ string_view's are used to hold pieces of the xml input to avoid copying
 separate attribute iterator exposed, enumerated first for namespaces then for values
 
 todo:
-improve error msgs to include error detail line\column numbers
+improve error message to include error detail line\column numbers
 default namespace
 standard entities
 */
@@ -25,7 +25,7 @@ namespace GLib::Xml
 	class Iterator
 	{
 		friend class AttributeIterator;
-		static constexpr char MinPrintable = 0x20;
+		static constexpr char minPrintable = 0x20;
 
 		StateEngine engine;
 
@@ -51,11 +51,13 @@ namespace GLib::Xml
 		unsigned int pos {};
 
 	public:
+		// ReSharper disable All
 		using iterator_category = std::forward_iterator_tag;
 		using value_type = Element;
 		using difference_type = void;
 		using pointer = void;
 		using reference = void;
+		// ReSharper restore All
 
 		Iterator(std::string_view::const_iterator begin, std::string_view::const_iterator end, NameSpaceManager * manager)
 			: ptr(begin)
@@ -99,7 +101,7 @@ namespace GLib::Xml
 		{
 			std::ostringstream s;
 			s << "Illegal character: ";
-			if (c >= MinPrintable)
+			if (c >= minPrintable)
 			{
 				s << '\'' << c << "' ";
 			}
@@ -244,7 +246,7 @@ namespace GLib::Xml
 							// don't yield for !doctype atm
 							// just set a member value for now?
 
-							if (elementName.first == elementName.second) // skip docktype
+							if (elementName.first == elementName.second) // skip doctype
 							{
 								break;
 							}

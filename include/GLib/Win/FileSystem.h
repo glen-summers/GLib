@@ -18,9 +18,9 @@ namespace GLib::Win::FileSystem
 
 		enum FileFlags : DWORD
 		{
-			access = GENERIC_READ | GENERIC_WRITE,												// NOLINT baad macros
-			create = CREATE_ALWAYS,																				// NOLINT
-			flags = FILE_ATTRIBUTE_TEMPORARY | FILE_FLAG_DELETE_ON_CLOSE, // NOLINT
+			Access = GENERIC_READ | GENERIC_WRITE,												// NOLINT bad macros
+			Create = CREATE_ALWAYS,																				// NOLINT
+			Flags = FILE_ATTRIBUTE_TEMPORARY | FILE_FLAG_DELETE_ON_CLOSE, // NOLINT
 		};
 	}
 
@@ -39,7 +39,7 @@ namespace GLib::Win::FileSystem
 		const wchar_t nul = u'\0';
 		for (size_t pos = 0, next = pp.find(nul, pos); next != std::wstring_view::npos; pos = next + 1, next = pp.find(nul, pos))
 		{
-			drives.push_back(Cvt::w2a(pp.substr(pos, next - 1 - pos)));
+			drives.push_back(Cvt::W2A(pp.substr(pos, next - 1 - pos)));
 		}
 
 		return drives;
@@ -53,12 +53,12 @@ namespace GLib::Win::FileSystem
 
 		for (const auto & logicalDrive : LogicalDrives())
 		{
-			DWORD length = ::QueryDosDeviceW(Cvt::a2w(logicalDrive).c_str(), s.Get(), static_cast<DWORD>(s.size()));
+			DWORD length = QueryDosDeviceW(Cvt::A2W(logicalDrive).c_str(), s.Get(), static_cast<DWORD>(s.size()));
 			Util::AssertTrue(length != 0, "QueryDosDeviceW");
 
 			s.EnsureSize(length);
 			size_t sizeWithoutTwoTrailingNulls = length - 2;
-			std::string dosDeviceName = Cvt::w2a({s.Get(), sizeWithoutTwoTrailingNulls});
+			std::string dosDeviceName = Cvt::W2A({s.Get(), sizeWithoutTwoTrailingNulls});
 			result.emplace(logicalDrive, dosDeviceName);
 		}
 		return result;
@@ -72,7 +72,7 @@ namespace GLib::Win::FileSystem
 		s.EnsureSize(length);
 		length = ::GetFinalPathNameByHandleW(fileHandle, s.Get(), static_cast<DWORD>(s.size()), flags);
 		Util::AssertTrue(length != 0 && length < s.size(), "GetFinalPathNameByHandleW");
-		return Cvt::w2a(std::wstring_view {s.Get(), length});
+		return Cvt::W2A(std::wstring_view {s.Get(), length});
 	}
 
 	inline std::string NormalisePath(const std::string & path, const std::map<std::string, std::string> & driveMap)
@@ -115,7 +115,7 @@ namespace GLib::Win::FileSystem
 		length = ::GetModuleFileNameW(module, s.Get(), static_cast<unsigned int>(s.size()));
 		Util::AssertTrue(length != 0 && length < s.size(), "GetModuleFileNameW");
 
-		return Cvt::w2a(std::wstring_view {s.Get(), length});
+		return Cvt::W2A(std::wstring_view {s.Get(), length});
 	}
 
 	inline std::string PathOfProcessHandle(HANDLE process)
@@ -142,19 +142,19 @@ namespace GLib::Win::FileSystem
 		s.EnsureSize(requiredSize);
 		Util::AssertTrue(::QueryFullProcessImageNameW(process, 0, s.Get(), &requiredSize), "QueryFullProcessImageNameW");
 
-		return Cvt::w2a(std::wstring_view {s.Get(), requiredSize});
+		return Cvt::W2A(std::wstring_view {s.Get(), requiredSize});
 	}
 
 	inline Handle CreateAutoDeleteFile(const std::string & name)
 	{
-		HANDLE h = ::CreateFileW(Cvt::a2w(name).c_str(), Detail::access, 0, nullptr, Detail::create, Detail::flags, nullptr);
+		HANDLE h = ::CreateFileW(Cvt::A2W(name).c_str(), Detail::Access, 0, nullptr, Detail::Create, Detail::Flags, nullptr);
 		Util::AssertTrue(h != nullptr, "CreateFileW");
 		return Handle(h);
 	}
 
 	inline std::string LongPath(const std::string & name)
 	{
-		auto ws = GLib::Cvt::a2w(name);
+		auto ws = GLib::Cvt::A2W(name);
 		size_t lenNoTerminator = ::GetLongPathNameW(ws.c_str(), nullptr, 0);
 		Util::AssertTrue(lenNoTerminator != 0, "GetLongPathNameW");
 
@@ -163,6 +163,6 @@ namespace GLib::Win::FileSystem
 
 		lenNoTerminator = ::GetLongPathNameW(ws.c_str(), s.Get(), static_cast<DWORD>(s.size()));
 		Util::AssertTrue(lenNoTerminator != 0, "GetLongPathNameW");
-		return Cvt::w2a(std::wstring_view {s.Get(), lenNoTerminator});
+		return Cvt::W2A(std::wstring_view {s.Get(), lenNoTerminator});
 	}
 }

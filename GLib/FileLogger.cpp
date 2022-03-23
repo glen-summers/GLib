@@ -12,7 +12,7 @@
 
 FileLogger::FileLogger()
 	: baseFileName(GLib::Compat::ProcessName() + "_" + std::to_string(GLib::Compat::ProcessId()))
-	, path(GLib::Compat::filesystem::temp_directory_path() / "glogfiles")
+	, path(GLib::Compat::FileSystem::temp_directory_path() / "glogfiles")
 {
 	create_directories(path);
 }
@@ -63,7 +63,7 @@ StreamInfo FileLogger::GetStream() const
 	// 	Compat::LocalTime(tm, t);
 	// 	s << "_" << std::put_time(&tm, "%Y-%m-%d");
 	// }
-	GLib::Compat::filesystem::path logFileName = path / (s.str() + ".log"); // combine, check trailing etc.
+	GLib::Compat::FileSystem::path logFileName = path / (s.str() + ".log"); // combine, check trailing etc.
 	const unsigned int date = GetDate();
 
 	const int MaxTries = 1000;
@@ -101,7 +101,7 @@ StreamInfo FileLogger::GetStream() const
 			// ensure we are not tunneled here...
 			// http://blogs.msdn.com/oldnewthing/archive/2005/07/15/439261.aspx
 			// http://support.microsoft.com/?kbid=172190
-			// FILETIME ft;
+			// FILE-TIME ft;
 			//::GetSystemTimeAsFileTime(&ft);
 			//::SetFileTime(GetImpl(m_stream), &ft, NULL, NULL); // filesystem ver? nope
 
@@ -110,7 +110,7 @@ StreamInfo FileLogger::GetStream() const
 		catch (...) // specific
 		{}
 	}
-	throw std::runtime_error("Exhausted possible stream names " + GLib::Cvt::p2a(logFileName));
+	throw std::runtime_error("Exhausted possible stream names " + GLib::Cvt::P2A(logFileName));
 }
 
 void FileLogger::InternalWrite(GLib::Flog::Level level, std::string_view prefix, std::string_view message)
@@ -151,9 +151,9 @@ void FileLogger::WriteToStream(GLib::Flog::Level level, std::string_view prefix,
 
 			auto & s = streamInfo.Stream();
 			s << std::left << std::put_time(&tm, "%d %b %Y, %H:%M:%S") << "." << std::setw(3) << std::setfill('0') << ms;
-			s << std::setfill(' ') << " : [ " << std::setw(THREAD_ID_WIDTH) << Manipulate(ThreadName, logState.ThreadName()) << " ] : ";
-			s << std::setw(LEVEL_WIDTH) << Manipulate(TranslateLevel, level) << " : ";
-			s << std::setw(PREFIX_WIDTH) << prefix << " : " << message;
+			s << std::setfill(' ') << " : [ " << std::setw(threadIdWidth) << Manipulate(ThreadName, logState.ThreadName()) << " ] : ";
+			s << std::setw(levelWidth) << Manipulate(TranslateLevel, level) << " : ";
+			s << std::setw(prefixWidth) << prefix << " : " << message;
 			s << std::endl << std::flush;
 		}
 		catch (...)
@@ -176,7 +176,7 @@ void FileLogger::HandleFileRollover(size_t newEntrySize)
 {
 	if (streamInfo)
 	{
-		auto oldPath = streamInfo.Path();
+		// auto oldPath = streamInfo.Path();
 		const auto size = streamInfo.Stream().tellp();
 		if (newEntrySize + size >= maxFileSize || streamInfo.Date() != GetDate())
 		{
@@ -211,7 +211,7 @@ void FileLogger::CloseStream() noexcept
 
 void FileLogger::WriteHeader(std::ostream & writer)
 {
-	writer << HeaderFooterSeparator << std::endl;
+	writer << headerFooterSeparator << std::endl;
 
 	const std::time_t t = std::time(nullptr);
 	std::tm tm {};
@@ -241,7 +241,7 @@ void FileLogger::WriteHeader(std::ostream & writer)
 				 << "ThreadId    : " << std::this_thread::get_id() << std::endl;
 	// Formatter::Format(writer, "UserName    : {0}\\{1}", Environment.UserDomainName, Environment.UserName);
 
-	writer << HeaderFooterSeparator << std::endl;
+	writer << headerFooterSeparator << std::endl;
 	writer.flush();
 }
 
@@ -251,15 +251,15 @@ void FileLogger::WriteFooter(std::ostream & writer)
 	std::tm tm {};
 	GLib::Compat::LocalTime(tm, t);
 
-	writer << HeaderFooterSeparator << std::endl
+	writer << headerFooterSeparator << std::endl
 				 << "Closed       " << std::put_time(&tm, "%d %b %Y, %H:%M:%S (%z)") << std::endl
-				 << HeaderFooterSeparator << std::endl;
+				 << headerFooterSeparator << std::endl;
 	writer.flush();
 }
 
 bool FileLogger::ResourcesAvailable(size_t newEntrySize) const
 {
-	return streamInfo && GetFreeDiskSpace(path) - newEntrySize >= ReserveDiskSpace;
+	return streamInfo && GetFreeDiskSpace(path) - newEntrySize >= reserveDiskSpace;
 }
 
 void FileLogger::CommitPendingScope()
@@ -369,12 +369,12 @@ unsigned FileLogger::GetDate()
 	const std::time_t t = std::time(nullptr);
 	std::tm tm {};
 	GLib::Compat::LocalTime(tm, t);
-	constexpr auto TmEpochYear = 1900;
-	constexpr auto ShiftTwoDecimals = 100;
-	return ((TmEpochYear + tm.tm_year) * ShiftTwoDecimals + tm.tm_mon + 1) * ShiftTwoDecimals + tm.tm_mday;
+	constexpr auto tmEpochYear = 1900;
+	constexpr auto shiftTwoDecimals = 100;
+	return ((tmEpochYear + tm.tm_year) * shiftTwoDecimals + tm.tm_mon + 1) * shiftTwoDecimals + tm.tm_mday;
 }
 
-uintmax_t FileLogger::GetFreeDiskSpace(const GLib::Compat::filesystem::path & path)
+uintmax_t FileLogger::GetFreeDiskSpace(const GLib::Compat::FileSystem::path & path)
 {
 	return space(path).available;
 }

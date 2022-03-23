@@ -36,14 +36,14 @@ namespace GLib::Win::Symbols
 			return NativeTryCatch([&]() { return *(exceptionInfo.ContextRecord); });
 		}
 
-		struct Vbase
+		struct VirtualBase
 		{
-			Vbase() = delete;
-			Vbase(const Vbase & other) = delete;
-			Vbase(Vbase && other) noexcept = delete;
-			Vbase & operator=(const Vbase & other) = delete;
-			Vbase & operator=(Vbase && other) noexcept = delete;
-			virtual ~Vbase() = delete;
+			VirtualBase() = delete;
+			VirtualBase(const VirtualBase & other) = delete;
+			VirtualBase(VirtualBase && other) noexcept = delete;
+			VirtualBase & operator=(const VirtualBase & other) = delete;
+			VirtualBase & operator=(VirtualBase && other) noexcept = delete;
+			virtual ~VirtualBase() = delete;
 		};
 
 		inline bool GetCPlusPlusExceptionName(const std::span<const ULONG_PTR> & ei, std::string & name)
@@ -51,7 +51,7 @@ namespace GLib::Win::Symbols
 			return NativeTryCatch(
 				[&]()
 				{
-					const Vbase & q = *WindowsCast<Vbase *>(ei[1]);
+					const VirtualBase & q = *WindowsCast<VirtualBase *>(ei[1]);
 					const type_info & t = typeid(q);
 					name = t.name();
 					return true;
@@ -70,10 +70,10 @@ namespace GLib::Win::Symbols
 					constexpr auto typeInfoOffsetIndex = 1;
 
 #if defined(_M_IX86)
-					ULONG_PTR hinstance = 0;
-					(void) instanceOffset64;
+					ULONG_PTR instance = 0;
+					static_cast<void>(instanceOffset64);
 #elif defined(_M_X64)
-					ULONG_PTR hinstance = ei[instanceOffset64];
+					ULONG_PTR instance = ei[instanceOffset64];
 #elif
 #error unexpected target
 #endif
@@ -81,13 +81,13 @@ namespace GLib::Win::Symbols
 					std::span<const DWORD> const throwInfo {WindowsCast<const DWORD *>(ei[throwInfoIndex]), catchableOffsetIndex + 1};
 
 					DWORD const catchableOffset {throwInfo[catchableOffsetIndex]};
-					std::span<const DWORD> const catchables {WindowsCast<const DWORD *>(hinstance + catchableOffset), catchablesOffsetIndex + 1};
+					std::span<const DWORD> const catchables {WindowsCast<const DWORD *>(instance + catchableOffset), catchablesOffsetIndex + 1};
 
 					DWORD const catchablesOffset {catchables[catchablesOffsetIndex]};
-					std::span<const DWORD> const catchablesTypes {WindowsCast<const DWORD *>(hinstance + catchablesOffset), typeInfoOffsetIndex + 1};
+					std::span<const DWORD> const catchablesTypes {WindowsCast<const DWORD *>(instance + catchablesOffset), typeInfoOffsetIndex + 1};
 					DWORD const typeInfoOffset {catchablesTypes[typeInfoOffsetIndex]};
 
-					name = WindowsCast<const type_info *>(hinstance + typeInfoOffset)->name();
+					name = WindowsCast<const type_info *>(instance + typeInfoOffset)->name();
 
 					return true;
 				});
@@ -113,10 +113,10 @@ namespace GLib::Win::Symbols
 			Formatter::Format(s, "\t{0} + 0x{1:%X}\n", name, symbol.Displacement());
 			if (auto line = process.TryGetLineFromAddress(address))
 			{
-				Formatter::Format(s, "\t{0}({1})", line->fileName, line->lineNumber);
-				if (line->displacement != 0)
+				Formatter::Format(s, "\t{0}({1})", line->FileName, line->LineNumber);
+				if (line->Displacement != 0)
 				{
-					s << " + " << line->displacement << " byte(s)";
+					s << " + " << line->Displacement << " byte(s)";
 				}
 				s << '\n';
 			}
@@ -138,10 +138,10 @@ namespace GLib::Win::Symbols
 						Formatter::Format(s, "\tinline context {0} + 0x{1:%x}\n", name, symbol->Displacement());
 						if (auto line = process.TryGetLineFromInlineContext(address, i))
 						{
-							Formatter::Format(s, "\t{0}({1})", line->fileName, line->lineNumber);
-							if (line->displacement != 0)
+							Formatter::Format(s, "\t{0}({1})", line->FileName, line->LineNumber);
+							if (line->Displacement != 0)
 							{
-								s << " + " << line->displacement << " byte(s)";
+								s << " + " << line->Displacement << " byte(s)";
 							}
 							s << '\n';
 						}
@@ -191,7 +191,7 @@ namespace GLib::Win::Symbols
 
 	inline void Print(std::ostream & s, const EXCEPTION_POINTERS * exceptionInfo, unsigned int maxFrames)
 	{
-		constexpr DWORD CPLUSPLUS_EXCEPTION_NUMBER = 0xe06d7363;
+		constexpr DWORD cPlusPlusExceptionNumber = 0xe06d7363;
 		const EXCEPTION_RECORD & er = *(exceptionInfo->ExceptionRecord);
 		std::span<const ULONG_PTR> const info {er.ExceptionInformation, EXCEPTION_MAXIMUM_PARAMETERS};
 
@@ -206,7 +206,7 @@ namespace GLib::Win::Symbols
 				break;
 			}
 
-			case CPLUSPLUS_EXCEPTION_NUMBER:
+			case cPlusPlusExceptionNumber:
 			{
 				std::string name("<unknown>");
 				if (!Detail::GetCPlusPlusExceptionName(info, name))

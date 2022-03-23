@@ -12,10 +12,10 @@ namespace GLib::Xml
 {
 	struct Attribute
 	{
-		std::string_view name;
-		std::string_view value;
-		std::string_view nameSpace;
-		std::string_view rawValue;
+		std::string_view Name;
+		std::string_view Value;
+		std::string_view NameSpace;
+		std::string_view RawValue;
 	};
 
 	class AttributeIterator
@@ -122,7 +122,7 @@ namespace GLib::Xml
 				{
 					if (newState == Xml::State::AttributeEntity || oldState == Xml::State::AttributeEntity)
 					{
-						continue; // currenly ignoring entities, receiver needs to decode
+						continue; // currently ignoring entities, receiver needs to decode
 					}
 
 					switch (oldState)

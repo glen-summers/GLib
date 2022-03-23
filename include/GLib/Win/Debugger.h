@@ -279,7 +279,7 @@ namespace GLib::Win
 				auto size = static_cast<size_t>(info.nDebugStringLength / 2) - 1;
 				std::vector<wchar_t> buffer(size); // soh?
 				symbols.GetProcess(processId).Process().ReadMemory<wchar_t>(address, &buffer[0], size);
-				message = Cvt::w2a(std::wstring {&buffer[0], size});
+				message = Cvt::W2A(std::wstring {&buffer[0], size});
 			}
 			else
 			{

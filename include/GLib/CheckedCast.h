@@ -6,7 +6,7 @@
 namespace GLib::Util
 {
 	template <typename Target, typename Source>
-	Target checked_cast(Source source)
+	Target CheckedCast(Source source)
 	{
 		constexpr auto max = std::numeric_limits<Target>::max();
 		constexpr auto min = std::numeric_limits<Target>::min();

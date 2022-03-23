@@ -85,11 +85,11 @@ Coverage c:\Build\Main.exe C:\Report -ws -i C:\MainCode C:\Utils\ -x C:\External
 			}
 		}
 
-		GLib::Flog::ScopeLog scope {log, GLib::Flog::Level::Info, "Total"};
+		GLib::Flog::ScopeLog scopeLog {log, GLib::Flog::Level::Info, "Total"};
 
 		Coverage dbg(executable, debugChildProcesses, includes, excludes);
-		constexpr unsigned TimeoutMilliseconds = 1000;
-		while (dbg.ProcessEvents(TimeoutMilliseconds))
+		constexpr unsigned timeoutMilliseconds = 1000;
+		while (dbg.ProcessEvents(timeoutMilliseconds))
 		{}
 
 		HtmlReport report(executable, reportPath, dbg.GetCoverageData(), showWhiteSpace);

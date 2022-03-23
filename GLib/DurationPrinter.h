@@ -8,8 +8,8 @@ inline std::ostream & operator<<(std::ostream & s, std::chrono::nanoseconds dura
 {
 	if (std::chrono::duration_cast<std::chrono::seconds>(duration).count() == 0)
 	{
-		constexpr auto ToMilliseconds = 1000;
-		return s << std::setprecision(1) << std::fixed << std::chrono::duration<double>(duration).count() * ToMilliseconds << "ms";
+		constexpr auto toMilliseconds = 1000;
+		return s << std::setprecision(1) << std::fixed << std::chrono::duration<double>(duration).count() * toMilliseconds << "ms";
 	}
 
 	auto day = std::chrono::duration_cast<std::chrono::days>(duration);

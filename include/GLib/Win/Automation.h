@@ -5,14 +5,14 @@
 
 #include <UIAutomation.h>
 
-namespace GLib::Win::Aut
+namespace GLib::Win
 {
-	class UIElement
+	class Element
 	{
 		ComPtr<IUIAutomationElement> element;
 
 	public:
-		UIElement(ComPtr<IUIAutomationElement> element)
+		Element(ComPtr<IUIAutomationElement> element)
 			: element(std::move(element))
 		{}
 
@@ -43,18 +43,18 @@ namespace GLib::Win::Aut
 		}
 	};
 
-	class UIAut
+	class Automation
 	{
 		ComPtr<IUIAutomation> automation;
 
 	public:
-		UIAut()
+		Automation()
 		{
 			CheckHr(::CoCreateInstance(__uuidof(CUIAutomation), nullptr, ComPtrDetail::ContextAll, __uuidof(IUIAutomation), GetAddress(automation)),
 							"CoCreateInstance");
 		}
 
-		UIElement ElementFromHandle(HWND hWnd) const
+		Element ElementFromHandle(HWND hWnd) const
 		{
 			ComPtr<IUIAutomationElement> element;
 			CheckHr(automation->ElementFromHandle(hWnd, GetAddress(element)), "ElementFromHandle");

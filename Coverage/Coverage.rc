@@ -24,18 +24,18 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_UK
 // TEXTINCLUDE
 //
 
-1 TEXTINCLUDE 
+1 TEXTINCLUDE
 BEGIN
     "resource.h\0"
 END
 
-2 TEXTINCLUDE 
+2 TEXTINCLUDE
 BEGIN
     "#include ""winres.h""\r\n"
     "\0"
 END
 
-3 TEXTINCLUDE 
+3 TEXTINCLUDE
 BEGIN
     "\r\n"
     "\0"
@@ -50,7 +50,7 @@ END
 //
 
 IDR_STYLESHEET              HTML                    "Template/coverage.css"
-IDR_ROOTDIRECTORY           HTML                    "Template/rootDirectory.html"
+IDR_ROOT_DIRECTORY          HTML                    "Template/rootDirectory.html"
 IDR_DIRECTORY               HTML                    "Template/directory.html"
 IDR_FILE                    HTML                    "Template/file.html"
 IDR_FUNCTIONS               HTML                    "Template/functions.html"

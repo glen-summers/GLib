@@ -12,8 +12,8 @@ namespace GLib::Cpp
 	inline std::ostream & operator<<(std::ostream & str, State s)
 	{
 		static constexpr std::array<std::string_view, static_cast<unsigned int>(State::Count)> stateNames {
-			"Error",					"None",			 "WhiteSpace", "CommentStart",		"CommentLine", "Continuation", "CommentBlock",
-			"CommentAsterix", "Directive", "String",		 "RawStringPrefix", "RawString",	 "Code",				 "CharacterLiteral",
+			"Error",					 "None",			"WhiteSpace", "CommentStart",		 "CommentLine", "Continuation", "CommentBlock",
+			"CommentAsterisk", "Directive", "String",			"RawStringPrefix", "RawString",		"Code",					"CharacterLiteral",
 		};
 
 		return str << stateNames.at(static_cast<unsigned int>(s));
@@ -23,7 +23,7 @@ namespace GLib::Cpp
 
 	class Iterator
 	{
-		static constexpr char MinPrintable = 0x20;
+		static constexpr char minPrintable = 0x20;
 
 		StateEngine engine;
 
@@ -36,11 +36,13 @@ namespace GLib::Cpp
 		Fragment fragment;
 
 	public:
+		// ReSharper disable All
 		using iterator_category = std::forward_iterator_tag;
 		using value_type = Fragment;
 		using difference_type = void;
 		using pointer = void;
 		using reference = void;
+		// ReSharper restore All
 
 		Iterator(std::string_view::const_iterator begin, std::string_view::const_iterator end, bool emitWhitespace)
 			: engine(emitWhitespace)
@@ -84,7 +86,7 @@ namespace GLib::Cpp
 		{
 			std::ostringstream s;
 			s << "Illegal character: ";
-			if (c >= MinPrintable)
+			if (c >= minPrintable)
 			{
 				s << '\'' << c << "' ";
 			}
@@ -170,7 +172,7 @@ namespace GLib::Cpp
 				{
 					switch (oldState)
 					{
-						case State::CommentAsterix:
+						case State::CommentAsterisk:
 						{
 							if (Set(State::CommentBlock, ptr))
 							{

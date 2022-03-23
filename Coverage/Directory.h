@@ -9,21 +9,22 @@
 
 class Directory
 {
-	std::string name, link;
+	std::string name;
+	std::string link;
 	unsigned int coveredLines;
 	unsigned int coverableLines;
-	unsigned int minCoveragePrecent;
+	unsigned int minCoveragePercent;
 	unsigned int coveredFunctions;
 	unsigned int coverableFunctions;
 
 public:
-	Directory(std::string name, std::string link, unsigned int coveredLines, unsigned int coverableLines, unsigned int minCoveragePrecent,
+	Directory(std::string name, std::string link, unsigned int coveredLines, unsigned int coverableLines, unsigned int minCoveragePercent,
 						unsigned int coveredFunctions, unsigned int coverableFunctions)
 		: name(move(name))
 		, link(move(link))
 		, coveredLines(coveredLines)
 		, coverableLines(coverableLines)
-		, minCoveragePrecent(minCoveragePrecent)
+		, minCoveragePercent(minCoveragePercent)
 		, coveredFunctions(coveredFunctions)
 		, coverableFunctions(coverableFunctions)
 	{}
@@ -60,12 +61,12 @@ public:
 
 	unsigned int MinCoveragePercent() const
 	{
-		return minCoveragePrecent;
+		return minCoveragePercent;
 	}
 
 	enum CoverageLevel MinCoverageStyle() const
 	{
-		return CoverageLevel(minCoveragePrecent);
+		return CoverageLevel(minCoveragePercent);
 	}
 
 	unsigned int CoveredFunctions() const

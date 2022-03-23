@@ -1,7 +1,7 @@
 
 #include "MainWindow.h"
-#include <GLib/Win/ComUtils.h>
 #include <GLib/Split.h>
+#include <GLib/Win/ComUtils.h>
 #pragma comment(lib, "Comctl32.lib")
 #pragma comment(linker, "\"/manifestdependency:type='win32' \
 name='Microsoft.Windows.Common-Controls' version='6.0.0.0' \
@@ -17,7 +17,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
 	try
 	{
 		GLib::Win::Mta com;
-		auto cmd = GLib::Cvt::w2a(lpCmdLine);
+		auto cmd = GLib::Cvt::W2A(lpCmdLine);
 		log.Info("Cmd: [{0}]", cmd);
 
 		GLib::Util::Splitter split {cmd, " "};

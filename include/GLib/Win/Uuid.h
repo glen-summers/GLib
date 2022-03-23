@@ -1,7 +1,7 @@
 #pragma once
 
-#include <GLib/Win/ComErrorCheck.h>
 #include <GLib/Formatter.h>
+#include <GLib/Win/ComErrorCheck.h>
 
 #include <rpc.h>
 #pragma comment(lib, "Rpcrt4.lib")
@@ -40,7 +40,7 @@ namespace GLib::Win::Util
 		return iid.WriteTo(s);
 	}
 
-	inline std::string to_string(const Uuid & id)
+	inline std::string ToString(const Uuid & id)
 	{
 		std::ostringstream s;
 		s << id;

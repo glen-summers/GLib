@@ -12,7 +12,7 @@ namespace GLib
 	// move?
 	struct Money
 	{
-		long double value;
+		long double Value;
 	};
 
 	namespace FormatterPolicy
@@ -41,12 +41,12 @@ namespace GLib
 			static void ToStringImpl(const char * defaultFormat, std::ostream & stm, const T & value, const std::string & format)
 			{
 				std::string f = CheckFormat(defaultFormat, format);
-				constexpr auto InitialBufferSize = 21;
-				Util::StackOrHeap<char, InitialBufferSize> s;
-				const int len = ::snprintf(nullptr, 0, f.c_str(), value); // NOLINT until c++/20 Format impl
-				Compat::AssertTrue(len >= 0, "snprintf", errno);
+				constexpr auto initialBufferSize = 21;
+				Util::StackOrHeap<char, initialBufferSize> s;
+				const int len = snprintf(nullptr, 0, f.c_str(), value); // NOLINT until c++/20 Format impl
+				Compat::AssertTrue(len >= 0, "ToString", errno);
 				s.EnsureSize(static_cast<size_t>(len) + 1);
-				::snprintf(s.Get(), s.size(), f.c_str(), value); // NOLINT until c++/20 Format impl
+				snprintf(s.Get(), s.size(), f.c_str(), value); // NOLINT until c++/20 Format impl
 
 				stm << s.Get();
 			}
@@ -57,27 +57,27 @@ namespace GLib
 				std::string f = CheckFormat(defaultFormat, format);
 				// stream to wide to correctly convert locale symbols, is there a better better way? maybe when code convert gets fixed
 				std::wstringstream wideStream;
-				(void) wideStream.imbue(stm.getloc());
-				wideStream << std::put_time(&value, Cvt::a2w(f).c_str());
-				stm << Cvt::w2a(wideStream.str());
+				static_cast<void>(wideStream.imbue(stm.getloc()));
+				wideStream << std::put_time(&value, Cvt::A2W(f).c_str());
+				stm << Cvt::W2A(wideStream.str());
 			}
 
 			template <>
 			inline void ToStringImpl(const char * defaultFormat, std::ostream & stm, const Money & value, const std::string & format)
 			{
-				(void) defaultFormat;
+				static_cast<void>(defaultFormat);
 				CheckFormatEmpty(format);
 				// stream to wide to correctly convert locale symbols, is there a better better way? maybe when code convert gets fixed
 				std::wstringstream wideStream;
-				(void) wideStream.imbue(stm.getloc());
-				wideStream << std::showbase << std::put_money(value.value);
-				stm << Cvt::w2a(wideStream.str());
+				static_cast<void>(wideStream.imbue(stm.getloc()));
+				wideStream << std::showbase << std::put_money(value.Value);
+				stm << Cvt::W2A(wideStream.str());
 			}
 
 			template <size_t>
 			void FormatPointer(std::ostream & stm, void * const & value)
 			{
-				(void) stm;
+				static_cast<void>(stm);
 				throw std::runtime_error("Unknown pointer size : " + std::to_string(sizeof(value)));
 			}
 

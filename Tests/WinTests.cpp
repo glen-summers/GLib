@@ -87,7 +87,7 @@ namespace
 		return p;
 	}
 
-	auto defaultTimeout = 10s;
+	auto DefaultTimeout = 10s;
 }
 
 // split up
@@ -99,8 +99,8 @@ BOOST_AUTO_TEST_CASE(TestDriveInfo)
 	(void) ld;
 	auto dm = FileSystem::DriveMap();
 
-	std::filesystem::path tempFilePath = std::filesystem::temp_directory_path() / a2w(to_string(Util::Uuid::CreateRandom()) + ".tmp");
-	Handle h(FileSystem::CreateAutoDeleteFile(p2a(tempFilePath)));
+	std::filesystem::path tempFilePath = std::filesystem::temp_directory_path() / A2W(ToString(Util::Uuid::CreateRandom()) + ".tmp");
+	Handle h(FileSystem::CreateAutoDeleteFile(P2A(tempFilePath)));
 	std::string pathOfHandle = FileSystem::PathOfFileHandle(h.get(), VOLUME_NAME_NT);
 
 	BOOST_TEST(!exists(std::filesystem::path(pathOfHandle)));
@@ -111,15 +111,15 @@ BOOST_AUTO_TEST_CASE(TestDriveInfo)
 BOOST_AUTO_TEST_CASE(TestPathOfModule)
 {
 	std::string path = FileSystem::PathOfModule(Process::CurrentModule());
-	BOOST_TEST("Tests.exe" == p2a(std::filesystem::path(path).filename()));
+	BOOST_TEST("Tests.exe" == P2A(std::filesystem::path(path).filename()));
 }
 
 BOOST_AUTO_TEST_CASE(TestPathOfhandle)
 {
-	std::filesystem::path tempFilePath = std::filesystem::temp_directory_path() / a2w(to_string(Util::Uuid::CreateRandom()) + "\xE2\x82\xAC.tmp");
+	std::filesystem::path tempFilePath = std::filesystem::temp_directory_path() / A2W(ToString(Util::Uuid::CreateRandom()) + "\xE2\x82\xAC.tmp");
 
-	Handle h(FileSystem::CreateAutoDeleteFile(p2a(tempFilePath)));
-	std::wstring pathOfHandle = a2w(FileSystem::PathOfFileHandle(h.get(), 0));
+	Handle h(FileSystem::CreateAutoDeleteFile(P2A(tempFilePath)));
+	std::wstring pathOfHandle = A2W(FileSystem::PathOfFileHandle(h.get(), 0));
 	BOOST_TEST(true == exists(std::filesystem::path(pathOfHandle)));
 	h.reset();
 	BOOST_TEST(false == exists(std::filesystem::path(pathOfHandle)));
@@ -197,13 +197,13 @@ BOOST_AUTO_TEST_CASE(RegistryTestComItf)
 BOOST_AUTO_TEST_CASE(RegistryCreateKey)
 {
 	const auto & rootKey = RegistryKeys::CurrentUser;
-	constexpr const char TestKey[] = "Software\\CrapolaCppUnitTests";
+	constexpr const char testKey[] = "Software\\CrapolaCppUnitTests";
 
-	auto key = rootKey.CreateSubKey(TestKey);
+	auto key = rootKey.CreateSubKey(testKey);
 
-	auto scopedDelete = GLib::Detail::Scope([&]() { rootKey.DeleteSubKey(TestKey); });
+	auto scopedDelete = GLib::Detail::Scope([&]() { static_cast<void>(rootKey.DeleteSubKey(testKey)); });
 
-	BOOST_TEST(rootKey.KeyExists(TestKey));
+	BOOST_TEST(rootKey.KeyExists(testKey));
 	key.SetInt32("Int32Value", 1234567890);
 	key.SetInt64("Int64Value", 12345678901234567890);
 	key.SetString("StringValue", "plugh");
@@ -223,8 +223,10 @@ BOOST_AUTO_TEST_CASE(RegistryCreateKey)
 	BOOST_TEST(12345678901234567890u == std::get<uint64_t>(key.Get("Int64Value")));
 	BOOST_TEST("plugh" == std::get<std::string>(key.Get("StringValue")));
 
-	rootKey.DeleteSubKey(TestKey);
-	BOOST_TEST(!rootKey.KeyExists(TestKey));
+	static_cast<void>(rootKey.DeleteSubKey(testKey));
+	BOOST_TEST(!rootKey.KeyExists(testKey));
+
+	static_cast<void>(scopedDelete);
 }
 
 BOOST_AUTO_TEST_CASE(PrintNativeException1)
@@ -291,9 +293,9 @@ BOOST_AUTO_TEST_CASE(TestVariant)
 
 BOOST_AUTO_TEST_CASE(TestApp0)
 {
-	Process p(p2a(GetTestApp()), "-exitTime 1", 0, SW_HIDE);
+	Process p(P2A(GetTestApp()), "-exitTime 1", 0, SW_HIDE);
 	auto scopedTerminator(p.ScopedTerminator());
-	p.WaitForExit(defaultTimeout);
+	p.WaitForExit(DefaultTimeout);
 	scopedTerminator.release();
 	BOOST_CHECK(0ul == p.ExitCode());
 }
@@ -301,14 +303,15 @@ BOOST_AUTO_TEST_CASE(TestApp0)
 BOOST_AUTO_TEST_CASE(TestApp1)
 {
 	Mta mta;
-	Aut::UIAut aut; // causes leaks
-	Process p(p2a(GetTestApp()), "-exitTime 500", 0, SW_SHOWNORMAL);
+
+	Automation aut; // causes leaks
+	Process p(P2A(GetTestApp()), "-exitTime 500", 0, SW_SHOWNORMAL);
 	auto scopedTerminator(p.ScopedTerminator());
-	p.WaitForInputIdle(defaultTimeout);
+	p.WaitForInputIdle(DefaultTimeout);
 
 	HWND hw = WindowFinder::Find(p.Id(), "TestApp");
 	BOOST_TEST(hw != nullptr);
-	Aut::UIElement mainWindow = aut.ElementFromHandle(hw);
+	Element mainWindow = aut.ElementFromHandle(hw);
 
 	BOOST_TEST("TestApp" == mainWindow.CurrentName());
 	BOOST_CHECK(mainWindow.CurrentClassName().find("GTL:") == 0);
@@ -322,7 +325,7 @@ BOOST_AUTO_TEST_CASE(TestApp1)
 
 	CheckHr(wp->Close(), "Close");
 
-	p.WaitForExit(defaultTimeout);
+	p.WaitForExit(DefaultTimeout);
 	scopedTerminator.release();
 
 	BOOST_CHECK(0ul == p.ExitCode());

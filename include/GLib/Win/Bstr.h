@@ -1,7 +1,7 @@
 #pragma once
 
-#include <GLib/Win/Transfer.h>
 #include <GLib/Cvt.h>
+#include <GLib/Win/Transfer.h>
 
 #include <utility>
 
@@ -46,7 +46,7 @@ namespace GLib::Win
 
 		std::string Value() const
 		{
-			return value != nullptr ? Cvt::w2a(value) : std::string {};
+			return value != nullptr ? Cvt::W2A(value) : std::string {};
 		}
 
 		static Bstr Attach(BSTR value)

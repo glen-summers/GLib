@@ -23,6 +23,11 @@ public:
 		: id {id}
 	{}
 
+	unsigned int Id() const
+	{
+		return id;
+	}
+
 	const Addresses & Addresses() const
 	{
 		return addresses;
@@ -31,7 +36,7 @@ public:
 	const Threads & Threads() const
 	{
 		return threads;
-	};
+	}
 
 	void AddThread(DWORD threadId, HANDLE handle)
 	{

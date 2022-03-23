@@ -156,7 +156,7 @@ namespace GLib
 					++it;
 				}
 
-				std::string format; // use strng_view?
+				std::string format; // use string_view?
 
 				if (ch == ':')
 				{

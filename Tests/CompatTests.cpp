@@ -122,7 +122,6 @@ BOOST_AUTO_TEST_CASE(ProcessName)
 
 BOOST_AUTO_TEST_CASE(CommandLine)
 {
-	auto name = GLib::Compat::CommandLine();
 	if (GLib::Compat::CommandLine().find(GLib::Compat::ProcessName()) == std::string::npos)
 	{
 		BOOST_FAIL(GLib::Compat::CommandLine() + " -- " + GLib::Compat::ProcessName());

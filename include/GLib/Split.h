@@ -42,41 +42,43 @@ namespace GLib::Util
 				}
 			}
 
-			class iterator
+			class Iterator
 			{
 				const Splitter * const splitter;
 				std::size_t current, nextDelimiter;
 
 			public:
+				// ReSharper disable All
 				using iterator_category = std::forward_iterator_tag;
 				using value_type = StringType;
 				using difference_type = void;
 				using pointer = void;
 				using reference = void;
+				// ReSharper restore All
 
-				iterator(const Splitter & splitter)
+				Iterator(const Splitter & splitter)
 					: splitter(&splitter)
 					, current(0)
 					, nextDelimiter(splitter.value.find(splitter.delimiter, 0))
 				{}
 
-				iterator()
+				Iterator()
 					: splitter()
 					, current(StringType::npos)
 					, nextDelimiter(StringType::npos)
 				{}
 
-				bool operator==(const iterator & it) const
+				bool operator==(const Iterator & it) const
 				{
 					return current == it.current;
 				}
 
-				bool operator!=(const iterator & it) const
+				bool operator!=(const Iterator & it) const
 				{
 					return !(*this == it);
 				}
 
-				iterator operator++()
+				Iterator operator++()
 				{
 					if (nextDelimiter != StringType::npos)
 					{
@@ -98,14 +100,14 @@ namespace GLib::Util
 				}
 			};
 
-			iterator begin() const
+			Iterator begin() const
 			{
-				return iterator(*this);
+				return Iterator(*this);
 			}
 
-			iterator end() const
+			Iterator end() const
 			{
-				return iterator();
+				return Iterator();
 			}
 		};
 	}

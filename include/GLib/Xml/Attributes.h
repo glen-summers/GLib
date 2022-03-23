@@ -27,7 +27,7 @@ namespace GLib::Xml
 			return {};
 		}
 
-		bool empty() const
+		bool Empty() const
 		{
 			return data.empty();
 		}

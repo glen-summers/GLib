@@ -11,7 +11,7 @@ namespace GLib::Xml
 {
 	class Printer
 	{
-		static constexpr int TextDepthNotSet = -1;
+		static constexpr int textDepthNotSet = -1;
 
 		bool const format;
 		bool elementOpen {};
@@ -24,7 +24,7 @@ namespace GLib::Xml
 	public:
 		explicit Printer(bool format = true)
 			: format(format)
-			, textDepth(TextDepthNotSet)
+			, textDepth(textDepthNotSet)
 		{}
 
 		void PushDeclaration()
@@ -41,7 +41,7 @@ namespace GLib::Xml
 		{
 			CloseJustOpenedElement();
 			stack.push(name);
-			if (textDepth == TextDepthNotSet && !isFirstElement && elementFormat)
+			if (textDepth == textDepthNotSet && !isFirstElement && elementFormat)
 			{
 				s << std::endl;
 			}
@@ -96,7 +96,7 @@ namespace GLib::Xml
 			}
 			else
 			{
-				if (textDepth == TextDepthNotSet && elementFormat)
+				if (textDepth == textDepthNotSet && elementFormat)
 				{
 					s << std::endl << std::setw(depth) << "";
 				}
@@ -105,7 +105,7 @@ namespace GLib::Xml
 
 			if (textDepth == depth)
 			{
-				textDepth = TextDepthNotSet;
+				textDepth = textDepthNotSet;
 			}
 
 			if (depth == 0 && elementFormat)

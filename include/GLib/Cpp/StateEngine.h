@@ -15,8 +15,8 @@ namespace GLib::Cpp
 		CommentStart,			// /:CommentLine,  *:CommentBlock
 		CommentLine,			// \:Continuation, NL:None   *sets return state*
 		Continuation,			// NL: <return continue state>, else if /:self? !\:CommentLine?
-		CommentBlock,			// *:CommentAsterix
-		CommentAsterix,		// /:None, Else:CommentBlock
+		CommentBlock,			// *:CommentAsterisk
+		CommentAsterisk,	// /:None, Else:CommentBlock
 		Directive,				// NL:None, /:CommentStart, \:Continuation, *sets return state*
 		String,						// ":None, \:Continuation  *sets return state*
 		RawStringPrefix,	// (: RawString
@@ -29,22 +29,22 @@ namespace GLib::Cpp
 
 	class StateEngine
 	{
-		static constexpr char ForwardSlash = '/';
-		static constexpr char BackSlash = '\\';
-		static constexpr char Asterix = '*';
-		static constexpr char NewLine = '\n';
-		static constexpr char Hash = '#';
-		static constexpr char DoubleQuote = '"';
-		static constexpr char OpenParenthesis = '(';
-		static constexpr char CloseParenthesis = ')';
-		static constexpr char RawStringStart = 'R';
-		static constexpr char OpenAngleBracket = '<';
-		static constexpr char CloseAngleBracket = '>';
-		static constexpr char SingleQuote = '\'';
+		static constexpr char forwardSlash = '/';
+		static constexpr char backSlash = '\\';
+		static constexpr char asterisk = '*';
+		static constexpr char newLine = '\n';
+		static constexpr char hash = '#';
+		static constexpr char doubleQuote = '"';
+		static constexpr char openParenthesis = '(';
+		static constexpr char closeParenthesis = ')';
+		static constexpr char rawStringStart = 'R';
+		static constexpr char openAngleBracket = '<';
+		static constexpr char closeAngleBracket = '>';
+		static constexpr char singleQuote = '\'';
 
-		static constexpr auto ContinuationMask = 0x80U;
+		static constexpr auto continuationMask = 0x80U;
 
-		static constexpr auto MaxPrefixSize = 16;
+		static constexpr auto maxPrefixSize = 16;
 
 		using StateFunction = State (StateEngine::*)(char) const;
 
@@ -66,7 +66,7 @@ namespace GLib::Cpp
 			, state {State::None}
 			, stateFunction {&StateEngine::None}
 		{
-			rawStringPrefix.reserve(MaxPrefixSize);
+			rawStringPrefix.reserve(maxPrefixSize);
 		}
 
 		State Push(char value)
@@ -84,7 +84,7 @@ namespace GLib::Cpp
 	private:
 		static bool IsContinuation(char c)
 		{
-			return (static_cast<unsigned char>(c) & ContinuationMask) != 0;
+			return (static_cast<unsigned char>(c) & continuationMask) != 0;
 		}
 
 		bool IsWhiteSpace(char c) const
@@ -124,23 +124,23 @@ namespace GLib::Cpp
 
 		State None(char c) const
 		{
-			if (c == ForwardSlash)
+			if (c == forwardSlash)
 			{
 				SetContinue(state);
 				return State::CommentStart;
 			}
 
-			if (c == Hash)
+			if (c == hash)
 			{
 				return State::Directive;
 			}
 
-			if (c == DoubleQuote)
+			if (c == doubleQuote)
 			{
 				return State::String;
 			}
 
-			if (c == SingleQuote)
+			if (c == singleQuote)
 			{
 				return State::CharacterLiteral;
 			}
@@ -155,28 +155,28 @@ namespace GLib::Cpp
 
 		State WhiteSpace(char c) const
 		{
-			if (c == ForwardSlash)
+			if (c == forwardSlash)
 			{
 				SetContinue(state);
 				return State::CommentStart;
 			}
 
-			if (c == Hash)
+			if (c == hash)
 			{
 				return State::Directive;
 			}
 
-			if (c == DoubleQuote)
+			if (c == doubleQuote)
 			{
 				return State::String;
 			}
 
-			if (c == SingleQuote)
+			if (c == singleQuote)
 			{
 				return State::CharacterLiteral;
 			}
 
-			if (c == NewLine)
+			if (c == newLine)
 			{
 				return State::None;
 			}
@@ -191,11 +191,11 @@ namespace GLib::Cpp
 
 		State CommentStart(char c) const
 		{
-			if (c == ForwardSlash)
+			if (c == forwardSlash)
 			{
 				return State::CommentLine;
 			}
-			if (c == Asterix)
+			if (c == asterisk)
 			{
 				return State::CommentBlock;
 			}
@@ -204,7 +204,7 @@ namespace GLib::Cpp
 
 		State CommentLine(char c) const
 		{
-			if (c == NewLine && lastChar != BackSlash)
+			if (c == newLine && lastChar != backSlash)
 			{
 				return State::None;
 			}
@@ -219,20 +219,20 @@ namespace GLib::Cpp
 
 		State CommentBlock(char c) const
 		{
-			if (c == Asterix)
+			if (c == asterisk)
 			{
-				return State::CommentAsterix;
+				return State::CommentAsterisk;
 			}
 			return state;
 		}
 
-		State CommentAsterix(char c) const
+		State CommentAsterisk(char c) const
 		{
-			if (c == ForwardSlash)
+			if (c == forwardSlash)
 			{
 				return State::None;
 			}
-			if (c != Asterix)
+			if (c != asterisk)
 			{
 				return State::CommentBlock;
 			}
@@ -241,12 +241,12 @@ namespace GLib::Cpp
 
 		State Directive(char c) const
 		{
-			if (c == NewLine && lastChar != BackSlash)
+			if (c == newLine && lastChar != backSlash)
 			{
 				return State::None;
 			}
 
-			if (c == ForwardSlash)
+			if (c == forwardSlash)
 			{
 				SetContinue(state);
 				return State::CommentStart;
@@ -257,7 +257,7 @@ namespace GLib::Cpp
 
 		State String(char c) const
 		{
-			if (c == BackSlash)
+			if (c == backSlash)
 			{
 				stringEscape = !stringEscape;
 				return state;
@@ -269,7 +269,7 @@ namespace GLib::Cpp
 				return state;
 			}
 
-			if (c == DoubleQuote)
+			if (c == doubleQuote)
 			{
 				return State::None;
 			}
@@ -279,18 +279,18 @@ namespace GLib::Cpp
 
 		State RawStringPrefix(char c) const
 		{
-			if (c == OpenParenthesis)
+			if (c == openParenthesis)
 			{
 				matchCount = 0;
 				return State::RawString;
 			}
 
-			if (IsWhiteSpace(c) || c == CloseParenthesis || c == BackSlash)
+			if (IsWhiteSpace(c) || c == closeParenthesis || c == backSlash)
 			{
 				return State::Error;
 			}
 
-			if (rawStringPrefix.size() == MaxPrefixSize)
+			if (rawStringPrefix.size() == maxPrefixSize)
 			{
 				return State::Error;
 			}
@@ -301,7 +301,7 @@ namespace GLib::Cpp
 
 		State RawString(char c) const
 		{
-			if (c == CloseParenthesis)
+			if (c == closeParenthesis)
 			{
 				if (matchCount != 0)
 				{
@@ -312,7 +312,7 @@ namespace GLib::Cpp
 				return state;
 			}
 
-			if (matchCount != 0 && matchCount - 1 == rawStringPrefix.size() && c == DoubleQuote)
+			if (matchCount != 0 && matchCount - 1 == rawStringPrefix.size() && c == doubleQuote)
 			{
 				return State::None;
 			}
@@ -336,13 +336,13 @@ namespace GLib::Cpp
 				return State::WhiteSpace;
 			}
 
-			if (c == ForwardSlash)
+			if (c == forwardSlash)
 			{
 				SetContinue(state);
 				return State::CommentStart;
 			}
 
-			if (c == DoubleQuote)
+			if (c == doubleQuote)
 			{
 				if (lastChar == 'R')
 				{
@@ -353,7 +353,7 @@ namespace GLib::Cpp
 				return State::String;
 			}
 
-			if (c == SingleQuote && (std::isxdigit(lastChar) == 0))
+			if (c == singleQuote && (std::isxdigit(lastChar) == 0))
 			{
 				return State::CharacterLiteral;
 			}
@@ -368,13 +368,13 @@ namespace GLib::Cpp
 
 		State CharacterLiteral(char c) const
 		{
-			if (c == BackSlash)
+			if (c == backSlash)
 			{
 				stringEscape = !stringEscape;
 				return state;
 			}
 
-			if (c == NewLine)
+			if (c == newLine)
 			{
 				return State::Error;
 			}
@@ -385,7 +385,7 @@ namespace GLib::Cpp
 				return state;
 			}
 
-			if (c == SingleQuote)
+			if (c == singleQuote)
 			{
 				return State::None;
 			}
@@ -402,7 +402,7 @@ namespace GLib::Cpp
 			&StateEngine::CommentLine,
 			&StateEngine::Continuation,
 			&StateEngine::CommentBlock,
-			&StateEngine::CommentAsterix,
+			&StateEngine::CommentAsterisk,
 			&StateEngine::Directive,
 			&StateEngine::String,
 			&StateEngine::RawStringPrefix,

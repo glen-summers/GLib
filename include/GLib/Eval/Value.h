@@ -1,7 +1,7 @@
 #pragma once
 
-#include <GLib/Eval/Utils.h>
 #include <GLib/Compat.h>
+#include <GLib/Eval/Utils.h>
 
 #include <functional>
 #include <memory>

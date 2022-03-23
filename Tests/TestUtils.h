@@ -13,7 +13,7 @@ namespace TestUtils
 		bool compare = e.what() == what;
 		if (!compare)
 		{
-			std::wcerr << "Expected exception message: \"" << GLib::Cvt::a2w(what) << "\" got: \"" << GLib::Cvt::a2w(e.what()) << "\"" << std::endl;
+			std::wcerr << "Expected exception message: \"" << GLib::Cvt::A2W(what) << "\" got: \"" << GLib::Cvt::A2W(e.what()) << "\"" << std::endl;
 		}
 		return compare;
 	}
@@ -84,6 +84,7 @@ namespace TestUtils
 	}
 }
 
+// ReSharper disable All
 namespace boost::test_tools::tt_detail
 {
 	template <typename K, typename V>
@@ -100,10 +101,11 @@ namespace boost::test_tools::tt_detail
 	{
 		inline void operator()(std::ostream & str, std::wstring const & item)
 		{
-			str << GLib::Cvt::w2a(item);
+			str << GLib::Cvt::W2A(item);
 		}
 	};
 }
+// ReSharper restore All
 
 #define BOOST_CHECK_EXCEPTION_EX(S, E, P, C)                                                                                                         \
 	BOOST_CHECK_THROW_IMPL(S, E, P<E>(ex, C), ": validation on the raised exception through predicate \"" BOOST_STRINGIZE(P<E>) "\"", CHECK)

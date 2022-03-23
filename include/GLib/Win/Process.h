@@ -83,7 +83,7 @@ namespace GLib::Win
 		void WaitForInputIdle(const std::chrono::duration<R, P> & duration) const
 		{
 			auto count = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
-			DWORD timeoutMilliseconds = GLib::Util::checked_cast<DWORD>(count);
+			DWORD timeoutMilliseconds = GLib::Util::CheckedCast<DWORD>(count);
 			CheckWaitResult(::WaitForInputIdle(p.get(), timeoutMilliseconds));
 		}
 
@@ -119,7 +119,7 @@ namespace GLib::Win
 		template <typename R, typename P>
 		void WaitForExit(const std::chrono::duration<R, P> & duration) const
 		{
-			auto ms = GLib::Util::checked_cast<DWORD>(std::chrono::duration_cast<std::chrono::milliseconds>(duration).count());
+			auto ms = GLib::Util::CheckedCast<DWORD>(std::chrono::duration_cast<std::chrono::milliseconds>(duration).count());
 			Wait(p.get(), ms);
 		}
 
@@ -158,7 +158,7 @@ namespace GLib::Win
 	private:
 		static Win::Handle Create(const std::string & app, const std::string & cmd, DWORD creationFlags, WORD show, const std::string & desktop)
 		{
-			return Create(Cvt::a2w(app), Cvt::a2w(app + " " + cmd), creationFlags, show, Cvt::a2w(desktop));
+			return Create(Cvt::A2W(app), Cvt::A2W(app + " " + cmd), creationFlags, show, Cvt::A2W(desktop));
 		}
 
 		static Win::Handle Create(const std::wstring & app, const std::wstring & cmd, DWORD creationFlags, WORD show, const std::wstring & desktop)

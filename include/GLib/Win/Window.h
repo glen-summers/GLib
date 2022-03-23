@@ -2,9 +2,9 @@
 
 #include <windowsx.h>
 
+#include <GLib/CheckedCast.h>
 #include <GLib/Win/ErrorCheck.h>
 #include <GLib/Win/Painter.h>
-#include <GLib/CheckedCast.h>
 
 #ifdef GLIB_DEBUG_MESSAGES
 #include <GLib/Win/MessageDebug.h>
@@ -32,31 +32,31 @@ namespace GLib::Win
 	{
 		constexpr unsigned int HRedraw = CS_HREDRAW;
 		constexpr unsigned int VRedraw = CS_VREDRAW;
-		constexpr unsigned int OverlappedWindow = WS_OVERLAPPEDWINDOW; // NOLINT(hicpp-signed-bitwise) baad macro
+		constexpr unsigned int OverlappedWindow = WS_OVERLAPPEDWINDOW; // NOLINT(hicpp-signed-bitwise) bad macro
 
 		inline auto MakeIntResource(int id)
 		{
-			return MAKEINTRESOURCEW(id); // NOLINT(cppcoreguidelines-pro-type-cstyle-cast) baad macro
+			return MAKEINTRESOURCEW(id); // NOLINT(cppcoreguidelines-pro-type-cstyle-cast) bad macro
 		}
 
 		inline WORD LoWord(WPARAM param)
 		{
-			return LOWORD(param); // NOLINT(hicpp-signed-bitwise) baad macro
+			return LOWORD(param); // NOLINT(hicpp-signed-bitwise) bad macro
 		}
 
 		inline WORD HiWord(WPARAM param)
 		{
-			return HIWORD(param); // NOLINT(hicpp-signed-bitwise) baad macro
+			return HIWORD(param); // NOLINT(hicpp-signed-bitwise) bad macro
 		}
 
 		inline Point PointFromParam(LPARAM param)
 		{
-			return {GET_X_LPARAM(param), GET_Y_LPARAM(param)}; // NOLINT(hicpp-signed-bitwise) baad macro
+			return {GET_X_LPARAM(param), GET_Y_LPARAM(param)}; // NOLINT(hicpp-signed-bitwise) bad macro
 		}
 
 		inline short WheelData(WPARAM param)
 		{
-			return GET_WHEEL_DELTA_WPARAM(param); // NOLINT(hicpp-signed-bitwise) baad macro
+			return GET_WHEEL_DELTA_WPARAM(param); // NOLINT(hicpp-signed-bitwise) bad macro
 		}
 
 		inline Size SizeFromParam(LPARAM param)
@@ -93,35 +93,33 @@ namespace GLib::Win
 
 		inline std::string RegisterClass(int icon, int menu, WNDPROC proc)
 		{
-			std::wstring className = Cvt::a2w(ClassInfoStore::Register(icon, menu, proc));
+			std::wstring className = Cvt::A2W(ClassInfoStore::Register(icon, menu, proc));
 			auto * instance = Instance();
 
-			WNDCLASSEXW wcex = {};
-			BOOL exists = ::GetClassInfoExW(instance, className.c_str(), &wcex);
+			WNDCLASSEXW wc {};
+			BOOL exists = ::GetClassInfoExW(instance, className.c_str(), &wc);
 			if (exists == 0)
 			{
 				Util::AssertTrue(::GetLastError() == ERROR_CLASS_DOES_NOT_EXIST, "GetClassInfoExW");
 
 				HICON i = icon == 0 ? nullptr : ::LoadIconW(instance, MakeIntResource(icon));
 
-				WNDCLASSEXW wc = {
-					sizeof(WNDCLASSEXW),
-					HRedraw | VRedraw,
-					static_cast<WNDPROC>(proc),
-					0,
-					0,
-					instance,
-					i,
-					::LoadCursorW(nullptr, IDC_ARROW), // NOLINT(cppcoreguidelines-pro-type-cstyle-cast) baad macro
-					Util::Detail::WindowsCast<HBRUSH>(size_t {COLOR_WINDOW} + 1),
-					MakeIntResource(menu),
-					className.c_str()
-					// hIconSm etc.
-				};
+				wc = {sizeof(WNDCLASSEXW),
+							HRedraw | VRedraw,
+							static_cast<WNDPROC>(proc),
+							0,
+							0,
+							instance,
+							i,
+							::LoadCursorW(nullptr, IDC_ARROW), // NOLINT(cppcoreguidelines-pro-type-cstyle-cast) bad macro
+							Util::Detail::WindowsCast<HBRUSH>(size_t {COLOR_WINDOW} + 1),
+							MakeIntResource(menu),
+							className.c_str(),
+							{}};
 
 				Util::AssertTrue(::RegisterClassExW(&wc) != 0, "RegisterClassExW");
 			}
-			return Cvt::w2a(className);
+			return Cvt::W2A(className);
 		}
 
 		inline void AssociateHandle(Window * value, HWND handle)
@@ -139,7 +137,7 @@ namespace GLib::Win
 		inline WindowHandle Create(DWORD style, int icon, int menu, const std::string & title, WNDPROC proc, Window * param)
 		{
 			std::string className = RegisterClass(icon, menu, proc);
-			Detail::WindowHandle handle(::CreateWindowExW(0, Cvt::a2w(className).c_str(), Cvt::a2w(title).c_str(), style, CW_USEDEFAULT, 0, CW_USEDEFAULT,
+			Detail::WindowHandle handle(::CreateWindowExW(0, Cvt::A2W(className).c_str(), Cvt::A2W(title).c_str(), style, CW_USEDEFAULT, 0, CW_USEDEFAULT,
 																										0, nullptr, nullptr, Instance(), param));
 			Util::AssertTrue(!!handle, "CreateWindowExW");
 			AssociateHandle(param, handle.get());
@@ -222,7 +220,7 @@ namespace GLib::Win
 
 		int MessageBox(const std::string & message, const std::string & caption, UINT type = MB_OK) const
 		{
-			int result = ::MessageBoxW(handle.get(), Cvt::a2w(message).c_str(), Cvt::a2w(caption).c_str(), type);
+			int result = ::MessageBoxW(handle.get(), Cvt::A2W(message).c_str(), Cvt::A2W(caption).c_str(), type);
 			Util::AssertTrue(result != 0, "MessageBoxW");
 			return result;
 		}
@@ -231,7 +229,7 @@ namespace GLib::Win
 		void SetTimer(const std::chrono::duration<R, P> & interval, UINT_PTR id = 1) const
 		{
 			auto count = std::chrono::duration_cast<std::chrono::milliseconds>(interval).count();
-			auto milliseconds = GLib::Util::checked_cast<DWORD>(count);
+			auto milliseconds = GLib::Util::CheckedCast<DWORD>(count);
 			UINT_PTR timerResult = ::SetTimer(handle.get(), id, milliseconds, nullptr);
 			Util::AssertTrue(timerResult != 0, "SetTimer");
 		}
@@ -271,7 +269,7 @@ namespace GLib::Win
 			return CloseResult::Allow;
 		}
 		virtual void OnDestroy() noexcept {}
-		virtual void OnNCDestroy() noexcept {}
+		virtual void OnNcDestroy() noexcept {}
 		virtual void OnUser(WPARAM /*w*/, LPARAM /*p*/) noexcept {}
 		virtual void OnNotify(const NMHDR & /*hdr*/) noexcept {}
 		virtual void OnChar(int /*char*/) noexcept {}
@@ -337,7 +335,7 @@ namespace GLib::Win
 
 				case WM_NCDESTROY:
 				{
-					OnNCDestroy();
+					OnNcDestroy();
 					(void) handle.release();
 					return;
 				}
@@ -411,6 +409,8 @@ namespace GLib::Win
 		}
 
 	protected:
+		~Window() = default;
+
 		HWND Handle() const
 		{
 			return handle.get();

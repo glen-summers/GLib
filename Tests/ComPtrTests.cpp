@@ -2,13 +2,13 @@
 
 #ifdef _DEBUG
 #define COM_PTR_DEBUG
-#define SIMPLECOM_LOG_QI_MISS
+#define COM_LOG_QI_MISS
 #endif
 
 #include "TestInterfaces.h"
 #include "TestUtils.h"
 
-#include <Glib/Win/ComException.h>
+#include <GLib/Win/ComException.h>
 
 namespace
 {
@@ -196,7 +196,7 @@ BOOST_AUTO_TEST_CASE(CallMethod)
 	BOOST_TEST(S_OK == test->Test1Method());
 }
 
-BOOST_AUTO_TEST_CASE(QIOk)
+BOOST_AUTO_TEST_CASE(QiOk)
 {
 	GLib::Win::ComPtr<ITest1> p1(GLib::Win::Make<ImplementsITest1AndITest2>());
 	GLib::Win::ComPtr<ITest1> p2 = GLib::Win::ComCast<ITest1>(p1);

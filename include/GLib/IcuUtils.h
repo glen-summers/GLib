@@ -7,8 +7,8 @@
 #include <string>
 
 #ifdef __linux__
-#include <unicode/ucol.h>
 #include <unicode/ucasemap.h>
+#include <unicode/ucol.h>
 #elif _MSC_VER
 #include <icu.h>
 #pragma comment(lib, "icuuc.lib")
@@ -69,9 +69,9 @@ namespace GLib::IcuUtils
 		inline UCaseMapPtr MakeUCaseMap(const char * locale = nullptr)
 		{
 			UErrorCode error = U_ZERO_ERROR;
-			UCaseMap * ucaseMap = ::ucasemap_open(locale, U_FOLD_CASE_DEFAULT, &error);
-			AssertNoError(error, "ucasemap_open");
-			return UCaseMapPtr(ucaseMap);
+			UCaseMap * uCaseMap = ::ucasemap_open(locale, U_FOLD_CASE_DEFAULT, &error);
+			AssertNoError(error, "MakeUCaseMap");
+			return UCaseMapPtr(uCaseMap);
 		}
 	}
 

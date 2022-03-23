@@ -71,7 +71,7 @@ namespace GLib::Win::D2d
 			}
 		}
 
-		void Begin() const // take a Labda and encompass Recreate here
+		void Begin() const // take a lambda and encompass Recreate here
 		{
 			renderTarget->BeginDraw();
 		}

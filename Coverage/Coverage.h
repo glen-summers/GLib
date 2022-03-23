@@ -3,8 +3,8 @@
 #include "Address.h"
 #include "Process.h"
 
-#include <GLib/Win/Debugger.h>
 #include <GLib/Flogging.h>
+#include <GLib/Win/Debugger.h>
 
 #include <regex>
 
@@ -13,8 +13,8 @@ class Coverage : public GLib::Win::Debugger
 	inline static auto const log = GLib::Flog::LogManager::GetLog<Coverage>();
 
 	static constexpr unsigned char debugBreakByte = 0xCC;
-	static constexpr unsigned int FooFoo = 0xf00f00;
-	static constexpr unsigned int FeeFee = 0xfeefee;
+	static constexpr unsigned int fooFoo = 0xf00f00;
+	static constexpr unsigned int feeFee = 0xfeefee;
 
 	std::regex nameSpaceRegex {R"(^(?:[A-Za-z_][A-Za-z_0-9]*::)*)"}; // +some extra unicode chars?
 
@@ -29,8 +29,8 @@ public:
 	Coverage(const std::string & executable, bool debugChildProcesses, const Strings & includes, const Strings & excludes)
 		: Debugger(executable, debugChildProcesses)
 		, executable(executable)
-		, includes(a2w(includes))
-		, excludes(a2w(excludes))
+		, includes(A2W(includes))
+		, excludes(A2W(excludes))
 	{
 		GLib::Flog::Detail::Stream() << std::boolalpha;
 		log.Info("Executable: {0}, DebugSubProcess: {1}", executable, debugChildProcesses);
@@ -47,7 +47,7 @@ public:
 	CoverageData GetCoverageData() const;
 
 private:
-	static WideStrings a2w(const Strings & strings);
+	static WideStrings A2W(const Strings & strings);
 	void AddLine(const std::wstring & fileName, unsigned lineNumber, const GLib::Win::Symbols::SymProcess & symProcess, DWORD64 address,
 							 Process & process);
 

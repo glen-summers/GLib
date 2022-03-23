@@ -106,7 +106,7 @@ BOOST_AUTO_TEST_CASE(TestWFunc)
 
 	// workaround wstring generates boost compile errors
 	std::vector<std::string> u8Actual;
-	std::transform(actual.begin(), actual.end(), std::back_inserter(u8Actual), [](const std::wstring w) -> std::string { return GLib::Cvt::w2a(w); });
+	std::transform(actual.begin(), actual.end(), std::back_inserter(u8Actual), [](const std::wstring w) -> std::string { return GLib::Cvt::W2A(w); });
 
 	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), u8Actual.begin(), u8Actual.end());
 }

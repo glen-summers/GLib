@@ -8,17 +8,17 @@
 template <typename T>
 struct Reverse
 {
-	T & iterable;
+	T & Iterable;
 };
 
 template <typename T>
-auto begin(const Reverse<T> & w)
+auto Begin(const Reverse<T> & w)
 {
 	return std::crbegin(w.iterable);
 }
 
 template <typename T>
-auto end(const Reverse<T> & w)
+auto End(const Reverse<T> & w)
 {
 	return std::crend(w.iterable);
 }

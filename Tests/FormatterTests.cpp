@@ -19,7 +19,7 @@ namespace
 		return e.what() == std::string("NoArguments");
 	}
 
-	const auto ukLocale =
+	const auto UnitedKingdomLocale =
 #ifdef __linux__
 		"en_GB.UTF8";
 #elif _WIN32
@@ -27,17 +27,17 @@ namespace
 #else
 #endif
 
-	tm MakeTm(int tm_sec, int tm_min, int tm_hour, int tm_mday, int tm_mon, int tm_year, int tm_wday, int tm_yday, int tm_isdst)
+	tm MakeTm(int second, int minute, int hour, int day, int month, int year, int weekDay, int yearDay, int isDaylightSaving)
 	{
-		return {tm_sec,
-						tm_min,
-						tm_hour,
-						tm_mday,
-						tm_mon,
-						tm_year,
-						tm_wday,
-						tm_yday,
-						tm_isdst
+		return {second,
+						minute,
+						hour,
+						day,
+						month,
+						year,
+						weekDay,
+						yearDay,
+						isDaylightSaving
 #ifdef __linux__
 						,
 						0,
@@ -158,13 +158,6 @@ BOOST_AUTO_TEST_CASE(TestSprintfFormatLengthNoException)
 {
 	std::string s = Formatter::Format("{0:%#40.8x}", 1234);
 	BOOST_TEST("                              0x000004d2" == s);
-}
-
-BOOST_AUTO_TEST_CASE(TestIntAsFloat)
-{
-	// produces random stuff
-	std::string s = Formatter::Format("{0:%f}", 1234);
-	// BOOST_TEST("1234" == s);
 }
 
 BOOST_AUTO_TEST_CASE(TestCharLiteral)
@@ -327,7 +320,7 @@ BOOST_AUTO_TEST_CASE(TestTimePointDefaultFormat)
 	const tm tm = MakeTm(0, 0, 0, 1, 0, yr - offset, 0, 0, 0);
 
 	std::ostringstream s;
-	s.imbue(std::locale(ukLocale));
+	s.imbue(std::locale(UnitedKingdomLocale));
 	Formatter::Format(s, "{0}", tm);
 	BOOST_TEST("01 Jan 1601, 00:00:00" == s.str());
 }
@@ -337,7 +330,7 @@ BOOST_AUTO_TEST_CASE(TestTimePoint)
 	const tm tm = MakeTm(0, 0, 18, 6, 10, 67, 0, 0, 1);
 
 	std::ostringstream s;
-	s.imbue(std::locale(ukLocale));
+	s.imbue(std::locale(UnitedKingdomLocale));
 	Formatter::Format(s, "{0:%d %b %Y, %H:%M:%S}", tm);
 	BOOST_TEST("06 Nov 1967, 18:00:00" == s.str());
 }
@@ -377,7 +370,7 @@ BOOST_AUTO_TEST_CASE(MoneyTest)
 	GLib::Money m {123456.7};
 
 	std::ostringstream s;
-	s.imbue(std::locale(ukLocale));
+	s.imbue(std::locale(UnitedKingdomLocale));
 	Formatter::Format(s, "{0}", m);
 	auto expected = "\xc2\xa3"
 									"1,234.57";
@@ -387,10 +380,10 @@ BOOST_AUTO_TEST_CASE(MoneyTest)
 BOOST_AUTO_TEST_CASE(TestLargeObject)
 {
 	CopyCheck c1;
-	BOOST_CHECK(c1.copies == 0 && c1.moves == 0);
+	BOOST_CHECK(c1.Copies == 0 && c1.Moves == 0);
 
 	CopyCheck c2(c1);
-	BOOST_CHECK(c2.copies == 1 && c1.moves == 0);
+	BOOST_CHECK(c2.Copies == 1 && c1.Moves == 0);
 
 	CopyCheck c3;
 	std::string s = Formatter::Format("{0}", c3);

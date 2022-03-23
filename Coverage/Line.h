@@ -6,11 +6,11 @@ enum class LineCover : int;
 
 struct Line
 {
-	std::string text;
-	unsigned int number;
-	std::string paddedNumber;
-	LineCover cover;
-	bool hasLink;
+	std::string Text;
+	unsigned int Number;
+	std::string PaddedNumber;
+	LineCover Cover;
+	bool HasLink;
 };
 
 template <>
@@ -20,32 +20,32 @@ struct GLib::Eval::Visitor<Line>
 	{
 		if (propertyName == "cover")
 		{
-			return f(Value(line.cover));
+			return f(Value(line.Cover));
 		}
 
 		if (propertyName == "number")
 		{
-			return f(Value(line.number));
+			return f(Value(line.Number));
 		}
 
 		if (propertyName == "paddedNumber")
 		{
-			return f(Value(line.paddedNumber));
+			return f(Value(line.PaddedNumber));
 		}
 
 		if (propertyName == "text")
 		{
-			return f(Value(line.text));
+			return f(Value(line.Text));
 		}
 
 		if (propertyName == "hasLink")
 		{
-			return f(Value(line.hasLink));
+			return f(Value(line.HasLink));
 		}
 
 		if (propertyName == "hasNoLink") // todo !${value}
 		{
-			return f(Value(!line.hasLink));
+			return f(Value(!line.HasLink));
 		}
 
 		throw std::runtime_error(std::string("Unknown property : '") + propertyName + '\'');

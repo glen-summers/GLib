@@ -45,25 +45,25 @@ namespace GLib::Xml
 
 	class StateEngine
 	{
-		static constexpr char LeftAngleBracket = '<';
-		static constexpr char RightAngleBracket = '>';
-		static constexpr char ForwardSlash = '/';
-		static constexpr char Equals = '=';
-		static constexpr char DoubleQuote = '"';
-		static constexpr char SingleQuote = '\'';
-		static constexpr char Colon = ':';
-		static constexpr char SemiColon = ';';
-		static constexpr char Underscore = '_';
-		static constexpr char FullStop = '.';
-		static constexpr char Hyphen = '-';
-		static constexpr char Exclamation = '!';
-		static constexpr char Dash = '-';
-		static constexpr char QuestionMark = '?';
-		static constexpr char LeftSquareBracket = '[';
-		static constexpr char RightSquareBracket = ']';
-		static constexpr char Ampersand = '&';
+		static constexpr char leftAngleBracket = '<';
+		static constexpr char rightAngleBracket = '>';
+		static constexpr char forwardSlash = '/';
+		static constexpr char equals = '=';
+		static constexpr char doubleQuote = '"';
+		static constexpr char singleQuote = '\'';
+		static constexpr char colon = ':';
+		static constexpr char semiColon = ';';
+		static constexpr char underscore = '_';
+		static constexpr char fullStop = '.';
+		static constexpr char hyphen = '-';
+		static constexpr char exclamation = '!';
+		static constexpr char dash = '-';
+		static constexpr char questionMark = '?';
+		static constexpr char leftSquareBracket = '[';
+		static constexpr char rightSquareBracket = ']';
+		static constexpr char ampersand = '&';
 
-		static constexpr auto ContinuationMask = 0x80U;
+		static constexpr auto continuationMask = 0x80U;
 
 		using StateFunction = State (StateEngine::*)(char) const;
 
@@ -102,7 +102,7 @@ namespace GLib::Xml
 	private:
 		static bool IsContinuation(char c)
 		{
-			return (static_cast<unsigned char>(c) & ContinuationMask) != 0;
+			return (static_cast<unsigned char>(c) & continuationMask) != 0;
 		}
 
 		static bool IsWhiteSpace(char c)
@@ -112,17 +112,17 @@ namespace GLib::Xml
 
 		static bool IsNameStart(char c)
 		{
-			return IsContinuation(c) || std::isalpha(c) != 0 || c == Colon || c == Underscore; // check docs
+			return IsContinuation(c) || std::isalpha(c) != 0 || c == colon || c == underscore; // check docs
 		}
 
 		static bool IsName(char c)
 		{
-			return IsNameStart(c) || std::isdigit(c) != 0 || c == FullStop || c == Hyphen; // check docs
+			return IsNameStart(c) || std::isdigit(c) != 0 || c == fullStop || c == hyphen; // check docs
 		}
 
 		static bool IsAllowedTextCharacter(char c)
 		{
-			return c != LeftAngleBracket;
+			return c != leftAngleBracket;
 		}
 
 		void SetState(Xml::State newState)
@@ -144,7 +144,7 @@ namespace GLib::Xml
 
 		Xml::State Start(char c) const
 		{
-			if (c == LeftAngleBracket)
+			if (c == leftAngleBracket)
 			{
 				return State::ElementStart;
 			}
@@ -166,7 +166,7 @@ namespace GLib::Xml
 			{
 				return state;
 			}
-			if (c == RightAngleBracket)
+			if (c == rightAngleBracket)
 			{
 				return State::Start;
 			}
@@ -181,16 +181,16 @@ namespace GLib::Xml
 				hasContent = true;
 				return State::ElementName;
 			}
-			if (c == ForwardSlash)
+			if (c == forwardSlash)
 			{
 				return State::ElementEnd;
 			}
-			if (c == Exclamation)
+			if (c == exclamation)
 			{
 				hasContent = true;
 				return State::Bang;
 			}
-			if (c == QuestionMark && !hasContent)
+			if (c == questionMark && !hasContent)
 			{
 				return State::XmlDeclaration;
 			}
@@ -213,7 +213,7 @@ namespace GLib::Xml
 			{
 				return state;
 			}
-			if (c == RightAngleBracket)
+			if (c == rightAngleBracket)
 			{
 				return State::Start;
 			}
@@ -230,7 +230,7 @@ namespace GLib::Xml
 			{
 				return state;
 			}
-			if (c == RightAngleBracket)
+			if (c == rightAngleBracket)
 			{
 				return State::Start;
 			}
@@ -243,11 +243,11 @@ namespace GLib::Xml
 			{
 				return state;
 			}
-			if (c == RightAngleBracket)
+			if (c == rightAngleBracket)
 			{
 				return State::Start;
 			}
-			if (c == ForwardSlash)
+			if (c == forwardSlash)
 			{
 				return State::EmptyElement;
 			}
@@ -261,7 +261,7 @@ namespace GLib::Xml
 		Xml::State EmptyElement(char c) const
 		{
 			(void) this;
-			if (c == RightAngleBracket)
+			if (c == rightAngleBracket)
 			{
 				return State::Start;
 			}
@@ -274,11 +274,11 @@ namespace GLib::Xml
 			{
 				return state;
 			}
-			if (c == RightAngleBracket)
+			if (c == rightAngleBracket)
 			{
 				return State::Start;
 			}
-			if (c == ForwardSlash)
+			if (c == forwardSlash)
 			{
 				return State::EmptyElement;
 			}
@@ -299,7 +299,7 @@ namespace GLib::Xml
 			{
 				return State::AttributeNameSpace;
 			}
-			if (c == Equals)
+			if (c == equals)
 			{
 				return State::AttributeValueStart;
 			}
@@ -312,7 +312,7 @@ namespace GLib::Xml
 			{
 				return state;
 			}
-			if (c == Equals)
+			if (c == equals)
 			{
 				return State::AttributeValueStart;
 			}
@@ -325,7 +325,7 @@ namespace GLib::Xml
 			{
 				return state;
 			}
-			if (c == DoubleQuote || c == SingleQuote)
+			if (c == doubleQuote || c == singleQuote)
 			{
 				attributeQuoteChar = c;
 				return State::AttributeValue;
@@ -339,7 +339,7 @@ namespace GLib::Xml
 			{
 				return State::AttributeEnd;
 			}
-			if (c == Ampersand)
+			if (c == ampersand)
 			{
 				return State::AttributeEntity;
 			}
@@ -357,11 +357,11 @@ namespace GLib::Xml
 			{
 				return State::AttributeSpace;
 			}
-			if (c == RightAngleBracket)
+			if (c == rightAngleBracket)
 			{
 				return State::Start;
 			}
-			if (c == ForwardSlash)
+			if (c == forwardSlash)
 			{
 				return State::EmptyElement;
 			}
@@ -370,11 +370,11 @@ namespace GLib::Xml
 
 		Xml::State Text(char c) const
 		{
-			if (c == LeftAngleBracket)
+			if (c == leftAngleBracket)
 			{
 				return State::ElementStart;
 			}
-			if (c == Ampersand)
+			if (c == ampersand)
 			{
 				return State::TextEntity;
 			}
@@ -387,11 +387,11 @@ namespace GLib::Xml
 
 		Xml::State Bang(char c) const
 		{
-			if (c == Dash)
+			if (c == dash)
 			{
 				return State::CommentStartDash;
 			}
-			if (c == LeftSquareBracket)
+			if (c == leftSquareBracket)
 			{
 				return State::CDataName;
 			}
@@ -406,7 +406,7 @@ namespace GLib::Xml
 		Xml::State CommentStartDash(char c) const
 		{
 			(void) this;
-			if (c == Dash)
+			if (c == dash)
 			{
 				return State::Comment;
 			}
@@ -415,7 +415,7 @@ namespace GLib::Xml
 
 		Xml::State Comment(char c) const
 		{
-			if (c == Dash)
+			if (c == dash)
 			{
 				return State::CommentEndDash;
 			}
@@ -425,7 +425,7 @@ namespace GLib::Xml
 		Xml::State CommentEndDash(char c) const
 		{
 			(void) this;
-			if (c == Dash)
+			if (c == dash)
 			{
 				return State::CommentEnd;
 			}
@@ -435,7 +435,7 @@ namespace GLib::Xml
 		Xml::State CommentEnd(char c) const
 		{
 			(void) this;
-			if (c == RightAngleBracket)
+			if (c == rightAngleBracket)
 			{
 				return State::Start;
 			}
@@ -444,7 +444,7 @@ namespace GLib::Xml
 
 		Xml::State XmlDeclaration(char c) const
 		{
-			if (c == QuestionMark)
+			if (c == questionMark)
 			{
 				return Xml::State::EmptyElement;
 			}
@@ -453,7 +453,7 @@ namespace GLib::Xml
 
 		Xml::State CDataName(char c) const
 		{
-			if (c == LeftSquareBracket)
+			if (c == leftSquareBracket)
 			{
 				return Xml::State::CDataValue;
 			}
@@ -462,7 +462,7 @@ namespace GLib::Xml
 
 		Xml::State CDataValue(char c) const
 		{
-			if (c == RightSquareBracket)
+			if (c == rightSquareBracket)
 			{
 				return Xml::State::CDataEnd1;
 			}
@@ -472,7 +472,7 @@ namespace GLib::Xml
 		Xml::State CDataEnd1(char c) const
 		{
 			(void) this;
-			if (c == RightSquareBracket)
+			if (c == rightSquareBracket)
 			{
 				return Xml::State::CDataEnd2;
 			}
@@ -482,7 +482,7 @@ namespace GLib::Xml
 		Xml::State CDataEnd2(char c) const
 		{
 			(void) this;
-			if (c == RightAngleBracket)
+			if (c == rightAngleBracket)
 			{
 				return Xml::State::Start;
 			}
@@ -491,7 +491,7 @@ namespace GLib::Xml
 
 		Xml::State TextEntity(char c) const
 		{
-			if (c == SemiColon)
+			if (c == semiColon)
 			{
 				return State::Text;
 			}
@@ -501,7 +501,7 @@ namespace GLib::Xml
 
 		Xml::State AttributeEntity(char c) const
 		{
-			if (c == SemiColon)
+			if (c == semiColon)
 			{
 				return State::AttributeValue;
 			}

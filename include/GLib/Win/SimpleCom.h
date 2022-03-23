@@ -2,10 +2,10 @@
 
 #include <GLib/Win/ComPtr.h>
 
-#ifdef SIMPLECOM_LOG_QI_MISS
+#ifdef COM_LOG_QI_MISS
 #include <GLib/Win/DebugWrite.h>
-#include <GLib/Win/Uuid.h>
 #include <GLib/Win/Registry.h>
+#include <GLib/Win/Uuid.h>
 #endif
 
 #include <GLib/TypePredicates.h>
@@ -57,8 +57,8 @@ namespace GLib::Win
 				*ppvObject = i;
 				return S_OK;
 			}
-#ifdef SIMPLECOM_LOG_QI_MISS
-			std::string itf = "Interface\\" + to_string(Util::Uuid(iid)), name;
+#ifdef COM_LOG_QI_MISS
+			std::string itf = "Interface\\" + ToString(Util::Uuid(iid)), name;
 			if (RegistryKeys::ClassesRoot.KeyExists(itf))
 			{
 				name = RegistryKeys::ClassesRoot.OpenSubKey(itf).GetString("");

@@ -16,7 +16,7 @@ BOOST_AUTO_TEST_CASE(EmptyElement)
 
 	std::vector<Xml::Element> expected {{"xml", Xml::ElementType::Empty}};
 	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), xml.begin(), xml.end());
-	BOOST_CHECK(xml.begin()->Attributes().empty());
+	BOOST_CHECK(xml.begin()->Attributes().Empty());
 }
 
 BOOST_AUTO_TEST_CASE(ElementSpace)

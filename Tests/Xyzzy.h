@@ -26,32 +26,32 @@ std::ostream & operator<<(std::ostream & s, const Xyzzy2 &)
 
 struct CopyCheck
 {
-	mutable int copies = 0;
-	int moves = 0;
+	mutable int Copies = 0;
+	int Moves = 0;
 
 	CopyCheck() = default;
 
 	CopyCheck(const CopyCheck & other)
-		: copies(++other.copies)
-		, moves(other.moves)
+		: Copies(++other.Copies)
+		, Moves(other.Moves)
 	{}
 
 	CopyCheck & operator=(const CopyCheck & other)
 	{
 		if (this != &other)
 		{
-			copies = ++other.copies;
+			Copies = ++other.Copies;
 		}
 		return *this;
 	}
 
 	CopyCheck(CopyCheck && other) noexcept
-		: copies(other.copies)
-		, moves(++other.moves)
+		: Copies(other.Copies)
+		, Moves(++other.Moves)
 	{}
 };
 
 inline std::ostream & operator<<(std::ostream & s, const CopyCheck & c)
 {
-	return s << c.copies << ":" << c.moves;
+	return s << c.Copies << ":" << c.Moves;
 }

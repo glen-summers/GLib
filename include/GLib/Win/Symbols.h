@@ -1,9 +1,9 @@
 #pragma once
 
-#include <GLib/Win/Local.h>
-#include <GLib/Win/Process.h>
 #include <GLib/Compat.h>
 #include <GLib/Scope.h>
+#include <GLib/Win/Local.h>
+#include <GLib/Win/Process.h>
 
 #define _NO_CVCONST_H // NOLINT (bugprone-reserved-identifier) required
 #include <DbgHelp.h>
@@ -111,10 +111,10 @@ namespace GLib::Win::Symbols
 
 	struct Line
 	{
-		unsigned int lineNumber;
-		std::string fileName;
+		unsigned int LineNumber;
+		std::string FileName;
 		uint64_t Address;
-		unsigned int displacement;
+		unsigned int Displacement;
 	};
 
 	class SymProcess
@@ -124,7 +124,7 @@ namespace GLib::Win::Symbols
 		uint64_t baseOfImage {};
 
 	public:
-		SymProcess(Handle && handle, uint64_t baseOfImage)
+		SymProcess(Handle handle, uint64_t baseOfImage)
 			: process(std::move(handle))
 			, symbolHandle(process.Handle().get())
 			, baseOfImage(baseOfImage)
@@ -141,7 +141,7 @@ namespace GLib::Win::Symbols
 
 			std::ostringstream searchPath;
 
-			auto const processPath = Cvt::p2a(std::filesystem::path(FileSystem::PathOfProcessHandle(duplicate.get())).parent_path());
+			auto const processPath = Cvt::P2A(std::filesystem::path(FileSystem::PathOfProcessHandle(duplicate.get())).parent_path());
 			searchPath << processPath << ";";
 
 			// set sym opts, add exe to sym path, legacy code, still needed?
@@ -156,7 +156,7 @@ namespace GLib::Win::Symbols
 			}
 
 			// when debugging processHandle and enumerateModules = true, get errorCode=0x8000000d : An illegal state change was requested
-			Util::AssertTrue(::SymInitializeW(duplicate.get(), Cvt::a2w(searchPath.str()).c_str(), invasive ? TRUE : FALSE), "SymInitializeW");
+			Util::AssertTrue(::SymInitializeW(duplicate.get(), Cvt::A2W(searchPath.str()).c_str(), invasive ? TRUE : FALSE), "SymInitializeW");
 			return {std::move(duplicate), baseOfImage};
 		}
 
@@ -197,25 +197,25 @@ namespace GLib::Win::Symbols
 		Symbol GetSymbolFromIndex(DWORD index) const
 		{
 			std::array<SYMBOL_INFOW, 2 + MAX_SYM_NAME * sizeof(wchar_t) / sizeof(SYMBOL_INFO)> buffer {};
-			auto * const symbuf = buffer.data();
-			symbuf->SizeOfStruct = sizeof(SYMBOL_INFOW);
-			symbuf->MaxNameLen = MAX_SYM_NAME;
+			auto * const symBuf = buffer.data();
+			symBuf->SizeOfStruct = sizeof(SYMBOL_INFOW);
+			symBuf->MaxNameLen = MAX_SYM_NAME;
 
-			BOOL result = ::SymFromIndexW(Handle(), baseOfImage, index, symbuf);
+			BOOL result = ::SymFromIndexW(Handle(), baseOfImage, index, symBuf);
 			Util::AssertTrue(result, "SymFromIndexW");
-			return {symbuf->Index, symbuf->TypeIndex, static_cast<enum SymTagEnum>(symbuf->Tag),
-							Cvt::w2a(std::wstring_view {static_cast<const wchar_t *>(symbuf->Name)}), 0};
+			return {symBuf->Index, symBuf->TypeIndex, static_cast<enum SymTagEnum>(symBuf->Tag),
+							Cvt::W2A(std::wstring_view {static_cast<const wchar_t *>(symBuf->Name)}), 0};
 		}
 
 		ULONG GetSymbolIdFromAddress(uint64_t address) const
 		{
 			SYMBOL_INFOW buffer {};
-			auto * const symbuf = &buffer;
-			symbuf->SizeOfStruct = sizeof(SYMBOL_INFOW);
+			auto * const symBuf = &buffer;
+			symBuf->SizeOfStruct = sizeof(SYMBOL_INFOW);
 			DWORD64 displacement = 0;
-			BOOL result = ::SymFromAddrW(Handle(), address, &displacement, symbuf);
+			BOOL result = ::SymFromAddrW(Handle(), address, &displacement, symBuf);
 			Util::AssertTrue(result, "SymFromAddrW");
-			return symbuf->Index;
+			return symBuf->Index;
 		}
 
 		std::optional<Symbol> TryGetSymbolFromAddress(uint64_t address) const
@@ -223,15 +223,15 @@ namespace GLib::Win::Symbols
 			std::optional<Symbol> symbol;
 
 			std::array<SYMBOL_INFOW, 2 + MAX_SYM_NAME * sizeof(wchar_t) / sizeof(SYMBOL_INFO)> buffer {};
-			auto * const symbuf = buffer.data();
-			symbuf->SizeOfStruct = sizeof(SYMBOL_INFOW);
-			symbuf->MaxNameLen = MAX_SYM_NAME;
+			auto * const symBuf = buffer.data();
+			symBuf->SizeOfStruct = sizeof(SYMBOL_INFOW);
+			symBuf->MaxNameLen = MAX_SYM_NAME;
 			DWORD64 displacement = 0;
-			BOOL result = ::SymFromAddrW(Handle(), address, &displacement, symbuf);
+			BOOL result = ::SymFromAddrW(Handle(), address, &displacement, symBuf);
 			if (Util::WarnAssertTrue(result, "SymFromAddrW"))
 			{
-				symbol = {symbuf->Index, symbuf->TypeIndex, static_cast<enum SymTagEnum>(symbuf->Tag),
-									Cvt::w2a(std::wstring_view {static_cast<const wchar_t *>(symbuf->Name)}), displacement};
+				symbol = {symBuf->Index, symBuf->TypeIndex, static_cast<enum SymTagEnum>(symBuf->Tag),
+									Cvt::W2A(std::wstring_view {static_cast<const wchar_t *>(symBuf->Name)}), displacement};
 			}
 			return symbol;
 		}
@@ -241,16 +241,16 @@ namespace GLib::Win::Symbols
 			std::optional<Symbol> symbol;
 
 			std::array<SYMBOL_INFOW, 2 + MAX_SYM_NAME * sizeof(wchar_t) / sizeof(SYMBOL_INFOW)> buffer {};
-			auto * const symbuf = buffer.data();
-			symbuf->SizeOfStruct = sizeof(SYMBOL_INFOW);
-			symbuf->MaxNameLen = MAX_SYM_NAME;
+			auto * const symBuf = buffer.data();
+			symBuf->SizeOfStruct = sizeof(SYMBOL_INFOW);
+			symBuf->MaxNameLen = MAX_SYM_NAME;
 			DWORD64 displacement = 0;
 
-			auto result = ::SymFromInlineContextW(Handle(), address, context, &displacement, symbuf);
+			auto result = ::SymFromInlineContextW(Handle(), address, context, &displacement, symBuf);
 			if (Util::WarnAssertTrue(result, "SymFromInlineContext"))
 			{
-				symbol = {symbuf->Index, symbuf->TypeIndex, static_cast<enum SymTagEnum>(symbuf->Tag),
-									Cvt::w2a(std::wstring_view {static_cast<const wchar_t *>(symbuf->Name)}), displacement};
+				symbol = {symBuf->Index, symBuf->TypeIndex, static_cast<enum SymTagEnum>(symBuf->Tag),
+									Cvt::W2A(std::wstring_view {static_cast<const wchar_t *>(symBuf->Name)}), displacement};
 			}
 			return symbol;
 		}
@@ -264,7 +264,7 @@ namespace GLib::Win::Symbols
 			BOOL result = ::SymGetLineFromAddrW64(Handle(), address, &displacement, &tmpLine);
 			if (Util::WarnAssertTrue(result, "SymGetLineFromAddrW64"))
 			{
-				line = {tmpLine.LineNumber, Cvt::w2a(tmpLine.FileName), tmpLine.Address, displacement};
+				line = {tmpLine.LineNumber, Cvt::W2A(tmpLine.FileName), tmpLine.Address, displacement};
 			}
 			return line;
 		}
@@ -278,7 +278,7 @@ namespace GLib::Win::Symbols
 			BOOL result = ::SymGetLineFromInlineContextW(Handle(), address, inlineContext, 0, &displacement, &tmpLine);
 			if (Util::WarnAssertTrue(result, "SymGetLineFromInlineContext"))
 			{
-				line = {tmpLine.LineNumber, Cvt::w2a(tmpLine.FileName), tmpLine.Address, displacement};
+				line = {tmpLine.LineNumber, Cvt::W2A(tmpLine.FileName), tmpLine.Address, displacement};
 			}
 			return line;
 		}
@@ -308,7 +308,7 @@ namespace GLib::Win::Symbols
 
 			result.Index(indexOfClassParent);
 			result.TypeIndex(typeIndexOfClassParent);
-			result.Name(Cvt::w2a(std::wstring_view {name.Get()}));
+			result.Name(Cvt::W2A(std::wstring_view {name.Get()}));
 			return true;
 		}
 
@@ -335,7 +335,7 @@ namespace GLib::Win::Symbols
 			SymProcess sp = SymProcess::GetProcess(processHandle, baseOfImage, false);
 
 			DWORD64 const loadBase =
-				::SymLoadModuleExW(sp.Handle(), imageFile, Cvt::a2w(imageName).c_str(), nullptr, static_cast<DWORD64>(baseOfImage), 0, nullptr, 0);
+				::SymLoadModuleExW(sp.Handle(), imageFile, Cvt::A2W(imageName).c_str(), nullptr, static_cast<DWORD64>(baseOfImage), 0, nullptr, 0);
 			Util::AssertTrue(0 != loadBase, "SymLoadModuleExW");
 
 			return handles.emplace(processId, std::move(sp)).first->second;

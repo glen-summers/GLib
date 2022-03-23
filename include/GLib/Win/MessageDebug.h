@@ -19,7 +19,7 @@ namespace GLib::Win
 				}
 				s.EnsureSize(s.size() * 2);
 			}
-			return Cvt::w2a(s.Get());
+			return Cvt::W2A(s.Get());
 		}
 	}
 
@@ -33,7 +33,7 @@ namespace GLib::Win
 		}
 
 		template <typename T>
-		static void Write(T * source, HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam, LRESULT lresult)
+		static void Write(T * source, HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam, LRESULT result)
 		{
 			bool isWindow = ::IsWindow(hWnd);
 			std::string sourceName = isWindow && source ? Compat::Unmangle(typeid(*source).name()) : "<unknown>"; // +hex value odf source
@@ -63,7 +63,7 @@ namespace GLib::Win
 			}
 
 			Debug::Write("Msg: {0,-6} {1,-24} : {2,-20} {3,-20} Hw:{4} : W:{5} L:{6} -> {7}", message, msgName, sourceName, className, hWnd, wParam, lParam,
-									 lresult);
+									 result);
 		}
 
 	private:
@@ -71,9 +71,10 @@ namespace GLib::Win
 		static const auto & MessageStrings()
 		{
 			// clang-format off
-			constexpr unsigned int Messages = 1024;
-			static auto msgs = std::array<std::string_view, Messages>
+			constexpr unsigned int messageCount = 1024;
+			static auto messages = std::array<std::string_view, messageCount>
 			{
+				// ReSharper disable All
 				"WM_NULL",
 				"WM_CREATE",
 				"WM_DESTROY",
@@ -1099,8 +1100,9 @@ namespace GLib::Win
 				"<WM_CBT_RESERVED__reserved_3fe>",
 				"WM_CBT_RESERVED_LAST"
 			};
+			// ReSharper restore All
 			// clang-format on
-			return msgs;
+			return messages;
 		}
 	};
 }

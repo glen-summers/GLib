@@ -13,7 +13,7 @@ namespace GLib::Html
 		std::string variable;
 		std::string enumeration;
 		std::string_view condition;
-		std::list<Node> children; // use ostream for xml fragmemts, single optional child for the rest, polymorphic?
+		std::list<Node> children; // use ostream for xml fragments, single optional child for the rest, polymorphic?
 		size_t const depth {};
 
 	public:

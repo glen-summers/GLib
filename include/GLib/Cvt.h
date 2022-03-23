@@ -19,22 +19,22 @@ namespace GLib::Cvt
 #endif
 	}
 
-	inline std::wstring a2w(std::string_view s)
+	inline std::wstring A2W(std::string_view s)
 	{
 		return Detail::Converter().from_bytes(s.data(), s.data() + s.size());
 		// Detail::AssertTrue(convert.converted() == s.size(), "conversion failed");
 	}
 
-	inline std::string w2a(std::wstring_view s)
+	inline std::string W2A(std::wstring_view s)
 	{
 		return Detail::Converter().to_bytes(s.data(), s.data() + s.size());
 		// Detail::AssertTrue(convert.converted() == s.size(), "conversion failed");
 	}
 
 	template <typename T>
-	inline std::string p2a(const T & t)
+	std::string P2A(const T & t)
 	{
-		return w2a(t.wstring());
+		return W2A(t.wstring());
 	}
 
 #ifdef _MSC_VER

@@ -22,15 +22,15 @@ struct Struct
 {
 	struct NestedStruct
 	{
-		std::string value;
+		std::string Value;
 	} Nested;
 };
 
 struct User
 {
-	std::string name;
-	int age;
-	std::list<std::string> hobbies;
+	std::string Name;
+	int Age;
+	std::list<std::string> Hobbies;
 };
 
 struct HasNoVisitor
@@ -46,15 +46,15 @@ struct GLib::Eval::Visitor<User>
 	{
 		if (propertyName == "name")
 		{
-			return f(Value(user.name));
+			return f(Value(user.Name));
 		}
 		if (propertyName == "age")
 		{
-			return f(Value(user.age));
+			return f(Value(user.Age));
 		}
 		if (propertyName == "hobbies")
 		{
-			return f(MakeCollection(user.hobbies));
+			return f(MakeCollection(user.Hobbies));
 		}
 		throw std::runtime_error(std::string("Unknown property : '") + propertyName + '\''); // bool return?
 	}
@@ -67,7 +67,7 @@ struct GLib::Eval::Visitor<Struct>
 	{
 		if (propertyName == "Nested")
 		{
-			return f(Value(value.Nested.value));
+			return f(Value(value.Nested.Value));
 		}
 		throw std::runtime_error(std::string("Unknown property : '") + propertyName + '\''); // bool return?
 	}

@@ -18,7 +18,7 @@ namespace GLib::Win::Util
 	{
 		inline bool IsError(DWORD value)
 		{
-			return IS_ERROR(value); // NOLINT(hicpp-signed-bitwise) baad macro
+			return IS_ERROR(value); // NOLINT(hicpp-signed-bitwise) bad macro
 		}
 
 		inline std::string FormatErrorMessage(std::string_view message, DWORD error, const wchar_t * moduleName = {})

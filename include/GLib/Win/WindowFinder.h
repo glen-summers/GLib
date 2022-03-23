@@ -1,7 +1,7 @@
 #pragma once
 
-#include <GLib/Win/ErrorCheck.h>
 #include <GLib/StackOrHeap.h>
+#include <GLib/Win/ErrorCheck.h>
 
 #include <functional>
 
@@ -31,7 +31,7 @@ namespace GLib::Win
 
 		static BOOL CALLBACK EnumWindowsCallback(HWND handle, LPARAM param) noexcept
 		{
-			// todo setlasterror when return false
+			// todo setLastError when return false
 			return (*reinterpret_cast<const WindowEnumerator *>(param))(handle);
 		}
 
@@ -40,7 +40,7 @@ namespace GLib::Win
 		{
 			HDESK desktop = ::GetThreadDesktop(::GetCurrentThreadId());
 			Util::AssertTrue(desktop != nullptr, "GetThreadDesktop");
-			auto wideWindowText = Cvt::a2w(windowText);
+			auto wideWindowText = Cvt::A2W(windowText);
 
 			HWND ret {};
 			WindowEnumerator func = [&](HWND wnd) noexcept -> bool

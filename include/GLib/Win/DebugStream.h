@@ -27,7 +27,7 @@ namespace GLib::Win::Debug
 
 			void Write(std::string_view s)
 			{
-				::OutputDebugStringW(Cvt::a2w(s).c_str());
+				OutputDebugStringW(Cvt::A2W(s).c_str());
 				Reset();
 			}
 		};

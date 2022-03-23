@@ -11,7 +11,7 @@ std::string LogManager::Unmangle(const std::string & name)
 	return Compat::Unmangle(name);
 }
 
-GLib::Flog::Level LogManager::SetLevel(GLib::Flog::Level level)
+GLib::Flog::Level LogManager::SetLevel(Level level)
 {
 	return FileLogger::SetLogLevel(level);
 }
@@ -27,7 +27,7 @@ void LogManager::SetThreadName(std::string_view name)
 	FileLogger::GetLogState().ThreadName(name);
 }
 
-GLib::Compat::filesystem::path LogManager::GetLogPath()
+GLib::Compat::FileSystem::path LogManager::GetLogPath()
 {
 	return FileLogger::Instance().streamInfo.Path();
 }

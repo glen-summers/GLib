@@ -9,23 +9,23 @@
 
 class FileLogger
 {
-	static constexpr std::string_view HeaderFooterSeparator = "------------------------------------------------";
-	static constexpr std::string_view Delimiter = " : ";
-	static constexpr int THREAD_ID_WIDTH = 5; // make dynamic
-	static constexpr int LEVEL_WIDTH = 8;
-	static constexpr int PREFIX_WIDTH = 16; // make dynamic
-	static constexpr size_t DefaultMaxFileSize = 5 * 1024 * 1024;
-	static constexpr size_t ReserveDiskSpace = 10 * 1024 * 1024;
+	static constexpr std::string_view headerFooterSeparator = "------------------------------------------------";
+	static constexpr std::string_view delimiter = " : ";
+	static constexpr int threadIdWidth = 5; // make dynamic
+	static constexpr int levelWidth = 8;
+	static constexpr int prefixWidth = 16; // make dynamic
+	static constexpr auto defaultMaxFileSize = size_t {5} * 1024 * 1024;
+	static constexpr auto reserveDiskSpace = size_t {10} * 1024 * 1024;
 
 	friend class GLib::Flog::Log;
 	friend class GLib::Flog::LogManager;
 
 	std::string const baseFileName;
-	GLib::Compat::filesystem::path const path;
+	GLib::Compat::FileSystem::path const path;
 	std::mutex streamMonitor;
 	StreamInfo streamInfo;
 	GLib::Flog::Level logLevel = GLib::Flog::Level::Info; // config
-	size_t maxFileSize = DefaultMaxFileSize;							// config
+	size_t maxFileSize = defaultMaxFileSize;							// config
 
 public:
 	FileLogger();
@@ -63,7 +63,7 @@ private:
 	static std::ostream & TranslateLevel(std::ostream & stream, GLib::Flog::Level level);
 	static std::ostream & ThreadName(std::ostream & stream, std::string_view threadName);
 	static unsigned int GetDate();
-	static uintmax_t GetFreeDiskSpace(const GLib::Compat::filesystem::path & path);
+	static uintmax_t GetFreeDiskSpace(const GLib::Compat::FileSystem::path & path);
 
 	static void CommitPendingScope();
 	static void ScopeStart(GLib::Flog::Level level, std::string_view prefix, std::string_view scope, std::string_view stem);

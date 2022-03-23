@@ -6,8 +6,8 @@
 
 struct Chunk
 {
-	LineCover cover;
-	float size;
+	LineCover Cover;
+	float Size;
 };
 
 template <>
@@ -17,12 +17,12 @@ struct GLib::Eval::Visitor<Chunk>
 	{
 		if (propertyName == "cover")
 		{
-			return f(Value(chunk.cover));
+			return f(Value(chunk.Cover));
 		}
 
 		if (propertyName == "size")
 		{
-			return f(Value(chunk.size));
+			return f(Value(chunk.Size));
 		}
 
 		throw std::runtime_error(std::string("Unknown property : '") + propertyName + '\'');

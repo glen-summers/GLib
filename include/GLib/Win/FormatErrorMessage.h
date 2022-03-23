@@ -19,16 +19,16 @@ namespace GLib::Win::Util
 
 		enum class Lang : unsigned int
 		{
-			Neutral = LANG_NEUTRAL,				// NOLINT baad macros
+			Neutral = LANG_NEUTRAL,				// NOLINT bad macros
 			SubDefault = SUBLANG_DEFAULT, // NOLINT
 		};
 
 		enum class Flags : unsigned int
 		{
-			AlocateBuffer = FORMAT_MESSAGE_ALLOCATE_BUFFER, // NOLINT
-			FromSystem = FORMAT_MESSAGE_FROM_SYSTEM,				// NOLINT
-			IgnoreInserts = FORMAT_MESSAGE_IGNORE_INSERTS,	// NOLINT
-			FromHandle = FORMAT_MESSAGE_FROM_HMODULE,				// NOLINT
+			AllocateBuffer = FORMAT_MESSAGE_ALLOCATE_BUFFER, // NOLINT
+			FromSystem = FORMAT_MESSAGE_FROM_SYSTEM,				 // NOLINT
+			IgnoreInserts = FORMAT_MESSAGE_IGNORE_INSERTS,	 // NOLINT
+			FromHandle = FORMAT_MESSAGE_FROM_HMODULE,				 // NOLINT
 		};
 
 		inline WORD Make(Lang l1, Lang l2)
@@ -50,7 +50,7 @@ namespace GLib::Win::Util
 	inline void FormatErrorMessage(std::ostream & stm, unsigned int error, const wchar_t * moduleName = nullptr)
 	{
 		wchar_t * pszMsg = nullptr;
-		auto flags = Detail::Flags::AlocateBuffer | Detail::Flags::FromSystem | Detail::Flags::IgnoreInserts;
+		auto flags = Detail::Flags::AllocateBuffer | Detail::Flags::FromSystem | Detail::Flags::IgnoreInserts;
 		if (moduleName != nullptr)
 		{
 			flags |= Detail::Flags::FromHandle;
@@ -75,7 +75,7 @@ namespace GLib::Win::Util
 				wMsg = wMsg.substr(0, len - ending.size());
 			}
 
-			stm << Cvt::w2a(wMsg);
+			stm << Cvt::W2A(wMsg);
 			::LocalFree(pszMsg);
 		}
 		else

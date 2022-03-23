@@ -1,7 +1,7 @@
 #pragma once
 
-#include <GLib/Win/DebugStream.h>
 #include <GLib/Formatter.h>
+#include <GLib/Win/DebugStream.h>
 
 namespace GLib::Win::Debug
 {
@@ -24,6 +24,6 @@ namespace GLib::Win::Debug
 
 	inline void Write(std::wstring_view value)
 	{
-		Stream() << Cvt::w2a(value) << std::endl;
+		Stream() << Cvt::W2A(value) << std::endl;
 	}
 }
