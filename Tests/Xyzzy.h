@@ -5,13 +5,13 @@
 
 struct Xyzzy
 {
-	void Format(std::ostream & s, const std::string & fmt) const
+	static void Format(std::ostream & s, const std::string & fmt)
 	{
 		s << fmt << ":plover";
 	}
 };
 
-std::ostream & operator<<(std::ostream & s, const Xyzzy &)
+inline std::ostream & operator<<(std::ostream & s, const Xyzzy &)
 {
 	return s << "plover";
 }
@@ -19,39 +19,54 @@ std::ostream & operator<<(std::ostream & s, const Xyzzy &)
 struct Xyzzy2
 {};
 
-std::ostream & operator<<(std::ostream & s, const Xyzzy2 &)
+inline std::ostream & operator<<(std::ostream & s, const Xyzzy2 &)
 {
 	return s << "plover2";
 }
 
-struct CopyCheck
+class CopyCheck
 {
-	mutable int Copies = 0;
-	int Moves = 0;
+	mutable int copies = 0;
+	int moves = 0;
 
+public:
 	CopyCheck() = default;
 
 	CopyCheck(const CopyCheck & other)
-		: Copies(++other.Copies)
-		, Moves(other.Moves)
+		: copies {++other.copies}
+		, moves {other.moves}
 	{}
+
+	CopyCheck(CopyCheck && other) noexcept
+		: copies {other.copies}
+		, moves {++other.moves}
+	{}
+
+	~CopyCheck() = default;
 
 	CopyCheck & operator=(const CopyCheck & other)
 	{
 		if (this != &other)
 		{
-			Copies = ++other.Copies;
+			copies = ++other.copies;
 		}
 		return *this;
 	}
 
-	CopyCheck(CopyCheck && other) noexcept
-		: Copies(other.Copies)
-		, Moves(++other.Moves)
-	{}
+	CopyCheck & operator=(CopyCheck && other) = default;
+
+	int Copies() const
+	{
+		return copies;
+	}
+
+	int Moves() const
+	{
+		return moves;
+	}
 };
 
 inline std::ostream & operator<<(std::ostream & s, const CopyCheck & c)
 {
-	return s << c.Copies << ":" << c.Moves;
+	return s << c.Copies() << ":" << c.Moves();
 }

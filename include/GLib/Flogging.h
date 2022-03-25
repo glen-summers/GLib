@@ -140,11 +140,6 @@ namespace GLib::Flog
 		std::string_view stem;
 
 	public:
-		ScopeLog(const ScopeLog &) = delete;
-		ScopeLog & operator=(const ScopeLog &) = delete;
-		ScopeLog(ScopeLog &&) = default;
-		ScopeLog & operator=(ScopeLog &&) = delete;
-
 		ScopeLog(const Log & log, Level level, std::string_view scope, std::string_view stem = "==")
 			: log(log)
 			, level(level)
@@ -153,6 +148,11 @@ namespace GLib::Flog
 		{
 			log.ScopeStart(this->level, this->scope, this->stem);
 		}
+
+		ScopeLog(const ScopeLog &) = delete;
+		ScopeLog & operator=(const ScopeLog &) = delete;
+		ScopeLog(ScopeLog &&) = default;
+		ScopeLog & operator=(ScopeLog &&) = delete;
 
 		~ScopeLog()
 		{

@@ -105,10 +105,10 @@ namespace boost::test_tools::tt_detail
 		}
 	};
 }
-// ReSharper restore All
 
 #define BOOST_CHECK_EXCEPTION_EX(S, E, P, C)                                                                                                         \
 	BOOST_CHECK_THROW_IMPL(S, E, P<E>(ex, C), ": validation on the raised exception through predicate \"" BOOST_STRINGIZE(P<E>) "\"", CHECK)
 #define GLIB_CHECK_EXCEPTION(S, E, C) BOOST_CHECK_EXCEPTION_EX(S, E, TestUtils::ExpectException, C)
 #define GLIB_CHECK_RUNTIME_EXCEPTION(S, C) GLIB_CHECK_EXCEPTION(S, std::runtime_error, C)
 #define GLIB_CHECK_LOGIC_EXCEPTION(S, C) GLIB_CHECK_EXCEPTION(S, std::logic_error, C)
+// ReSharper restore All

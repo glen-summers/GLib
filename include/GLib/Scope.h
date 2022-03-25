@@ -11,7 +11,7 @@ namespace GLib::Detail
 
 	public:
 		explicit ScopedFunction(Function function)
-			: function(function)
+			: function(std::move(function))
 		{}
 
 		ScopedFunction(const ScopedFunction &) = delete;

@@ -163,6 +163,7 @@ git commit --no-edit --all --verbose --message init
 set DOCKER_SCAN_SUGGEST=false
 docker build --file dockerFile --target glib --tag glib .
 docker container run -t --rm -v $(VolumeShare) glib /src/GLib/go.sh
+docker image prune --force
 docker system df
 "/>
 	</Target>
@@ -170,24 +171,21 @@ docker system df
 	<Target Name="DockerCoverage">
 		<Exec WorkingDirectory="$(Root)" Command="
 set DOCKER_SCAN_SUGGEST=false
-docker build --file dockerFile --target glib-coverage --tag glib-coverage .
-docker container run -t --rm -v $(VolumeShare) glib-coverage /src/GLib/go.sh coverage
+docker build --file dockerFile --target glib --tag glib .
+docker container run -t --rm -v $(VolumeShare) glib /src/GLib/go.sh coverage
+docker image prune --force
+docker system df
 start $(out)\DockerShare\cmake\build\Debug\TestsCoverage\index.html
 "/>
 		<!-- todo copy out raw coverage files and merge with windows coverage-->
 	</Target>
 
 	<Target Name="DockerInfo">
-		<Exec Command="docker --version"/>
-		<Exec Command="docker image ls"/>
-	</Target>
-
-	<Target Name="DockerPurge">
-		<Exec Command="docker ps --quiet"/>
-		<Exec Command="docker system prune --all --force"/>
-		<Exec Command="docker images -f dangling=true"/>
-		<Exec Command="docker image ls --all"/>
-		<Exec Command="docker ps --all"/>
+		<Exec Command="
+docker --version
+docker image ls
+docker system df
+"/>
 	</Target>
 
 	<!-- fwds if exist? maybe split out-->

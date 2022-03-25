@@ -31,11 +31,18 @@ namespace GLib::Win
 			Restricted(Restricted &&) = delete;
 			Restricted & operator=(const Restricted &) = delete;
 			Restricted & operator=(Restricted &&) = delete;
-			~Restricted() = delete;
+			virtual ~Restricted() = delete;
 
 		private:
-			ULONG STDMETHODCALLTYPE AddRef() final;
-			ULONG STDMETHODCALLTYPE Release() final;
+			ULONG STDMETHODCALLTYPE AddRef()
+			{
+				return 0;
+			}
+
+			ULONG STDMETHODCALLTYPE Release()
+			{
+				return 0;
+			}
 		};
 	}
 

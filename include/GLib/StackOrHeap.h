@@ -19,8 +19,8 @@ namespace GLib::Util
 	public:
 		StackOrHeap() = default;
 		StackOrHeap(const StackOrHeap &) = delete;
-		StackOrHeap & operator=(const StackOrHeap &) = delete;
 		StackOrHeap(StackOrHeap &&) = delete;
+		StackOrHeap & operator=(const StackOrHeap &) = delete;
 		StackOrHeap & operator=(StackOrHeap &&) = delete;
 		~StackOrHeap() = default;
 

@@ -12,6 +12,7 @@ namespace GLib::Eval
 		CollectionBase(CollectionBase &&) = delete;
 		CollectionBase & operator=(const CollectionBase &) = delete;
 		CollectionBase & operator=(CollectionBase &&) = delete;
+
 		~CollectionBase() override = default;
 	};
 

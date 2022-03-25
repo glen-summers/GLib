@@ -380,10 +380,10 @@ BOOST_AUTO_TEST_CASE(MoneyTest)
 BOOST_AUTO_TEST_CASE(TestLargeObject)
 {
 	CopyCheck c1;
-	BOOST_CHECK(c1.Copies == 0 && c1.Moves == 0);
+	BOOST_CHECK(c1.Copies() == 0 && c1.Moves() == 0);
 
 	CopyCheck c2(c1);
-	BOOST_CHECK(c2.Copies == 1 && c1.Moves == 0);
+	BOOST_CHECK(c2.Copies() == 1 && c1.Moves() == 0);
 
 	CopyCheck c3;
 	std::string s = Formatter::Format("{0}", c3);

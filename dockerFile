@@ -36,10 +36,4 @@ COPY /GLib $dir/GLib
 COPY /include $dir/include
 COPY /Tests $dir/Tests
 COPY /Coverage/SymbolNameUtils.h $dir/Coverage/
-RUN ${HOME}/GLib/go.sh
-CMD ["/bin/bash"]
-
-FROM glib AS glib-coverage
-LABEL description="GLib Coverage Build"
-RUN ${HOME}/GLib/go.sh coverage
 CMD ["/bin/bash"]

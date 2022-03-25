@@ -30,6 +30,12 @@ namespace TestApp
 			SetTimer(std::chrono::seconds {exitTimeSeconds});
 		}
 
+		MainWindow(const MainWindow &) = delete;
+		MainWindow(MainWindow &&) = delete;
+		MainWindow & operator=(const MainWindow &) = delete;
+		MainWindow & operator=(MainWindow &&) = delete;
+		~MainWindow() override = default;
+
 	protected:
 		void OnCommand(int command) noexcept override
 		{
@@ -38,8 +44,8 @@ namespace TestApp
 				case ID_HELP_ABOUT:
 				{
 					int button {};
-					auto * icon = TD_INFORMATION_ICON; // NOLINT(cppcoreguidelines-pro-type-cstyle-cast) bad macro
-					GLib::Win::WarnHr(::TaskDialog(Handle(), Instance(), L"About", L"Main", L"Sub", TDCBF_CLOSE_BUTTON, icon, &button), "TaskDialog");
+					GLib::Win::WarnHr(TaskDialog(Handle(), Instance(), L"About", L"Main", L"Sub", TDCBF_CLOSE_BUTTON, TD_INFORMATION_ICON, &button),
+														"TaskDialog");
 					break;
 				}
 

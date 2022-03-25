@@ -12,7 +12,6 @@
 
 #include <GLib/Formatter.h>
 
-#include <functional>
 #include <memory>
 
 namespace GLib::Win
@@ -174,6 +173,30 @@ namespace GLib::Win
 			, accel {accel != 0 ? Detail::LoadAccel(accel) : nullptr}
 		{}
 
+		Window(const Window &) = delete;
+		Window(Window &&) = delete;
+		Window & operator=(const Window &) = delete;
+		Window & operator=(Window &&) = delete;
+
+	protected:
+		virtual ~Window() = default;
+
+		HWND Handle() const
+		{
+			return handle.get();
+		}
+
+		static HINSTANCE Instance()
+		{
+			return Detail::Instance();
+		}
+
+		LRESULT Send(UINT msg, WPARAM wParam = {}, LPARAM lParam = {}) const
+		{
+			return ::SendMessageW(Handle(), msg, wParam, lParam);
+		}
+
+	public:
 		int PumpMessages() const
 		{
 			MSG msg = {};
@@ -406,24 +429,6 @@ namespace GLib::Win
 					SetHandled(false);
 				}
 			}
-		}
-
-	protected:
-		~Window() = default;
-
-		HWND Handle() const
-		{
-			return handle.get();
-		}
-
-		static HINSTANCE Instance()
-		{
-			return Detail::Instance();
-		}
-
-		LRESULT Send(UINT msg, WPARAM wParam = {}, LPARAM lParam = {}) const
-		{
-			return ::SendMessageW(Handle(), msg, wParam, lParam);
 		}
 
 	private:

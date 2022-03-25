@@ -12,18 +12,6 @@
 
 #include <atomic>
 
-#define WRAP(x) x
-#define GLIB_COM_RULE_OF_FIVE(ClassName)                                                                                                             \
-public:                                                                                                                                              \
-	(ClassName)() = default;                                                                                                                           \
-	(ClassName)(const WRAP(ClassName) & other) = delete;                                                                                               \
-	(ClassName)(WRAP(ClassName) && other) noexcept = delete;                                                                                           \
-	WRAP(ClassName) & operator=(const WRAP(ClassName) & other) = delete;                                                                               \
-	WRAP(ClassName) & operator=(WRAP(ClassName) && other) noexcept = delete;                                                                           \
-                                                                                                                                                     \
-protected:                                                                                                                                           \
-	virtual ~ClassName() = default;
-
 namespace GLib::Win
 {
 	template <typename T>
@@ -100,7 +88,15 @@ namespace GLib::Win
 	public:
 		using DefaultInterface = typename Detail::First<Interfaces...>::Value;
 		using PtrType = ComPtr<DefaultInterface>;
-		GLIB_COM_RULE_OF_FIVE(Unknown)
+
+		Unknown() = default;
+		Unknown(const Unknown &) = delete;
+		Unknown(Unknown &&) = delete;
+		Unknown & operator=(const Unknown &) = delete;
+		Unknown & operator=(Unknown &&) = delete;
+
+	protected:
+		virtual ~Unknown() = default;
 
 		HRESULT STDMETHODCALLTYPE QueryInterface(const IID & id, void ** ppvObject) override
 		{

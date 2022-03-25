@@ -36,19 +36,19 @@ template <typename T>
 struct DeleteCounter
 {
 	DeleteCounter() = default;
-	DeleteCounter(const DeleteCounter & other) = default;
-	DeleteCounter(DeleteCounter && other) noexcept = default;
-	DeleteCounter & operator=(const DeleteCounter & other) = default;
-	DeleteCounter & operator=(DeleteCounter && other) noexcept = default;
-
-	static void Reset()
-	{
-		DeleteCount(0);
-	}
+	DeleteCounter(const DeleteCounter &) = delete;
+	DeleteCounter(DeleteCounter &&) = delete;
+	DeleteCounter & operator=(const DeleteCounter &) = delete;
+	DeleteCounter & operator=(DeleteCounter &&) = delete;
 
 	~DeleteCounter()
 	{
 		DeleteCount(1);
+	}
+
+	static void Reset()
+	{
+		DeleteCount(0);
 	}
 
 	static int DeleteCount(int add = 0)
@@ -63,9 +63,17 @@ struct DeleteCounter
 	}
 };
 
-class ImplementsITest1 final : public GLib::Win::Unknown<ImplementsITest1, ITest1>, public DeleteCounter<ImplementsITest1>
+class ImplementsITest1 final : public GLib::Win::Unknown<ImplementsITest1, ITest1>
 {
-	GLIB_COM_RULE_OF_FIVE(ImplementsITest1)
+	DeleteCounter<ImplementsITest1> counter;
+
+public:
+	ImplementsITest1() = default;
+	ImplementsITest1(const ImplementsITest1 &) = delete;
+	ImplementsITest1(ImplementsITest1 &&) = delete;
+	ImplementsITest1 & operator=(const ImplementsITest1 &) = delete;
+	ImplementsITest1 & operator=(ImplementsITest1 &&) = delete;
+	~ImplementsITest1() override = default;
 
 	HRESULT STDMETHODCALLTYPE Test1Method() override
 	{
@@ -73,10 +81,17 @@ class ImplementsITest1 final : public GLib::Win::Unknown<ImplementsITest1, ITest
 	}
 };
 
-class ImplementsITest1AndITest2 final : public GLib::Win::Unknown<ImplementsITest1AndITest2, ITest1, ITest2>,
-																				public DeleteCounter<ImplementsITest1AndITest2>
+class ImplementsITest1AndITest2 final : public GLib::Win::Unknown<ImplementsITest1AndITest2, ITest1, ITest2>
 {
-	GLIB_COM_RULE_OF_FIVE(ImplementsITest1AndITest2)
+	DeleteCounter<ImplementsITest1AndITest2> counter;
+
+public:
+	ImplementsITest1AndITest2() = default;
+	ImplementsITest1AndITest2(const ImplementsITest1AndITest2 &) = delete;
+	ImplementsITest1AndITest2(ImplementsITest1AndITest2 &&) = delete;
+	ImplementsITest1AndITest2 & operator=(const ImplementsITest1AndITest2 &) = delete;
+	ImplementsITest1AndITest2 & operator=(ImplementsITest1AndITest2 &&) = delete;
+	~ImplementsITest1AndITest2() override = default;
 
 	HRESULT STDMETHODCALLTYPE Test1Method() override
 	{
@@ -92,10 +107,17 @@ class ImplementsITest1AndITest2 final : public GLib::Win::Unknown<ImplementsITes
 class ImplementsITest1ExtendedAndITest1ExtendedAlt;
 
 class ImplementsITest1ExtendedAndITest1ExtendedAlt final
-	: public GLib::Win::Unknown<ImplementsITest1ExtendedAndITest1ExtendedAlt, ITest1Extended, ITest1, ITest1ExtendedAlt>,
-		public DeleteCounter<ImplementsITest1ExtendedAndITest1ExtendedAlt>
+	: public GLib::Win::Unknown<ImplementsITest1ExtendedAndITest1ExtendedAlt, ITest1Extended, ITest1, ITest1ExtendedAlt>
 {
-	GLIB_COM_RULE_OF_FIVE(ImplementsITest1ExtendedAndITest1ExtendedAlt)
+	DeleteCounter<ImplementsITest1ExtendedAndITest1ExtendedAlt> counter;
+
+public:
+	ImplementsITest1ExtendedAndITest1ExtendedAlt() = default;
+	ImplementsITest1ExtendedAndITest1ExtendedAlt(const ImplementsITest1ExtendedAndITest1ExtendedAlt &) = delete;
+	ImplementsITest1ExtendedAndITest1ExtendedAlt(ImplementsITest1ExtendedAndITest1ExtendedAlt &&) = delete;
+	ImplementsITest1ExtendedAndITest1ExtendedAlt & operator=(const ImplementsITest1ExtendedAndITest1ExtendedAlt &) = delete;
+	ImplementsITest1ExtendedAndITest1ExtendedAlt & operator=(ImplementsITest1ExtendedAndITest1ExtendedAlt &&) = delete;
+	~ImplementsITest1ExtendedAndITest1ExtendedAlt() override = default;
 
 	HRESULT STDMETHODCALLTYPE Test1Method() override
 	{
