@@ -7,8 +7,6 @@
 #include "HtmlReport.h"
 #include "SymbolNameUtils.h"
 
-#include <fstream>
-
 WideStrings Coverage::A2W(const Strings & strings)
 {
 	WideStrings wideStrings;
@@ -37,13 +35,13 @@ void Coverage::AddLine(const std::wstring & fileName, unsigned lineNumber, const
 
 		for (const auto & value : includes)
 		{
-			bool const isMatch = ::_wcsnicmp(value.c_str(), fileName.c_str(), value.size()) == 0;
+			bool const isMatch = _wcsnicmp(value.c_str(), fileName.c_str(), value.size()) == 0;
 			include |= isMatch;
 		}
 
 		for (const auto & value : excludes)
 		{
-			bool const isMatch = ::_wcsnicmp(value.c_str(), fileName.c_str(), value.size()) == 0;
+			bool const isMatch = _wcsnicmp(value.c_str(), fileName.c_str(), value.size()) == 0;
 			exclude |= isMatch;
 		}
 
@@ -173,13 +171,13 @@ DWORD Coverage::OnException(DWORD processId, DWORD threadId, const EXCEPTION_DEB
 
 			CONTEXT ctx {};
 			ctx.ContextFlags = CONTEXT_ALL; // NOLINT(hicpp-signed-bitwise) bad macro
-			GLib::Win::Util::AssertTrue(::GetThreadContext(threadHandle, &ctx), "GetThreadContext");
+			GLib::Win::Util::AssertTrue(GetThreadContext(threadHandle, &ctx), "GetThreadContext");
 #ifdef _WIN64
 			--ctx.Rip;
 #elif _WIN32
 			--ctx.Eip;
 #endif
-			GLib::Win::Util::AssertTrue(::SetThreadContext(threadHandle, &ctx), "SetThreadContext");
+			GLib::Win::Util::AssertTrue(SetThreadContext(threadHandle, &ctx), "SetThreadContext");
 		}
 		return DBG_CONTINUE;
 	}

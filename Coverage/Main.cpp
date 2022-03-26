@@ -40,7 +40,7 @@ Coverage c:\Build\Main.exe C:\Report -ws -i C:\MainCode C:\Utils\ -x C:\External
 			return errorCode;
 		}
 
-		std::span<char *> const args {argv, static_cast<size_t>(argc)};
+		std::span const args {argv, static_cast<size_t>(argc)};
 
 		auto it = args.begin();
 		auto end = args.end();

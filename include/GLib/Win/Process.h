@@ -25,11 +25,11 @@ namespace GLib::Win
 		inline bool Terminate(HANDLE process, UINT terminationExitCode) noexcept
 		{
 			DWORD exitCode = 0;
-			BOOL result = ::GetExitCodeProcess(process, &exitCode);
+			BOOL result = GetExitCodeProcess(process, &exitCode);
 			bool stillRunning = result != FALSE && exitCode == STILL_ACTIVE;
 			if (stillRunning)
 			{
-				Util::WarnAssertTrue(::TerminateProcess(process, terminationExitCode), "TerminateProcess");
+				Util::WarnAssertTrue(TerminateProcess(process, terminationExitCode), "TerminateProcess");
 			}
 			return stillRunning;
 		}
@@ -60,7 +60,7 @@ namespace GLib::Win
 
 		static int CurrentId()
 		{
-			return ::GetCurrentProcessId();
+			return GetCurrentProcessId();
 		}
 
 		static HMODULE CurrentModule()
@@ -70,7 +70,7 @@ namespace GLib::Win
 
 		Process(Handle handle)
 			: p(std::move(handle))
-			, threadId(::GetThreadId(p.get()))
+			, threadId(GetThreadId(p.get()))
 		{}
 
 		// creation flags  DETACHED_PROCESS?
@@ -105,7 +105,7 @@ namespace GLib::Win
 
 		DWORD Id() const
 		{
-			DWORD pid = ::GetProcessId(p.get());
+			DWORD pid = GetProcessId(p.get());
 			Util::AssertTrue(pid != 0, "GetProcessId");
 			return pid;
 		}
@@ -126,7 +126,7 @@ namespace GLib::Win
 		DWORD ExitCode() const
 		{
 			DWORD exitCode = 0;
-			BOOL win32Result = ::GetExitCodeProcess(p.get(), &exitCode);
+			BOOL win32Result = GetExitCodeProcess(p.get(), &exitCode);
 			Util::AssertTrue(win32Result, "GetExitCodeProcess");
 			return exitCode;
 		}
@@ -138,20 +138,20 @@ namespace GLib::Win
 
 		void ReadMemory(uint64_t address, void * buffer, size_t size) const
 		{
-			BOOL result = ::ReadProcessMemory(p.get(), Detail::ToAddress(address), buffer, size, nullptr);
+			BOOL result = ReadProcessMemory(p.get(), Detail::ToAddress(address), buffer, size, nullptr);
 			Util::AssertTrue(result, "ReadProcessMemory");
 		}
 
 		template <typename T>
 		void ReadMemory(uint64_t address, void * buffer, size_t size) const
 		{
-			BOOL result = ::ReadProcessMemory(p.get(), Detail::ToAddress(address), buffer, size * sizeof(T), nullptr);
+			BOOL result = ReadProcessMemory(p.get(), Detail::ToAddress(address), buffer, size * sizeof(T), nullptr);
 			Util::AssertTrue(result, "ReadProcessMemory");
 		}
 
 		void WriteMemory(uint64_t address, const void * buffer, size_t size) const
 		{
-			BOOL result = ::WriteProcessMemory(p.get(), Detail::ToPseudoWritableAddress(address), buffer, size, nullptr);
+			BOOL result = WriteProcessMemory(p.get(), Detail::ToPseudoWritableAddress(address), buffer, size, nullptr);
 			Util::AssertTrue(result, "WriteProcessMemory");
 		}
 
@@ -166,8 +166,8 @@ namespace GLib::Win
 			STARTUPINFOW sui = {};
 			sui.cb = sizeof(STARTUPINFOW);
 
-			std::unique_ptr<wchar_t, void (*)(void *)> cmdCopy {::_wcsdup(cmd.c_str()), std::free};
-			std::unique_ptr<wchar_t, void (*)(void *)> desktopCopy {::_wcsdup(desktop.c_str()), std::free};
+			std::unique_ptr<wchar_t, void (*)(void *)> cmdCopy {_wcsdup(cmd.c_str()), std::free};
+			std::unique_ptr<wchar_t, void (*)(void *)> desktopCopy {_wcsdup(desktop.c_str()), std::free};
 
 			sui.lpDesktop = desktopCopy.get();
 			sui.dwFlags = STARTF_USESHOWWINDOW;
@@ -175,7 +175,7 @@ namespace GLib::Win
 
 			PROCESS_INFORMATION pi = {};
 
-			Util::AssertTrue(::CreateProcessW(app.c_str(), cmdCopy.get(), nullptr, nullptr, FALSE, creationFlags, nullptr, nullptr, &sui, &pi),
+			Util::AssertTrue(CreateProcessW(app.c_str(), cmdCopy.get(), nullptr, nullptr, FALSE, creationFlags, nullptr, nullptr, &sui, &pi),
 											 "CreateProcessW");
 			Win::Handle(pi.hThread).reset();
 			return Win::Handle {pi.hProcess};
@@ -183,7 +183,7 @@ namespace GLib::Win
 
 		static void Wait(HANDLE h, DWORD timeoutMilliseconds)
 		{
-			CheckWaitResult(::WaitForSingleObject(h, timeoutMilliseconds));
+			CheckWaitResult(WaitForSingleObject(h, timeoutMilliseconds));
 		}
 
 		static void CheckWaitResult(DWORD result)
@@ -195,7 +195,7 @@ namespace GLib::Win
 				case WAIT_TIMEOUT:
 					throw std::exception("Timeout waiting for exit");
 				case WAIT_FAILED:
-					Util::Detail::Throw("CheckWaitResult", ::GetLastError());
+					Util::Detail::Throw("CheckWaitResult", GetLastError());
 				default:
 					throw std::runtime_error("Unexpected result");
 			}

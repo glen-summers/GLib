@@ -119,20 +119,20 @@ namespace GLib::Win
 			auto wideName = Cvt::A2W(name);
 			auto wideValue = Cvt::A2W(value);
 			auto valueSize = static_cast<DWORD>((wideName.size() + 1) * sizeof(wchar_t));
-			const auto * valueBytes = Detail::ToBytes(wideValue.c_str());
-			Util::AssertSuccess(::RegSetValueExW(key, wideName.c_str(), 0, type, valueBytes, valueSize), "RegSetValueEx");
+			const auto * valueBytes = ToBytes(wideValue.c_str());
+			Util::AssertSuccess(RegSetValueExW(key, wideName.c_str(), 0, type, valueBytes, valueSize), "RegSetValueEx");
 		}
 
 		inline std::string GetString(HKEY key, const std::wstring & valueName)
 		{
 			DWORD size {};
 			DWORD flags = static_cast<DWORD>(RRF_RT_REG_SZ) | static_cast<DWORD>(RRF_RT_REG_EXPAND_SZ);
-			LSTATUS result = ::RegGetValueW(key, nullptr, valueName.c_str(), flags, nullptr, nullptr, &size);
+			LSTATUS result = RegGetValueW(key, nullptr, valueName.c_str(), flags, nullptr, nullptr, &size);
 			Util::AssertSuccess(result, "RegGetValue");
 
 			GLib::Util::WideCharBuffer data;
 			data.EnsureSize(size / sizeof(wchar_t));
-			result = ::RegGetValueW(key, nullptr, valueName.c_str(), flags, nullptr, data.Get(), &size);
+			result = RegGetValueW(key, nullptr, valueName.c_str(), flags, nullptr, data.Get(), &size);
 			Util::AssertSuccess(result, "RegGetValue");
 			return Cvt::W2A(data.Get());
 		}
@@ -143,7 +143,7 @@ namespace GLib::Win
 			DWORD actualTypeCode {};
 			T value {};
 			DWORD bytes {sizeof(T)};
-			LSTATUS result = ::RegQueryValueExW(key, valueName.c_str(), nullptr, &actualTypeCode, Detail::ToBytes(&value), &bytes);
+			LSTATUS result = RegQueryValueExW(key, valueName.c_str(), nullptr, &actualTypeCode, Detail::ToBytes(&value), &bytes);
 			Util::AssertSuccess(result, "RegQueryValueEx");
 			return value;
 		}
@@ -168,7 +168,7 @@ namespace GLib::Win
 		bool KeyExists(std::string_view path) const
 		{
 			HKEY resultKey {};
-			LSTATUS result = ::RegOpenKeyW(key.Get(), Cvt::A2W(path).c_str(), &resultKey);
+			LSTATUS result = RegOpenKeyW(key.Get(), Cvt::A2W(path).c_str(), &resultKey);
 			bool exists = Detail::Found(result, "RegOpenKey");
 			if (exists)
 			{
@@ -197,7 +197,7 @@ namespace GLib::Win
 			auto wideName = Cvt::A2W(valueName);
 			DWORD bytes {};
 			DWORD actualTypeCode {};
-			LSTATUS result = ::RegQueryValueExW(key.Get(), wideName.c_str(), nullptr, &actualTypeCode, nullptr, &bytes);
+			LSTATUS result = RegQueryValueExW(key.Get(), wideName.c_str(), nullptr, &actualTypeCode, nullptr, &bytes);
 			Util::AssertSuccess(result, "RegQueryValueEx");
 
 			switch (actualTypeCode)
@@ -230,20 +230,20 @@ namespace GLib::Win
 
 		void SetInt32(std::string_view name, uint32_t value) const
 		{
-			LSTATUS result = ::RegSetValueExW(key.Get(), Cvt::A2W(name).c_str(), 0, REG_DWORD, Detail::ToBytes(&value), sizeof(value));
+			LSTATUS result = RegSetValueExW(key.Get(), Cvt::A2W(name).c_str(), 0, REG_DWORD, Detail::ToBytes(&value), sizeof(value));
 			Util::AssertSuccess(result, "RegSetValueEx");
 		}
 
 		void SetInt64(std::string_view name, uint64_t value) const
 		{
-			LSTATUS result = ::RegSetValueExW(key.Get(), Cvt::A2W(name).c_str(), 0, REG_QWORD, Detail::ToBytes(&value), sizeof(value));
+			LSTATUS result = RegSetValueExW(key.Get(), Cvt::A2W(name).c_str(), 0, REG_QWORD, Detail::ToBytes(&value), sizeof(value));
 			Util::AssertSuccess(result, "RegSetValueEx");
 		}
 
 		SubKey OpenSubKey(std::string_view path) const
 		{
 			HKEY subKey;
-			LSTATUS result = ::RegOpenKeyExW(key.Get(), Cvt::A2W(path).c_str(), 0, Detail::Read, &subKey);
+			LSTATUS result = RegOpenKeyExW(key.Get(), Cvt::A2W(path).c_str(), 0, Detail::Read, &subKey);
 			Util::AssertSuccess(result, "RegOpenKeyEx");
 			return {Detail::KeyHolder {subKey}};
 		}

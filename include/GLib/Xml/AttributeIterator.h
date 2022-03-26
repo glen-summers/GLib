@@ -22,7 +22,7 @@ namespace GLib::Xml
 	{
 		using Iterator = std::string_view::const_iterator;
 
-		Xml::StateEngine engine;
+		StateEngine engine;
 		const NameSpaceManager * manager {};
 		Iterator ptr;
 		Iterator end;
@@ -112,7 +112,7 @@ namespace GLib::Xml
 				const auto oldPtr = ptr;
 				const auto oldState = engine.GetState();
 				const auto newState = engine.Push(*ptr);
-				if (newState == Xml::State::Error)
+				if (newState == State::Error)
 				{
 					IllegalCharacter(*ptr);
 				}
@@ -120,23 +120,23 @@ namespace GLib::Xml
 
 				if (newState != oldState)
 				{
-					if (newState == Xml::State::AttributeEntity || oldState == Xml::State::AttributeEntity)
+					if (newState == State::AttributeEntity || oldState == State::AttributeEntity)
 					{
 						continue; // currently ignoring entities, receiver needs to decode
 					}
 
 					switch (oldState)
 					{
-						case Xml::State::AttributeName:
+						case State::AttributeName:
 						{
 							attributeName.second = oldPtr;
 							break;
 						}
 
-						case Xml::State::AttributeValue:
+						case State::AttributeValue:
 						{
 							attributeValue.second = oldPtr;
-							if (manager == nullptr || !Xml::NameSpaceManager::IsDeclaration(Utils::ToStringView(attributeName)))
+							if (manager == nullptr || !NameSpaceManager::IsDeclaration(Utils::ToStringView(attributeName)))
 							{
 								return;
 							}
@@ -151,13 +151,13 @@ namespace GLib::Xml
 
 					switch (newState)
 					{
-						case Xml::State::AttributeName:
+						case State::AttributeName:
 						{
 							attributeName.first = oldPtr;
 							break;
 						}
 
-						case Xml::State::AttributeValue:
+						case State::AttributeValue:
 						{
 							attributeValue.first = ptr;
 							break;

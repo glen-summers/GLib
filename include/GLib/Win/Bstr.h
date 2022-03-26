@@ -36,7 +36,7 @@ namespace GLib::Win
 
 		~Bstr()
 		{
-			::SysFreeString(value);
+			SysFreeString(value);
 		}
 
 		bool HasValue() const

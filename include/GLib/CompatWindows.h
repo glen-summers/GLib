@@ -50,9 +50,9 @@ namespace GLib::Compat
 	{
 		auto wideName = Cvt::A2W(name);
 
-		GLib::Util::WideCharBuffer tmp;
+		Util::WideCharBuffer tmp;
 		size_t len = 0;
-		errno_t err = ::_wgetenv_s(&len, tmp.Get(), tmp.size(), wideName.c_str());
+		errno_t err = _wgetenv_s(&len, tmp.Get(), tmp.size(), wideName.c_str());
 		if (len == 0)
 		{
 			return {};
@@ -84,12 +84,12 @@ namespace GLib::Compat
 
 	inline int64_t ProcessId()
 	{
-		return ::GetCurrentProcessId();
+		return GetCurrentProcessId();
 	}
 
 	inline std::string ProcessPath()
 	{
-		return GLib::Win::FileSystem::PathOfModule(nullptr);
+		return Win::FileSystem::PathOfModule(nullptr);
 	}
 
 	inline std::string ProcessName()
@@ -99,12 +99,12 @@ namespace GLib::Compat
 
 	inline std::string CommandLine()
 	{
-		return GLib::Cvt::W2A(::GetCommandLineW());
+		return Cvt::W2A(GetCommandLineW());
 	}
 
 	inline void TzSet()
 	{
-		::_tzset();
+		_tzset();
 	}
 }
 

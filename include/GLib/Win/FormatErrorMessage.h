@@ -56,18 +56,18 @@ namespace GLib::Win::Util
 			flags |= Detail::Flags::FromHandle;
 		}
 
-		HMODULE module(moduleName != nullptr ? ::LoadLibraryW(moduleName) : nullptr);
+		HMODULE module(moduleName != nullptr ? LoadLibraryW(moduleName) : nullptr);
 		auto * requiredCast = Detail::WindowsCast<LPWSTR>(&pszMsg);
-		auto result = ::FormatMessageW(static_cast<DWORD>(flags), module, error, Detail::Make(Detail::Lang::Neutral, Detail::Lang::SubDefault),
-																	 requiredCast, 0, nullptr);
+		auto result =
+			FormatMessageW(static_cast<DWORD>(flags), module, error, Make(Detail::Lang::Neutral, Detail::Lang::SubDefault), requiredCast, 0, nullptr);
 		if (module != nullptr)
 		{
-			::FreeLibrary(module);
+			FreeLibrary(module);
 		}
 
 		if (result != 0)
 		{
-			size_t len = ::wcslen(pszMsg);
+			size_t len = wcslen(pszMsg);
 			std::wstring_view wMsg {pszMsg, len};
 			constexpr std::wstring_view ending = L"\r\n";
 			if (std::equal(ending.rbegin(), ending.rend(), wMsg.rbegin()))
@@ -84,7 +84,7 @@ namespace GLib::Win::Util
 		}
 		if (module != nullptr)
 		{
-			::FreeLibrary(module);
+			FreeLibrary(module);
 		}
 	}
 }

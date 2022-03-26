@@ -72,11 +72,11 @@ namespace GLib::Win
 		{
 			void operator()(HWND hWnd) const noexcept
 			{
-				Util::WarnAssertTrue(::DestroyWindow(hWnd), "DestroyWindow");
+				Util::WarnAssertTrue(DestroyWindow(hWnd), "DestroyWindow");
 			}
 		};
 
-		using WindowHandle = std::unique_ptr<HWND__, Detail::WindowDestroyer>;
+		using WindowHandle = std::unique_ptr<HWND__, WindowDestroyer>;
 
 		class ClassInfoStore
 		{
@@ -96,12 +96,12 @@ namespace GLib::Win
 			auto * instance = Instance();
 
 			WNDCLASSEXW wc {};
-			BOOL exists = ::GetClassInfoExW(instance, className.c_str(), &wc);
+			BOOL exists = GetClassInfoExW(instance, className.c_str(), &wc);
 			if (exists == 0)
 			{
-				Util::AssertTrue(::GetLastError() == ERROR_CLASS_DOES_NOT_EXIST, "GetClassInfoExW");
+				Util::AssertTrue(GetLastError() == ERROR_CLASS_DOES_NOT_EXIST, "GetClassInfoExW");
 
-				HICON i = icon == 0 ? nullptr : ::LoadIconW(instance, MakeIntResource(icon));
+				HICON i = icon == 0 ? nullptr : LoadIconW(instance, MakeIntResource(icon));
 
 				wc = {sizeof(WNDCLASSEXW),
 							HRedraw | VRedraw,
@@ -110,34 +110,34 @@ namespace GLib::Win
 							0,
 							instance,
 							i,
-							::LoadCursorW(nullptr, IDC_ARROW), // NOLINT(cppcoreguidelines-pro-type-cstyle-cast) bad macro
+							LoadCursorW(nullptr, IDC_ARROW), // NOLINT(cppcoreguidelines-pro-type-cstyle-cast) bad macro
 							Util::Detail::WindowsCast<HBRUSH>(size_t {COLOR_WINDOW} + 1),
 							MakeIntResource(menu),
 							className.c_str(),
 							{}};
 
-				Util::AssertTrue(::RegisterClassExW(&wc) != 0, "RegisterClassExW");
+				Util::AssertTrue(RegisterClassExW(&wc) != 0, "RegisterClassExW");
 			}
 			return Cvt::W2A(className);
 		}
 
 		inline void AssociateHandle(Window * value, HWND handle)
 		{
-			::SetLastError(ERROR_SUCCESS); // SetWindowLongPtr does not set last error on success
-			auto ret = ::SetWindowLongPtr(handle, GWLP_USERDATA, Util::Detail::WindowsCast<LONG_PTR>(value));
-			Util::AssertTrue(ret != 0 || ::GetLastError() == ERROR_SUCCESS, "SetWindowLongPtr");
+			SetLastError(ERROR_SUCCESS); // SetWindowLongPtr does not set last error on success
+			auto ret = SetWindowLongPtrW(handle, GWLP_USERDATA, Util::Detail::WindowsCast<LONG_PTR>(value));
+			Util::AssertTrue(ret != 0 || GetLastError() == ERROR_SUCCESS, "SetWindowLongPtr");
 		}
 
 		inline Window * FromHandle(HWND hWnd)
 		{
-			return Util::Detail::WindowsCast<Window *>(::GetWindowLongPtr(hWnd, GWLP_USERDATA));
+			return Util::Detail::WindowsCast<Window *>(GetWindowLongPtrW(hWnd, GWLP_USERDATA));
 		}
 
 		inline WindowHandle Create(DWORD style, int icon, int menu, const std::string & title, WNDPROC proc, Window * param)
 		{
-			std::string className = RegisterClass(icon, menu, proc);
-			Detail::WindowHandle handle(::CreateWindowExW(0, Cvt::A2W(className).c_str(), Cvt::A2W(title).c_str(), style, CW_USEDEFAULT, 0, CW_USEDEFAULT,
-																										0, nullptr, nullptr, Instance(), param));
+			std::string className = RegisterClassW(icon, menu, proc);
+			WindowHandle handle(CreateWindowExW(0, Cvt::A2W(className).c_str(), Cvt::A2W(title).c_str(), style, CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, nullptr,
+																					nullptr, Instance(), param));
 			Util::AssertTrue(!!handle, "CreateWindowExW");
 			AssociateHandle(param, handle.get());
 
@@ -150,7 +150,7 @@ namespace GLib::Win
 
 		inline HACCEL LoadAccel(int id)
 		{
-			HACCEL accel = ::LoadAcceleratorsW(Instance(), MakeIntResource(id));
+			HACCEL accel = LoadAcceleratorsW(Instance(), MakeIntResource(id));
 			Util::AssertTrue(accel != nullptr, "LoadAcceleratorsW");
 			return accel;
 		}
@@ -193,20 +193,20 @@ namespace GLib::Win
 
 		LRESULT Send(UINT msg, WPARAM wParam = {}, LPARAM lParam = {}) const
 		{
-			return ::SendMessageW(Handle(), msg, wParam, lParam);
+			return SendMessageW(Handle(), msg, wParam, lParam);
 		}
 
 	public:
 		int PumpMessages() const
 		{
 			MSG msg = {};
-			while (::GetMessageW(&msg, nullptr, 0, 0) != FALSE) // returns -1 on error?
+			while (GetMessageW(&msg, nullptr, 0, 0) != FALSE) // returns -1 on error?
 			{
-				auto ret = ::TranslateAcceleratorW(handle.get(), accel, &msg); // no error if hAccel is null
+				auto ret = TranslateAcceleratorW(handle.get(), accel, &msg); // no error if hAccel is null
 				if (ret == 0)
 				{
-					::TranslateMessage(&msg);
-					::DispatchMessageW(&msg);
+					TranslateMessage(&msg);
+					DispatchMessageW(&msg);
 				}
 			}
 			return static_cast<int>(msg.wParam);
@@ -215,19 +215,19 @@ namespace GLib::Win
 		Size ClientSize() const
 		{
 			RECT rc;
-			Util::AssertTrue(::GetClientRect(handle.get(), &rc), "GetClientRect");
+			Util::AssertTrue(GetClientRect(handle.get(), &rc), "GetClientRect");
 			return {rc.right - rc.left, rc.bottom - rc.top};
 		}
 
 		bool Show(int cmd) const
 		{
-			return ::ShowWindow(handle.get(), cmd) != FALSE;
+			return ShowWindow(handle.get(), cmd) != FALSE;
 		}
 
 		Painter GetPainter() const
 		{
 			PAINTSTRUCT ps {};
-			auto * dc = ::BeginPaint(handle.get(), &ps);
+			auto * dc = BeginPaint(handle.get(), &ps);
 			return Painter {PaintInfo {ps, handle.get(), dc}};
 		}
 
@@ -238,15 +238,18 @@ namespace GLib::Win
 
 		void Destroy() const
 		{
-			::DestroyWindow(handle.get());
+			DestroyWindow(handle.get());
 		}
 
+#pragma push_macro("MessageBox")
+#undef MessageBox
 		int MessageBox(const std::string & message, const std::string & caption, UINT type = MB_OK) const
 		{
-			int result = ::MessageBoxW(handle.get(), Cvt::A2W(message).c_str(), Cvt::A2W(caption).c_str(), type);
+			int result = MessageBoxW(handle.get(), Cvt::A2W(message).c_str(), Cvt::A2W(caption).c_str(), type);
 			Util::AssertTrue(result != 0, "MessageBoxW");
 			return result;
 		}
+#pragma pop_macro("MessageBox")
 
 		template <typename R, typename P>
 		void SetTimer(const std::chrono::duration<R, P> & interval, UINT_PTR id = 1) const
@@ -264,7 +267,7 @@ namespace GLib::Win
 
 		void Invalidate(bool erase) const
 		{
-			Util::AssertTrue(::InvalidateRect(Handle(), nullptr, erase ? TRUE : FALSE), "InvalidateRect");
+			Util::AssertTrue(InvalidateRect(Handle(), nullptr, erase ? TRUE : FALSE), "InvalidateRect");
 		}
 
 		static void SetHandled(bool newValue = true)
@@ -446,7 +449,7 @@ namespace GLib::Win
 
 			if (!handled)
 			{
-				result = ::DefWindowProc(hWnd, message, wParam, lParam);
+				result = DefWindowProc(hWnd, message, wParam, lParam);
 			}
 
 #ifdef GLIB_DEBUG_MESSAGES

@@ -20,7 +20,7 @@ namespace GLib::Win::Util
 		static Uuid CreateRandom()
 		{
 			UUID uuid;
-			CheckHr(::UuidCreate(&uuid), "UuidCreate");
+			CheckHr(UuidCreate(&uuid), "UuidCreate");
 			return Uuid {uuid};
 		}
 

@@ -80,7 +80,7 @@ namespace GLib::Win::Util
 #ifdef _DEBUG // || defined(GLIB_DEBUG)
 				if (!result)
 				{
-					Debug::Stream() << "GLib warning: " << Detail::FormatErrorMessage(message, errorCode) << std::endl;
+					Debug::Stream() << "GLib warning: " << FormatErrorMessage(message, errorCode) << std::endl;
 				}
 #else
 				static_cast<void>(message);
@@ -119,13 +119,13 @@ namespace GLib::Win::Util
 	template <typename T>
 	bool AssertTrue(T result, std::string_view message)
 	{
-		return Detail::Checker::AssertTrue(result, message, ::GetLastError());
+		return Detail::Checker::AssertTrue(result, message, GetLastError());
 	}
 
 	template <typename T>
 	bool WarnAssertTrue(T result, std::string_view message)
 	{
-		return Detail::Checker::WarnAssertTrue(result, message, ::GetLastError());
+		return Detail::Checker::WarnAssertTrue(result, message, GetLastError());
 	}
 
 	template <typename T>

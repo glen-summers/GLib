@@ -73,8 +73,8 @@ namespace GLib::Win
 		bool ProcessEvents(DWORD timeout)
 		{
 			DEBUG_EVENT debugEvent {};
-			BOOL const result = ::WaitForDebugEventEx(&debugEvent, timeout);
-			Util::WarnAssertTrue(result == TRUE || ::GetLastError() == ERROR_SEM_TIMEOUT, "WaitForDebugEventEx");
+			BOOL const result = WaitForDebugEventEx(&debugEvent, timeout);
+			Util::WarnAssertTrue(result == TRUE || GetLastError() == ERROR_SEM_TIMEOUT, "WaitForDebugEventEx");
 			if (result == FALSE)
 			{
 				return !exitCode.has_value();
@@ -158,7 +158,7 @@ namespace GLib::Win
 				}
 			}
 
-			Util::AssertTrue(::ContinueDebugEvent(debugEvent.dwProcessId, debugEvent.dwThreadId, continueStatus), "ContinueDebugEvent");
+			Util::AssertTrue(ContinueDebugEvent(debugEvent.dwProcessId, debugEvent.dwThreadId, continueStatus), "ContinueDebugEvent");
 			return true;
 		}
 

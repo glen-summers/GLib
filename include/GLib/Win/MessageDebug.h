@@ -11,7 +11,7 @@ namespace GLib::Win
 			GLib::Util::WideCharBuffer s;
 			for (;;)
 			{
-				unsigned int lengthNoNull = ::GetClassNameW(hWnd, s.Get(), static_cast<int>(s.size()));
+				unsigned int lengthNoNull = GetClassNameW(hWnd, s.Get(), static_cast<int>(s.size()));
 				Util::AssertTrue(lengthNoNull != 0, "GetClassNameW");
 				if (lengthNoNull < s.size() - 1)
 				{
@@ -28,14 +28,14 @@ namespace GLib::Win
 	public:
 		static void Write(const std::string & context, HWND hWnd, const void * param)
 		{
-			std::string className = ::IsWindow(hWnd) != 0 ? Detail::ClassName(hWnd) : "<unknown>";
+			std::string className = IsWindow(hWnd) != 0 ? Detail::ClassName(hWnd) : "<unknown>";
 			Debug::Write("{0} ClassName:{1}, Param:{2}, hWnd:{3}", context, className, param, hWnd);
 		}
 
 		template <typename T>
 		static void Write(T * source, HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam, LRESULT result)
 		{
-			bool isWindow = ::IsWindow(hWnd);
+			bool isWindow = IsWindow(hWnd);
 			std::string sourceName = isWindow && source ? Compat::Unmangle(typeid(*source).name()) : "<unknown>"; // +hex value odf source
 
 			std::string msgName;

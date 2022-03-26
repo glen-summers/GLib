@@ -67,6 +67,6 @@ namespace GLib::Util
 	};
 
 	constexpr auto DefaultStackReserveSize = 256;
-	using CharBuffer = Util::StackOrHeap<char, DefaultStackReserveSize>;
-	using WideCharBuffer = Util::StackOrHeap<wchar_t, DefaultStackReserveSize>;
+	using CharBuffer = StackOrHeap<char, DefaultStackReserveSize>;
+	using WideCharBuffer = StackOrHeap<wchar_t, DefaultStackReserveSize>;
 }

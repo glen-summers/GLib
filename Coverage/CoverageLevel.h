@@ -16,7 +16,7 @@ inline unsigned int Percentage(size_t value, size_t amount)
 	return static_cast<unsigned int>(HundredPercent * value / amount);
 }
 
-inline std::ostream & operator<<(std::ostream & s, enum CoverageLevel coverageLevel)
+inline std::ostream & operator<<(std::ostream & s, CoverageLevel coverageLevel)
 {
 	switch (coverageLevel)
 	{
@@ -31,13 +31,11 @@ inline std::ostream & operator<<(std::ostream & s, enum CoverageLevel coverageLe
 		case CoverageLevel::Green:
 			s << "green";
 			break;
-
-		default:;
 	}
 	return s;
 }
 
-inline enum CoverageLevel CoverageLevel(unsigned int coveragePercent)
+inline CoverageLevel CoverageLevel(unsigned int coveragePercent)
 {
 	const int lowValue = 70; // config
 	const int highValue = 90;

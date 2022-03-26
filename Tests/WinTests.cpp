@@ -132,7 +132,7 @@ BOOST_AUTO_TEST_CASE(TestDebugStream)
 	Debug::Write("DebugStreamTest1");
 	Debug::Write("DebugStreamTest2 {0} {1} {2}", 1, 2, 3);
 	Debug::Write("Utf8 \xE2\x82\xAC");
-	::OutputDebugStringA("Write utf8 \xE2\x82\xAC directly for Debugger test\r\n");
+	OutputDebugStringA("Write utf8 \xE2\x82\xAC directly for Debugger test\r\n");
 }
 
 BOOST_AUTO_TEST_CASE(TestProcess)
@@ -151,7 +151,7 @@ BOOST_AUTO_TEST_CASE(TestProcess)
 
 BOOST_AUTO_TEST_CASE(TestErrorCheck)
 {
-	::SetLastError(ERROR_ACCESS_DENIED);
+	SetLastError(ERROR_ACCESS_DENIED);
 	GLIB_CHECK_EXCEPTION(Util::AssertTrue(false, "test fail"), WinException, "test fail : Access is denied. (5)");
 }
 
@@ -322,7 +322,7 @@ BOOST_AUTO_TEST_CASE(TestApp1)
 	BOOL value;
 	CheckHr(wp->get_CurrentCanMaximize(&value), "get_CurrentCanMaximize");
 	BOOST_CHECK(value == TRUE);
-	CheckHr(wp->SetWindowVisualState(WindowVisualState::WindowVisualState_Maximized), "SetWindowVisualState");
+	CheckHr(wp->SetWindowVisualState(WindowVisualState_Maximized), "SetWindowVisualState");
 
 	CheckHr(wp->Close(), "Close");
 

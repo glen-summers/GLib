@@ -24,7 +24,7 @@ namespace GLib::Win
 			std::ostringstream stm;
 			stm << message << " : ";
 			ComPtr<IErrorInfo> errorInfo;
-			if (::GetErrorInfo(0, GetAddress(errorInfo)) == S_OK)
+			if (GetErrorInfo(0, GetAddress(errorInfo)) == S_OK)
 			{
 				Bstr description;
 				errorInfo->GetDescription(GetAddress(description));

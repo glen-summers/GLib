@@ -253,7 +253,7 @@ void HtmlReport::GenerateIndices() const
 
 void HtmlReport::GenerateSourceFile(std::filesystem::path & subPath, const FileCoverageData & data) const
 {
-	const auto & targetPath = (htmlPath / subPath);
+	const auto & targetPath = htmlPath / subPath;
 	auto relativePath = relative(htmlPath, targetPath.parent_path());
 
 	const std::filesystem::path & sourceFile = data.Path();

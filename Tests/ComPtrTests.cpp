@@ -37,23 +37,23 @@ BOOST_AUTO_TEST_SUITE(ComPtrTests)
 BOOST_AUTO_TEST_CASE(ComErrorCheckWithErrorInfo)
 {
 	GLib::Win::ComPtr<ICreateErrorInfo> p;
-	GLib::Win::CheckHr(::CreateErrorInfo(GetAddress(p)), "CreateErrorInfo");
+	GLib::Win::CheckHr(CreateErrorInfo(GetAddress(p)), "CreateErrorInfo");
 	auto ei = GLib::Win::ComCast<IErrorInfo>(p);
 	p->SetDescription(const_cast<LPOLESTR>(L"hello"));
-	GLib::Win::CheckHr(::SetErrorInfo(0, Get(ei)), "SetErrorInfo");
+	GLib::Win::CheckHr(SetErrorInfo(0, Get(ei)), "SetErrorInfo");
 
 	GLIB_CHECK_EXCEPTION(GLib::Win::CheckHr(E_OUTOFMEMORY, "fail"), GLib::Win::ComException, "fail : hello (8007000E)");
 }
 
 BOOST_AUTO_TEST_CASE(ComErrorCheck)
 {
-	::SetErrorInfo(0, nullptr);
+	SetErrorInfo(0, nullptr);
 	GLIB_CHECK_EXCEPTION(GLib::Win::CheckHr(E_FAIL, "test E_FAIL"), GLib::Win::ComException, "test E_FAIL : Unspecified error (80004005)");
 }
 
 BOOST_AUTO_TEST_CASE(ComErrorCheck2)
 {
-	::SetErrorInfo(0, nullptr);
+	SetErrorInfo(0, nullptr);
 	GLIB_CHECK_EXCEPTION(GLib::Win::CheckHr(E_UNEXPECTED, "test E_UNEXPECTED"), GLib::Win::ComException,
 											 "test E_UNEXPECTED : Catastrophic failure (8000FFFF)");
 }

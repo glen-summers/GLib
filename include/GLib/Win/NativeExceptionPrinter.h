@@ -100,7 +100,7 @@ namespace GLib::Win::Symbols
 			DWORD flags = UNDNAME_NAME_ONLY;
 
 			if (!symbolName.empty() && *symbolName.begin() == '?' &&
-					::UnDecorateSymbolName(symbolName.c_str(), undecoratedName.data(), undecoratedNameSize, flags) != 0)
+					UnDecorateSymbolName(symbolName.c_str(), undecoratedName.data(), undecoratedNameSize, flags) != 0)
 			{
 				symbolName = undecoratedName.data();
 			}
@@ -127,7 +127,7 @@ namespace GLib::Win::Symbols
 			DWORD inlineContext {};
 			DWORD inlineFrameIndex {};
 
-			if (::SymQueryInlineTrace(process.Handle(), address, 0, address, address, &inlineContext, &inlineFrameIndex) == TRUE)
+			if (SymQueryInlineTrace(process.Handle(), address, 0, address, address, &inlineContext, &inlineFrameIndex) == TRUE)
 			{
 				for (DWORD i = inlineContext; i < inlineContext + inlineTrace; ++i)
 				{
@@ -155,10 +155,10 @@ namespace GLib::Win::Symbols
 		{
 			for (unsigned int frames = 0; frames < maxFrames; ++frames)
 			{
-				if (::StackWalk64(machineType, process.Handle(), ::GetCurrentThread(), frame, context, nullptr, SymFunctionTableAccess64, SymGetModuleBase64,
-													nullptr) == FALSE)
+				if (StackWalk64(machineType, process.Handle(), GetCurrentThread(), frame, context, nullptr, SymFunctionTableAccess64, SymGetModuleBase64,
+												nullptr) == FALSE)
 				{
-					s << "StackWalk64: " << ::GetLastError() << '\n';
+					s << "StackWalk64: " << GetLastError() << '\n';
 					break;
 				}
 
@@ -169,14 +169,14 @@ namespace GLib::Win::Symbols
 				}
 
 				MEMORY_BASIC_INFORMATION mb {};
-				if (::VirtualQueryEx(process.Handle(), WindowsCast<PVOID>(address), &mb, sizeof mb) != 0)
+				if (VirtualQueryEx(process.Handle(), WindowsCast<PVOID>(address), &mb, sizeof mb) != 0)
 				{
 					auto * module = static_cast<HMODULE>(mb.AllocationBase);
 					std::string moduleName = FileSystem::PathOfModule(module);
-					Formatter::Format(s, "{0,-30} + 0x{1:%08X}\n", moduleName, static_cast<DWORD_PTR>(address) - WindowsCast<DWORD_PTR>(mb.AllocationBase));
+					Formatter::Format(s, "{0,-30} + 0x{1:%08X}\n", moduleName, address - WindowsCast<DWORD_PTR>(mb.AllocationBase));
 				}
 
-				DWORD inlineTrace = ::SymAddrIncludeInlineTrace(process.Handle(), address);
+				DWORD inlineTrace = SymAddrIncludeInlineTrace(process.Handle(), address);
 				if (inlineTrace != 0)
 				{
 					InlineTrace(s, process, address, inlineTrace);

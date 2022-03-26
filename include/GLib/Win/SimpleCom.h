@@ -81,7 +81,7 @@ namespace GLib::Win
 	}
 
 	template <typename T, typename... Interfaces>
-	class Unknown : public Detail::Implements<typename GLib::Util::SelfTypeFilter<GLib::TypePredicates::HasNoInheritor, Interfaces...>::TupleType::Type>
+	class Unknown : public Detail::Implements<typename GLib::Util::SelfTypeFilter<TypePredicates::HasNoInheritor, Interfaces...>::TupleType::Type>
 	{
 		std::atomic<ULONG> ref = 1;
 

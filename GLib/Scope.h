@@ -3,8 +3,7 @@
 #include "Fwd.h"
 
 #include <chrono>
-#include <string>
-#include <utility>
+#include <string_view>
 
 class Scope
 {

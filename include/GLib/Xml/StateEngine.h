@@ -125,7 +125,7 @@ namespace GLib::Xml
 			return c != leftAngleBracket;
 		}
 
-		void SetState(Xml::State newState)
+		void SetState(State newState)
 		{
 			if (newState != state)
 			{
@@ -136,13 +136,13 @@ namespace GLib::Xml
 
 		////////////////////////
 		// state functions
-		Xml::State Error(char c) const
+		State Error(char c) const
 		{
 			static_cast<void>(c);
 			return state;
 		}
 
-		Xml::State Start(char c) const
+		State Start(char c) const
 		{
 			if (c == leftAngleBracket)
 			{
@@ -160,7 +160,7 @@ namespace GLib::Xml
 			return State::Error;
 		}
 
-		Xml::State DocTypeDecl(char c) const
+		State DocTypeDecl(char c) const
 		{
 			if (IsName(c) || IsWhiteSpace(c))
 			{
@@ -173,7 +173,7 @@ namespace GLib::Xml
 			return state;
 		}
 
-		Xml::State ElementStart(char c) const
+		State ElementStart(char c) const
 		{
 			if (IsNameStart(c))
 			{
@@ -197,7 +197,7 @@ namespace GLib::Xml
 			return State::Error;
 		}
 
-		Xml::State ElementEnd(char c) const
+		State ElementEnd(char c) const
 		{
 			static_cast<void>(this);
 			if (IsNameStart(c))
@@ -207,7 +207,7 @@ namespace GLib::Xml
 			return State::Error;
 		}
 
-		Xml::State ElementEndName(char c) const
+		State ElementEndName(char c) const
 		{
 			if (IsName(c))
 			{
@@ -224,7 +224,7 @@ namespace GLib::Xml
 			return State::Error;
 		}
 
-		Xml::State ElementEndSpace(char c) const
+		State ElementEndSpace(char c) const
 		{
 			if (IsWhiteSpace(c))
 			{
@@ -237,7 +237,7 @@ namespace GLib::Xml
 			return State::Error;
 		}
 
-		Xml::State ElementName(char c) const
+		State ElementName(char c) const
 		{
 			if (IsName(c))
 			{
@@ -258,7 +258,7 @@ namespace GLib::Xml
 			return State::Error;
 		}
 
-		Xml::State EmptyElement(char c) const
+		State EmptyElement(char c) const
 		{
 			static_cast<void>(this);
 			if (c == rightAngleBracket)
@@ -268,7 +268,7 @@ namespace GLib::Xml
 			return State::Error;
 		}
 
-		Xml::State AttributeSpace(char c) const
+		State AttributeSpace(char c) const
 		{
 			if (IsWhiteSpace(c))
 			{
@@ -289,7 +289,7 @@ namespace GLib::Xml
 			return State::Error;
 		}
 
-		Xml::State AttributeName(char c) const
+		State AttributeName(char c) const
 		{
 			if (IsName(c))
 			{
@@ -306,7 +306,7 @@ namespace GLib::Xml
 			return State::Error;
 		}
 
-		Xml::State AttributeNameSpace(char c) const
+		State AttributeNameSpace(char c) const
 		{
 			if (IsWhiteSpace(c))
 			{
@@ -319,7 +319,7 @@ namespace GLib::Xml
 			return State::Error;
 		}
 
-		Xml::State AttributeValueStart(char c) const
+		State AttributeValueStart(char c) const
 		{
 			if (IsWhiteSpace(c))
 			{
@@ -333,7 +333,7 @@ namespace GLib::Xml
 			return State::Error;
 		}
 
-		Xml::State AttributeValue(char c) const
+		State AttributeValue(char c) const
 		{
 			if (c == attributeQuoteChar)
 			{
@@ -350,7 +350,7 @@ namespace GLib::Xml
 			return State::Error;
 		}
 
-		Xml::State AttributeEnd(char c) const
+		State AttributeEnd(char c) const
 		{
 			static_cast<void>(this);
 			if (IsWhiteSpace(c))
@@ -368,7 +368,7 @@ namespace GLib::Xml
 			return State::Error;
 		}
 
-		Xml::State Text(char c) const
+		State Text(char c) const
 		{
 			if (c == leftAngleBracket)
 			{
@@ -385,7 +385,7 @@ namespace GLib::Xml
 			return State::Error;
 		}
 
-		Xml::State Bang(char c) const
+		State Bang(char c) const
 		{
 			if (c == dash)
 			{
@@ -403,7 +403,7 @@ namespace GLib::Xml
 			return State::Error;
 		}
 
-		Xml::State CommentStartDash(char c) const
+		State CommentStartDash(char c) const
 		{
 			static_cast<void>(this);
 			if (c == dash)
@@ -413,7 +413,7 @@ namespace GLib::Xml
 			return State::Error;
 		}
 
-		Xml::State Comment(char c) const
+		State Comment(char c) const
 		{
 			if (c == dash)
 			{
@@ -422,7 +422,7 @@ namespace GLib::Xml
 			return state;
 		}
 
-		Xml::State CommentEndDash(char c) const
+		State CommentEndDash(char c) const
 		{
 			static_cast<void>(this);
 			if (c == dash)
@@ -432,7 +432,7 @@ namespace GLib::Xml
 			return State::Comment;
 		}
 
-		Xml::State CommentEnd(char c) const
+		State CommentEnd(char c) const
 		{
 			static_cast<void>(this);
 			if (c == rightAngleBracket)
@@ -442,54 +442,54 @@ namespace GLib::Xml
 			return State::Error;
 		}
 
-		Xml::State XmlDeclaration(char c) const
+		State XmlDeclaration(char c) const
 		{
 			if (c == questionMark)
 			{
-				return Xml::State::EmptyElement;
+				return State::EmptyElement;
 			}
 			return state;
 		}
 
-		Xml::State CDataName(char c) const
+		State CDataName(char c) const
 		{
 			if (c == leftSquareBracket)
 			{
-				return Xml::State::CDataValue;
+				return State::CDataValue;
 			}
 			return state;
 		}
 
-		Xml::State CDataValue(char c) const
+		State CDataValue(char c) const
 		{
 			if (c == rightSquareBracket)
 			{
-				return Xml::State::CDataEnd1;
+				return State::CDataEnd1;
 			}
 			return state;
 		}
 
-		Xml::State CDataEnd1(char c) const
+		State CDataEnd1(char c) const
 		{
 			static_cast<void>(this);
 			if (c == rightSquareBracket)
 			{
-				return Xml::State::CDataEnd2;
+				return State::CDataEnd2;
 			}
-			return Xml::State::CDataValue;
+			return State::CDataValue;
 		}
 
-		Xml::State CDataEnd2(char c) const
+		State CDataEnd2(char c) const
 		{
 			static_cast<void>(this);
 			if (c == rightAngleBracket)
 			{
-				return Xml::State::Start;
+				return State::Start;
 			}
-			return Xml::State::CDataValue;
+			return State::CDataValue;
 		}
 
-		Xml::State TextEntity(char c) const
+		State TextEntity(char c) const
 		{
 			if (c == semiColon)
 			{
@@ -499,7 +499,7 @@ namespace GLib::Xml
 			return state;
 		}
 
-		Xml::State AttributeEntity(char c) const
+		State AttributeEntity(char c) const
 		{
 			if (c == semiColon)
 			{

@@ -1,4 +1,3 @@
-
 #include <GLib/StackOrHeap.h>
 
 #include <boost/test/unit_test.hpp>
@@ -29,11 +28,9 @@ BOOST_AUTO_TEST_CASE(Realloc)
 	GLib::Util::StackOrHeap<char, 100_size> s;
 
 	BOOST_CHECK(100_size == s.size());
-	const char * p = s.Get();
 
 	s.EnsureSize(50_size);
 	BOOST_CHECK(100_size == s.size());
-	BOOST_TEST(p == s.Get());
 
 	{
 		std::string * ss = new (s.Get()) std::string(99_size, '-');
@@ -43,10 +40,6 @@ BOOST_AUTO_TEST_CASE(Realloc)
 
 	s.EnsureSize(200_size);
 	BOOST_CHECK(200_size == s.size());
-
-	BOOST_TEST(p != s.Get());
-	BOOST_TEST_MESSAGE(p);
-	BOOST_TEST_MESSAGE(s.Get());
 
 	{
 		std::string * sss = new (s.Get()) std::string(199_size, '-');

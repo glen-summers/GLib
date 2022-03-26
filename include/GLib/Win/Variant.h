@@ -9,7 +9,7 @@ namespace GLib::Win
 		inline VARIANT Create()
 		{
 			VARIANT v;
-			::VariantInit(&v);
+			VariantInit(&v);
 			return v;
 		}
 
@@ -30,31 +30,31 @@ namespace GLib::Win
 
 		inline VARIANT Create(const std::string & value)
 		{
-			auto * bstr = ::SysAllocString(Cvt::A2W(value).c_str());
+			auto * bstr = SysAllocString(Cvt::A2W(value).c_str());
 			if (bstr == nullptr)
 			{
 				throw std::runtime_error("SysAllocString");
 			}
 
 			VARIANT v;
-			::VariantInit(&v);
+			VariantInit(&v);
 			Vt(v) = VT_BSTR;
-			Bstr(v) = ::SysAllocString(Cvt::A2W(value).c_str());
+			Bstr(v) = SysAllocString(Cvt::A2W(value).c_str());
 			return v;
 		}
 
 		inline VARIANT Copy(const VARIANT & v)
 		{
 			VARIANT copy;
-			::VariantInit(&copy);
-			CheckHr(::VariantCopy(&copy, &v), "VariantCopy");
+			VariantInit(&copy);
+			CheckHr(VariantCopy(&copy, &v), "VariantCopy");
 			return copy;
 		}
 
 		inline VARIANT Move(VARIANT & other)
 		{
 			VARIANT v {other};
-			::VariantInit(&other);
+			VariantInit(&other);
 			return v;
 		}
 	}
@@ -83,7 +83,7 @@ namespace GLib::Win
 
 		~Variant()
 		{
-			WarnHr(::VariantClear(&v), "VariantClear");
+			WarnHr(VariantClear(&v), "VariantClear");
 		}
 
 		VARTYPE Type() const
@@ -94,21 +94,21 @@ namespace GLib::Win
 		std::string ToString() const
 		{
 			VARIANT tmp {};
-			CheckHr(::VariantChangeType(&tmp, &v, 0, VT_BSTR), "VariantChangeType");
+			CheckHr(VariantChangeType(&tmp, &v, 0, VT_BSTR), "VariantChangeType");
 			return Cvt::W2A(Detail::Bstr(tmp));
 		}
 
 		Variant & operator=(const Variant & other)
 		{
 			Variant {other}.Swap(*this);
-			CheckHr(::VariantCopy(&v, &other.v), "VariantCopy");
+			CheckHr(VariantCopy(&v, &other.v), "VariantCopy");
 			return *this;
 		}
 
 		Variant & operator=(Variant && other) noexcept
 		{
 			v = other.v;
-			::VariantInit(&other.v);
+			VariantInit(&other.v);
 			return *this;
 		}
 
@@ -116,7 +116,7 @@ namespace GLib::Win
 		{
 			auto * v1 = const_cast<VARIANT *>(&v);
 			auto * v2 = const_cast<VARIANT *>(&other.v);
-			return ::VarCmp(v1, v2, 0) == VARCMP_EQ;
+			return VarCmp(v1, v2, 0) == VARCMP_EQ;
 		}
 
 		bool operator!=(const Variant & other) const noexcept

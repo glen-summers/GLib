@@ -14,7 +14,7 @@ namespace GLib::Win::D2d
 		{
 			ComPtr<ID2D1Factory> factory;
 			D2D1_FACTORY_OPTIONS options {D2D1_DEBUG_LEVEL_INFORMATION};
-			CheckHr(::D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED, __uuidof(ID2D1Factory), &options, GetAddress<ID2D1Factory>(factory)),
+			CheckHr(D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED, __uuidof(ID2D1Factory), &options, GetAddress<ID2D1Factory>(factory)),
 							"D2D1CreateFactory");
 			return factory;
 		}

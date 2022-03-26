@@ -127,7 +127,7 @@ void FileLogger::InternalWrite(GLib::Flog::Level level, std::string_view prefix,
 
 void FileLogger::WriteToStream(GLib::Flog::Level level, std::string_view prefix, std::string_view message)
 {
-	std::lock_guard<std::mutex> guard(streamMonitor);
+	std::lock_guard guard(streamMonitor);
 	{
 		try
 		{

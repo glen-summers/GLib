@@ -16,13 +16,13 @@ struct GLib::Eval::Visitor<FunctionCoverage>
 			std::ostringstream s;
 			if (!fc.NameSpace().empty())
 			{
-				GLib::Xml::Utils::Escape(fc.NameSpace(), s) << "::";
+				Xml::Utils::Escape(fc.NameSpace(), s) << "::";
 			}
 			if (!fc.ClassName().empty())
 			{
-				GLib::Xml::Utils::Escape(fc.ClassName(), s) << "::";
+				Xml::Utils::Escape(fc.ClassName(), s) << "::";
 			}
-			GLib::Xml::Utils::Escape(fc.FunctionName(), s);
+			Xml::Utils::Escape(fc.FunctionName(), s);
 			return f(Value(s.str()));
 		}
 		if (propertyName == "line")

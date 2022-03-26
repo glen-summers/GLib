@@ -95,7 +95,7 @@ namespace GLib::Eval
 	private:
 		void Evaluate(const std::string & value, const ValueVisitor & visitor) const
 		{
-			const auto & s = GLib::Util::Splitter {value, "."};
+			const auto & s = Util::Splitter {value, "."};
 			auto it = s.begin();
 
 			const auto lit = localValues.find(*it);
@@ -114,7 +114,7 @@ namespace GLib::Eval
 			SubEvaluate(*vit->second, it, s.end(), visitor);
 		}
 
-		static void SubEvaluate(const ValueBase & value, GLib::Util::Splitter::Iterator & it, const GLib::Util::Splitter::Iterator & end,
+		static void SubEvaluate(const ValueBase & value, Util::Splitter::Iterator & it, const Util::Splitter::Iterator & end,
 														const ValueVisitor & visitor)
 		{
 			if (it != end)

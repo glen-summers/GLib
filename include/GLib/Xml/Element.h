@@ -22,7 +22,7 @@ namespace GLib::Xml
 		std::string_view nameSpace;
 		std::string_view outerXml;
 		ElementType type {};
-		GLib::Xml::Attributes attributes;
+		Xml::Attributes attributes;
 		size_t depth {};			 // move/remove?
 		std::string_view text; // value?
 
@@ -74,7 +74,7 @@ namespace GLib::Xml
 			return type;
 		}
 
-		const GLib::Xml::Attributes & Attributes() const
+		const Xml::Attributes & Attributes() const
 		{
 			return attributes;
 		}

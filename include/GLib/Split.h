@@ -123,7 +123,7 @@ namespace GLib::Util
 	}
 
 	template <typename Predicate, typename OutYes, typename OutNo>
-	inline void Split(std::string_view value, Predicate predicate, OutYes outYes, OutNo outNo)
+	void Split(std::string_view value, Predicate predicate, OutYes outYes, OutNo outNo)
 	{
 		for (auto it = value.begin(); it != value.end();)
 		{

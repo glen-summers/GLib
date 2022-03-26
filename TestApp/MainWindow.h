@@ -97,7 +97,7 @@ namespace TestApp
 		void OnDestroy() noexcept override
 		{
 			log.Info("OnDestroy");
-			::PostQuitMessage(0);
+			PostQuitMessage(0);
 		}
 
 		void OnTimer() noexcept override

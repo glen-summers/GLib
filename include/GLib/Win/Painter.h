@@ -25,7 +25,7 @@ namespace GLib::Win
 
 	inline void Detail::PaintEnder::operator()(const PaintInfo * info) const
 	{
-		Util::WarnAssertTrue(::EndPaint(info->Window, &info->PaintStruct), "EndPaint");
+		Util::WarnAssertTrue(EndPaint(info->Window, &info->PaintStruct), "EndPaint");
 	}
 
 	class Painter

@@ -129,7 +129,7 @@ namespace GLib::Xml
 						throw std::runtime_error("No root element");
 					}
 
-					if (engine.GetState() != Xml::State::Start || !elementStack.empty())
+					if (engine.GetState() != State::Start || !elementStack.empty())
 					{
 						throw std::runtime_error("Xml not closed");
 					}
@@ -141,7 +141,7 @@ namespace GLib::Xml
 				const char character = *ptr;
 				const auto newState = engine.Push(character);
 
-				if (newState == Xml::State::Error)
+				if (newState == State::Error)
 				{
 					IllegalCharacter(character, line, pos);
 				}
@@ -159,26 +159,26 @@ namespace GLib::Xml
 				{
 					switch (oldState)
 					{
-						case Xml::State::Text:
+						case State::Text:
 						{
-							if (newState == Xml::State::TextEntity) // hack
+							if (newState == State::TextEntity) // hack
 							{
 								break;
 							}
 
-							element = {Xml::ElementType::Text, Utils::ToStringView({*lastPtr, oldPtr})};
+							element = {ElementType::Text, Utils::ToStringView({*lastPtr, oldPtr})};
 							lastPtr = oldPtr;
 							return;
 						}
 
-						case Xml::State::CommentEnd:
+						case State::CommentEnd:
 						{
-							element = {Xml::ElementType::Comment, Utils::ToStringView({*lastPtr, ptr})};
+							element = {ElementType::Comment, Utils::ToStringView({*lastPtr, ptr})};
 							lastPtr = ptr;
 							return;
 						}
 
-						case Xml::State::ElementName:
+						case State::ElementName:
 						{
 							elementName.second = oldPtr;
 							elementType = ElementType::Open;
@@ -189,14 +189,14 @@ namespace GLib::Xml
 							break;
 						}
 
-						case Xml::State::ElementEndName:
+						case State::ElementEndName:
 						{
 							elementName.second = oldPtr;
 							elementType = ElementType::Close;
 							break;
 						}
 
-						case Xml::State::AttributeName:
+						case State::AttributeName:
 						{
 							attributeName.second = oldPtr;
 							break;
@@ -207,40 +207,40 @@ namespace GLib::Xml
 
 					switch (newState)
 					{
-						case Xml::State::AttributeEnd:
+						case State::AttributeEnd:
 						{
 							manager->Push(Utils::ToStringView(attributeName), Utils::ToStringView({attributeValueStart, oldPtr}).substr(1), elementStack.size());
 							attributes.second = ptr;
 							break;
 						}
 
-						case Xml::State::ElementName:
-						case Xml::State::ElementEndName:
-						case Xml::State::Bang:
+						case State::ElementName:
+						case State::ElementEndName:
+						case State::Bang:
 						{
 							elementName = {oldPtr, oldPtr};
 							break;
 						}
 
-						case Xml::State::EmptyElement:
+						case State::EmptyElement:
 						{
 							elementType = ElementType::Empty;
 							break;
 						}
 
-						case Xml::State::AttributeName:
+						case State::AttributeName:
 						{
 							attributeName.first = oldPtr;
 							break;
 						}
 
-						case Xml::State::AttributeValue:
+						case State::AttributeValue:
 						{
 							attributeValueStart = oldPtr;
 							break;
 						}
 
-						case Xml::State::Start:
+						case State::Start:
 						{
 							// bug: white space at end is not in outerXml...
 							// don't yield for !doctype atm

@@ -168,7 +168,7 @@ namespace GLib::Flog
 		static Level SetLevel(Level level);
 		static size_t SetMaxFileSize(size_t size);
 		static void SetThreadName(std::string_view name);
-		static GLib::Compat::FileSystem::path GetLogPath();
+		static Compat::FileSystem::path GetLogPath();
 
 		static Log GetLog(const std::string & name) noexcept
 		{
