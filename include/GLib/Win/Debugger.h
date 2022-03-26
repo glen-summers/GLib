@@ -91,6 +91,7 @@ namespace GLib::Win
 					auto pi = Detail::CreateProcessInfo(debugEvent);
 					Handle handle {pi.hFile};
 					OnCreateProcess(processId, threadId, pi);
+					static_cast<void>(handle);
 					break;
 				}
 
@@ -115,8 +116,8 @@ namespace GLib::Win
 				case LOAD_DLL_DEBUG_EVENT:
 				{
 					Handle handle {Detail::LoadDll(debugEvent).hFile};
-
 					OnLoadDll(processId, threadId, Detail::LoadDll(debugEvent));
+					static_cast<void>(handle);
 					break;
 				}
 
@@ -164,7 +165,7 @@ namespace GLib::Win
 	protected:
 		virtual void OnCreateProcess(DWORD processId, DWORD threadId, const CREATE_PROCESS_DEBUG_INFO & info)
 		{
-			(void) threadId;
+			static_cast<void>(threadId);
 
 			std::string const logicalName = FileSystem::PathOfFileHandle(info.hFile, VOLUME_NAME_NT);
 			std::string const name = FileSystem::NormalisePath(logicalName, driveMap);
@@ -204,17 +205,17 @@ namespace GLib::Win
 
 		virtual void On32BitProcess(const IMAGE_NT_HEADERS32 & headers)
 		{
-			(void) headers;
+			static_cast<void>(headers);
 		}
 
 		virtual void On64BitProcess(const IMAGE_NT_HEADERS64 & headers)
 		{
-			(void) headers;
+			static_cast<void>(headers);
 		}
 
 		virtual void OnExitProcess(DWORD processId, DWORD threadId, const EXIT_PROCESS_DEBUG_INFO & info)
 		{
-			(void) threadId;
+			static_cast<void>(threadId);
 
 			if (processId == debugProcessId)
 			{
@@ -226,8 +227,8 @@ namespace GLib::Win
 
 		virtual void OnLoadDll(DWORD processId, DWORD threadId, const LOAD_DLL_DEBUG_INFO & info) const
 		{
-			(void) processId;
-			(void) threadId;
+			static_cast<void>(processId);
+			static_cast<void>(threadId);
 
 			std::string const logicalName = FileSystem::PathOfFileHandle(info.hFile, VOLUME_NAME_NT);
 			std::string const name = FileSystem::NormalisePath(logicalName, driveMap);
@@ -237,39 +238,39 @@ namespace GLib::Win
 
 		virtual void OnUnloadDll(DWORD processId, DWORD threadId, const UNLOAD_DLL_DEBUG_INFO & info) const
 		{
-			(void) processId;
-			(void) threadId;
+			static_cast<void>(processId);
+			static_cast<void>(threadId);
 
 			Debug::Stream() << "GDB UnloadDll: " << info.lpBaseOfDll << std::endl;
 		}
 
 		virtual void OnCreateThread(DWORD processId, DWORD threadId, const CREATE_THREAD_DEBUG_INFO & info)
 		{
-			(void) processId;
-			(void) threadId;
+			static_cast<void>(processId);
+			static_cast<void>(threadId);
 
 			Debug::Stream() << "GDB CreateThread: " << info.hThread << std::endl;
 		}
 
 		virtual void OnExitThread(DWORD processId, DWORD threadId, const EXIT_THREAD_DEBUG_INFO & info)
 		{
-			(void) processId;
-			(void) threadId;
+			static_cast<void>(processId);
+			static_cast<void>(threadId);
 
 			Debug::Stream() << "GDB ThreadExit code: " << info.dwExitCode << std::endl;
 		}
 
 		virtual DWORD OnException(DWORD processId, DWORD threadId, const EXCEPTION_DEBUG_INFO & info)
 		{
-			(void) processId;
-			(void) threadId;
-			(void) info;
+			static_cast<void>(processId);
+			static_cast<void>(threadId);
+			static_cast<void>(info);
 			return DBG_EXCEPTION_NOT_HANDLED;
 		}
 
 		virtual void OnDebugString(DWORD processId, DWORD threadId, const OUTPUT_DEBUG_STRING_INFO & info)
 		{
-			(void) threadId;
+			static_cast<void>(threadId);
 
 			auto address = Detail::ConvertAddress(info.lpDebugStringData);
 

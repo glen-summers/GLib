@@ -143,7 +143,7 @@ namespace GLib::Cpp
 			{
 				const auto oldState = engine.GetState();
 
-				State newState {};
+				State newState;
 
 				if (ptr != end)
 				{
@@ -236,7 +236,7 @@ namespace GLib::Cpp
 
 		Iterator end() const
 		{
-			(void) this;
+			static_cast<void>(this);
 			return {value.cend(), value.cend(), emitWhitespace};
 		}
 	};

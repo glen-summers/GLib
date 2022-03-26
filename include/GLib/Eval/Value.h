@@ -28,8 +28,8 @@ namespace GLib::Eval
 	template <typename T, std::enable_if_t<!Utils::Detail::IsContainer<T>::value> * = nullptr>
 	void ForEach(T value, const ValueVisitor & f)
 	{
-		(void) value;
-		(void) f;
+		static_cast<void>(value);
+		static_cast<void>(f);
 		throw std::runtime_error(std::string("ForEach not defined for : ") + Compat::Unmangle(typeid(T).name()));
 	}
 
@@ -88,8 +88,8 @@ namespace GLib::Eval
 	{
 		static void Visit(const Value & value, const std::string & propertyName, const ValueVisitor & visitor)
 		{
-			(void) value;
-			(void) visitor;
+			static_cast<void>(value);
+			static_cast<void>(visitor);
 
 			throw std::runtime_error(std::string("No accessor defined for property: '") + propertyName + "', type:'" +
 															 Compat::Unmangle(typeid(Value).name()) + '\'');

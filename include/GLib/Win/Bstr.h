@@ -58,7 +58,7 @@ namespace GLib::Win
 		Bstr(BSTR other, bool ignored) noexcept
 			: value(other)
 		{
-			(void) ignored;
+			static_cast<void>(ignored);
 		}
 	};
 

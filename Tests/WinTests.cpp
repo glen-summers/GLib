@@ -96,7 +96,7 @@ BOOST_AUTO_TEST_SUITE(WinTests)
 BOOST_AUTO_TEST_CASE(TestDriveInfo)
 {
 	auto ld = FileSystem::LogicalDrives();
-	(void) ld;
+	static_cast<void>(ld);
 	auto dm = FileSystem::DriveMap();
 
 	std::filesystem::path tempFilePath = std::filesystem::temp_directory_path() / A2W(ToString(Util::Uuid::CreateRandom()) + ".tmp");
@@ -142,6 +142,7 @@ BOOST_AUTO_TEST_CASE(TestProcess)
 	{
 		auto scopedTerminator = p.ScopedTerminator();
 		BOOST_TEST(p.IsRunning());
+		static_cast<void>(scopedTerminator);
 	}
 
 	BOOST_TEST(!p.IsRunning());
@@ -329,6 +330,7 @@ BOOST_AUTO_TEST_CASE(TestApp1)
 	scopedTerminator.release();
 
 	BOOST_CHECK(0ul == p.ExitCode());
+	static_cast<void>(mta);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

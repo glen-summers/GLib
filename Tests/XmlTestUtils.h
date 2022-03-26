@@ -75,7 +75,7 @@ namespace GLib::Xml
 		{
 			for (const auto & a : e.Attributes())
 			{
-				(void) a;
+				static_cast<void>(a);
 			}
 		}
 	}

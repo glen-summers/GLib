@@ -70,7 +70,7 @@ namespace GLib::Eval::Utils
 	template <typename T, std::enable_if_t<!Detail::HasToString<T>::value && !Detail::CanStream<T>::value> * = nullptr>
 	std::string ToString(const T & value)
 	{
-		(void) value;
+		static_cast<void>(value);
 		throw std::runtime_error(std::string("Cannot convert type to string : ") + Compat::Unmangle(typeid(T).name()));
 	}
 

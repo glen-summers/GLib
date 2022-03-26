@@ -32,6 +32,7 @@ BOOST_AUTO_TEST_CASE(LocalTimeZero)
 
 	tm tm {};
 	GLib::Compat::LocalTime(tm, 0);
+	static_cast<void>(scope);
 
 	BOOST_TEST(tm.tm_sec == 0);
 	BOOST_TEST(tm.tm_min == 0);
@@ -66,6 +67,7 @@ BOOST_AUTO_TEST_CASE(LocalTimeSpecific)
 
 	tm tm {};
 	GLib::Compat::LocalTime(tm, 1569056285);
+	static_cast<void>(scope);
 
 	BOOST_TEST(tm.tm_sec == 5);
 	BOOST_TEST(tm.tm_min == 58);

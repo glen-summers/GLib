@@ -94,6 +94,8 @@ void Coverage::OnCreateProcess(DWORD processId, DWORD threadId, const CREATE_PRO
 
 	Symbols().Lines([&](PSRCCODEINFOW lineInfo) { AddLine(lineInfo->FileName, lineInfo->LineNumber, process, lineInfo->Address, it->second); },
 									process.Handle(), info.lpBaseOfImage);
+
+	static_cast<void>(scopeLog);
 }
 
 void Coverage::CaptureData(DWORD processId)
@@ -127,6 +129,8 @@ void Coverage::CaptureData(DWORD processId)
 		}
 		it->second.Accumulate(address);
 	}
+
+	static_cast<void>(scopeLog);
 }
 
 void Coverage::OnExitProcess(DWORD processId, DWORD threadId, const EXIT_PROCESS_DEBUG_INFO & info)
@@ -143,7 +147,7 @@ void Coverage::OnCreateThread(DWORD processId, DWORD threadId, const CREATE_THRE
 
 void Coverage::OnExitThread(DWORD processId, DWORD threadId, const EXIT_THREAD_DEBUG_INFO & info)
 {
-	(void) info;
+	static_cast<void>(info);
 	processes.at(processId).RemoveThread(threadId);
 }
 
@@ -231,6 +235,7 @@ CoverageData Coverage::GetCoverageData() const
 		}
 	}
 
+	static_cast<void>(scopeLog);
 	return coverageData;
 }
 

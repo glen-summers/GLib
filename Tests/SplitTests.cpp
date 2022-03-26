@@ -124,7 +124,8 @@ BOOST_AUTO_TEST_CASE(ConsecutiveFindTest)
 	std::vector<int> values {1, 1, 2, 3, 3, 3};
 	std::vector<std::pair<int, size_t>> result, expected = {{1, 2}, {2, 1}, {3, 3}};
 
-	for (auto it = values.begin(), end = values.end(), next = end; it != end; it = next)
+	std::vector<int>::iterator next;
+	for (auto it = values.begin(), end = values.end(); it != end; it = next)
 	{
 		next = GLib::Util::ConsecutiveFind(it, end);
 		result.emplace_back(*it, std::distance(it, next));
@@ -141,7 +142,8 @@ BOOST_AUTO_TEST_CASE(ConsecutiveFindPred)
 	std::vector<Pair> values {{1, "1"}, {2, "1"}, {3, "2"}, {4, "3"}, {5, "3"}, {6, "3"}};
 	std::vector<std::pair<std::string, size_t>> result, expected = {{"1", 2}, {"2", 1}, {"3", 3}};
 
-	for (auto it = values.begin(), end = values.end(), next = end; it != end; it = next)
+	std::vector<Pair>::iterator next;
+	for (auto it = values.begin(), end = values.end(); it != end; it = next)
 	{
 		next = GLib::Util::ConsecutiveFind(it, end, pred);
 		result.emplace_back(it->second, std::distance(it, next));

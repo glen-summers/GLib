@@ -60,6 +60,8 @@ BOOST_AUTO_TEST_CASE(LogLevel)
 	std::string contents((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
 	BOOST_TEST(contents.find(" : INFO     : FlogTests::Fred  : info") == std::string::npos);
 	BOOST_TEST(contents.find(" : ERROR    : FlogTests::Fred  : error") != std::string::npos);
+
+	static_cast<void>(scope);
 }
 
 BOOST_AUTO_TEST_CASE(LogFileSize)
@@ -77,6 +79,8 @@ BOOST_AUTO_TEST_CASE(LogFileSize)
 
 	log.Info(std::string(924, 'x'));
 	BOOST_TEST(path1 != GLib::Flog::LogManager::GetLogPath());
+
+	static_cast<void>(scope);
 }
 
 BOOST_AUTO_TEST_CASE(ProcessName)
@@ -119,6 +123,7 @@ BOOST_AUTO_TEST_CASE(TestOneScope)
 	log.Info("Start");
 	{
 		GLib::Flog::ScopeLog scope1(log, GLib::Flog::Level::Info, "Scoop");
+		static_cast<void>(scope1);
 	}
 	log.Info("End");
 
@@ -137,6 +142,7 @@ BOOST_AUTO_TEST_CASE(TestOneScopeWithInnerLog)
 	{
 		GLib::Flog::ScopeLog scope1(log, GLib::Flog::Level::Info, "Scoop");
 		log.Info("Middle");
+		static_cast<void>(scope1);
 	}
 	log.Info("End");
 
@@ -162,12 +168,16 @@ BOOST_AUTO_TEST_CASE(TestNestedScopes)
 		{
 			GLib::Flog::ScopeLog scope3(log, GLib::Flog::Level::Info, "Scoop3", "++");
 			log.Info("s3");
+			static_cast<void>(scope3);
 		}
+		static_cast<void>(scope2);
 	}
 	log.Info("End");
 
 	std::ifstream in(GLib::Flog::LogManager::GetLogPath());
 	std::string contents((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
+
+	static_cast<void>(scope1);
 
 	BOOST_TEST(contents.find("] : INFO     : FlogTests::Fred  : Start") != std::string::npos);
 	BOOST_TEST(contents.find("] : INFO     : FlogTests::Fred  : ==> Scoop1") != std::string::npos);
@@ -202,7 +212,9 @@ BOOST_AUTO_TEST_CASE(TestPendingScopeOverPrefixChange)
 	GLib::Flog::ScopeLog scope1(log1, GLib::Flog::Level::Info, "Scoop1");
 	{
 		GLib::Flog::ScopeLog scope2(log2, GLib::Flog::Level::Info, "Scoop2");
+		static_cast<void>(scope2);
 	}
+	static_cast<void>(scope1);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

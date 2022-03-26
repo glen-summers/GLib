@@ -353,7 +353,7 @@ namespace GLib::Xml
 
 		Iterator end() const
 		{
-			(void) this;
+			static_cast<void>(this);
 			return Iterator {};
 		}
 

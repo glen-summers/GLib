@@ -69,8 +69,8 @@ namespace GLib::Win
 			Debug::Stream() << "ComWarning : " << Detail::FormatErrorInfo(message, hr) << std::endl;
 		}
 #else
-		(void) hr;
-		(void) message;
+		static_cast<void>(hr);
+		static_cast<void>(message);
 #endif
 	}
 }

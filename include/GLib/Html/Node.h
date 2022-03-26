@@ -36,7 +36,7 @@ namespace GLib::Html
 			: parent(parent)
 			, condition(condition)
 		{
-			(void) unused;
+			static_cast<void>(unused);
 		}
 
 		Node * Parent() const

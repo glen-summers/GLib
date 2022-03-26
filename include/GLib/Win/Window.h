@@ -83,8 +83,8 @@ namespace GLib::Win
 		public:
 			static std::string Register(int icon, int menu, WNDPROC proc)
 			{
-				(void) icon;
-				(void) menu;
+				static_cast<void>(icon);
+				static_cast<void>(menu);
 				// hash+more
 				return Formatter::Format("GTL:{0}", static_cast<void *>(&proc));
 			}
@@ -233,7 +233,7 @@ namespace GLib::Win
 
 		void Close() const
 		{
-			Send(WM_CLOSE);
+			static_cast<void>(Send(WM_CLOSE));
 		}
 
 		void Destroy() const
@@ -359,7 +359,7 @@ namespace GLib::Win
 				case WM_NCDESTROY:
 				{
 					OnNcDestroy();
-					(void) handle.release();
+					static_cast<void>(handle.release());
 					return;
 				}
 

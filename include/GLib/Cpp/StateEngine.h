@@ -118,7 +118,7 @@ namespace GLib::Cpp
 
 		State Error(char c) const
 		{
-			(void) c;
+			static_cast<void>(c);
 			return state;
 		}
 

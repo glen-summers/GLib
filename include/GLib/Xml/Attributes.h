@@ -23,7 +23,7 @@ namespace GLib::Xml
 
 		AttributeIterator end() const
 		{
-			(void) this;
+			static_cast<void>(this);
 			return {};
 		}
 

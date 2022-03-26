@@ -45,8 +45,8 @@ namespace GLib::Eval
 
 		void VisitProperty(const std::string & propertyName, const ValueVisitor & visitor) const override
 		{
-			(void) propertyName;
-			(void) visitor;
+			static_cast<void>(propertyName);
+			static_cast<void>(visitor);
 			throw std::runtime_error("Not implemented");
 			// size?
 		}

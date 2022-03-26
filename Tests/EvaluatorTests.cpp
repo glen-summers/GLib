@@ -98,7 +98,7 @@ BOOST_AUTO_TEST_CASE(RemoveValue)
 	evaluator.Set("stringVal", "Hello");
 	BOOST_TEST("Hello" == evaluator.Evaluate("stringVal"));
 	evaluator.Remove("stringVal");
-	GLIB_CHECK_RUNTIME_EXCEPTION({ (void) evaluator.Evaluate("stringVal"); }, "Value not found : stringVal");
+	GLIB_CHECK_RUNTIME_EXCEPTION({ static_cast<void>(evaluator.Evaluate("stringVal")); }, "Value not found : stringVal");
 }
 
 BOOST_AUTO_TEST_CASE(RemoveNonexistentCollectionThrows)
@@ -135,7 +135,7 @@ BOOST_AUTO_TEST_CASE(CollectionUnimplementedMethods)
 	const std::vector<int> values {1, 2, 3};
 	evaluator.SetCollection("value", values);
 
-	GLIB_CHECK_RUNTIME_EXCEPTION({ (void) evaluator.Evaluate("value.property"); }, "Not implemented");
+	GLIB_CHECK_RUNTIME_EXCEPTION({ static_cast<void>(evaluator.Evaluate("value.property")); }, "Not implemented");
 }
 
 BOOST_AUTO_TEST_CASE(ValueForEachThrows)
@@ -164,14 +164,14 @@ BOOST_AUTO_TEST_CASE(UnknownValueThrows)
 	User user {"Zardoz", 999, {"Domination", "MassiveHead"}};
 	evaluator.Set("user", user);
 
-	GLIB_CHECK_RUNTIME_EXCEPTION({ (void) evaluator.Evaluate("user.HasProperty"); }, "Unknown property : 'HasProperty'");
+	GLIB_CHECK_RUNTIME_EXCEPTION({ static_cast<void>(evaluator.Evaluate("user.HasProperty")); }, "Unknown property : 'HasProperty'");
 }
 
 BOOST_AUTO_TEST_CASE(UnknownVisitorThrows)
 {
 	GLib::Eval::Evaluator evaluator;
 	evaluator.Set("HasNoVisitor", HasNoVisitor {});
-	GLIB_CHECK_RUNTIME_EXCEPTION({ (void) evaluator.Evaluate("HasNoVisitor.FuBar"); },
+	GLIB_CHECK_RUNTIME_EXCEPTION({ static_cast<void>(evaluator.Evaluate("HasNoVisitor.FuBar")); },
 															 "No accessor defined for property: 'FuBar', type:'HasNoVisitor'");
 	;
 }
@@ -180,7 +180,7 @@ BOOST_AUTO_TEST_CASE(NoToStringThrows)
 {
 	GLib::Eval::Evaluator evaluator;
 	evaluator.Set("HasNoToString", HasNoToString {});
-	GLIB_CHECK_RUNTIME_EXCEPTION({ (void) evaluator.Evaluate("HasNoToString"); }, "Cannot convert type to string : HasNoToString");
+	GLIB_CHECK_RUNTIME_EXCEPTION({ static_cast<void>(evaluator.Evaluate("HasNoToString")); }, "Cannot convert type to string : HasNoToString");
 }
 
 BOOST_AUTO_TEST_CASE(Bool)

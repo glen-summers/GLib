@@ -9,9 +9,9 @@ processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPWSTR lpCmdLine, _In_ int nShowCmd)
 {
-	(void) hPrevInstance;
+	static_cast<void>(hPrevInstance);
 
-	int returnValue {};
+	int returnValue;
 	const GLib::Flog::Log & log = GLib::Flog::LogManager::GetLog("Main");
 
 	try
@@ -42,10 +42,11 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
 		log.Info("show: {0}", nShowCmd);
 		if (nShowCmd != 0)
 		{
-			window.Show(nShowCmd);
+			static_cast<void>(window.Show(nShowCmd));
 		}
 		log.Info("Pump");
 		returnValue = window.PumpMessages();
+		static_cast<void>(com);
 	}
 	catch (const std::runtime_error & e)
 	{

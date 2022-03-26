@@ -138,7 +138,7 @@ namespace GLib::Xml
 		// state functions
 		Xml::State Error(char c) const
 		{
-			(void) c;
+			static_cast<void>(c);
 			return state;
 		}
 
@@ -199,7 +199,7 @@ namespace GLib::Xml
 
 		Xml::State ElementEnd(char c) const
 		{
-			(void) this;
+			static_cast<void>(this);
 			if (IsNameStart(c))
 			{
 				return State::ElementEndName;
@@ -260,7 +260,7 @@ namespace GLib::Xml
 
 		Xml::State EmptyElement(char c) const
 		{
-			(void) this;
+			static_cast<void>(this);
 			if (c == rightAngleBracket)
 			{
 				return State::Start;
@@ -352,7 +352,7 @@ namespace GLib::Xml
 
 		Xml::State AttributeEnd(char c) const
 		{
-			(void) this;
+			static_cast<void>(this);
 			if (IsWhiteSpace(c))
 			{
 				return State::AttributeSpace;
@@ -405,7 +405,7 @@ namespace GLib::Xml
 
 		Xml::State CommentStartDash(char c) const
 		{
-			(void) this;
+			static_cast<void>(this);
 			if (c == dash)
 			{
 				return State::Comment;
@@ -424,7 +424,7 @@ namespace GLib::Xml
 
 		Xml::State CommentEndDash(char c) const
 		{
-			(void) this;
+			static_cast<void>(this);
 			if (c == dash)
 			{
 				return State::CommentEnd;
@@ -434,7 +434,7 @@ namespace GLib::Xml
 
 		Xml::State CommentEnd(char c) const
 		{
-			(void) this;
+			static_cast<void>(this);
 			if (c == rightAngleBracket)
 			{
 				return State::Start;
@@ -471,7 +471,7 @@ namespace GLib::Xml
 
 		Xml::State CDataEnd1(char c) const
 		{
-			(void) this;
+			static_cast<void>(this);
 			if (c == rightSquareBracket)
 			{
 				return Xml::State::CDataEnd2;
@@ -481,7 +481,7 @@ namespace GLib::Xml
 
 		Xml::State CDataEnd2(char c) const
 		{
-			(void) this;
+			static_cast<void>(this);
 			if (c == rightAngleBracket)
 			{
 				return Xml::State::Start;

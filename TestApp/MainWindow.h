@@ -66,11 +66,11 @@ namespace TestApp
 		{
 			log.Info("OnPaint");
 			GLib::Win::Painter p = GetPainter();
-
 			renderer.Verify(Handle(), ClientSize());
 			renderer.Begin();
 			renderer.Clear(D2D1::ColorF::CornflowerBlue);
 			renderer.End();
+			static_cast<void>(p);
 		}
 
 		void OnSize(const GLib::Win::Size & size) noexcept override

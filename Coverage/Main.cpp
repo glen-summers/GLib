@@ -93,6 +93,8 @@ Coverage c:\Build\Main.exe C:\Report -ws -i C:\MainCode C:\Utils\ -x C:\External
 		{}
 
 		HtmlReport report(executable, reportPath, dbg.GetCoverageData(), showWhiteSpace);
+		static_cast<void>(report);
+		static_cast<void>(scopeLog);
 	}
 	catch (const std::exception & e)
 	{

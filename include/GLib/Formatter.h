@@ -238,7 +238,7 @@ namespace GLib
 		template <typename... Ts>
 		static std::string Format(std::string_view format)
 		{
-			(void) format;
+			static_cast<void>(format);
 			throw std::logic_error("NoArguments");
 		}
 
@@ -254,14 +254,14 @@ namespace GLib
 		static auto FormatImpl(std::ostream & os, const T & obj, const std::string & format, int unused)
 			-> decltype(Policy::Format(os, obj, format), void())
 		{
-			(void) unused;
+			static_cast<void>(unused);
 			return Policy::Format(os, obj, format);
 		}
 
 		template <typename T, typename std::enable_if<FormatterDetail::IsFormattable<T>::value>::type * = nullptr>
 		static void FormatImpl(std::ostream & stm, const T & value, const std::string & format, long unused)
 		{
-			(void) unused;
+			static_cast<void>(unused);
 			if (!format.empty())
 			{
 				value.Format(stm, format);
@@ -276,7 +276,7 @@ namespace GLib
 		static void FormatImpl(std::ostream & stm, const T & value, const std::string & format, long unused)
 		{
 			// handle T==wide string?
-			(void) unused;
+			static_cast<void>(unused);
 			FormatterDetail::CheckEmptyFormat(format);
 			stm << value;
 		}

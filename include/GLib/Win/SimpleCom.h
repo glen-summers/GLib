@@ -53,7 +53,7 @@ namespace GLib::Win
 			}
 			Debug::Write("QI miss {0} : {1} {2}", typeid(T).name(), itf, name);
 #else
-			(void) iid;
+			static_cast<void>(iid);
 #endif
 			*ppvObject = nullptr;
 			return E_NOINTERFACE;

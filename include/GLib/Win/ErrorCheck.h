@@ -83,8 +83,8 @@ namespace GLib::Win::Util
 					Debug::Stream() << "GLib warning: " << Detail::FormatErrorMessage(message, errorCode) << std::endl;
 				}
 #else
-				(void) message;
-				(void) errorCode;
+				static_cast<void>(message);
+				static_cast<void>(errorCode);
 #endif
 				return result;
 			}

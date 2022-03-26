@@ -67,12 +67,12 @@ namespace Util
 	{
 		friend bool operator==(const TypeIndex & lhs, const TypeIndex & rhs) = default;
 		friend bool operator!=(const TypeIndex & lhs, const TypeIndex & rhs) = default;
-		std::type_index value;
+		std::type_index Value;
 	};
 
 	std::ostream & operator<<(std::ostream & s, const TypeIndex & ti)
 	{
-		return s << ti.value.name();
+		return s << ti.Value.name();
 	}
 
 	template <typename First, typename... Rest>

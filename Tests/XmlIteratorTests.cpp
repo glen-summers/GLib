@@ -469,17 +469,17 @@ BOOST_AUTO_TEST_CASE(AttributeIteratorInvalidChars)
 {
 	GLIB_CHECK_RUNTIME_EXCEPTION(
 		for (const auto & a
-				 : Xml::Attributes {"0='baad'"}) { (void) a; };
+				 : Xml::Attributes {"0='baad'"}) { static_cast<void>(a); };
 		, "Illegal character: '0' (0x30)");
 
 	GLIB_CHECK_RUNTIME_EXCEPTION(
 		for (const auto & a
-				 : Xml::Attributes {"baad=baad"}) { (void) a; };
+				 : Xml::Attributes {"baad=baad"}) { static_cast<void>(a); };
 		, "Illegal character: 'b' (0x62)");
 
 	GLIB_CHECK_RUNTIME_EXCEPTION(
 		for (const auto & a
-				 : Xml::Attributes {"baad='-<-'"}) { (void) a; };
+				 : Xml::Attributes {"baad='-<-'"}) { static_cast<void>(a); };
 		, "Illegal character: '<' (0x3c)");
 }
 

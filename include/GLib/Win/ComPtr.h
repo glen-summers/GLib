@@ -165,7 +165,7 @@ namespace GLib::Win
 		ComPtr(T * other, bool ignored) noexcept
 			: p(other)
 		{
-			(void) ignored;
+			static_cast<void>(ignored);
 		}
 
 		void Swap(ComPtr & rhs)

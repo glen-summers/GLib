@@ -361,13 +361,13 @@ namespace GLib::Win::Symbols
 
 		void SourceFiles(std::function<void(PSOURCEFILEW)> f, HANDLE process, void * base) const
 		{
-			(void) this;
+			static_cast<void>(this);
 			Util::AssertTrue(::SymEnumSourceFilesW(process, Detail::ConvertBase(base), nullptr, EnumSourceFiles, &f), "SymEnumSourceFilesW");
 		}
 
 		void Lines(std::function<void(PSRCCODEINFOW)> f, HANDLE process, void * base) const
 		{
-			(void) this;
+			static_cast<void>(this);
 			auto result = ::SymEnumLinesW(process, Detail::ConvertBase(base), nullptr, nullptr, EnumLines, &f);
 			Util::AssertTrue(result == TRUE || ::GetLastError() == ERROR_NOT_SUPPORTED, "SymEnumLinesW");
 		}
@@ -375,7 +375,7 @@ namespace GLib::Win::Symbols
 		template <typename Inserter>
 		void Processes(Inserter && inserter) const
 		{
-			(void) this;
+			static_cast<void>(this);
 			std::function<void(HANDLE)> f = [&](HANDLE h) { *inserter++ = h; };
 			Util::AssertTrue(::SymEnumProcesses(EnumProcesses, &f), "SymEnumProcesses");
 		}

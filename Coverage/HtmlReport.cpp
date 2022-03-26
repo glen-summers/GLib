@@ -76,6 +76,8 @@ HtmlReport::HtmlReport(std::string testName, const std::filesystem::path & htmlP
 	}
 	GenerateRootIndex();
 	GenerateIndices();
+
+	static_cast<void>(scopeLog);
 }
 
 std::filesystem::path HtmlReport::Initialise(const std::filesystem::path & path)

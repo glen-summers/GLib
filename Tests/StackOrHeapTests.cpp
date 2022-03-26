@@ -44,9 +44,9 @@ BOOST_AUTO_TEST_CASE(Realloc)
 	s.EnsureSize(200_size);
 	BOOST_CHECK(200_size == s.size());
 
-	BOOST_TEST((void *) p != (void *) (s.Get()));
-	BOOST_TEST_MESSAGE((void *) p);
-	BOOST_TEST_MESSAGE((void *) (s.Get()));
+	BOOST_TEST(p != s.Get());
+	BOOST_TEST_MESSAGE(p);
+	BOOST_TEST_MESSAGE(s.Get());
 
 	{
 		std::string * sss = new (s.Get()) std::string(199_size, '-');
