@@ -87,7 +87,7 @@ namespace GLib::Win
 			CheckWaitResult(::WaitForInputIdle(p.get(), timeoutMilliseconds));
 		}
 
-		const Handle & Handle() const
+		[[nodiscard]] const Handle & Handle() const
 		{
 			return p;
 		}
@@ -103,7 +103,7 @@ namespace GLib::Win
 			return Detail::TerminatorHolder<ExitCode>(p.get());
 		}
 
-		DWORD Id() const
+		[[nodiscard]] DWORD Id() const
 		{
 			DWORD pid = GetProcessId(p.get());
 			Util::AssertTrue(pid != 0, "GetProcessId");
@@ -123,7 +123,7 @@ namespace GLib::Win
 			Wait(p.get(), ms);
 		}
 
-		DWORD ExitCode() const
+		[[nodiscard]] DWORD ExitCode() const
 		{
 			DWORD exitCode = 0;
 			BOOL win32Result = GetExitCodeProcess(p.get(), &exitCode);
@@ -131,7 +131,7 @@ namespace GLib::Win
 			return exitCode;
 		}
 
-		bool IsRunning() const
+		[[nodiscard]] bool IsRunning() const
 		{
 			return ExitCode() == STILL_ACTIVE;
 		}

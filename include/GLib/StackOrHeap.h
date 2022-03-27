@@ -33,7 +33,7 @@ namespace GLib::Util
 			// could go back to stack if (heapInUse && newElementCount <= StackElementCount)
 		}
 
-		size_t size() const
+		[[nodiscard]] size_t size() const
 		{
 			return GetSize();
 		}
@@ -43,18 +43,18 @@ namespace GLib::Util
 			return HeapInUse() ? &std::get<1>(storage)[0] : std::get<0>(storage).data();
 		}
 
-		const T * Get() const
+		[[nodiscard]] const T * Get() const
 		{
 			return HeapInUse() ? &std::get<1>(storage)[0] : std::get<0>(storage).data();
 		}
 
 	private:
-		bool HeapInUse() const
+		[[nodiscard]] bool HeapInUse() const
 		{
 			return storage.index() != 0;
 		}
 
-		size_t GetSize() const
+		[[nodiscard]] size_t GetSize() const
 		{
 			return HeapInUse() ? heapSize : StackElementCount;
 		}

@@ -51,7 +51,7 @@ namespace GLib::Eval
 		ValueBase & operator=(ValueBase &&) = delete;
 		virtual ~ValueBase() = default;
 
-		virtual std::string ToString() const = 0; // +format/stream?
+		[[nodiscard]] virtual std::string ToString() const = 0; // +format/stream?
 
 		virtual void VisitProperty(const std::string & propertyName, const ValueVisitor & f) const = 0;
 		virtual void ForEach(const ValueVisitor & f) const = 0;
@@ -67,7 +67,7 @@ namespace GLib::Eval
 			: value(std::move(value))
 		{}
 
-		std::string ToString() const override
+		[[nodiscard]] std::string ToString() const override
 		{
 			return Utils::ToString(value);
 		}

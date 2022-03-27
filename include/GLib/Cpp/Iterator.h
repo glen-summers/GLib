@@ -229,12 +229,12 @@ namespace GLib::Cpp
 			, emitWhitespace(emitWhitespace)
 		{}
 
-		Iterator begin() const
+		[[nodiscard]] Iterator begin() const
 		{
 			return {value.cbegin(), value.cend(), emitWhitespace};
 		}
 
-		Iterator end() const
+		[[nodiscard]] Iterator end() const
 		{
 			static_cast<void>(this);
 			return {value.cend(), value.cend(), emitWhitespace};

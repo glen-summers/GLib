@@ -351,7 +351,7 @@ namespace GLib::Xml
 			return {value.begin(), value.end(), &manager};
 		}
 
-		Iterator end() const
+		[[nodiscard]] Iterator end() const
 		{
 			static_cast<void>(this);
 			return Iterator {};

@@ -56,27 +56,27 @@ public:
 		}
 	}
 
-	const Functions & Functions() const
+	[[nodiscard]] const Functions & Functions() const
 	{
 		return functions;
 	}
 
-	const std::filesystem::path & Path() const
+	[[nodiscard]] const std::filesystem::path & Path() const
 	{
 		return path;
 	}
 
-	unsigned int CoveredLines() const
+	[[nodiscard]] unsigned int CoveredLines() const
 	{
 		return coveredLines;
 	}
 
-	unsigned int CoverableLines() const
+	[[nodiscard]] unsigned int CoverableLines() const
 	{
 		return static_cast<unsigned int>(lineCoverage.size());
 	}
 
-	unsigned int CoveredFunctions() const
+	[[nodiscard]] unsigned int CoveredFunctions() const
 	{
 		unsigned int value {};
 		for (const auto & f : functions) // improve
@@ -89,12 +89,12 @@ public:
 		return value;
 	}
 
-	unsigned int CoverableFunctions() const
+	[[nodiscard]] unsigned int CoverableFunctions() const
 	{
 		return static_cast<unsigned int>(functions.size());
 	}
 
-	const LineCoverage & LineCoverage() const
+	[[nodiscard]] const LineCoverage & LineCoverage() const
 	{
 		return lineCoverage;
 	}

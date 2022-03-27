@@ -39,12 +39,12 @@ namespace GLib::Win
 			SysFreeString(value);
 		}
 
-		bool HasValue() const
+		[[nodiscard]] bool HasValue() const
 		{
 			return value != nullptr;
 		}
 
-		std::string Value() const
+		[[nodiscard]] std::string Value() const
 		{
 			return value != nullptr ? Cvt::W2A(value) : std::string {};
 		}

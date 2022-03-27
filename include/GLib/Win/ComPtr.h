@@ -58,7 +58,7 @@ namespace GLib::Win
 		ComPtr<Target> value;
 		if (source)
 		{
-			CheckHr(source->QueryInterface(__uuidof(Target), GetAddress(value)), "QueryInterface");
+			CheckHr(source->QueryInterface(__uuidof(Target), GetAddress(value).Void()), "QueryInterface");
 		}
 		return value;
 	}

@@ -4,11 +4,11 @@
 
 namespace GLib::Win
 {
-	template <typename Wrapped, typename Raw>
+	template <typename Wrapped, typename RawType>
 	class Transfer
 	{
 		Wrapped & wrapped;
-		Raw rawValue;
+		RawType rawValue;
 
 	public:
 		explicit Transfer(Wrapped & wrapped)
@@ -27,12 +27,12 @@ namespace GLib::Win
 			std::swap(wrapped, newValue);
 		}
 
-		operator Raw *()
+		RawType * Raw()
 		{
 			return &rawValue;
 		}
 
-		operator void **()
+		void ** Void()
 		{
 			return reinterpret_cast<void **>(&rawValue); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast) required for COM interop
 		}

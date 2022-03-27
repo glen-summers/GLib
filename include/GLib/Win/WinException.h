@@ -12,12 +12,12 @@ namespace GLib::Win
 		HRESULT const hResult;
 
 	public:
-		DWORD ErrorCode() const
+		[[nodiscard]] DWORD ErrorCode() const
 		{
 			return errorCode;
 		}
 
-		HRESULT HResult() const
+		[[nodiscard]] HRESULT HResult() const
 		{
 			return hResult;
 		}

@@ -100,12 +100,12 @@ namespace GLib::Util
 				}
 			};
 
-			Iterator begin() const
+			[[nodiscard]] Iterator begin() const
 			{
 				return Iterator(*this);
 			}
 
-			Iterator end() const
+			[[nodiscard]] Iterator end() const
 			{
 				return Iterator();
 			}

@@ -27,7 +27,7 @@ namespace GLib::Eval
 		{}
 
 	protected:
-		std::string ToString() const override
+		[[nodiscard]] std::string ToString() const override
 		{
 			std::ostringstream stm;
 			auto it = container.begin();

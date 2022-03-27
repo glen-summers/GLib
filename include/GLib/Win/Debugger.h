@@ -55,17 +55,17 @@ namespace GLib::Win
 		Debugger & operator=(Debugger &&) = delete;
 		virtual ~Debugger() = default;
 
-		const Symbols::Engine & Symbols() const
+		[[nodiscard]] const Symbols::Engine & Symbols() const
 		{
 			return symbols;
 		}
 
-		DWORD ProcessId() const
+		[[nodiscard]] DWORD ProcessId() const
 		{
 			return debugProcessId;
 		}
 
-		DWORD ExitCode() const
+		[[nodiscard]] DWORD ExitCode() const
 		{
 			return exitCode.value();
 		}

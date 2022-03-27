@@ -24,33 +24,33 @@ public:
 		, start(std::chrono::high_resolution_clock::now())
 	{}
 
-	GLib::Flog::Level Level() const
+	[[nodiscard]] GLib::Flog::Level Level() const
 	{
 		return level;
 	}
 
-	std::string_view Prefix() const
+	[[nodiscard]] std::string_view Prefix() const
 	{
 		return prefix;
 	}
 
-	std::string_view ScopeText() const
+	[[nodiscard]] std::string_view ScopeText() const
 	{
 		return scopeText;
 	}
 
-	std::string_view Stem() const
+	[[nodiscard]] std::string_view Stem() const
 	{
 		return stem;
 	}
 
-	auto Duration() const
+	[[nodiscard]] auto Duration() const
 	{
 		return std::chrono::high_resolution_clock::now() - start;
 	}
 
 	template <typename T>
-	auto Duration() const
+	[[nodiscard]] auto Duration() const
 	{
 		return std::chrono::duration_cast<T>(Duration());
 	}

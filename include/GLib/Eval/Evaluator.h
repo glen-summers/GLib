@@ -85,7 +85,7 @@ namespace GLib::Eval
 			Evaluate(name, [&](const ValueBase & value) { value.ForEach(visitor); });
 		}
 
-		std::string Evaluate(const std::string & name) const
+		[[nodiscard]] std::string Evaluate(const std::string & name) const
 		{
 			std::string result;
 			Evaluate(name, [&](const ValueBase & value) { result = value.ToString(); });

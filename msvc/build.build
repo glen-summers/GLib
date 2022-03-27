@@ -197,6 +197,10 @@ docker system df
 		<MSBuild Projects="Tidy.build" Targets="Tidy" Properties="Source=$(Source)"/>
 	</Target>
 
+	<Target Name="TidyFix">
+		<MSBuild Projects="Tidy.build" Targets="Tidy" Properties="Source=$(Source);Fix=true"/>
+	</Target>
+
 	<Target Name="TidyFile">
 		<MSBuild Projects="Tidy.build" Targets="TidyFile" Properties="FileName=$(FileName);Source=$(Source)"/>
 	</Target>

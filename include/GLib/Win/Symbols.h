@@ -63,7 +63,7 @@ namespace GLib::Win::Symbols
 			, displacement(displacement)
 		{}
 
-		ULONG Index() const
+		[[nodiscard]] ULONG Index() const
 		{
 			return index;
 		}
@@ -73,7 +73,7 @@ namespace GLib::Win::Symbols
 			index = value;
 		}
 
-		ULONG TypeIndex() const
+		[[nodiscard]] ULONG TypeIndex() const
 		{
 			return typeIndex;
 		}
@@ -83,7 +83,7 @@ namespace GLib::Win::Symbols
 			typeIndex = value;
 		}
 
-		enum SymTagEnum Tag() const
+		[[nodiscard]] enum SymTagEnum Tag() const
 		{
 			return tag;
 		}
@@ -93,7 +93,7 @@ namespace GLib::Win::Symbols
 			tag = value;
 		}
 
-		const std::string & Name() const
+		[[nodiscard]] const std::string & Name() const
 		{
 			return name;
 		}
@@ -103,7 +103,7 @@ namespace GLib::Win::Symbols
 			name = move(value);
 		}
 
-		DWORD64 Displacement() const
+		[[nodiscard]] DWORD64 Displacement() const
 		{
 			return displacement;
 		}
@@ -160,12 +160,12 @@ namespace GLib::Win::Symbols
 			return {std::move(duplicate), baseOfImage};
 		}
 
-		HANDLE Handle() const
+		[[nodiscard]] HANDLE Handle() const
 		{
 			return process.Handle().get();
 		}
 
-		const Process & Process() const
+		[[nodiscard]] const Process & Process() const
 		{
 			return process;
 		}
@@ -181,7 +181,7 @@ namespace GLib::Win::Symbols
 		}
 
 		template <typename T>
-		T Read(uint64_t address, bool absolute = false) const
+		[[nodiscard]] T Read(uint64_t address, bool absolute = false) const
 		{
 			T value;
 			ReadMemory(address, &value, sizeof(T), absolute);
@@ -194,7 +194,7 @@ namespace GLib::Win::Symbols
 			WriteMemory(address, &value, sizeof(T), absolute);
 		}
 
-		Symbol GetSymbolFromIndex(DWORD index) const
+		[[nodiscard]] Symbol GetSymbolFromIndex(DWORD index) const
 		{
 			std::array<SYMBOL_INFOW, 2 + MAX_SYM_NAME * sizeof(wchar_t) / sizeof(SYMBOL_INFO)> buffer {};
 			auto * const symBuf = buffer.data();
@@ -207,7 +207,7 @@ namespace GLib::Win::Symbols
 							Cvt::W2A(std::wstring_view {static_cast<const wchar_t *>(symBuf->Name)}), 0};
 		}
 
-		ULONG GetSymbolIdFromAddress(uint64_t address) const
+		[[nodiscard]] ULONG GetSymbolIdFromAddress(uint64_t address) const
 		{
 			SYMBOL_INFOW buffer {};
 			auto * const symBuf = &buffer;
@@ -218,7 +218,7 @@ namespace GLib::Win::Symbols
 			return symBuf->Index;
 		}
 
-		std::optional<Symbol> TryGetSymbolFromAddress(uint64_t address) const
+		[[nodiscard]] std::optional<Symbol> TryGetSymbolFromAddress(uint64_t address) const
 		{
 			std::optional<Symbol> symbol;
 
@@ -236,7 +236,7 @@ namespace GLib::Win::Symbols
 			return symbol;
 		}
 
-		std::optional<Symbol> TryGetSymbolFromInlineContext(uint64_t address, ULONG context) const
+		[[nodiscard]] std::optional<Symbol> TryGetSymbolFromInlineContext(uint64_t address, ULONG context) const
 		{
 			std::optional<Symbol> symbol;
 
@@ -255,7 +255,7 @@ namespace GLib::Win::Symbols
 			return symbol;
 		}
 
-		std::optional<Line> TryGetLineFromAddress(uint64_t address) const
+		[[nodiscard]] std::optional<Line> TryGetLineFromAddress(uint64_t address) const
 		{
 			std::optional<Line> line;
 
@@ -269,7 +269,7 @@ namespace GLib::Win::Symbols
 			return line;
 		}
 
-		std::optional<Line> TryGetLineFromInlineContext(uint64_t address, ULONG inlineContext) const
+		[[nodiscard]] std::optional<Line> TryGetLineFromInlineContext(uint64_t address, ULONG inlineContext) const
 		{
 			std::optional<Line> line;
 
@@ -303,8 +303,7 @@ namespace GLib::Win::Symbols
 			}
 
 			Local<WCHAR> name;
-			Util::AssertTrue(SymGetTypeInfo(Handle(), baseOfImage, indexOfClassParent, TI_GET_SYMNAME, static_cast<void **>(GetAddress<WCHAR>(name))),
-											 "SymGetTypeInfo");
+			Util::AssertTrue(SymGetTypeInfo(Handle(), baseOfImage, indexOfClassParent, TI_GET_SYMNAME, GetAddress<WCHAR>(name).Void()), "SymGetTypeInfo");
 
 			result.Index(indexOfClassParent);
 			result.TypeIndex(typeIndexOfClassParent);
@@ -313,7 +312,7 @@ namespace GLib::Win::Symbols
 		}
 
 	private:
-		uint64_t Address(uint64_t address, bool fromBase) const
+		[[nodiscard]] uint64_t Address(uint64_t address, bool fromBase) const
 		{
 			return fromBase ? baseOfImage + address : address;
 		}
@@ -341,7 +340,7 @@ namespace GLib::Win::Symbols
 			return handles.emplace(processId, std::move(sp)).first->second;
 		}
 
-		const SymProcess & GetProcess(DWORD processId) const
+		[[nodiscard]] const SymProcess & GetProcess(DWORD processId) const
 		{
 			auto const it = handles.find(processId);
 			if (it == handles.end())

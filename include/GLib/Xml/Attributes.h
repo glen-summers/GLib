@@ -16,23 +16,23 @@ namespace GLib::Xml
 			, manager(manager)
 		{}
 
-		AttributeIterator begin() const
+		[[nodiscard]] AttributeIterator begin() const
 		{
 			return {manager, data.begin(), data.end()};
 		}
 
-		AttributeIterator end() const
+		[[nodiscard]] AttributeIterator end() const
 		{
 			static_cast<void>(this);
 			return {};
 		}
 
-		bool Empty() const
+		[[nodiscard]] bool Empty() const
 		{
 			return data.empty();
 		}
 
-		std::string_view Value() const
+		[[nodiscard]] std::string_view Value() const
 		{
 			return data;
 		}

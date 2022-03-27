@@ -49,42 +49,42 @@ namespace GLib::Xml
 
 		Element() = default;
 
-		std::string_view QName() const
+		[[nodiscard]] std::string_view QName() const
 		{
 			return qName;
 		}
 
-		std::string_view Name() const
+		[[nodiscard]] std::string_view Name() const
 		{
 			return name;
 		}
 
-		std::string_view NameSpace() const
+		[[nodiscard]] std::string_view NameSpace() const
 		{
 			return nameSpace;
 		}
 
-		std::string_view OuterXml() const
+		[[nodiscard]] std::string_view OuterXml() const
 		{
 			return outerXml;
 		}
 
-		ElementType Type() const
+		[[nodiscard]] ElementType Type() const
 		{
 			return type;
 		}
 
-		const Xml::Attributes & Attributes() const
+		[[nodiscard]] const Xml::Attributes & Attributes() const
 		{
 			return attributes;
 		}
 
-		size_t Depth() const // move/remove?
+		[[nodiscard]] size_t Depth() const // move/remove?
 		{
 			return depth;
 		}
 
-		std::string_view Text() const
+		[[nodiscard]] std::string_view Text() const
 		{
 			return text;
 		}

@@ -181,7 +181,7 @@ namespace GLib::Win
 	protected:
 		virtual ~Window() = default;
 
-		HWND Handle() const
+		[[nodiscard]] HWND Handle() const
 		{
 			return handle.get();
 		}
@@ -191,13 +191,13 @@ namespace GLib::Win
 			return Detail::Instance();
 		}
 
-		LRESULT Send(UINT msg, WPARAM wParam = {}, LPARAM lParam = {}) const
+		[[nodiscard]] LRESULT Send(UINT msg, WPARAM wParam = {}, LPARAM lParam = {}) const
 		{
 			return SendMessageW(Handle(), msg, wParam, lParam);
 		}
 
 	public:
-		int PumpMessages() const
+		[[nodiscard]] int PumpMessages() const
 		{
 			MSG msg = {};
 			while (GetMessageW(&msg, nullptr, 0, 0) != FALSE) // returns -1 on error?
@@ -212,19 +212,19 @@ namespace GLib::Win
 			return static_cast<int>(msg.wParam);
 		}
 
-		Size ClientSize() const
+		[[nodiscard]] Size ClientSize() const
 		{
 			RECT rc;
 			Util::AssertTrue(GetClientRect(handle.get(), &rc), "GetClientRect");
 			return {rc.right - rc.left, rc.bottom - rc.top};
 		}
 
-		bool Show(int cmd) const
+		[[nodiscard]] bool Show(int cmd) const
 		{
 			return ShowWindow(handle.get(), cmd) != FALSE;
 		}
 
-		Painter GetPainter() const
+		[[nodiscard]] Painter GetPainter() const
 		{
 			PAINTSTRUCT ps {};
 			auto * dc = BeginPaint(handle.get(), &ps);
@@ -243,7 +243,7 @@ namespace GLib::Win
 
 #pragma push_macro("MessageBox")
 #undef MessageBox
-		int MessageBox(const std::string & message, const std::string & caption, UINT type = MB_OK) const
+		[[nodiscard]] int MessageBox(const std::string & message, const std::string & caption, UINT type = MB_OK) const
 		{
 			int result = MessageBoxW(handle.get(), Cvt::A2W(message).c_str(), Cvt::A2W(caption).c_str(), type);
 			Util::AssertTrue(result != 0, "MessageBoxW");

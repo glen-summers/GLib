@@ -20,7 +20,7 @@ namespace GLib::Win
 		ComPtr<T> GetCurrentPattern(long id)
 		{
 			ComPtr<IUnknown> pattern;
-			CheckHr(element->GetCurrentPattern(id, GetAddress(pattern)), "GetCurrentPattern");
+			CheckHr(element->GetCurrentPattern(id, GetAddress(pattern).Raw()), "GetCurrentPattern");
 			if (!pattern)
 			{
 				throw std::exception("Pattern not implemented");
@@ -31,14 +31,14 @@ namespace GLib::Win
 		std::string CurrentName() const
 		{
 			Bstr bstr;
-			CheckHr(element->get_CurrentName(GetAddress(bstr)), "CurrentName");
+			CheckHr(element->get_CurrentName(GetAddress(bstr).Raw()), "CurrentName");
 			return bstr.Value();
 		}
 
 		std::string CurrentClassName() const
 		{
 			Bstr bstr;
-			CheckHr(element->get_CurrentClassName(GetAddress(bstr)), "CurrentClassName");
+			CheckHr(element->get_CurrentClassName(GetAddress(bstr).Raw()), "CurrentClassName");
 			return bstr.Value();
 		}
 	};
@@ -50,14 +50,14 @@ namespace GLib::Win
 	public:
 		Automation()
 		{
-			CheckHr(CoCreateInstance(__uuidof(CUIAutomation), nullptr, ComPtrDetail::ContextAll, __uuidof(IUIAutomation), GetAddress(automation)),
+			CheckHr(CoCreateInstance(__uuidof(CUIAutomation), nullptr, ComPtrDetail::ContextAll, __uuidof(IUIAutomation), GetAddress(automation).Void()),
 							"CoCreateInstance");
 		}
 
 		Element ElementFromHandle(HWND hWnd) const
 		{
 			ComPtr<IUIAutomationElement> element;
-			CheckHr(automation->ElementFromHandle(hWnd, GetAddress(element)), "ElementFromHandle");
+			CheckHr(automation->ElementFromHandle(hWnd, GetAddress(element).Raw()), "ElementFromHandle");
 			return std::move(element);
 		}
 	};

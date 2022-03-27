@@ -23,17 +23,17 @@ public:
 		: id {id}
 	{}
 
-	unsigned int Id() const
+	[[nodiscard]] unsigned int Id() const
 	{
 		return id;
 	}
 
-	const Addresses & Addresses() const
+	[[nodiscard]] const Addresses & Addresses() const
 	{
 		return addresses;
 	}
 
-	const Threads & Threads() const
+	[[nodiscard]] const Threads & Threads() const
 	{
 		return threads;
 	}
@@ -48,7 +48,7 @@ public:
 		threads.erase(threadId);
 	}
 
-	HANDLE FindThread(DWORD threadId) const
+	[[nodiscard]] HANDLE FindThread(DWORD threadId) const
 	{
 		auto it = threads.find(threadId);
 		if (it == threads.end())
@@ -58,7 +58,7 @@ public:
 		return it->second;
 	}
 
-	const IndexToFunction & IndexToFunction() const
+	[[nodiscard]] const IndexToFunction & IndexToFunction() const
 	{
 		return indexToFunction;
 	}

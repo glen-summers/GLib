@@ -124,7 +124,7 @@ namespace GLib::Xml
 			}
 		}
 
-		std::string Xml() const
+		[[nodiscard]] std::string Xml() const
 		{
 			if (depth != 0)
 			{

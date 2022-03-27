@@ -29,7 +29,7 @@ namespace GLib::Win
 			: p(value)
 		{}
 
-		const T * Get() const
+		[[nodiscard]] const T * Get() const
 		{
 			return p.get();
 		}

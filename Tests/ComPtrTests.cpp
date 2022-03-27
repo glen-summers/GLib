@@ -37,7 +37,7 @@ BOOST_AUTO_TEST_SUITE(ComPtrTests)
 BOOST_AUTO_TEST_CASE(ComErrorCheckWithErrorInfo)
 {
 	GLib::Win::ComPtr<ICreateErrorInfo> p;
-	GLib::Win::CheckHr(CreateErrorInfo(GetAddress(p)), "CreateErrorInfo");
+	GLib::Win::CheckHr(CreateErrorInfo(GetAddress(p).Raw()), "CreateErrorInfo");
 	auto ei = GLib::Win::ComCast<IErrorInfo>(p);
 	p->SetDescription(const_cast<LPOLESTR>(L"hello"));
 	GLib::Win::CheckHr(SetErrorInfo(0, Get(ei)), "SetErrorInfo");
@@ -236,7 +236,7 @@ BOOST_AUTO_TEST_CASE(QiMissInDebugOut)
 {
 	GLib::Win::ComPtr<ITest1Extended> p12 = GLib::Win::Make<ImplementsITest1ExtendedAndITest1ExtendedAlt>();
 	GLib::Win::ComPtr<IUnknown> unk;
-	HRESULT hr = p12->QueryInterface(__uuidof(IClassFactory), GetAddress(unk));
+	HRESULT hr = p12->QueryInterface(__uuidof(IClassFactory), GetAddress(unk).Void());
 	BOOST_TEST(hr == E_NOINTERFACE);
 }
 

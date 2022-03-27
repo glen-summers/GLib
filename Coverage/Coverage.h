@@ -43,7 +43,7 @@ public:
 		}
 	}
 
-	CoverageData GetCoverageData() const;
+	[[nodiscard]] CoverageData GetCoverageData() const;
 
 private:
 	static WideStrings A2W(const Strings & strings);

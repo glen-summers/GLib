@@ -29,57 +29,57 @@ public:
 		, coverableFunctions(coverableFunctions)
 	{}
 
-	std::string Name() const
+	[[nodiscard]] std::string Name() const
 	{
 		return name;
 	}
 
-	std::string Link() const
+	[[nodiscard]] std::string Link() const
 	{
 		return link;
 	}
 
-	enum CoverageLevel Style() const
+	[[nodiscard]] enum CoverageLevel Style() const
 	{
 		return CoverageLevel(CoveragePercent());
 	}
 
-	unsigned int CoveragePercent() const
+	[[nodiscard]] unsigned int CoveragePercent() const
 	{
 		return Percentage(coveredLines, coverableLines);
 	}
 
-	unsigned int CoveredLines() const
+	[[nodiscard]] unsigned int CoveredLines() const
 	{
 		return coveredLines;
 	}
 
-	unsigned int CoverableLines() const
+	[[nodiscard]] unsigned int CoverableLines() const
 	{
 		return coverableLines;
 	}
 
-	unsigned int MinCoveragePercent() const
+	[[nodiscard]] unsigned int MinCoveragePercent() const
 	{
 		return minCoveragePercent;
 	}
 
-	enum CoverageLevel MinCoverageStyle() const
+	[[nodiscard]] enum CoverageLevel MinCoverageStyle() const
 	{
 		return CoverageLevel(minCoveragePercent);
 	}
 
-	unsigned int CoveredFunctions() const
+	[[nodiscard]] unsigned int CoveredFunctions() const
 	{
 		return coveredFunctions;
 	}
 
-	unsigned int CoverableFunctions() const
+	[[nodiscard]] unsigned int CoverableFunctions() const
 	{
 		return coverableFunctions;
 	}
 
-	unsigned int CoveredFunctionsPercent() const
+	[[nodiscard]] unsigned int CoveredFunctionsPercent() const
 	{
 		return Percentage(coveredFunctions, coverableFunctions);
 	}

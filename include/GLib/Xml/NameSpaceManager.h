@@ -25,7 +25,7 @@ namespace GLib::Xml
 			return IsDeclaration(value) ? value.substr(xmlNameSpace.size()) : std::string_view {};
 		}
 
-		std::string_view Get(std::string_view prefix) const
+		[[nodiscard]] std::string_view Get(std::string_view prefix) const
 		{
 			auto nit = nameSpaces.find(prefix);
 			if (nit == nameSpaces.end())
@@ -78,7 +78,7 @@ namespace GLib::Xml
 			}
 		}
 
-		std::tuple<std::string_view, std::string_view> Normalise(std::string_view name) const
+		[[nodiscard]] std::tuple<std::string_view, std::string_view> Normalise(std::string_view name) const
 		{
 			const size_t colon = name.find(':');
 			if (colon != std::string_view::npos)

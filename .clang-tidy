@@ -1,0 +1,20 @@
+Checks: '*,
+-abseil-string-find-str-contains,
+-altera-id-dependent-backward-branch,
+-altera-unroll-loops,
+-altera-struct-pack-align,
+-bugprone-easily-swappable-parameters,
+-cppcoreguidelines-macro-usage,
+-llvm-header-guard,
+-llvm-namespace-comment,
+-llvmlibc-callee-namespace,
+-llvmlibc-implementation-in-namespace,
+-llvmlibc-restrict-system-libc-headers,
+-fuchsia-default-arguments-calls,
+-fuchsia-default-arguments-declarations,
+-fuchsia-overloaded-operator,
+-modernize-use-trailing-return-type,
+-google-readability-namespace-comments,
+-google-runtime-int
+'
+HeaderFilterRegex: '^.*\\GLib\\.*$'

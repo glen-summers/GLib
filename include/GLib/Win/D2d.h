@@ -14,7 +14,7 @@ namespace GLib::Win::D2d
 		{
 			ComPtr<ID2D1Factory> factory;
 			D2D1_FACTORY_OPTIONS options {D2D1_DEBUG_LEVEL_INFORMATION};
-			CheckHr(D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED, __uuidof(ID2D1Factory), &options, GetAddress<ID2D1Factory>(factory)),
+			CheckHr(D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED, __uuidof(ID2D1Factory), &options, GetAddress<ID2D1Factory>(factory).Void()),
 							"D2D1CreateFactory");
 			return factory;
 		}
@@ -29,7 +29,7 @@ namespace GLib::Win::D2d
 		{
 			ComPtr<ID2D1HwndRenderTarget> renderTarget;
 			WarnHr(factory->CreateHwndRenderTarget(D2D1::RenderTargetProperties(), D2D1::HwndRenderTargetProperties(handle, D2D1::SizeU(size.cx, size.cy)),
-																						 GetAddress(renderTarget)),
+																						 GetAddress(renderTarget).Raw()),
 						 "CreateHwndRenderTarget");
 			return renderTarget;
 		}
@@ -47,7 +47,7 @@ namespace GLib::Win::D2d
 			, recreated()
 		{}
 
-		const Factory & Factory() const
+		[[nodiscard]] const Factory & Factory() const
 		{
 			return factory;
 		}
@@ -89,7 +89,7 @@ namespace GLib::Win::D2d
 			}
 		}
 
-		bool Resize(const SIZE & size) const
+		[[nodiscard]] bool Resize(const SIZE & size) const
 		{
 			bool resize = renderTarget != nullptr;
 			if (resize)

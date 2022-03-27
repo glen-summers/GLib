@@ -23,32 +23,32 @@ public:
 		, coverableLines {coverableLines}
 	{}
 
-	const std::string & NameSpace() const
+	[[nodiscard]] const std::string & NameSpace() const
 	{
 		return nameSpace;
 	}
 
-	const std::string & ClassName() const
+	[[nodiscard]] const std::string & ClassName() const
 	{
 		return className;
 	}
 
-	const std::string & FunctionName() const
+	[[nodiscard]] const std::string & FunctionName() const
 	{
 		return functionName;
 	}
 
-	const unsigned int & Line() const
+	[[nodiscard]] const unsigned int & Line() const
 	{
 		return line;
 	}
 
-	unsigned int CoveredLines() const
+	[[nodiscard]] unsigned int CoveredLines() const
 	{
 		return coveredLines;
 	}
 
-	unsigned int CoverableLines() const
+	[[nodiscard]] unsigned int CoverableLines() const
 	{
 		return coverableLines;
 	}

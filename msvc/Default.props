@@ -10,14 +10,12 @@
     <BoostItem>boost\test\unit_test.hpp</BoostItem>
     <ExtDeps>$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), "$(BoostSig)/$(BoostItem)"))</ExtDeps>
     <Boost>$(ExtDeps)\ExternalDependencies\$(BoostVerUnd)</Boost>
+    <Defines>NOMINMAX;WIN32_LEAN_AND_MEAN;BOOST_ALL_NO_LIB;_SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING</Defines>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
-      <AdditionalIncludeDirectories>
-        $(Boost);
-        $([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)\..\include'));
-      </AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions);NOMINMAX;WIN32_LEAN_AND_MEAN;BOOST_ALL_NO_LIB</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(Boost);$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)\..\include'));</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);$(Defines)</PreprocessorDefinitions>
       <TreatWarningAsError Condition="'$(Configuration)'=='Debug'">false</TreatWarningAsError>
       <TreatWarningAsError Condition="'$(Configuration)'!='Debug'">true</TreatWarningAsError>
       <WarningLevel>Level4</WarningLevel>
