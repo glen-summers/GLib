@@ -342,7 +342,7 @@ namespace GLib::Xml
 		NameSpaceManager manager;
 
 	public:
-		Holder(std::string_view value)
+		explicit Holder(std::string_view value)
 			: value(value)
 		{}
 

@@ -114,7 +114,7 @@ namespace GLib::Flog
 		friend class ScopeLog;
 
 	private:
-		Log(std::string name) noexcept
+		explicit Log(std::string name) noexcept
 			: name(std::move(name))
 		{}
 
@@ -170,7 +170,7 @@ namespace GLib::Flog
 		static void SetThreadName(std::string_view name);
 		static Compat::FileSystem::path GetLogPath();
 
-		static Log GetLog(const std::string & name) noexcept
+		static auto GetLog(const std::string & name) noexcept
 		{
 			return Log(name);
 		}

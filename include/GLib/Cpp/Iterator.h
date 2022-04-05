@@ -224,7 +224,7 @@ namespace GLib::Cpp
 		bool emitWhitespace;
 
 	public:
-		Holder(std::string_view value, bool emitWhitespace = true)
+		explicit Holder(std::string_view value, bool emitWhitespace = true)
 			: value(value)
 			, emitWhitespace(emitWhitespace)
 		{}

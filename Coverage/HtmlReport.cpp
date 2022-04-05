@@ -275,7 +275,7 @@ void HtmlReport::GenerateSourceFile(std::filesystem::path & subPath, const FileC
 		try
 		{
 			std::stringstream tmp;
-			Htmlify({std::string_view {buffer.str()}, showWhiteSpace}, tmp);
+			Htmlify(buffer.str(), showWhiteSpace, tmp);
 			source = tmp.str();
 		}
 		catch (const std::exception & e)

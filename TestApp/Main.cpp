@@ -11,7 +11,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
 {
 	static_cast<void>(hPrevInstance);
 
-	int returnValue;
+	int returnValue = 0;
 	const GLib::Flog::Log & log = GLib::Flog::LogManager::GetLog("Main");
 
 	try

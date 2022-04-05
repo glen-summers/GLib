@@ -32,7 +32,7 @@ namespace GLib::Util
 			StringType delimiter;
 
 		public:
-			Splitter(StringType value, const StringType & delimiter = DefaultDelimiter<typename StringType::value_type>())
+			explicit Splitter(StringType value, const StringType & delimiter = DefaultDelimiter<typename StringType::value_type>())
 				: value(move(value))
 				, delimiter(delimiter)
 			{
@@ -56,7 +56,7 @@ namespace GLib::Util
 				using reference = void;
 				// ReSharper restore All
 
-				Iterator(const Splitter & splitter)
+				explicit Iterator(const Splitter & splitter)
 					: splitter(&splitter)
 					, current(0)
 					, nextDelimiter(splitter.value.find(splitter.delimiter, 0))

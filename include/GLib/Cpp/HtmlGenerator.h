@@ -88,7 +88,7 @@ inline bool IsCommonType(std::string_view value)
 	return types.find(value) != types.end();
 }
 
-inline void Htmlify(const GLib::Cpp::Holder & code, std::ostream & out)
+inline void Htmlify(std::string_view code, bool emitWhitespace, std::ostream & out)
 {
 	// clang-format off
 	static std::unordered_map<GLib::Cpp::State, Style> styles =
@@ -108,7 +108,7 @@ inline void Htmlify(const GLib::Cpp::Holder & code, std::ostream & out)
 	auto escape = [&](std::string_view value) { GLib::Xml::Utils::Escape(value, out); };
 	auto vis = [&](std::string_view v) { VisibleWhitespace(v, out); };
 
-	for (const auto & f : code)
+	for (const auto & f : GLib::Cpp::Holder(code, emitWhitespace))
 	{
 		if (f.first == GLib::Cpp::State::Code)
 		{

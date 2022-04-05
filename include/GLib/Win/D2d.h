@@ -42,7 +42,7 @@ namespace GLib::Win::D2d
 		bool recreated;
 
 	public:
-		Renderer(Factory factory)
+		explicit Renderer(Factory factory)
 			: factory(std::move(factory))
 			, recreated()
 		{}

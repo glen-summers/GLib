@@ -28,7 +28,7 @@ namespace GLib::Html
 		std::string_view textReplacement;
 
 	public:
-		Generator(Eval::Evaluator & evaluator)
+		explicit Generator(Eval::Evaluator & evaluator)
 			: evaluator(evaluator)
 		{}
 

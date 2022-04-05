@@ -34,12 +34,12 @@ namespace GLib::Win
 			virtual ~Restricted() = delete;
 
 		private:
-			ULONG STDMETHODCALLTYPE AddRef()
+			ULONG STDMETHODCALLTYPE AddRef() override
 			{
 				return 0;
 			}
 
-			ULONG STDMETHODCALLTYPE Release()
+			ULONG STDMETHODCALLTYPE Release() override
 			{
 				return 0;
 			}
@@ -88,7 +88,7 @@ namespace GLib::Win
 		{}
 
 		template <typename U>
-		ComPtr(const ComPtr<U> & other) noexcept
+		explicit ComPtr(const ComPtr<U> & other) noexcept
 			: p(InternalAddRef(other.p))
 		{}
 
@@ -97,7 +97,7 @@ namespace GLib::Win
 		{}
 
 		template <typename U>
-		ComPtr(ComPtr<U> && right) noexcept
+		explicit ComPtr(ComPtr<U> && right) noexcept
 			: p(std::exchange(right.p, nullptr))
 		{}
 

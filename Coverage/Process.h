@@ -19,7 +19,7 @@ class Process // ren ProcessInfo
 	IndexToFunction indexToFunction;
 
 public:
-	Process(unsigned int id)
+	explicit Process(unsigned int id)
 		: id {id}
 	{}
 

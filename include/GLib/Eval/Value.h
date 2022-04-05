@@ -63,7 +63,7 @@ namespace GLib::Eval
 		ValueType value;
 
 	public:
-		Value(ValueType value)
+		explicit Value(ValueType value)
 			: value(std::move(value))
 		{}
 

@@ -16,7 +16,7 @@ namespace GLib::Util
 	public:
 		using typename Base::int_type;
 
-		VectorStreamBuffer(size_t initialCapacity = DefaultCapacity)
+		explicit VectorStreamBuffer(size_t initialCapacity = DefaultCapacity)
 		{
 			buffer.reserve(initialCapacity);
 		}

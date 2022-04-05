@@ -68,13 +68,14 @@ namespace GLib::Win
 			return Util::Detail::WindowsCast<HMODULE>(&__ImageBase);
 		}
 
-		Process(Handle handle)
+		explicit Process(Handle handle)
 			: p(std::move(handle))
 			, threadId(GetThreadId(p.get()))
 		{}
 
 		// creation flags  DETACHED_PROCESS?
-		Process(const std::string & app, const std::string & cmd = {}, DWORD creationFlags = {}, WORD show = {}, const std::string & desktop = {})
+		explicit Process(const std::string & app, const std::string & cmd = {}, DWORD creationFlags = {}, WORD show = {},
+										 const std::string & desktop = {})
 			: Process(Create(app, cmd, creationFlags, show, desktop))
 		{}
 

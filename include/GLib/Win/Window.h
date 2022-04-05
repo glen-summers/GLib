@@ -434,7 +434,6 @@ namespace GLib::Win
 			}
 		}
 
-	private:
 		static LRESULT APIENTRY WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) noexcept
 		{
 			LRESULT result = 0;

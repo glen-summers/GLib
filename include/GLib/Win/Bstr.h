@@ -13,7 +13,7 @@ namespace GLib::Win
 	{
 		BSTR value {}; // use unique_ptr?
 
-		Bstr(BSTR value)
+		explicit Bstr(BSTR value)
 			: value(value)
 		{}
 
@@ -49,9 +49,9 @@ namespace GLib::Win
 			return value != nullptr ? Cvt::W2A(value) : std::string {};
 		}
 
-		static Bstr Attach(BSTR value)
+		static auto Attach(BSTR value)
 		{
-			return {value};
+			return Bstr(value);
 		}
 
 	private:

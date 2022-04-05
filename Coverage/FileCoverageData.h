@@ -19,7 +19,7 @@ class FileCoverageData
 	Functions functions;
 
 public:
-	FileCoverageData(std::filesystem::path path)
+	explicit FileCoverageData(std::filesystem::path path)
 		: path(std::move(path))
 		, coveredLines()
 	{}

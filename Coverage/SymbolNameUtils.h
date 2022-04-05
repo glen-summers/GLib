@@ -102,7 +102,7 @@ inline void RemoveTemplateDefinitions(std::string & name)
 		return;
 	}
 
-	bool ok;
+	bool ok = 0;
 	if (left < right)
 	{
 		ok = Parse(name, right - left, '<', '>');
