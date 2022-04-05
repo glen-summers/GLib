@@ -19,12 +19,12 @@ namespace GLib
 	{
 		namespace Detail
 		{
-			inline std::string CheckFormat(const char * defaultFormat, const std::string & format)
+			inline std::string CheckFormat(const char * defaultFormat, const std::string & format, const std::string & type)
 			{
 				std::string f = format.empty() ? defaultFormat : format;
 				if (*f.begin() != '%')
 				{
-					throw std::logic_error("Invalid format : " + f);
+					throw std::logic_error("Invalid format : '" + f + "' for Type: " + type);
 				}
 				return f;
 			}
@@ -40,7 +40,7 @@ namespace GLib
 			template <typename T>
 			static void ToStringImpl(const char * defaultFormat, std::ostream & stm, const T & value, const std::string & format)
 			{
-				std::string f = CheckFormat(defaultFormat, format);
+				std::string f = CheckFormat(defaultFormat, format, Compat::Unmangle(typeid(T).name()));
 				constexpr auto initialBufferSize = 21;
 				Util::StackOrHeap<char, initialBufferSize> s;
 				const int len = snprintf(nullptr, 0, f.c_str(), value); // NOLINT until c++/20 Format impl
@@ -54,7 +54,7 @@ namespace GLib
 			template <>
 			inline void ToStringImpl(const char * defaultFormat, std::ostream & stm, const std::tm & value, const std::string & format)
 			{
-				std::string f = CheckFormat(defaultFormat, format);
+				std::string f = CheckFormat(defaultFormat, format, "tm");
 				// stream to wide to correctly convert locale symbols, is there a better better way? maybe when code convert gets fixed
 				std::wstringstream wideStream;
 				static_cast<void>(wideStream.imbue(stm.getloc()));

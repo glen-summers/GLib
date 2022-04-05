@@ -47,16 +47,15 @@ public:
 
 private:
 	static WideStrings A2W(const Strings & strings);
-	void AddLine(const std::wstring & fileName, unsigned lineNumber, const GLib::Win::Symbols::SymProcess & symProcess, DWORD64 address,
+	void AddLine(const std::wstring & fileName, unsigned lineNumber, const GLib::Win::Symbols::SymProcess & symProcess, uint64_t address,
 							 Process & process);
 
-	void OnCreateProcess(DWORD processId, DWORD threadId, const CREATE_PROCESS_DEBUG_INFO & info) override;
-	void OnExitProcess(DWORD processId, DWORD threadId, const EXIT_PROCESS_DEBUG_INFO & info) override;
-	void OnCreateThread(DWORD processId, DWORD threadId, const CREATE_THREAD_DEBUG_INFO & info) override;
-	void OnExitThread(DWORD processId, DWORD threadId, const EXIT_THREAD_DEBUG_INFO & info) override;
-	DWORD OnException(DWORD processId, DWORD threadId, const EXCEPTION_DEBUG_INFO & info) override;
+	void OnCreateProcess(ULONG processId, ULONG threadId, const CREATE_PROCESS_DEBUG_INFO & info) override;
+	void OnExitProcess(ULONG processId, ULONG threadId, const EXIT_PROCESS_DEBUG_INFO & info) override;
+	void OnCreateThread(ULONG processId, ULONG threadId, const CREATE_THREAD_DEBUG_INFO & info) override;
+	void OnExitThread(ULONG processId, ULONG threadId, const EXIT_THREAD_DEBUG_INFO & info) override;
+	ULONG OnException(ULONG processId, ULONG threadId, const EXCEPTION_DEBUG_INFO & info) override;
 
-	void CleanupFunctionNames(const std::string & name, const std::string & typeName, std::string & nameSpace, std::string & className,
-														std::string & functionName) const;
-	void CaptureData(DWORD processId);
+	[[nodiscard]] std::tuple<std::string, std::string, std::string> CleanupFunctionNames(const std::string & name, const std::string & typeName) const;
+	void CaptureData(ULONG processId);
 };

@@ -36,9 +36,9 @@ namespace GLib::Win
 		Symbols::Engine symbols;
 		std::map<std::string, std::string> driveMap;
 		Process mainProcess;
-		DWORD const debugProcessId;
+		ULONG const debugProcessId;
 		bool const debugChildProcesses;
-		std::optional<DWORD> exitCode;
+		std::optional<ULONG> exitCode;
 		std::string pendingDebugOut;
 
 	public:
@@ -60,17 +60,17 @@ namespace GLib::Win
 			return symbols;
 		}
 
-		[[nodiscard]] DWORD ProcessId() const
+		[[nodiscard]] ULONG ProcessId() const
 		{
 			return debugProcessId;
 		}
 
-		[[nodiscard]] DWORD ExitCode() const
+		[[nodiscard]] ULONG ExitCode() const
 		{
 			return exitCode.value();
 		}
 
-		bool ProcessEvents(DWORD timeout)
+		bool ProcessEvents(ULONG timeout)
 		{
 			DEBUG_EVENT debugEvent {};
 			BOOL const result = WaitForDebugEventEx(&debugEvent, timeout);
@@ -80,9 +80,9 @@ namespace GLib::Win
 				return !exitCode.has_value();
 			}
 
-			DWORD const processId = debugEvent.dwProcessId;
-			DWORD const threadId = debugEvent.dwThreadId;
-			DWORD continueStatus = DBG_CONTINUE;
+			ULONG const processId = debugEvent.dwProcessId;
+			ULONG const threadId = debugEvent.dwThreadId;
+			ULONG continueStatus = DBG_CONTINUE;
 
 			switch (debugEvent.dwDebugEventCode)
 			{
@@ -163,7 +163,7 @@ namespace GLib::Win
 		}
 
 	protected:
-		virtual void OnCreateProcess(DWORD processId, DWORD threadId, const CREATE_PROCESS_DEBUG_INFO & info)
+		virtual void OnCreateProcess(ULONG processId, ULONG threadId, const CREATE_PROCESS_DEBUG_INFO & info)
 		{
 			static_cast<void>(threadId);
 
@@ -213,7 +213,7 @@ namespace GLib::Win
 			static_cast<void>(headers);
 		}
 
-		virtual void OnExitProcess(DWORD processId, DWORD threadId, const EXIT_PROCESS_DEBUG_INFO & info)
+		virtual void OnExitProcess(ULONG processId, ULONG threadId, const EXIT_PROCESS_DEBUG_INFO & info)
 		{
 			static_cast<void>(threadId);
 
@@ -225,7 +225,7 @@ namespace GLib::Win
 			symbols.RemoveProcess(processId);
 		}
 
-		virtual void OnLoadDll(DWORD processId, DWORD threadId, const LOAD_DLL_DEBUG_INFO & info) const
+		virtual void OnLoadDll(ULONG processId, ULONG threadId, const LOAD_DLL_DEBUG_INFO & info) const
 		{
 			static_cast<void>(processId);
 			static_cast<void>(threadId);
@@ -236,7 +236,7 @@ namespace GLib::Win
 			Debug::Stream() << "GDB LoadDll: " << name << " " << info.lpBaseOfDll << std::endl;
 		}
 
-		virtual void OnUnloadDll(DWORD processId, DWORD threadId, const UNLOAD_DLL_DEBUG_INFO & info) const
+		virtual void OnUnloadDll(ULONG processId, ULONG threadId, const UNLOAD_DLL_DEBUG_INFO & info) const
 		{
 			static_cast<void>(processId);
 			static_cast<void>(threadId);
@@ -244,7 +244,7 @@ namespace GLib::Win
 			Debug::Stream() << "GDB UnloadDll: " << info.lpBaseOfDll << std::endl;
 		}
 
-		virtual void OnCreateThread(DWORD processId, DWORD threadId, const CREATE_THREAD_DEBUG_INFO & info)
+		virtual void OnCreateThread(ULONG processId, ULONG threadId, const CREATE_THREAD_DEBUG_INFO & info)
 		{
 			static_cast<void>(processId);
 			static_cast<void>(threadId);
@@ -252,7 +252,7 @@ namespace GLib::Win
 			Debug::Stream() << "GDB CreateThread: " << info.hThread << std::endl;
 		}
 
-		virtual void OnExitThread(DWORD processId, DWORD threadId, const EXIT_THREAD_DEBUG_INFO & info)
+		virtual void OnExitThread(ULONG processId, ULONG threadId, const EXIT_THREAD_DEBUG_INFO & info)
 		{
 			static_cast<void>(processId);
 			static_cast<void>(threadId);
@@ -260,7 +260,7 @@ namespace GLib::Win
 			Debug::Stream() << "GDB ThreadExit code: " << info.dwExitCode << std::endl;
 		}
 
-		virtual DWORD OnException(DWORD processId, DWORD threadId, const EXCEPTION_DEBUG_INFO & info)
+		virtual ULONG OnException(ULONG processId, ULONG threadId, const EXCEPTION_DEBUG_INFO & info)
 		{
 			static_cast<void>(processId);
 			static_cast<void>(threadId);
@@ -268,7 +268,7 @@ namespace GLib::Win
 			return DBG_EXCEPTION_NOT_HANDLED;
 		}
 
-		virtual void OnDebugString(DWORD processId, DWORD threadId, const OUTPUT_DEBUG_STRING_INFO & info)
+		virtual void OnDebugString(ULONG processId, ULONG threadId, const OUTPUT_DEBUG_STRING_INFO & info)
 		{
 			static_cast<void>(threadId);
 

@@ -15,8 +15,6 @@
 
 namespace GLib::Compat
 {
-	namespace FileSystem = std::filesystem;
-
 	inline void LocalTime(tm & tm, const time_t & t)
 	{
 		localtime_s(&tm, &t);
@@ -94,7 +92,7 @@ namespace GLib::Compat
 
 	inline std::string ProcessName()
 	{
-		return Cvt::P2A(FileSystem::path(ProcessPath()).filename());
+		return Cvt::P2A(std::filesystem::path(ProcessPath()).filename());
 	}
 
 	inline std::string CommandLine()

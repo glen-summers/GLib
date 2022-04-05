@@ -12,8 +12,8 @@ namespace GLib::Win
 
 	namespace Detail
 	{
-		inline static constexpr DWORD Read = KEY_READ;
-		inline static constexpr DWORD AllAccess = KEY_ALL_ACCESS;
+		inline static constexpr ULONG Read = KEY_READ;
+		inline static constexpr ULONG AllAccess = KEY_ALL_ACCESS;
 		inline static constexpr size_t Position = 30;
 		inline static constexpr size_t Length = 8;
 		inline static constexpr auto TopBitsSet = 0xffffffff00000000;
@@ -114,19 +114,19 @@ namespace GLib::Win
 			return Util::AssertSuccess(result, message);
 		}
 
-		inline void SetString(HKEY key, std::string_view name, std::string_view value, DWORD type)
+		inline void SetString(HKEY key, std::string_view name, std::string_view value, ULONG type)
 		{
 			auto wideName = Cvt::A2W(name);
 			auto wideValue = Cvt::A2W(value);
-			auto valueSize = static_cast<DWORD>((wideName.size() + 1) * sizeof(wchar_t));
+			auto valueSize = static_cast<ULONG>((wideName.size() + 1) * sizeof(wchar_t));
 			const auto * valueBytes = ToBytes(wideValue.c_str());
 			Util::AssertSuccess(RegSetValueExW(key, wideName.c_str(), 0, type, valueBytes, valueSize), "RegSetValueEx");
 		}
 
 		inline std::string GetString(HKEY key, const std::wstring & valueName)
 		{
-			DWORD size {};
-			DWORD flags = static_cast<DWORD>(RRF_RT_REG_SZ) | static_cast<DWORD>(RRF_RT_REG_EXPAND_SZ);
+			ULONG size {};
+			ULONG flags = static_cast<ULONG>(RRF_RT_REG_SZ) | static_cast<ULONG>(RRF_RT_REG_EXPAND_SZ);
 			LSTATUS result = RegGetValueW(key, nullptr, valueName.c_str(), flags, nullptr, nullptr, &size);
 			Util::AssertSuccess(result, "RegGetValue");
 
@@ -140,9 +140,9 @@ namespace GLib::Win
 		template <typename T>
 		T GetScalar(HKEY key, const std::wstring & valueName)
 		{
-			DWORD actualTypeCode {};
+			ULONG actualTypeCode {};
 			T value {};
-			DWORD bytes {sizeof(T)};
+			ULONG bytes {sizeof(T)};
 			LSTATUS result = RegQueryValueExW(key, valueName.c_str(), nullptr, &actualTypeCode, Detail::ToBytes(&value), &bytes);
 			Util::AssertSuccess(result, "RegQueryValueEx");
 			return value;
@@ -195,8 +195,8 @@ namespace GLib::Win
 		RegistryValue Get(std::string_view valueName) const
 		{
 			auto wideName = Cvt::A2W(valueName);
-			DWORD bytes {};
-			DWORD actualTypeCode {};
+			ULONG bytes {};
+			ULONG actualTypeCode {};
 			LSTATUS result = RegQueryValueExW(key.Get(), wideName.c_str(), nullptr, &actualTypeCode, nullptr, &bytes);
 			Util::AssertSuccess(result, "RegQueryValueEx");
 
@@ -264,13 +264,13 @@ namespace GLib::Win
 	};
 
 	template <typename T>
-	inline auto operator/(const RegistryKey<T> & key, std::string_view name)
+	auto operator/(const RegistryKey<T> & key, std::string_view name)
 	{
 		return key.OpenSubKey(name);
 	}
 
 	template <typename T>
-	inline RegistryValue operator&(const RegistryKey<T> & key, std::string_view name)
+	RegistryValue operator&(const RegistryKey<T> & key, std::string_view name)
 	{
 		return key.Get(name);
 	}

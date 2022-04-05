@@ -108,7 +108,7 @@ namespace GLib
 				}
 
 				bool leftJustify = {};
-				size_t width {};
+				std::streamsize width {};
 				if (ch == ',')
 				{
 					++it;

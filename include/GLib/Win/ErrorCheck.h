@@ -9,19 +9,18 @@
 
 #include <sstream>
 
-EXTERN_C IMAGE_DOS_HEADER
-	__ImageBase; // NOLINT(bugprone-reserved-identifier,cert-dcl37-c,cert-dcl51-cpp,cppcoreguidelines-avoid-non-const-global-variables) required
+EXTERN_C IMAGE_DOS_HEADER __ImageBase; // NOLINT required
 
 namespace GLib::Win::Util
 {
 	namespace Detail
 	{
-		inline bool IsError(DWORD value)
+		inline bool IsError(ULONG value)
 		{
-			return IS_ERROR(value); // NOLINT(hicpp-signed-bitwise) bad macro
+			return IS_ERROR(value); // NOLINT bad macro
 		}
 
-		inline std::string FormatErrorMessage(std::string_view message, DWORD error, const wchar_t * moduleName = {})
+		inline std::string FormatErrorMessage(std::string_view message, ULONG error, const wchar_t * moduleName = {})
 		{
 			std::ostringstream stm;
 			stm << message << " : ";
@@ -34,7 +33,7 @@ namespace GLib::Win::Util
 			return stm.str();
 		}
 
-		__declspec(noreturn) inline void Throw(std::string_view message, DWORD result)
+		__declspec(noreturn) inline void Throw(std::string_view message, ULONG result)
 		{
 			std::string formattedMessage = FormatErrorMessage(message, result);
 
@@ -50,10 +49,10 @@ namespace GLib::Win::Util
 		{
 		public:
 			template <typename T>
-			static bool AssertTrue(T value, std::string_view message, DWORD errorCode) = delete;
+			static bool AssertTrue(T value, std::string_view message, ULONG errorCode) = delete;
 
 			template <typename T>
-			static bool WarnAssertTrue(T value, std::string_view message, DWORD errorCode) = delete;
+			static bool WarnAssertTrue(T value, std::string_view message, ULONG errorCode) = delete;
 
 			template <typename T>
 			static bool AssertSuccess(T value, std::string_view message) = delete;
@@ -61,7 +60,7 @@ namespace GLib::Win::Util
 			template <typename T>
 			static bool WarnAssertSuccess(T value, std::string_view message) = delete;
 
-			static bool AssertTrue(bool result, std::string_view message, DWORD errorCode)
+			static bool AssertTrue(bool result, std::string_view message, ULONG errorCode)
 			{
 				if (!result)
 				{
@@ -70,12 +69,12 @@ namespace GLib::Win::Util
 				return result;
 			}
 
-			static bool AssertTrue(BOOL result, std::string_view message, DWORD errorCode)
+			static bool AssertTrue(BOOL result, std::string_view message, ULONG errorCode)
 			{
 				return AssertTrue(result != FALSE, message, errorCode);
 			}
 
-			static bool WarnAssertTrue(bool result, std::string_view message, DWORD errorCode) noexcept
+			static bool WarnAssertTrue(bool result, std::string_view message, ULONG errorCode) noexcept
 			{
 #ifdef _DEBUG // || defined(GLIB_DEBUG)
 				if (!result)
@@ -89,29 +88,29 @@ namespace GLib::Win::Util
 				return result;
 			}
 
-			static bool WarnAssertTrue(BOOL result, std::string_view message, DWORD errorCode) noexcept
+			static bool WarnAssertTrue(BOOL result, std::string_view message, ULONG errorCode) noexcept
 			{
 				return WarnAssertTrue(result != FALSE, message, errorCode);
 			}
 
-			static bool AssertSuccess(DWORD result, std::string_view message)
+			static bool AssertSuccess(ULONG result, std::string_view message)
 			{
 				return AssertTrue(result == ERROR_SUCCESS, message, result);
 			}
 
-			static bool WarnAssertSuccess(DWORD result, std::string_view message) noexcept
+			static bool WarnAssertSuccess(ULONG result, std::string_view message) noexcept
 			{
 				return WarnAssertTrue(result == ERROR_SUCCESS, message, result);
 			}
 
 			static bool AssertSuccess(LSTATUS result, std::string_view message)
 			{
-				return AssertTrue(result == ERROR_SUCCESS, message, static_cast<DWORD>(result));
+				return AssertTrue(result == ERROR_SUCCESS, message, static_cast<ULONG>(result));
 			}
 
 			static bool WarnAssertSuccess(LSTATUS result, std::string_view message) noexcept
 			{
-				return WarnAssertTrue(result == ERROR_SUCCESS, message, static_cast<DWORD>(result));
+				return WarnAssertTrue(result == ERROR_SUCCESS, message, static_cast<ULONG>(result));
 			}
 		};
 	}

@@ -4,7 +4,7 @@
 
 namespace GLib::Xml
 {
-	enum class ElementType : int
+	enum class ElementType : uint8_t
 	{
 		Open,
 		Empty,

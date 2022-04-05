@@ -24,7 +24,7 @@ namespace GLib::Win
 
 		inline bool Terminate(HANDLE process, UINT terminationExitCode) noexcept
 		{
-			DWORD exitCode = 0;
+			ULONG exitCode = 0;
 			BOOL result = GetExitCodeProcess(process, &exitCode);
 			bool stillRunning = result != FALSE && exitCode == STILL_ACTIVE;
 			if (stillRunning)
@@ -50,7 +50,7 @@ namespace GLib::Win
 	class Process
 	{
 		Handle p;
-		int const threadId;
+		const ULONG threadId;
 
 	public:
 		static std::string CurrentPath()
@@ -58,7 +58,7 @@ namespace GLib::Win
 			return FileSystem::PathOfModule(nullptr);
 		}
 
-		static int CurrentId()
+		static ULONG CurrentId()
 		{
 			return GetCurrentProcessId();
 		}
@@ -74,7 +74,7 @@ namespace GLib::Win
 		{}
 
 		// creation flags  DETACHED_PROCESS?
-		explicit Process(const std::string & app, const std::string & cmd = {}, DWORD creationFlags = {}, WORD show = {},
+		explicit Process(const std::string & app, const std::string & cmd = {}, ULONG creationFlags = {}, WORD show = {},
 										 const std::string & desktop = {})
 			: Process(Create(app, cmd, creationFlags, show, desktop))
 		{}
@@ -84,7 +84,7 @@ namespace GLib::Win
 		void WaitForInputIdle(const std::chrono::duration<R, P> & duration) const
 		{
 			auto count = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
-			DWORD timeoutMilliseconds = GLib::Util::CheckedCast<DWORD>(count);
+			ULONG timeoutMilliseconds = GLib::Util::CheckedCast<ULONG>(count);
 			CheckWaitResult(::WaitForInputIdle(p.get(), timeoutMilliseconds));
 		}
 
@@ -104,9 +104,9 @@ namespace GLib::Win
 			return Detail::TerminatorHolder<ExitCode>(p.get());
 		}
 
-		[[nodiscard]] DWORD Id() const
+		[[nodiscard]] ULONG Id() const
 		{
-			DWORD pid = GetProcessId(p.get());
+			ULONG pid = GetProcessId(p.get());
 			Util::AssertTrue(pid != 0, "GetProcessId");
 			return pid;
 		}
@@ -120,13 +120,13 @@ namespace GLib::Win
 		template <typename R, typename P>
 		void WaitForExit(const std::chrono::duration<R, P> & duration) const
 		{
-			auto ms = GLib::Util::CheckedCast<DWORD>(std::chrono::duration_cast<std::chrono::milliseconds>(duration).count());
+			auto ms = GLib::Util::CheckedCast<ULONG>(std::chrono::duration_cast<std::chrono::milliseconds>(duration).count());
 			Wait(p.get(), ms);
 		}
 
-		[[nodiscard]] DWORD ExitCode() const
+		[[nodiscard]] ULONG ExitCode() const
 		{
-			DWORD exitCode = 0;
+			ULONG exitCode = 0;
 			BOOL win32Result = GetExitCodeProcess(p.get(), &exitCode);
 			Util::AssertTrue(win32Result, "GetExitCodeProcess");
 			return exitCode;
@@ -157,12 +157,12 @@ namespace GLib::Win
 		}
 
 	private:
-		static Win::Handle Create(const std::string & app, const std::string & cmd, DWORD creationFlags, WORD show, const std::string & desktop)
+		static Win::Handle Create(const std::string & app, const std::string & cmd, ULONG creationFlags, WORD show, const std::string & desktop)
 		{
 			return Create(Cvt::A2W(app), Cvt::A2W(app + " " + cmd), creationFlags, show, Cvt::A2W(desktop));
 		}
 
-		static Win::Handle Create(const std::wstring & app, const std::wstring & cmd, DWORD creationFlags, WORD show, const std::wstring & desktop)
+		static Win::Handle Create(const std::wstring & app, const std::wstring & cmd, ULONG creationFlags, WORD show, const std::wstring & desktop)
 		{
 			STARTUPINFOW sui = {};
 			sui.cb = sizeof(STARTUPINFOW);
@@ -182,12 +182,12 @@ namespace GLib::Win
 			return Win::Handle {pi.hProcess};
 		}
 
-		static void Wait(HANDLE h, DWORD timeoutMilliseconds)
+		static void Wait(HANDLE h, ULONG timeoutMilliseconds)
 		{
 			CheckWaitResult(WaitForSingleObject(h, timeoutMilliseconds));
 		}
 
-		static void CheckWaitResult(DWORD result)
+		static void CheckWaitResult(ULONG result)
 		{
 			switch (result)
 			{

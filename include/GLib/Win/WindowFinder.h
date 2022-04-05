@@ -36,7 +36,7 @@ namespace GLib::Win
 		}
 
 	public:
-		static HWND Find(DWORD pid, const std::string & windowText)
+		static HWND Find(ULONG pid, const std::string & windowText)
 		{
 			HDESK desktop = GetThreadDesktop(GetCurrentThreadId());
 			Util::AssertTrue(desktop != nullptr, "GetThreadDesktop");
@@ -45,7 +45,7 @@ namespace GLib::Win
 			HWND ret {};
 			WindowEnumerator func = [&](HWND wnd) noexcept -> bool
 			{
-				DWORD windowPid = 0;
+				ULONG windowPid = 0;
 				GetWindowThreadProcessId(wnd, &windowPid);
 
 				try

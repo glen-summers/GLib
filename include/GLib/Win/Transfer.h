@@ -18,8 +18,8 @@ namespace GLib::Win
 
 		Transfer(const Transfer & ref) = delete;
 		Transfer(Transfer && ref) = delete;
-		const Transfer & operator=(const Transfer &) = delete;
-		const Transfer & operator=(Transfer &&) = delete;
+		Transfer & operator=(const Transfer &) = delete;
+		Transfer & operator=(Transfer &&) = delete;
 
 		~Transfer()
 		{

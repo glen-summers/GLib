@@ -4,7 +4,7 @@
 
 #include <string>
 
-enum class Quatrain : int
+enum class Quatrain : uint8_t
 {
 	Fee,
 	Fi,
@@ -15,7 +15,7 @@ enum class Quatrain : int
 inline std::ostream & operator<<(std::ostream & s, Quatrain q)
 {
 	constexpr auto a = std::array<std::string_view, 4> {"Fee", "Fi", "Fo", "Fum"};
-	return s << a.at(static_cast<int>(q));
+	return s << a.at(static_cast<uint8_t>(q));
 }
 
 struct Struct

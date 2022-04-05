@@ -40,9 +40,9 @@ namespace GLib::Win::Symbols
 		{
 			VirtualBase() = delete;
 			VirtualBase(const VirtualBase & other) = delete;
-			VirtualBase(VirtualBase && other) noexcept = delete;
+			VirtualBase(VirtualBase && other) = delete;
 			VirtualBase & operator=(const VirtualBase & other) = delete;
-			VirtualBase & operator=(VirtualBase && other) noexcept = delete;
+			VirtualBase & operator=(VirtualBase && other) = delete;
 			virtual ~VirtualBase() = delete;
 		};
 
@@ -78,14 +78,14 @@ namespace GLib::Win::Symbols
 #error unexpected target
 #endif
 
-					std::span<const DWORD> const throwInfo {WindowsCast<const DWORD *>(ei[throwInfoIndex]), catchableOffsetIndex + 1};
+					std::span<const ULONG> const throwInfo {WindowsCast<const ULONG *>(ei[throwInfoIndex]), catchableOffsetIndex + 1};
 
-					DWORD const catchableOffset {throwInfo[catchableOffsetIndex]};
-					std::span<const DWORD> const catchables {WindowsCast<const DWORD *>(instance + catchableOffset), catchablesOffsetIndex + 1};
+					ULONG const catchableOffset {throwInfo[catchableOffsetIndex]};
+					std::span<const ULONG> const catchables {WindowsCast<const ULONG *>(instance + catchableOffset), catchablesOffsetIndex + 1};
 
-					DWORD const catchablesOffset {catchables[catchablesOffsetIndex]};
-					std::span<const DWORD> const catchablesTypes {WindowsCast<const DWORD *>(instance + catchablesOffset), typeInfoOffsetIndex + 1};
-					DWORD const typeInfoOffset {catchablesTypes[typeInfoOffsetIndex]};
+					ULONG const catchablesOffset {catchables[catchablesOffsetIndex]};
+					std::span<const ULONG> const catchablesTypes {WindowsCast<const ULONG *>(instance + catchablesOffset), typeInfoOffsetIndex + 1};
+					ULONG const typeInfoOffset {catchablesTypes[typeInfoOffsetIndex]};
 
 					name = WindowsCast<const type_info *>(instance + typeInfoOffset)->name();
 
@@ -95,9 +95,9 @@ namespace GLib::Win::Symbols
 
 		inline void UnDecorate(std::string & symbolName)
 		{
-			constexpr DWORD undecoratedNameSize = 512;
+			constexpr ULONG undecoratedNameSize = 512;
 			std::array<char, undecoratedNameSize> undecoratedName {};
-			DWORD flags = UNDNAME_NAME_ONLY;
+			ULONG flags = UNDNAME_NAME_ONLY;
 
 			if (!symbolName.empty() && *symbolName.begin() == '?' &&
 					UnDecorateSymbolName(symbolName.c_str(), undecoratedName.data(), undecoratedNameSize, flags) != 0)
@@ -106,30 +106,30 @@ namespace GLib::Win::Symbols
 			}
 		}
 
-		inline void Trace(std::ostream & s, const SymProcess & process, const Symbol & symbol, DWORD64 address)
+		inline void Trace(std::ostream & s, const SymProcess & process, const Symbol & symbol, uint64_t address)
 		{
 			auto name = symbol.Name();
 			UnDecorate(name);
 			Formatter::Format(s, "\t{0} + 0x{1:%X}\n", name, symbol.Displacement());
 			if (auto line = process.TryGetLineFromAddress(address))
 			{
-				Formatter::Format(s, "\t{0}({1})", line->FileName, line->LineNumber);
-				if (line->Displacement != 0)
+				Formatter::Format(s, "\t{0}({1})", line->FileName(), line->LineNumber());
+				if (line->Displacement() != 0)
 				{
-					s << " + " << line->Displacement << " byte(s)";
+					s << " + " << line->Displacement() << " byte(s)";
 				}
 				s << '\n';
 			}
 		}
 
-		inline void InlineTrace(std::ostream & s, const SymProcess & process, DWORD64 address, DWORD inlineTrace)
+		inline void InlineTrace(std::ostream & s, const SymProcess & process, uint64_t address, ULONG inlineTrace)
 		{
-			DWORD inlineContext {};
-			DWORD inlineFrameIndex {};
+			ULONG inlineContext {};
+			ULONG inlineFrameIndex {};
 
 			if (SymQueryInlineTrace(process.Handle(), address, 0, address, address, &inlineContext, &inlineFrameIndex) == TRUE)
 			{
-				for (DWORD i = inlineContext; i < inlineContext + inlineTrace; ++i)
+				for (ULONG i = inlineContext; i < inlineContext + inlineTrace; ++i)
 				{
 					if (auto symbol = process.TryGetSymbolFromInlineContext(address, i))
 					{
@@ -138,10 +138,10 @@ namespace GLib::Win::Symbols
 						Formatter::Format(s, "\tinline context {0} + 0x{1:%x}\n", name, symbol->Displacement());
 						if (auto line = process.TryGetLineFromInlineContext(address, i))
 						{
-							Formatter::Format(s, "\t{0}({1})", line->FileName, line->LineNumber);
-							if (line->Displacement != 0)
+							Formatter::Format(s, "\t{0}({1})", line->FileName(), line->LineNumber());
+							if (line->Displacement() != 0)
 							{
-								s << " + " << line->Displacement << " byte(s)";
+								s << " + " << line->Displacement() << " byte(s)";
 							}
 							s << '\n';
 						}
@@ -150,7 +150,7 @@ namespace GLib::Win::Symbols
 			}
 		}
 
-		inline void WalkStack(std::ostream & s, const SymProcess & process, DWORD machineType, STACKFRAME64 * frame, CONTEXT * context,
+		inline void WalkStack(std::ostream & s, const SymProcess & process, ULONG machineType, STACKFRAME64 * frame, CONTEXT * context,
 													unsigned int maxFrames)
 		{
 			for (unsigned int frames = 0; frames < maxFrames; ++frames)
@@ -162,7 +162,7 @@ namespace GLib::Win::Symbols
 					break;
 				}
 
-				DWORD64 address = frame->AddrPC.Offset;
+				uint64_t address = frame->AddrPC.Offset;
 				if (address == frame->AddrReturn.Offset)
 				{
 					break;
@@ -176,7 +176,7 @@ namespace GLib::Win::Symbols
 					Formatter::Format(s, "{0,-30} + 0x{1:%08X}\n", moduleName, address - WindowsCast<DWORD_PTR>(mb.AllocationBase));
 				}
 
-				DWORD inlineTrace = SymAddrIncludeInlineTrace(process.Handle(), address);
+				ULONG inlineTrace = SymAddrIncludeInlineTrace(process.Handle(), address);
 				if (inlineTrace != 0)
 				{
 					InlineTrace(s, process, address, inlineTrace);
@@ -191,7 +191,7 @@ namespace GLib::Win::Symbols
 
 	inline void Print(std::ostream & s, const EXCEPTION_POINTERS * exceptionInfo, unsigned int maxFrames)
 	{
-		constexpr DWORD cPlusPlusExceptionNumber = 0xe06d7363;
+		constexpr ULONG cPlusPlusExceptionNumber = 0xe06d7363;
 		const EXCEPTION_RECORD & er = *(exceptionInfo->ExceptionRecord);
 		std::span<const ULONG_PTR> const info {er.ExceptionInformation, EXCEPTION_MAXIMUM_PARAMETERS};
 
@@ -223,7 +223,7 @@ namespace GLib::Win::Symbols
 				if (er.NumberParameters != 0)
 				{
 					s << "\tException parameters: ";
-					for (DWORD i = 0; i < er.NumberParameters; ++i)
+					for (ULONG i = 0; i < er.NumberParameters; ++i)
 					{
 						if (i != 0)
 						{
@@ -239,7 +239,7 @@ namespace GLib::Win::Symbols
 
 		STACKFRAME64 frame = {};
 		CONTEXT context = Detail::GetContext(*exceptionInfo);
-		DWORD machineType;
+		ULONG machineType;
 
 #if defined(_M_IX86)
 		machineType = IMAGE_FILE_MACHINE_I386;

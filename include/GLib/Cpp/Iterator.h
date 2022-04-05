@@ -143,7 +143,7 @@ namespace GLib::Cpp
 			{
 				const auto oldState = engine.GetState();
 
-				State newState;
+				State newState {};
 
 				if (ptr != end)
 				{

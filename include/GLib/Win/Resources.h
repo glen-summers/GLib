@@ -9,7 +9,7 @@ namespace GLib::Win
 	template <typename T>
 	std::tuple<const T *, size_t> LoadResource(HINSTANCE instance, unsigned int id, LPCWSTR resourceType)
 	{
-		HRSRC resource = FindResourceW(instance, MAKEINTRESOURCEW(id), resourceType); // NOLINT(cppcoreguidelines-pro-type-cstyle-cast) bad macro
+		HRSRC resource = FindResourceW(instance, MAKEINTRESOURCEW(id), resourceType); // NOLINT bad macro
 		Util::AssertTrue(resource != nullptr, "FindResourceW");
 
 		HGLOBAL resourceData = LoadResource(instance, resource);

@@ -26,7 +26,7 @@ namespace GLib::Win
 			: value {std::exchange(other.value, nullptr)}
 		{}
 
-		Bstr & operator=(const Bstr & other) noexcept = delete;
+		Bstr & operator=(const Bstr & other) = delete;
 
 		Bstr & operator=(Bstr && other) noexcept
 		{

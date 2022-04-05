@@ -21,7 +21,7 @@ class FileLogger
 	friend class GLib::Flog::LogManager;
 
 	std::string const baseFileName;
-	GLib::Compat::FileSystem::path const path;
+	std::filesystem::path const path;
 	std::mutex streamMonitor;
 	StreamInfo streamInfo;
 	GLib::Flog::Level logLevel = GLib::Flog::Level::Info; // config
@@ -63,7 +63,7 @@ private:
 	static std::ostream & TranslateLevel(std::ostream & stream, GLib::Flog::Level level);
 	static std::ostream & ThreadName(std::ostream & stream, std::string_view threadName);
 	static unsigned int GetDate();
-	static uintmax_t GetFreeDiskSpace(const GLib::Compat::FileSystem::path & path);
+	static uintmax_t GetFreeDiskSpace(const std::filesystem::path & path);
 
 	static void CommitPendingScope();
 	static void ScopeStart(GLib::Flog::Level level, std::string_view prefix, std::string_view scope, std::string_view stem);

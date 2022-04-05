@@ -25,7 +25,7 @@ using GLib::Cvt::P2A;
 
 std::string LoadHtml(unsigned int id)
 {
-	return GLib::Win::LoadResourceString(nullptr, id, RT_HTML); // NOLINT(cppcoreguidelines-pro-type-cstyle-cast) bad macro
+	return GLib::Win::LoadResourceString(nullptr, id, RT_HTML); // NOLINT bad macro
 }
 
 std::string GetDateTime(time_t t)
@@ -164,12 +164,12 @@ void HtmlReport::GenerateRootIndex() const
 	e.Set("coveredLines", totalCoveredLines);
 	e.Set("coverableLines", totalCoverableLines);
 	e.Set("coveragePercent", coveragePercent);
-	e.Set("coverageStyle", CoverageLevel(coveragePercent));
+	e.Set("coverageStyle", GetCoverageLevel(coveragePercent));
 
 	e.Set("coveredFunctions", totalCoveredFunctions);
 	e.Set("coverableFunctions", totalCoverableFunctions);
 	e.Set("coverageFunctionsPercent", coverageFunctionPercent);
-	e.Set("coverageFunctionsStyle", CoverageLevel(coverageFunctionPercent));
+	e.Set("coverageFunctionsStyle", GetCoverageLevel(coverageFunctionPercent));
 
 	auto rootIndex = htmlPath / "index.html";
 	std::ofstream out(rootIndex);
@@ -233,12 +233,12 @@ void HtmlReport::GenerateIndices() const
 		e.Set("coveredLines", totalCoveredLines);
 		e.Set("coverableLines", totalCoverableLines);
 		e.Set("coveragePercent", coveragePercent);
-		e.Set("coverageStyle", CoverageLevel(coveragePercent));
+		e.Set("coverageStyle", GetCoverageLevel(coveragePercent));
 
 		e.Set("coveredFunctions", totalCoveredFunctions);
 		e.Set("coverableFunctions", totalCoverableFunctions);
 		e.Set("coverageFunctionsPercent", coverageFunctionPercent);
-		e.Set("coverageFunctionsStyle", CoverageLevel(coverageFunctionPercent));
+		e.Set("coverageFunctionsStyle", GetCoverageLevel(coverageFunctionPercent));
 
 		auto pathIndex = path / "index.html";
 		std::ofstream out(pathIndex);
@@ -338,7 +338,7 @@ void HtmlReport::GenerateSourceFile(std::filesystem::path & subPath, const FileC
 	e.Set("parent", P2A(parent));
 	e.Set("fileName", P2A(targetPath.filename()));
 	e.Set("styleSheet", css);
-	e.Set("coverageStyle", CoverageLevel(coveragePercent));
+	e.Set("coverageStyle", GetCoverageLevel(coveragePercent));
 
 	e.Set("coveredLines", data.CoveredLines());
 	e.Set("coverableLines", lc.size());
@@ -347,7 +347,7 @@ void HtmlReport::GenerateSourceFile(std::filesystem::path & subPath, const FileC
 	e.Set("coveredFunctions", data.CoveredFunctions());
 	e.Set("coverableFunctions", data.CoverableFunctions());
 	e.Set("coverageFunctionsPercent", coverageFunctionPercent);
-	e.Set("coverageFunctionsStyle", CoverageLevel(coverageFunctionPercent));
+	e.Set("coverageFunctionsStyle", GetCoverageLevel(coverageFunctionPercent));
 
 	e.Set("index", P2A(relativePath / "index.html"));
 

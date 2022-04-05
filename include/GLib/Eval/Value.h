@@ -58,12 +58,12 @@ namespace GLib::Eval
 	};
 
 	template <typename ValueType>
-	class Value : public ValueBase
+	class Value : public ValueBase // NOLINT(fuchsia-trailing-return) ??
 	{
 		ValueType value;
 
 	public:
-		explicit Value(ValueType value)
+		explicit Value(ValueType value) // NOLINT(fuchsia-trailing-return) ??
 			: value(std::move(value))
 		{}
 

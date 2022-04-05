@@ -132,13 +132,13 @@ The Windows command-line build is from a go.cmd at root level which checks Visua
 	});
 
 #### StackOrHeap
-	inline std::string PathOfFileHandle(HANDLE fileHandle, DWORD flags)
+	inline std::string PathOfFileHandle(HANDLE fileHandle, ULONG flags)
 	{
 		Util::StackOrHeap<wchar_t, DefaultStackReserveSize>
-		DWORD length = ::GetFinalPathNameByHandleW(fileHandle, nullptr, 0, flags);
+		ULONG length = ::GetFinalPathNameByHandleW(fileHandle, nullptr, 0, flags);
 		Util::AssertTrue(length != 0, "GetFinalPathNameByHandleW failed");
 		s.EnsureSize(length);
-		length = ::GetFinalPathNameByHandleW(fileHandle, s.Get(), static_cast<DWORD>(s.size()), flags);
+		length = ::GetFinalPathNameByHandleW(fileHandle, s.Get(), static_cast<ULONG>(s.size()), flags);
 		Util::AssertTrue(length != 0 && length < s.size(), "GetFinalPathNameByHandleW failed");
 		return Cvt::w2a(std::wstring_view{s.Get(), length});
 	}
@@ -329,7 +329,7 @@ The Windows command-line build is from a go.cmd at root level which checks Visua
 
 	inline std::map<std::string, std::string> DriveMap();
 
-	inline std::string PathOfFileHandle(HANDLE fileHandle, DWORD flags);
+	inline std::string PathOfFileHandle(HANDLE fileHandle, ULONG flags);
 
 	inline std::string NormalisePath(const std::string & path, const std::map<std::string, std::string> & driveMap);
 

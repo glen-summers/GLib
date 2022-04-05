@@ -5,7 +5,9 @@
 
 namespace GLib::Xml
 {
-	enum class State : int
+	using EnumType = uint8_t;
+
+	enum class State : EnumType
 	{
 		Error,
 		Start,
@@ -63,7 +65,7 @@ namespace GLib::Xml
 		static constexpr char rightSquareBracket = ']';
 		static constexpr char ampersand = '&';
 
-		static constexpr auto continuationMask = 0x80U;
+		static constexpr EnumType continuationMask = 0x80U;
 
 		using StateFunction = State (StateEngine::*)(char) const;
 
@@ -80,7 +82,7 @@ namespace GLib::Xml
 	public:
 		explicit StateEngine(State state = State::Start)
 			: state(state)
-			, stateFunction(stateFunctions.at(static_cast<int>(state)))
+			, stateFunction(stateFunctions.at(static_cast<EnumType>(state)))
 		{}
 
 		State GetState() const
@@ -102,7 +104,7 @@ namespace GLib::Xml
 	private:
 		static bool IsContinuation(char c)
 		{
-			return (static_cast<unsigned char>(c) & continuationMask) != 0;
+			return (static_cast<EnumType>(c) & continuationMask) != 0;
 		}
 
 		static bool IsWhiteSpace(char c)
@@ -130,7 +132,7 @@ namespace GLib::Xml
 			if (newState != state)
 			{
 				state = newState;
-				stateFunction = stateFunctions.at(static_cast<int>(state));
+				stateFunction = stateFunctions.at(static_cast<EnumType>(state));
 			}
 		}
 

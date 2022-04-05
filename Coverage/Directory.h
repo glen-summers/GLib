@@ -41,7 +41,7 @@ public:
 
 	[[nodiscard]] enum CoverageLevel Style() const
 	{
-		return CoverageLevel(CoveragePercent());
+		return GetCoverageLevel(CoveragePercent());
 	}
 
 	[[nodiscard]] unsigned int CoveragePercent() const
@@ -66,7 +66,7 @@ public:
 
 	[[nodiscard]] enum CoverageLevel MinCoverageStyle() const
 	{
-		return CoverageLevel(minCoveragePercent);
+		return GetCoverageLevel(minCoveragePercent);
 	}
 
 	[[nodiscard]] unsigned int CoveredFunctions() const

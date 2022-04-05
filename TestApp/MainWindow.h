@@ -44,8 +44,8 @@ namespace TestApp
 				case ID_HELP_ABOUT:
 				{
 					int button {};
-					GLib::Win::WarnHr(TaskDialog(Handle(), Instance(), L"About", L"Main", L"Sub", TDCBF_CLOSE_BUTTON, TD_INFORMATION_ICON, &button),
-														"TaskDialog");
+					auto icon = TD_INFORMATION_ICON; // NOLINT bad macro
+					GLib::Win::WarnHr(TaskDialog(Handle(), Instance(), L"About", L"Main", L"Sub", TDCBF_CLOSE_BUTTON, icon, &button), "TaskDialog");
 					break;
 				}
 

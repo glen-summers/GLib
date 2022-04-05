@@ -3,7 +3,7 @@
 #if defined(__linux__) && defined(__GNUG__)
 
 #include <algorithm>
-#include <experimental/filesystem>
+#include <filesystem>
 #include <fstream>
 #include <optional>
 #include <sstream>
@@ -17,8 +17,6 @@
 
 namespace GLib::Compat
 {
-	namespace FileSystem = std::experimental::filesystem;
-
 	inline void AssertTrue(bool value, const char * prefix, int error)
 	{
 		if (!value)
@@ -74,7 +72,7 @@ namespace GLib::Compat
 
 	inline std::string ProcessPath()
 	{
-		return Cvt::P2A(FileSystem::read_symlink("/proc/self/exe"));
+		return Cvt::P2A(std::filesystem::read_symlink("/proc/self/exe"));
 	}
 
 	inline std::string CommandLine()
@@ -93,7 +91,7 @@ namespace GLib::Compat
 
 	inline std::string ProcessName()
 	{
-		return Cvt::P2A(FileSystem::path(ProcessPath()).filename());
+		return Cvt::P2A(std::filesystem::path(ProcessPath()).filename());
 	}
 
 	inline void TzSet()

@@ -2,7 +2,7 @@
 
 #include <GLib/Eval/Evaluator.h>
 
-enum class LineCover : int;
+enum class LineCover : uint8_t;
 
 struct Line
 {

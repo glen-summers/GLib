@@ -151,7 +151,7 @@ BOOST_AUTO_TEST_CASE(TestSprintfFormatPassThrough)
 BOOST_AUTO_TEST_CASE(TestSprintfFormatException)
 {
 	BOOST_CHECK_EXCEPTION(Formatter::Format("{0:x}", 1234), std::logic_error,
-												[](const std::logic_error & e) { return e.what() == std::string("Invalid format : x"); });
+												[](const std::logic_error & e) { return e.what() == std::string("Invalid format : 'x' for Type: int"); });
 }
 
 BOOST_AUTO_TEST_CASE(TestSprintfFormatLengthNoException)

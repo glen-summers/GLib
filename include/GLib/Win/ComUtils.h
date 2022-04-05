@@ -15,7 +15,7 @@ namespace GLib::Win
 			}
 		};
 
-		enum class Apartment : unsigned long
+		enum class Apartment : ULONG
 		{
 			MultiThreaded = COINITBASE_MULTITHREADED,
 			SingleThreaded = COINIT_APARTMENTTHREADED
@@ -31,7 +31,7 @@ namespace GLib::Win
 		ComInitialise()
 			: com {this}
 		{
-			CheckHr(CoInitializeEx(nullptr, static_cast<DWORD>(Apartment)), "CoInitializeEx");
+			CheckHr(CoInitializeEx(nullptr, static_cast<ULONG>(Apartment)), "CoInitializeEx");
 		}
 	};
 

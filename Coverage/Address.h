@@ -5,16 +5,16 @@
 class Address
 {
 	unsigned char oldData;
-	unsigned int symbolId;
+	ULONG symbolId;
 
 	mutable FileLines fileLines; // use sparse container?
 	mutable bool visited;
 
 public:
-	explicit Address(unsigned char oldData, unsigned int symbolId)
+	explicit Address(unsigned char oldData, ULONG symbolId)
 		: oldData(oldData)
-		, visited()
 		, symbolId(symbolId)
+		, visited()
 	{}
 
 	unsigned char OldData() const
@@ -37,7 +37,7 @@ public:
 		visited = true;
 	}
 
-	unsigned int SymbolId() const
+	ULONG SymbolId() const
 	{
 		return symbolId;
 	}

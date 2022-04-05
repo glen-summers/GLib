@@ -2,7 +2,7 @@
 
 #include <ostream>
 
-enum class CoverageLevel : int
+enum class CoverageLevel : uint8_t
 {
 	Red,
 	Amber,
@@ -35,10 +35,10 @@ inline std::ostream & operator<<(std::ostream & s, CoverageLevel coverageLevel)
 	return s;
 }
 
-inline CoverageLevel CoverageLevel(unsigned int coveragePercent)
+inline CoverageLevel GetCoverageLevel(unsigned int coveragePercent)
 {
-	const int lowValue = 70; // config
-	const int highValue = 90;
+	const uint8_t lowValue = 70; // config
+	const uint8_t highValue = 90;
 
 	return coveragePercent < lowValue ? CoverageLevel::Red : coveragePercent < highValue ? CoverageLevel::Amber : CoverageLevel::Green;
 }

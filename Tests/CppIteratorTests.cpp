@@ -593,16 +593,14 @@ BOOST_AUTO_TEST_CASE(UnterminatedBug)
 	GLIB_CHECK_RUNTIME_EXCEPTION({ Htmlify(code, false, stm); }, "Termination error, State: CommentLine, StartLine: 1");
 }
 
-//**/ #define BULK_TEST
+// #define BULK_TEST
 #ifdef BULK_TEST
-namespace fs = GLib::Compat::filesystem;
-
-void ScanFile(const fs::path & p, std::ostream & s)
+void ScanFile(const std::filesystem::path & p, std::ostream & s)
 {
 	std::ifstream t(p);
 	if (!t)
 	{
-		std::cout << "read failed : " + p.u8string() << '\n';
+		std::cout << "read failed : " << p << '\n';
 		return;
 	}
 
@@ -610,45 +608,58 @@ void ScanFile(const fs::path & p, std::ostream & s)
 	{
 		std::stringstream ss;
 		ss << t.rdbuf();
-		Parse(Holder {ss.str()});
+		Parse(ss.str(), true);
 	}
 	catch (const std::runtime_error & e)
 	{
-		s << p.u8string() << " : " << e.what() << '\n';
+		s << p << " : " << e.what() << '\n';
 	}
 }
 
 BOOST_AUTO_TEST_CASE(BulkTest)
 {
-	auto paths = {
+	auto source = std::filesystem::path {__FILE__}.parent_path().parent_path();
+	std::unordered_set<std::string_view> extensions {".c", ".cpp", ".h", ".hpp"};
+
+	std::list<std::filesystem::path> paths = {
 #if defined(__linux__) && defined(__GNUG__)
 		"/usr/include"
 #elif defined(_WIN32) && defined(_MSC_VER)
-		R"--(C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.24.28314\include)--",
-		R"--(C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.24.28314\crt)--",
-		R"--(C:\Users\Glen\source\ExternalDependencies\boost_1_69_0_test\boost)--"
+		source / "Coverage",
+		source / "GLib",
+		source / "include",
+		source / "Tests",
+
+		// needs getting the tools\version
+		R"--(C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.31.31103\include)--",
+		R"--(C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.31.31103\crt)--",
+		R"--(C:\Users\Glen\source\ExternalDependencies\boost_1_78_0_test\boost)--"
 #else
 #error unknown
 #endif
 	};
 
 	std::ostringstream s;
-	for (auto p : paths)
+	for (const auto & p : paths)
 	{
 		size_t count {};
-		for (const auto & de : fs::recursive_directory_iterator(p))
+		for (const auto & de : std::filesystem::recursive_directory_iterator(p))
 		{
-			if (is_regular_file(de.path()) && de.path().extension() != ".asm")
+			if (is_regular_file(de.path()) && extensions.contains(de.path().extension().string()))
 			{
 				ScanFile(de.path(), s);
 				++count;
 			}
 		}
-		std::cout << "BulkTest: " << p << ", Count: " << count << '\n';
+		s << "BulkTest: " << p << ", Count: " << count << '\n';
 	}
 
-	BOOST_TEST("" == s.str());
+	auto state = boost::unit_test::unit_test_log.set_threshold_level(boost::unit_test::log_level::log_messages);
+	static_cast<void>(state);
+	BOOST_TEST_MESSAGE(s.str());
+	// static_cast<void>(boost::unit_test::unit_test_log.set_threshold_level(state)); // does no restore
+	static_cast<void>(boost::unit_test::unit_test_log.set_threshold_level(boost::unit_test::log_level::log_nothing));
 }
-#endif
+#endif // BULK_TEST
 
 BOOST_AUTO_TEST_SUITE_END()

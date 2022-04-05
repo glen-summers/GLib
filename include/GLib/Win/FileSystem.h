@@ -16,7 +16,7 @@ namespace GLib::Win::FileSystem
 	{
 		constexpr auto MaximumPathLength = 32768U;
 
-		enum FileFlags : DWORD
+		enum FileFlags : ULONG
 		{
 			Access = GENERIC_READ | GENERIC_WRITE,												// NOLINT bad macros
 			Create = CREATE_ALWAYS,																				// NOLINT
@@ -30,9 +30,9 @@ namespace GLib::Win::FileSystem
 		std::vector<std::string> drives;
 		GLib::Util::WideCharBuffer s;
 
-		DWORD sizeWithFinalTerminator = GetLogicalDriveStringsW(0, nullptr);
+		ULONG sizeWithFinalTerminator = GetLogicalDriveStringsW(0, nullptr);
 		s.EnsureSize(sizeWithFinalTerminator - 1);
-		auto size = GetLogicalDriveStringsW(static_cast<DWORD>(s.size()), s.Get());
+		auto size = GetLogicalDriveStringsW(static_cast<ULONG>(s.size()), s.Get());
 		Util::AssertTrue(size != 0 && size < sizeWithFinalTerminator, "GetLogicalDriveStringsW");
 
 		std::wstring_view pp {s.Get(), size};
@@ -53,7 +53,7 @@ namespace GLib::Win::FileSystem
 
 		for (const auto & logicalDrive : LogicalDrives())
 		{
-			DWORD length = QueryDosDeviceW(Cvt::A2W(logicalDrive).c_str(), s.Get(), static_cast<DWORD>(s.size()));
+			ULONG length = QueryDosDeviceW(Cvt::A2W(logicalDrive).c_str(), s.Get(), static_cast<ULONG>(s.size()));
 			Util::AssertTrue(length != 0, "QueryDosDeviceW");
 
 			s.EnsureSize(length);
@@ -64,13 +64,13 @@ namespace GLib::Win::FileSystem
 		return result;
 	}
 
-	inline std::string PathOfFileHandle(HANDLE fileHandle, DWORD flags)
+	inline std::string PathOfFileHandle(HANDLE fileHandle, ULONG flags)
 	{
 		GLib::Util::WideCharBuffer s;
-		DWORD length = GetFinalPathNameByHandleW(fileHandle, nullptr, 0, flags);
+		ULONG length = GetFinalPathNameByHandleW(fileHandle, nullptr, 0, flags);
 		Util::AssertTrue(length != 0, "GetFinalPathNameByHandleW");
 		s.EnsureSize(length);
-		length = GetFinalPathNameByHandleW(fileHandle, s.Get(), static_cast<DWORD>(s.size()), flags);
+		length = GetFinalPathNameByHandleW(fileHandle, s.Get(), static_cast<ULONG>(s.size()), flags);
 		Util::AssertTrue(length != 0 && length < s.size(), "GetFinalPathNameByHandleW");
 		return Cvt::W2A(std::wstring_view {s.Get(), length});
 	}
@@ -97,7 +97,7 @@ namespace GLib::Win::FileSystem
 		for (;;)
 		{
 			// this could return prefix "\\?\"
-			unsigned int len = GetModuleFileNameW(module, s.Get(), static_cast<unsigned int>(s.size()));
+			ULONG len = GetModuleFileNameW(module, s.Get(), static_cast<unsigned int>(s.size()));
 			Util::AssertTrue(len != 0, "GetModuleFileNameW");
 			if (len < s.size())
 			{
@@ -122,10 +122,10 @@ namespace GLib::Win::FileSystem
 	{
 		GLib::Util::WideCharBuffer s;
 
-		DWORD requiredSize = 0;
+		ULONG requiredSize = 0;
 		for (;;)
 		{
-			auto size = static_cast<DWORD>(s.size());
+			auto size = static_cast<ULONG>(s.size());
 			Util::AssertTrue(QueryFullProcessImageNameW(process, 0, s.Get(), &size), "QueryFullProcessImageNameW");
 			if (size < s.size())
 			{
@@ -161,7 +161,7 @@ namespace GLib::Win::FileSystem
 		GLib::Util::WideCharBuffer s;
 		s.EnsureSize(lenNoTerminator + 1);
 
-		lenNoTerminator = GetLongPathNameW(ws.c_str(), s.Get(), static_cast<DWORD>(s.size()));
+		lenNoTerminator = GetLongPathNameW(ws.c_str(), s.Get(), static_cast<ULONG>(s.size()));
 		Util::AssertTrue(lenNoTerminator != 0, "GetLongPathNameW");
 		return Cvt::W2A(std::wstring_view {s.Get(), lenNoTerminator});
 	}

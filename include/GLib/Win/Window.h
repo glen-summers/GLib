@@ -31,31 +31,31 @@ namespace GLib::Win
 	{
 		constexpr unsigned int HRedraw = CS_HREDRAW;
 		constexpr unsigned int VRedraw = CS_VREDRAW;
-		constexpr unsigned int OverlappedWindow = WS_OVERLAPPEDWINDOW; // NOLINT(hicpp-signed-bitwise) bad macro
+		constexpr unsigned int OverlappedWindow = WS_OVERLAPPEDWINDOW; // NOLINT bad macro
 
 		inline auto MakeIntResource(int id)
 		{
-			return MAKEINTRESOURCEW(id); // NOLINT(cppcoreguidelines-pro-type-cstyle-cast) bad macro
+			return MAKEINTRESOURCEW(id); // NOLINT bad macro
 		}
 
 		inline WORD LoWord(WPARAM param)
 		{
-			return LOWORD(param); // NOLINT(hicpp-signed-bitwise) bad macro
+			return LOWORD(param); // NOLINT bad macro
 		}
 
 		inline WORD HiWord(WPARAM param)
 		{
-			return HIWORD(param); // NOLINT(hicpp-signed-bitwise) bad macro
+			return HIWORD(param); // NOLINT bad macro
 		}
 
 		inline Point PointFromParam(LPARAM param)
 		{
-			return {GET_X_LPARAM(param), GET_Y_LPARAM(param)}; // NOLINT(hicpp-signed-bitwise) bad macro
+			return {GET_X_LPARAM(param), GET_Y_LPARAM(param)}; // NOLINT bad macro
 		}
 
 		inline short WheelData(WPARAM param)
 		{
-			return GET_WHEEL_DELTA_WPARAM(param); // NOLINT(hicpp-signed-bitwise) bad macro
+			return GET_WHEEL_DELTA_WPARAM(param); // NOLINT bad macro
 		}
 
 		inline Size SizeFromParam(LPARAM param)
@@ -110,7 +110,7 @@ namespace GLib::Win
 							0,
 							instance,
 							i,
-							LoadCursorW(nullptr, IDC_ARROW), // NOLINT(cppcoreguidelines-pro-type-cstyle-cast) bad macro
+							LoadCursorW(nullptr, IDC_ARROW), // NOLINT bad macro
 							Util::Detail::WindowsCast<HBRUSH>(size_t {COLOR_WINDOW} + 1),
 							MakeIntResource(menu),
 							className.c_str(),
@@ -133,7 +133,7 @@ namespace GLib::Win
 			return Util::Detail::WindowsCast<Window *>(GetWindowLongPtrW(hWnd, GWLP_USERDATA));
 		}
 
-		inline WindowHandle Create(DWORD style, int icon, int menu, const std::string & title, WNDPROC proc, Window * param)
+		inline WindowHandle Create(ULONG style, int icon, int menu, const std::string & title, WNDPROC proc, Window * param)
 		{
 			std::string className = RegisterClassW(icon, menu, proc);
 			WindowHandle handle(CreateWindowExW(0, Cvt::A2W(className).c_str(), Cvt::A2W(title).c_str(), style, CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, nullptr,
@@ -255,7 +255,7 @@ namespace GLib::Win
 		void SetTimer(const std::chrono::duration<R, P> & interval, UINT_PTR id = 1) const
 		{
 			auto count = std::chrono::duration_cast<std::chrono::milliseconds>(interval).count();
-			auto milliseconds = GLib::Util::CheckedCast<DWORD>(count);
+			auto milliseconds = GLib::Util::CheckedCast<ULONG>(count);
 			UINT_PTR timerResult = ::SetTimer(handle.get(), id, milliseconds, nullptr);
 			Util::AssertTrue(timerResult != 0, "SetTimer");
 		}

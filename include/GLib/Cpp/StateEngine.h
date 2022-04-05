@@ -7,7 +7,9 @@
 
 namespace GLib::Cpp
 {
-	enum class State : unsigned int
+	using EnumType = uint8_t;
+
+	enum class State : EnumType
 	{
 		Error,
 		None,							// /:CommentStart, #:Directive, R":RawStringPrefix, ":String, ':CharacterLiteral, WS:WhiteSpace, Else:Code
@@ -42,7 +44,7 @@ namespace GLib::Cpp
 		static constexpr char closeAngleBracket = '>';
 		static constexpr char singleQuote = '\'';
 
-		static constexpr auto continuationMask = 0x80U;
+		static constexpr EnumType continuationMask = 0x80U;
 
 		static constexpr auto maxPrefixSize = 16;
 
@@ -84,7 +86,7 @@ namespace GLib::Cpp
 	private:
 		static bool IsContinuation(char c)
 		{
-			return (static_cast<unsigned char>(c) & continuationMask) != 0;
+			return (static_cast<EnumType>(c) & continuationMask) != 0;
 		}
 
 		bool IsWhiteSpace(char c) const
@@ -97,7 +99,7 @@ namespace GLib::Cpp
 			if (newState != state)
 			{
 				state = newState;
-				stateFunction = stateFunctions.at(static_cast<int>(state));
+				stateFunction = stateFunctions.at(static_cast<EnumType>(state));
 			}
 		}
 

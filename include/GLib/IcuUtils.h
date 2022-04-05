@@ -75,7 +75,7 @@ namespace GLib::IcuUtils
 		}
 	}
 
-	enum class CompareResult : int
+	enum class CompareResult : int8_t
 	{
 		Less = -1,
 		Equal = 0,

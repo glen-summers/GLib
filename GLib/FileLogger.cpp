@@ -12,7 +12,7 @@
 
 FileLogger::FileLogger()
 	: baseFileName(GLib::Compat::ProcessName() + "_" + std::to_string(GLib::Compat::ProcessId()))
-	, path(GLib::Compat::FileSystem::temp_directory_path() / "glogfiles")
+	, path(std::filesystem::temp_directory_path() / "glogfiles")
 {
 	create_directories(path);
 }
@@ -63,7 +63,7 @@ StreamInfo FileLogger::GetStream() const
 	// 	Compat::LocalTime(tm, t);
 	// 	s << "_" << std::put_time(&tm, "%Y-%m-%d");
 	// }
-	GLib::Compat::FileSystem::path logFileName = path / (s.str() + ".log"); // combine, check trailing etc.
+	std::filesystem::path logFileName = path / (s.str() + ".log"); // combine, check trailing etc.
 	const unsigned int date = GetDate();
 
 	const int MaxTries = 1000;
@@ -194,18 +194,22 @@ void FileLogger::CloseStream() noexcept
 		{
 			WriteFooter(streamInfo.Stream());
 		}
-		catch (...) // specific?
+		catch (...)
 		{}
 
 		try
 		{
 			streamInfo.Stream().flush();
 		}
-		catch (...) // specific?
+		catch (...)
 		{}
 
-		// streamWriter.close();
-		streamInfo = StreamInfo();
+		try
+		{
+			streamInfo = StreamInfo();
+		}
+		catch (...)
+		{}
 	}
 }
 
@@ -374,7 +378,7 @@ unsigned FileLogger::GetDate()
 	return ((tmEpochYear + tm.tm_year) * shiftTwoDecimals + tm.tm_mon + 1) * shiftTwoDecimals + tm.tm_mday;
 }
 
-uintmax_t FileLogger::GetFreeDiskSpace(const GLib::Compat::FileSystem::path & path)
+uintmax_t FileLogger::GetFreeDiskSpace(const std::filesystem::path & path)
 {
 	return space(path).available;
 }

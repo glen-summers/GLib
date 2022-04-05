@@ -1,5 +1,4 @@
-#ifndef FLOGGING_H
-#define FLOGGING_H
+#pragma once
 
 #include <GLib/Formatter.h>
 #include <GLib/GenericOutStream.h>
@@ -36,7 +35,7 @@ namespace GLib::Flog
 		}
 	}
 
-	enum class Level : unsigned
+	enum class Level : uint8_t
 	{
 		Spam,
 		Debug,
@@ -168,7 +167,7 @@ namespace GLib::Flog
 		static Level SetLevel(Level level);
 		static size_t SetMaxFileSize(size_t size);
 		static void SetThreadName(std::string_view name);
-		static Compat::FileSystem::path GetLogPath();
+		static std::filesystem::path GetLogPath();
 
 		static auto GetLog(const std::string & name) noexcept
 		{
@@ -182,4 +181,3 @@ namespace GLib::Flog
 		}
 	};
 }
-#endif // FLOGGING_H

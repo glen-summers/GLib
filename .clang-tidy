@@ -15,6 +15,7 @@ Checks: '*,
 -fuchsia-overloaded-operator,
 -modernize-use-trailing-return-type,
 -google-readability-namespace-comments,
--google-runtime-int
+-google-runtime-int,
+-misc-no-recursion
 '
 HeaderFilterRegex: '^.*\\GLib\\.*$'

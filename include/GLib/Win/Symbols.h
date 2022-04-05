@@ -14,6 +14,10 @@
 #include <functional>
 #include <sstream>
 
+static_assert(std::is_same_v<ULONG, DWORD>);
+static_assert(std::is_same_v<ULONG64, DWORD64>);
+static_assert(std::is_same_v<ULONG64, uint64_t>);
+
 namespace GLib::Win::Symbols
 {
 	namespace Detail
@@ -35,9 +39,9 @@ namespace GLib::Win::Symbols
 			return Handle {duplicatedHandle};
 		}
 
-		inline ULONG64 ConvertBase(void * baseValue)
+		inline auto ConvertBase(void * baseValue)
 		{
-			return Util::Detail::WindowsCast<ULONG64>(baseValue);
+			return Util::Detail::WindowsCast<uint64_t>(baseValue);
 		}
 	}
 
@@ -50,18 +54,22 @@ namespace GLib::Win::Symbols
 			SymTagNull
 		};
 		std::string name;
-		DWORD64 displacement {};
+		uint64_t displacement {};
 
 	public:
-		Symbol() = default;
-
-		Symbol(ULONG index, ULONG typeIndex, enum SymTagEnum tag, std::string name, DWORD64 displacement)
+		Symbol(ULONG index, ULONG typeIndex, enum SymTagEnum tag, std::string name, uint64_t displacement)
 			: index(index)
 			, typeIndex(typeIndex)
 			, tag(tag)
 			, name(move(name))
 			, displacement(displacement)
 		{}
+
+		Symbol(const Symbol &) = delete;
+		Symbol(Symbol &&) = default;
+		Symbol & operator=(const Symbol &) = delete;
+		Symbol & operator=(Symbol &&) = delete;
+		~Symbol() = default;
 
 		[[nodiscard]] ULONG Index() const
 		{
@@ -103,18 +111,52 @@ namespace GLib::Win::Symbols
 			name = move(value);
 		}
 
-		[[nodiscard]] DWORD64 Displacement() const
+		[[nodiscard]] uint64_t Displacement() const
 		{
 			return displacement;
 		}
 	};
 
-	struct Line
+	class Line
 	{
-		unsigned int LineNumber;
-		std::string FileName;
-		uint64_t Address;
-		unsigned int Displacement;
+		unsigned int lineNumber;
+		std::string fileName;
+		uint64_t address;
+		unsigned int displacement;
+
+	public:
+		Line(unsigned int lineNumber, std::string fileName, uint64_t address, unsigned int displacement)
+			: lineNumber(lineNumber)
+			, fileName(move(fileName))
+			, address(address)
+			, displacement(displacement)
+		{}
+
+		Line(const Line &) = delete;
+		Line(Line &&) = default;
+		Line & operator=(const Line &) = delete;
+		Line & operator=(Line &&) = delete;
+		~Line() = default;
+
+		[[nodiscard]] unsigned int LineNumber() const
+		{
+			return lineNumber;
+		}
+
+		[[nodiscard]] const std::string & FileName() const
+		{
+			return fileName;
+		}
+
+		[[nodiscard]] uint64_t Address() const
+		{
+			return address;
+		}
+
+		[[nodiscard]] unsigned int Displacement() const
+		{
+			return displacement;
+		}
 	};
 
 	class SymProcess
@@ -156,7 +198,7 @@ namespace GLib::Win::Symbols
 			}
 
 			// when debugging processHandle and enumerateModules = true, get errorCode=0x8000000d : An illegal state change was requested
-			Util::AssertTrue(::SymInitializeW(duplicate.get(), Cvt::A2W(searchPath.str()).c_str(), invasive ? TRUE : FALSE), "SymInitializeW");
+			Util::AssertTrue(SymInitializeW(duplicate.get(), Cvt::A2W(searchPath.str()).c_str(), invasive ? TRUE : FALSE), "SymInitializeW");
 			return {std::move(duplicate), baseOfImage};
 		}
 
@@ -194,7 +236,7 @@ namespace GLib::Win::Symbols
 			WriteMemory(address, &value, sizeof(T), absolute);
 		}
 
-		[[nodiscard]] Symbol GetSymbolFromIndex(DWORD index) const
+		[[nodiscard]] Symbol GetSymbolFromIndex(ULONG index) const
 		{
 			std::array<SYMBOL_INFOW, 2 + MAX_SYM_NAME * sizeof(wchar_t) / sizeof(SYMBOL_INFO)> buffer {};
 			auto * const symBuf = buffer.data();
@@ -203,8 +245,12 @@ namespace GLib::Win::Symbols
 
 			BOOL result = SymFromIndexW(Handle(), baseOfImage, index, symBuf);
 			Util::AssertTrue(result, "SymFromIndexW");
-			return {symBuf->Index, symBuf->TypeIndex, static_cast<enum SymTagEnum>(symBuf->Tag),
-							Cvt::W2A(std::wstring_view {static_cast<const wchar_t *>(symBuf->Name)}), 0};
+
+			return {symBuf->Index,
+							symBuf->TypeIndex,
+							static_cast<enum SymTagEnum>(symBuf->Tag),
+							Cvt::W2A(std::wstring_view {static_cast<const wchar_t *>(symBuf->Name)}),
+							{}};
 		}
 
 		[[nodiscard]] ULONG GetSymbolIdFromAddress(uint64_t address) const
@@ -212,7 +258,7 @@ namespace GLib::Win::Symbols
 			SYMBOL_INFOW buffer {};
 			auto * const symBuf = &buffer;
 			symBuf->SizeOfStruct = sizeof(SYMBOL_INFOW);
-			DWORD64 displacement = 0;
+			uint64_t displacement = 0;
 			BOOL result = SymFromAddrW(Handle(), address, &displacement, symBuf);
 			Util::AssertTrue(result, "SymFromAddrW");
 			return symBuf->Index;
@@ -220,72 +266,64 @@ namespace GLib::Win::Symbols
 
 		[[nodiscard]] std::optional<Symbol> TryGetSymbolFromAddress(uint64_t address) const
 		{
-			std::optional<Symbol> symbol;
-
 			std::array<SYMBOL_INFOW, 2 + MAX_SYM_NAME * sizeof(wchar_t) / sizeof(SYMBOL_INFO)> buffer {};
 			auto * const symBuf = buffer.data();
 			symBuf->SizeOfStruct = sizeof(SYMBOL_INFOW);
 			symBuf->MaxNameLen = MAX_SYM_NAME;
-			DWORD64 displacement = 0;
+			uint64_t displacement = 0;
 			BOOL result = SymFromAddrW(Handle(), address, &displacement, symBuf);
 			if (Util::WarnAssertTrue(result, "SymFromAddrW"))
 			{
-				symbol = {symBuf->Index, symBuf->TypeIndex, static_cast<enum SymTagEnum>(symBuf->Tag),
-									Cvt::W2A(std::wstring_view {static_cast<const wchar_t *>(symBuf->Name)}), displacement};
+				return Symbol {symBuf->Index, symBuf->TypeIndex, static_cast<enum SymTagEnum>(symBuf->Tag),
+											 Cvt::W2A(std::wstring_view {static_cast<const wchar_t *>(symBuf->Name)}), displacement};
 			}
-			return symbol;
+			return {};
 		}
 
 		[[nodiscard]] std::optional<Symbol> TryGetSymbolFromInlineContext(uint64_t address, ULONG context) const
 		{
-			std::optional<Symbol> symbol;
-
 			std::array<SYMBOL_INFOW, 2 + MAX_SYM_NAME * sizeof(wchar_t) / sizeof(SYMBOL_INFOW)> buffer {};
 			auto * const symBuf = buffer.data();
 			symBuf->SizeOfStruct = sizeof(SYMBOL_INFOW);
 			symBuf->MaxNameLen = MAX_SYM_NAME;
-			DWORD64 displacement = 0;
+			uint64_t displacement = 0;
 
 			auto result = SymFromInlineContextW(Handle(), address, context, &displacement, symBuf);
 			if (Util::WarnAssertTrue(result, "SymFromInlineContext"))
 			{
-				symbol = {symBuf->Index, symBuf->TypeIndex, static_cast<enum SymTagEnum>(symBuf->Tag),
-									Cvt::W2A(std::wstring_view {static_cast<const wchar_t *>(symBuf->Name)}), displacement};
+				return Symbol {symBuf->Index, symBuf->TypeIndex, static_cast<enum SymTagEnum>(symBuf->Tag),
+											 Cvt::W2A(std::wstring_view {static_cast<const wchar_t *>(symBuf->Name)}), displacement};
 			}
-			return symbol;
+			return {};
 		}
 
 		[[nodiscard]] std::optional<Line> TryGetLineFromAddress(uint64_t address) const
 		{
-			std::optional<Line> line;
-
 			IMAGEHLP_LINEW64 tmpLine {sizeof(IMAGEHLP_LINEW64)};
-			DWORD displacement = 0;
+			ULONG displacement = 0;
 			BOOL result = SymGetLineFromAddrW64(Handle(), address, &displacement, &tmpLine);
 			if (Util::WarnAssertTrue(result, "SymGetLineFromAddrW64"))
 			{
-				line = {tmpLine.LineNumber, Cvt::W2A(tmpLine.FileName), tmpLine.Address, displacement};
+				return Line {tmpLine.LineNumber, Cvt::W2A(tmpLine.FileName), tmpLine.Address, displacement};
 			}
-			return line;
+			return {};
 		}
 
 		[[nodiscard]] std::optional<Line> TryGetLineFromInlineContext(uint64_t address, ULONG inlineContext) const
 		{
-			std::optional<Line> line;
-
 			IMAGEHLP_LINEW64 tmpLine {sizeof(IMAGEHLP_LINEW64)};
-			DWORD displacement = 0;
+			ULONG displacement = 0;
 			BOOL result = SymGetLineFromInlineContextW(Handle(), address, inlineContext, 0, &displacement, &tmpLine);
 			if (Util::WarnAssertTrue(result, "SymGetLineFromInlineContext"))
 			{
-				line = {tmpLine.LineNumber, Cvt::W2A(tmpLine.FileName), tmpLine.Address, displacement};
+				return Line {tmpLine.LineNumber, Cvt::W2A(tmpLine.FileName), tmpLine.Address, displacement};
 			}
-			return line;
+			return {};
 		}
 
-		bool TryGetClassParent(LONG symbolId, Symbol & result) const
+		[[nodiscard]] std::optional<Symbol> TryGetClassParent(ULONG symbolId) const
 		{
-			DWORD typeIndexOfClassParent = 0;
+			ULONG typeIndexOfClassParent {};
 
 			// docs say TypeId param should be the TypeIndex member of returned SYMBOL_INFO
 			// and the result from TI_GET_CLASSPARENTID is "The type index of the class parent."
@@ -293,22 +331,19 @@ namespace GLib::Win::Symbols
 			// but seems to get indexOfClassParent having the same value of typeIndexOfClassParent
 			if (SymGetTypeInfo(Handle(), baseOfImage, symbolId, TI_GET_CLASSPARENTID, &typeIndexOfClassParent) == FALSE)
 			{
-				return false;
+				return {};
 			}
 
-			DWORD indexOfClassParent = 0;
+			ULONG indexOfClassParent {};
 			if (SymGetTypeInfo(Handle(), baseOfImage, typeIndexOfClassParent, TI_GET_SYMINDEX, &indexOfClassParent) == FALSE)
 			{
-				return false;
+				return {};
 			}
 
 			Local<WCHAR> name;
-			Util::AssertTrue(SymGetTypeInfo(Handle(), baseOfImage, indexOfClassParent, TI_GET_SYMNAME, GetAddress<WCHAR>(name).Void()), "SymGetTypeInfo");
+			Util::AssertTrue(SymGetTypeInfo(Handle(), baseOfImage, indexOfClassParent, TI_GET_SYMNAME, GetAddress<WCHAR>(name).Raw()), "SymGetTypeInfo");
 
-			result.Index(indexOfClassParent);
-			result.TypeIndex(typeIndexOfClassParent);
-			result.Name(Cvt::W2A(std::wstring_view {name.Get()}));
-			return true;
+			return Symbol {indexOfClassParent, typeIndexOfClassParent, {}, Cvt::W2A(std::wstring_view {name.Get()}), {}};
 		}
 
 	private:
@@ -320,27 +355,26 @@ namespace GLib::Win::Symbols
 
 	class Engine
 	{
-		std::unordered_map<DWORD, SymProcess> handles;
+		std::unordered_map<ULONG, SymProcess> handles;
 
 	public:
 		Engine()
 		{
-			auto flags = SYMOPT_DEBUG | static_cast<DWORD>(SYMOPT_UNDNAME) | static_cast<DWORD>(SYMOPT_LOAD_LINES);
-			SymSetOptions(::SymGetOptions() | flags);
+			auto flags = SYMOPT_DEBUG | static_cast<ULONG>(SYMOPT_UNDNAME) | static_cast<ULONG>(SYMOPT_LOAD_LINES);
+			SymSetOptions(SymGetOptions() | flags);
 		}
 
-		SymProcess & AddProcess(DWORD processId, HANDLE processHandle, uint64_t baseOfImage, HANDLE imageFile, const std::string & imageName)
+		SymProcess & AddProcess(ULONG processId, HANDLE processHandle, uint64_t baseOfImage, HANDLE imageFile, const std::string & imageName)
 		{
 			SymProcess sp = SymProcess::GetProcess(processHandle, baseOfImage, false);
 
-			DWORD64 const loadBase =
-				SymLoadModuleExW(sp.Handle(), imageFile, Cvt::A2W(imageName).c_str(), nullptr, static_cast<DWORD64>(baseOfImage), 0, nullptr, 0);
+			uint64_t const loadBase = SymLoadModuleExW(sp.Handle(), imageFile, Cvt::A2W(imageName).c_str(), nullptr, baseOfImage, 0, nullptr, 0);
 			Util::AssertTrue(0 != loadBase, "SymLoadModuleExW");
 
 			return handles.emplace(processId, std::move(sp)).first->second;
 		}
 
-		[[nodiscard]] const SymProcess & GetProcess(DWORD processId) const
+		[[nodiscard]] const SymProcess & GetProcess(ULONG processId) const
 		{
 			auto const it = handles.find(processId);
 			if (it == handles.end())
@@ -350,7 +384,7 @@ namespace GLib::Win::Symbols
 			return it->second;
 		}
 
-		void RemoveProcess(DWORD processId)
+		void RemoveProcess(ULONG processId)
 		{
 			if (handles.erase(processId) == 0)
 			{

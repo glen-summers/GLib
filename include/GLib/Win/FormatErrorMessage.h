@@ -14,16 +14,16 @@ namespace GLib::Win::Util
 		template <typename T1, typename T2>
 		T1 WindowsCast(T2 t2)
 		{
-			return reinterpret_cast<T1>(t2); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast) required by legacy windows runtime
+			return reinterpret_cast<T1>(t2); // NOLINT required by legacy windows runtime
 		}
 
-		enum class Lang : unsigned int
+		enum class Lang : WORD
 		{
 			Neutral = LANG_NEUTRAL,				// NOLINT bad macros
 			SubDefault = SUBLANG_DEFAULT, // NOLINT
 		};
 
-		enum class Flags : unsigned int
+		enum class Flags : ULONG
 		{
 			AllocateBuffer = FORMAT_MESSAGE_ALLOCATE_BUFFER, // NOLINT
 			FromSystem = FORMAT_MESSAGE_FROM_SYSTEM,				 // NOLINT
@@ -31,7 +31,7 @@ namespace GLib::Win::Util
 			FromHandle = FORMAT_MESSAGE_FROM_HMODULE,				 // NOLINT
 		};
 
-		inline WORD Make(Lang l1, Lang l2)
+		inline ULONG Make(Lang l1, Lang l2)
 		{
 			return MAKELANGID(static_cast<WORD>(l1), static_cast<WORD>(l2)); // NOLINT
 		}
@@ -47,7 +47,7 @@ namespace GLib::Win::Util
 		}
 	}
 
-	inline void FormatErrorMessage(std::ostream & stm, unsigned int error, const wchar_t * moduleName = nullptr)
+	inline void FormatErrorMessage(std::ostream & stm, ULONG error, const wchar_t * moduleName = nullptr)
 	{
 		wchar_t * pszMsg = nullptr;
 		auto flags = Detail::Flags::AllocateBuffer | Detail::Flags::FromSystem | Detail::Flags::IgnoreInserts;
@@ -59,7 +59,7 @@ namespace GLib::Win::Util
 		HMODULE module(moduleName != nullptr ? LoadLibraryW(moduleName) : nullptr);
 		auto * requiredCast = Detail::WindowsCast<LPWSTR>(&pszMsg);
 		auto result =
-			FormatMessageW(static_cast<DWORD>(flags), module, error, Make(Detail::Lang::Neutral, Detail::Lang::SubDefault), requiredCast, 0, nullptr);
+			FormatMessageW(static_cast<ULONG>(flags), module, error, Make(Detail::Lang::Neutral, Detail::Lang::SubDefault), requiredCast, 0, nullptr);
 		if (module != nullptr)
 		{
 			FreeLibrary(module);
