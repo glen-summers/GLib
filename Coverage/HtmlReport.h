@@ -30,7 +30,7 @@ public:
 private:
 	void GenerateRootIndex() const;
 	void GenerateIndices() const;
-	void GenerateSourceFile(std::filesystem::path & subPath, const FileCoverageData & data) const;
+	void GenerateSourceFile(const std::filesystem::path & subPath, const FileCoverageData & data) const;
 
 	static std::filesystem::path Initialise(const std::filesystem::path & path);
 	static std::set<std::filesystem::path> RootPaths(const CoverageData & data);

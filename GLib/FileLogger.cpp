@@ -24,7 +24,7 @@ FileLogger::~FileLogger()
 
 const LogState & FileLogger::GetLogState() noexcept
 {
-	thread_local LogState const state;
+	thread_local LogState state;
 	return state;
 }
 
@@ -54,8 +54,6 @@ StreamInfo FileLogger::GetStream() const
 	// change this to be full flog compliant, with some params, then upgrade flog tail to handle any scenario
 	// static constexpr bool alwaysAddDate = false;
 
-	std::ostringstream s;
-	s << baseFileName;
 	// if (alwaysAddDate)
 	// {
 	// 	time_t t = std::time(nullptr);
@@ -63,17 +61,17 @@ StreamInfo FileLogger::GetStream() const
 	// 	Compat::LocalTime(tm, t);
 	// 	s << "_" << std::put_time(&tm, "%Y-%m-%d");
 	// }
-	std::filesystem::path logFileName = path / (s.str() + ".log"); // combine, check trailing etc.
+	std::filesystem::path logFileName = (path / baseFileName).replace_extension(".log"); // combine, check trailing etc.
 	const unsigned int date = GetDate();
 
-	const int MaxTries = 1000;
+	constexpr int maxTries = 1000;
 
 	// consolidate with renameOldFile??
-	for (int num = 0; num < MaxTries; ++num)
+	for (int num = 0; num < maxTries; ++num)
 	{
 		if (num != 0)
 		{
-			logFileName.replace_filename(s.str() + "_" + std::to_string(num) + ".log");
+			logFileName.replace_filename(baseFileName + "_" + std::to_string(num));
 		}
 
 		// RenameOldFile(logFileName.u8string());
@@ -105,7 +103,7 @@ StreamInfo FileLogger::GetStream() const
 			//::GetSystemTimeAsFileTime(&ft);
 			//::SetFileTime(GetImpl(m_stream), &ft, NULL, NULL); // filesystem ver? nope
 
-			return StreamInfo {move(newStreamWriter), logFileName, date};
+			return {move(newStreamWriter), std::move(logFileName), date};
 		}
 		catch (...) // specific
 		{}

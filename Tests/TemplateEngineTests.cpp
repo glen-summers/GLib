@@ -278,7 +278,7 @@ BOOST_AUTO_TEST_CASE(IfEach)
 	std::ostringstream stm;
 	Evaluator evaluator;
 
-	std::vector<int> vars {1, 2, 3};
+	std::vector vars {1, 2, 3};
 	evaluator.SetCollection("vars", vars);
 	evaluator.Set("value", true);
 	Generate(evaluator, xml, stm);

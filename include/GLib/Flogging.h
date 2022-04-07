@@ -51,7 +51,7 @@ namespace GLib::Flog
 
 	class Log
 	{
-		std::string const name;
+		const std::string name;
 
 	public:
 		void Spam(std::string_view message) const

@@ -21,8 +21,8 @@ namespace GLib::Html
 		static constexpr auto if_ = std::string_view {"if"};
 		static constexpr auto text = std::string_view {"text"};
 
-		std::regex const propRegex {R"(\$\{([\w\.]+)\})"};
-		std::regex const varRegex {R"(^(\w+)\s:\s\$\{([\w\.]+)\}$)"};
+		const std::regex propRegex {R"(\$\{([\w\.]+)\})"};
+		const std::regex varRegex {R"(^(\w+)\s:\s\$\{([\w\.]+)\}$)"};
 
 		Eval::Evaluator & evaluator;
 		std::string_view textReplacement;
@@ -115,7 +115,7 @@ namespace GLib::Html
 				{
 					std::string_view eachValue;
 					std::string_view ifValue;
-					for (const Xml::Attribute & attr : e.Attributes())
+					for (const Xml::Attribute & attr : e.GetAttributes())
 					{
 						if (attr.Name == each)
 						{
@@ -181,7 +181,7 @@ namespace GLib::Html
 			std::string_view ifValue;
 			std::string_view eachValue;
 
-			std::string_view attr = e.Attributes().Value();
+			std::string_view attr = e.GetAttributes().Value();
 			Xml::Attributes attributes {attr, nullptr};
 			bool pop {};
 

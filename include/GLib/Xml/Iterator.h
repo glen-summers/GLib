@@ -30,7 +30,7 @@ namespace GLib::Xml
 		StateEngine engine;
 
 		std::string_view::const_iterator ptr {};
-		std::string_view::const_iterator const end {};
+		const std::string_view::const_iterator end {};
 		std::optional<std::string_view::const_iterator> lastPtr;
 		NameSpaceManager * manager = {};
 
@@ -338,7 +338,7 @@ namespace GLib::Xml
 
 	class Holder
 	{
-		std::string_view const value;
+		const std::string_view value;
 		NameSpaceManager manager;
 
 	public:

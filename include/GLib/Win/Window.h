@@ -105,7 +105,7 @@ namespace GLib::Win
 
 				wc = {sizeof(WNDCLASSEXW),
 							HRedraw | VRedraw,
-							static_cast<WNDPROC>(proc),
+							proc,
 							0,
 							0,
 							instance,

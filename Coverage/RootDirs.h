@@ -11,13 +11,11 @@ namespace Detail
 		bool result = false;
 		for (auto it1 = p1.begin(), it2 = p2.begin(); it1 != p1.end() && it2 != p2.end(); ++it1, ++it2)
 		{
-			auto part1 = *it1;
-			auto part2 = *it2;
-			if (part1 != part2)
+			if (*it1 != *it2)
 			{
 				break;
 			}
-			root /= part1;
+			root /= *it1;
 			result = true;
 		}
 

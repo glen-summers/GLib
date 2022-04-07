@@ -17,7 +17,7 @@
 			<TidyFound>$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildBinPath), $(TidySig)))</TidyFound>
 			<Tidy>$(TidyFound)\$(TidySig)</Tidy>
 
-			<TidyCmd>@(TidyFlags, ' ') -- -I@(TidyInclude, ' -I') -std=c++20 -D@(Defs,' -D') -x c++ -W@(TidyIgnoreWarning, ',')</TidyCmd>
+			<TidyCmd>@(TidyFlags, ' ') -- -I@(TidyInclude, ' -I') -std=c++20 -D@(Defs,' -D') -x c++ -W@(TidyIgnoreWarning, ' -W')</TidyCmd>
 		</PropertyGroup>
 
 		<Message Text="TidyCmd = $(TidyCmd)"/>
@@ -47,12 +47,4 @@
 		<!-- vvslow, split and run in parallel? or add compilation database json? -->
 		<Exec Command='"$(Tidy)" %(Relative.Identity) $(TidyCmd)' WorkingDirectory="$(Source)"/>
 	</Target>
-
-	<Target Name="TidyFile" DependsOnTargets="FindTidy">
-		<PropertyGroup>
-			<FileName>$([MSBuild]::MakeRelative($(Source), $(FileName)))</FileName>
-		</PropertyGroup>
-		<Exec Command='"$(Tidy)" "$(FileName)" $(TidyCmd)' WorkingDirectory="$(Source)"/>
-	</Target>
-
 </Project>

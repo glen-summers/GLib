@@ -8,8 +8,8 @@ namespace GLib::Win
 {
 	class WinException : public std::runtime_error
 	{
-		ULONG const errorCode;
-		HRESULT const hResult;
+		const ULONG errorCode;
+		const HRESULT hResult;
 
 	public:
 		[[nodiscard]] ULONG ErrorCode() const

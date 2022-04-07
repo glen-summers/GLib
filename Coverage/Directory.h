@@ -39,7 +39,7 @@ public:
 		return link;
 	}
 
-	[[nodiscard]] enum CoverageLevel Style() const
+	[[nodiscard]] CoverageLevel Style() const
 	{
 		return GetCoverageLevel(CoveragePercent());
 	}
@@ -64,7 +64,7 @@ public:
 		return minCoveragePercent;
 	}
 
-	[[nodiscard]] enum CoverageLevel MinCoverageStyle() const
+	[[nodiscard]] CoverageLevel MinCoverageStyle() const
 	{
 		return GetCoverageLevel(minCoveragePercent);
 	}
@@ -145,6 +145,6 @@ struct GLib::Eval::Visitor<Directory>
 			return f(Value(dir.CoveredFunctionsPercent()));
 		}
 
-		throw std::runtime_error(std::string("Unknown property : '") + propertyName + '\'');
+		throw std::runtime_error("Unknown property : '" + propertyName + '\'');
 	}
 };

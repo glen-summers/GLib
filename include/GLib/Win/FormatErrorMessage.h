@@ -5,7 +5,6 @@
 #include <GLib/Cvt.h>
 
 #include <ostream>
-#include <string_view>
 
 namespace GLib::Win::Util
 {
@@ -76,7 +75,7 @@ namespace GLib::Win::Util
 			}
 
 			stm << Cvt::W2A(wMsg);
-			::LocalFree(pszMsg);
+			LocalFree(pszMsg);
 		}
 		else
 		{

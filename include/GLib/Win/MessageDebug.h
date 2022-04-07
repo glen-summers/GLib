@@ -11,13 +11,13 @@ namespace GLib::Win
 			GLib::Util::WideCharBuffer s;
 			for (;;)
 			{
-				unsigned int lengthNoNull = GetClassNameW(hWnd, s.Get(), static_cast<int>(s.size()));
+				unsigned int lengthNoNull = GetClassNameW(hWnd, s.Get(), static_cast<int>(s.Size()));
 				Util::AssertTrue(lengthNoNull != 0, "GetClassNameW");
-				if (lengthNoNull < s.size() - 1)
+				if (lengthNoNull < s.Size() - 1)
 				{
 					break;
 				}
-				s.EnsureSize(s.size() * 2);
+				s.EnsureSize(s.Size() * 2);
 			}
 			return Cvt::W2A(s.Get());
 		}

@@ -40,7 +40,7 @@ BOOST_AUTO_TEST_CASE(BasicTest)
 	log.Info("Format: {0} , {1}", 1, 2);
 
 	std::ifstream in(GLib::Flog::LogManager::GetLogPath());
-	std::string contents((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
+	std::string contents((std::istreambuf_iterator(in)), std::istreambuf_iterator<char>());
 	BOOST_TEST(contents.find(" : INFO     : FlogTests::Fred  : Hello") != std::string::npos);
 	BOOST_TEST(contents.find(" : INFO     : FlogTests::Fred  : Format: 1 , 2") != std::string::npos);
 }
@@ -57,7 +57,7 @@ BOOST_AUTO_TEST_CASE(LogLevel)
 	log.Error("error");
 
 	std::ifstream in(GLib::Flog::LogManager::GetLogPath());
-	std::string contents((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
+	std::string contents((std::istreambuf_iterator(in)), std::istreambuf_iterator<char>());
 	BOOST_TEST(contents.find(" : INFO     : FlogTests::Fred  : info") == std::string::npos);
 	BOOST_TEST(contents.find(" : ERROR    : FlogTests::Fred  : error") != std::string::npos);
 
@@ -91,7 +91,7 @@ BOOST_AUTO_TEST_CASE(ProcessName)
 	}
 
 	std::ifstream in(GLib::Flog::LogManager::GetLogPath());
-	std::string contents((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
+	std::string contents((std::istreambuf_iterator(in)), std::istreambuf_iterator<char>());
 
 	auto processName = GLib::Compat::ProcessName();
 	auto processPath = GLib::Compat::ProcessPath();
@@ -110,7 +110,7 @@ BOOST_AUTO_TEST_CASE(SetThreadName)
 	GLib::Flog::LogManager::SetThreadName({});
 
 	std::ifstream in(GLib::Flog::LogManager::GetLogPath());
-	std::string contents((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
+	std::string contents((std::istreambuf_iterator(in)), std::istreambuf_iterator<char>());
 
 	BOOST_TEST(contents.find("] : INFO     : ThreadName       : TestThread") != std::string::npos);
 	BOOST_TEST(contents.find(": [ TestThread ] : INFO     : FlogTests::Fred  : Hello") != std::string::npos);
@@ -128,7 +128,7 @@ BOOST_AUTO_TEST_CASE(TestOneScope)
 	log.Info("End");
 
 	std::ifstream in(GLib::Flog::LogManager::GetLogPath());
-	std::string contents((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
+	std::string contents((std::istreambuf_iterator(in)), std::istreambuf_iterator<char>());
 
 	BOOST_TEST(contents.find("] : INFO     : FlogTests::Fred  : Start") != std::string::npos);
 	BOOST_TEST(contents.find("] : INFO     : FlogTests::Fred  : <==> Scoop") != std::string::npos);
@@ -147,7 +147,7 @@ BOOST_AUTO_TEST_CASE(TestOneScopeWithInnerLog)
 	log.Info("End");
 
 	std::ifstream in(GLib::Flog::LogManager::GetLogPath());
-	std::string contents((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
+	std::string contents((std::istreambuf_iterator(in)), std::istreambuf_iterator<char>());
 
 	BOOST_TEST(contents.find("] : INFO     : FlogTests::Fred  : Start") != std::string::npos);
 	BOOST_TEST(contents.find("] : INFO     : FlogTests::Fred  : ==> Scoop") != std::string::npos);
@@ -175,7 +175,7 @@ BOOST_AUTO_TEST_CASE(TestNestedScopes)
 	log.Info("End");
 
 	std::ifstream in(GLib::Flog::LogManager::GetLogPath());
-	std::string contents((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
+	std::string contents((std::istreambuf_iterator(in)), std::istreambuf_iterator<char>());
 
 	static_cast<void>(scope1);
 
@@ -199,7 +199,7 @@ BOOST_AUTO_TEST_CASE(TestInterlevedLogs)
 	log2.Info("2");
 
 	std::ifstream in(GLib::Flog::LogManager::GetLogPath());
-	std::string contents((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
+	std::string contents((std::istreambuf_iterator(in)), std::istreambuf_iterator<char>());
 
 	BOOST_TEST(contents.find("] : INFO     : Jim              : 1") != std::string::npos);
 	BOOST_TEST(contents.find("] : INFO     : Sheila           : 2") != std::string::npos);

@@ -3,7 +3,6 @@
 #include <GLib/Win/ComPtr.h>
 
 #include <d2d1.h>
-#include <d2d1_3.h>
 #pragma comment(lib, "D2d1.lib")
 
 namespace GLib::Win::D2d

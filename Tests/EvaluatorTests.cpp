@@ -76,7 +76,7 @@ BOOST_AUTO_TEST_CASE(NativeTypeForEach)
 {
 	GLib::Eval::Evaluator evaluator;
 
-	const std::vector<int> integers {1, 2, 3};
+	const std::vector integers {1, 2, 3};
 	evaluator.SetCollection("integers", integers);
 
 	std::vector<std::string> result;
@@ -121,7 +121,7 @@ BOOST_AUTO_TEST_CASE(ResetValue)
 BOOST_AUTO_TEST_CASE(ResetCollection)
 {
 	GLib::Eval::Evaluator evaluator;
-	std::list<int> values {1, 2, 3};
+	std::list values {1, 2, 3};
 	evaluator.SetCollection("values", values);
 	BOOST_TEST("1,2,3" == evaluator.Evaluate("values")); // delim?
 
@@ -132,7 +132,7 @@ BOOST_AUTO_TEST_CASE(ResetCollection)
 BOOST_AUTO_TEST_CASE(CollectionUnimplementedMethods)
 {
 	GLib::Eval::Evaluator evaluator;
-	const std::vector<int> values {1, 2, 3};
+	const std::vector values {1, 2, 3};
 	evaluator.SetCollection("value", values);
 
 	GLIB_CHECK_RUNTIME_EXCEPTION({ static_cast<void>(evaluator.Evaluate("value.property")); }, "Not implemented");
@@ -149,7 +149,7 @@ BOOST_AUTO_TEST_CASE(ValueForEachThrows)
 BOOST_AUTO_TEST_CASE(CollectionForEach)
 {
 	GLib::Eval::Evaluator evaluator;
-	std::vector<int> ints {1, 2, 3, 4};
+	std::vector ints {1, 2, 3, 4};
 	evaluator.Set("ints", ints);
 
 	std::vector<std::string> result;

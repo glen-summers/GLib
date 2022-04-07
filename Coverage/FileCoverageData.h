@@ -12,8 +12,8 @@ using Functions = std::multiset<Function>;
 
 class FileCoverageData
 {
-	std::filesystem::path const path;
-	unsigned int coveredLines;
+	const std::filesystem::path path;
+	unsigned int coveredLines {};
 	LineCoverage lineCoverage;
 
 	Functions functions;
@@ -21,7 +21,6 @@ class FileCoverageData
 public:
 	explicit FileCoverageData(std::filesystem::path path)
 		: path(std::move(path))
-		, coveredLines()
 	{}
 
 	void AddLine(unsigned int line, bool covered)

@@ -43,6 +43,6 @@ struct GLib::Eval::Visitor<FunctionCoverage>
 			return f(Value(fc.CoveredLines() != 0 ? LineCover::Covered : LineCover::NotCovered));
 		}
 
-		throw std::runtime_error(std::string("Unknown property : '") + propertyName + '\'');
+		throw std::runtime_error("Unknown property : '" + propertyName + '\'');
 	}
 };

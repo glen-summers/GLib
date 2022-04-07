@@ -46,12 +46,11 @@ public:
 	// 2. lines merged into constructor from in class assignments, can cause multiple file names per accumulated address
 	void Accumulate(const Address & address) const
 	{
-		bool const visited = address.Visited();
 		for (const auto & [file, addressLines] : address.FileLines())
 		{
 			for (const auto & [line, _] : addressLines) // map merge method?
 			{
-				fileLines[file][line] |= visited;
+				fileLines[file][line] |= address.Visited();
 			}
 		}
 	}

@@ -83,7 +83,7 @@ BOOST_AUTO_TEST_CASE(NullInitialisedComPtrHasZeroUseCount)
 
 BOOST_AUTO_TEST_CASE(InitialisedComPtrHasOneUseCount)
 {
-	GLib::Win::ComPtr<ITest1> p1(GLib::Win::Make<ImplementsITest1>());
+	GLib::Win::ComPtr p1(GLib::Win::Make<ImplementsITest1>());
 
 	BOOST_TEST(1U == UseCount(p1));
 	BOOST_TEST(nullptr != p1);
@@ -93,14 +93,14 @@ BOOST_AUTO_TEST_CASE(InitialisedComPtrHasOneUseCount)
 
 BOOST_AUTO_TEST_CASE(CtorFromSameType)
 {
-	GLib::Win::ComPtr<ITest1> p1(GLib::Win::Make<ImplementsITest1>());
+	GLib::Win::ComPtr p1(GLib::Win::Make<ImplementsITest1>());
 	BOOST_TEST(1U == UseCount(p1));
 
-	GLib::Win::ComPtr<ITest1> p2(p1);
+	GLib::Win::ComPtr p2(p1);
 	BOOST_TEST(2U == UseCount(p1));
 	BOOST_TEST(2U == UseCount(p2));
 
-	GLib::Win::ComPtr<ITest1> p2m(std::move(p2));
+	GLib::Win::ComPtr p2m(std::move(p2));
 	BOOST_TEST(2U == UseCount(p1));
 	BOOST_TEST(0U == UseCount(p2));
 	BOOST_TEST(2U == UseCount(p2m));
@@ -108,7 +108,7 @@ BOOST_AUTO_TEST_CASE(CtorFromSameType)
 
 BOOST_AUTO_TEST_CASE(CtorFromRawValue)
 {
-	GLib::Win::ComPtr<ITest1> p1(GLib::Win::Make<ImplementsITest1>());
+	GLib::Win::ComPtr p1(GLib::Win::Make<ImplementsITest1>());
 	GLib::Win::ComPtr<ITest1> p2(Get(p1));
 	BOOST_TEST(2U == UseCount(p1));
 	BOOST_TEST(2U == UseCount(p2));
@@ -116,14 +116,14 @@ BOOST_AUTO_TEST_CASE(CtorFromRawValue)
 
 BOOST_AUTO_TEST_CASE(CtorFromOtherType)
 {
-	GLib::Win::ComPtr<ITest1Extended> p1(GLib::Win::Make<ImplementsITest1ExtendedAndITest1ExtendedAlt>());
+	GLib::Win::ComPtr p1(GLib::Win::Make<ImplementsITest1ExtendedAndITest1ExtendedAlt>());
 	BOOST_TEST(1U == UseCount(p1));
 
 	GLib::Win::ComPtr<ITest1> p2(p1);
 	BOOST_TEST(2U == UseCount(p1));
 	BOOST_TEST(2U == UseCount(p2));
 
-	GLib::Win::ComPtr<ITest1> p2m(std::move(p2));
+	GLib::Win::ComPtr p2m(std::move(p2));
 	BOOST_TEST(2U == UseCount(p1));
 	BOOST_TEST(0U == UseCount(p2));
 	BOOST_TEST(2U == UseCount(p2m));
@@ -150,7 +150,7 @@ BOOST_AUTO_TEST_CASE(AssignmentSameType)
 
 BOOST_AUTO_TEST_CASE(AssignmentOtherType)
 {
-	GLib::Win::ComPtr<ITest1Extended> p1(GLib::Win::Make<ImplementsITest1ExtendedAndITest1ExtendedAlt>());
+	GLib::Win::ComPtr p1(GLib::Win::Make<ImplementsITest1ExtendedAndITest1ExtendedAlt>());
 	GLib::Win::ComPtr<ITest1> p2, p3;
 	BOOST_TEST(1U == UseCount(p1));
 	BOOST_TEST(0U == UseCount(p2));
@@ -169,8 +169,9 @@ BOOST_AUTO_TEST_CASE(AssignmentOtherType)
 
 BOOST_AUTO_TEST_CASE(SelfAssign)
 {
-	GLib::Win::ComPtr<ITest1> p1(GLib::Win::Make<ImplementsITest1>());
-	GLib::Win::ComPtr<ITest1> p2(GLib::Win::Make<ImplementsITest1>());
+	GLib::Win::ComPtr p1(GLib::Win::Make<ImplementsITest1>());
+	static_cast<void>(p1);
+	GLib::Win::ComPtr p2(GLib::Win::Make<ImplementsITest1>());
 	p1 = p2;
 
 	BOOST_TEST(Get(p1) == Get(p2));
@@ -192,13 +193,13 @@ BOOST_AUTO_TEST_CASE(SelfAssignBug)
 
 BOOST_AUTO_TEST_CASE(CallMethod)
 {
-	GLib::Win::ComPtr<ITest1> test(GLib::Win::Make<ImplementsITest1>());
+	GLib::Win::ComPtr test(GLib::Win::Make<ImplementsITest1>());
 	BOOST_TEST(S_OK == test->Test1Method());
 }
 
 BOOST_AUTO_TEST_CASE(QiOk)
 {
-	GLib::Win::ComPtr<ITest1> p1(GLib::Win::Make<ImplementsITest1AndITest2>());
+	GLib::Win::ComPtr p1(GLib::Win::Make<ImplementsITest1AndITest2>());
 	GLib::Win::ComPtr<ITest1> p2 = GLib::Win::ComCast<ITest1>(p1);
 	BOOST_TEST(2U == UseCount(p1));
 	BOOST_TEST(2U == UseCount(p2));

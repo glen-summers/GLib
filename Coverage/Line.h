@@ -48,6 +48,6 @@ struct GLib::Eval::Visitor<Line>
 			return f(Value(!line.HasLink));
 		}
 
-		throw std::runtime_error(std::string("Unknown property : '") + propertyName + '\'');
+		throw std::runtime_error("Unknown property : '" + propertyName + '\'');
 	}
 };

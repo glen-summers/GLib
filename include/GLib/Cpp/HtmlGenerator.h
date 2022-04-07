@@ -7,7 +7,6 @@
 #include <cctype>
 #include <unordered_map>
 #include <unordered_set>
-#include <vector>
 
 enum class Style : char
 {
@@ -24,7 +23,7 @@ inline void VisibleWhitespace(std::string_view value, std::ostream & s)
 {
 	for (size_t startPos = 0;;)
 	{
-		size_t const find = value.find_first_of(" 	", startPos);
+		const size_t find = value.find_first_of(" 	", startPos);
 		if (find == std::string::npos)
 		{
 			s << value.substr(startPos);

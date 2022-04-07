@@ -46,7 +46,7 @@ namespace GLib
 				const int len = snprintf(nullptr, 0, f.c_str(), value); // NOLINT until c++/20 Format impl
 				Compat::AssertTrue(len >= 0, "ToString", errno);
 				s.EnsureSize(static_cast<size_t>(len) + 1);
-				snprintf(s.Get(), s.size(), f.c_str(), value); // NOLINT until c++/20 Format impl
+				snprintf(s.Get(), s.Size(), f.c_str(), value); // NOLINT until c++/20 Format impl
 
 				stm << s.Get();
 			}
@@ -78,6 +78,7 @@ namespace GLib
 			void FormatPointer(std::ostream & stm, void * const & value)
 			{
 				static_cast<void>(stm);
+				static_cast<void>(value);
 				throw std::runtime_error("Unknown pointer size : " + std::to_string(sizeof value));
 			}
 

@@ -12,7 +12,7 @@ namespace GLib::Win
 		ComPtr<IUIAutomationElement> element;
 
 	public:
-		Element(ComPtr<IUIAutomationElement> element)
+		explicit Element(ComPtr<IUIAutomationElement> element)
 			: element(std::move(element))
 		{}
 
@@ -58,7 +58,7 @@ namespace GLib::Win
 		{
 			ComPtr<IUIAutomationElement> element;
 			CheckHr(automation->ElementFromHandle(hWnd, GetAddress(element).Raw()), "ElementFromHandle");
-			return std::move(element);
+			return Element {std::move(element)};
 		}
 	};
 }

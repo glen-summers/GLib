@@ -28,20 +28,20 @@ void Coverage::AddLine(const std::wstring & fileName, unsigned int lineNumber, c
 		return;
 	}
 
-	if (wideFiles.find(fileName) == wideFiles.end())
+	if (!wideFiles.contains(fileName))
 	{
 		bool include = includes.empty();
 		bool exclude = false;
 
 		for (const auto & value : includes)
 		{
-			bool const isMatch = _wcsnicmp(value.c_str(), fileName.c_str(), value.size()) == 0;
+			const bool isMatch = _wcsnicmp(value.c_str(), fileName.c_str(), value.size()) == 0;
 			include |= isMatch;
 		}
 
 		for (const auto & value : excludes)
 		{
-			bool const isMatch = _wcsnicmp(value.c_str(), fileName.c_str(), value.size()) == 0;
+			const bool isMatch = _wcsnicmp(value.c_str(), fileName.c_str(), value.size()) == 0;
 			exclude |= isMatch;
 		}
 
@@ -90,8 +90,7 @@ void Coverage::OnCreateProcess(ULONG processId, ULONG threadId, const CREATE_PRO
 
 	GLib::Flog::ScopeLog scopeLog(log, GLib::Flog::Level::Info, "EnumLines");
 
-	Symbols().Lines([&](PSRCCODEINFOW lineInfo)
-									{ AddLine(static_cast<const wchar_t *>(lineInfo->FileName), lineInfo->LineNumber, process, lineInfo->Address, it->second); },
+	Symbols().Lines([&](PSRCCODEINFOW lineInfo) { AddLine(&lineInfo->FileName[0], lineInfo->LineNumber, process, lineInfo->Address, it->second); },
 									process.Handle(), info.lpBaseOfImage);
 
 	static_cast<void>(scopeLog);

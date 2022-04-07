@@ -1,5 +1,3 @@
-
-
 #include <GLib/Split.h>
 
 #include <GLib/ConsecutiveFind.h>
@@ -121,17 +119,20 @@ BOOST_AUTO_TEST_CASE(EmptyDeliminatorIsError)
 
 BOOST_AUTO_TEST_CASE(ConsecutiveFindTest)
 {
-	std::vector<int> values {1, 1, 2, 3, 3, 3};
-	std::vector<std::pair<int, size_t>> result, expected = {{1, 2}, {2, 1}, {3, 3}};
+	using Pair = std::pair<int, size_t>;
+	const std::vector values {1, 1, 2, 3, 3, 3};
+	const std::vector<Pair> expected = {{1, 2}, {2, 1}, {3, 3}};
 
-	std::vector<int>::iterator next;
-	for (auto it = values.begin(), end = values.end(); it != end; it = next)
+	std::vector<Pair> result;
+	std::vector<int>::const_iterator next;
+
+	for (auto it = values.cbegin(), end = values.cend(); it != end; it = next)
 	{
 		next = GLib::Util::ConsecutiveFind(it, end);
 		result.emplace_back(*it, std::distance(it, next));
 	}
 
-	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), result.begin(), result.end());
+	BOOST_CHECK_EQUAL_COLLECTIONS(expected.cbegin(), expected.cend(), result.cbegin(), result.cend());
 }
 
 BOOST_AUTO_TEST_CASE(ConsecutiveFindPred)
@@ -139,17 +140,19 @@ BOOST_AUTO_TEST_CASE(ConsecutiveFindPred)
 	using Pair = std::pair<int, std::string>;
 	auto pred = [](const Pair & p1, const Pair & p2) { return p1.second != p2.second; };
 
-	std::vector<Pair> values {{1, "1"}, {2, "1"}, {3, "2"}, {4, "3"}, {5, "3"}, {6, "3"}};
-	std::vector<std::pair<std::string, size_t>> result, expected = {{"1", 2}, {"2", 1}, {"3", 3}};
+	const std::vector<Pair> values {{1, "1"}, {2, "1"}, {3, "2"}, {4, "3"}, {5, "3"}, {6, "3"}};
+	const std::vector<std::pair<std::string, size_t>> expected {{"1", 2}, {"2", 1}, {"3", 3}};
 
-	std::vector<Pair>::iterator next;
-	for (auto it = values.begin(), end = values.end(); it != end; it = next)
+	std::vector<std::pair<std::string, size_t>> result;
+	std::vector<Pair>::const_iterator next;
+
+	for (auto it = values.cbegin(), end = values.cend(); it != end; it = next)
 	{
 		next = GLib::Util::ConsecutiveFind(it, end, pred);
 		result.emplace_back(it->second, std::distance(it, next));
 	}
 
-	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), result.begin(), result.end());
+	BOOST_CHECK_EQUAL_COLLECTIONS(expected.cbegin(), expected.cend(), result.cbegin(), result.cend());
 }
 
 BOOST_AUTO_TEST_SUITE_END()

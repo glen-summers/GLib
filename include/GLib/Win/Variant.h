@@ -1,7 +1,5 @@
 #pragma once
 
-#include <GLib/Win/ComErrorCheck.h>
-
 namespace GLib::Win
 {
 	namespace Detail
@@ -39,7 +37,7 @@ namespace GLib::Win
 			VARIANT v;
 			VariantInit(&v);
 			Vt(v) = VT_BSTR;
-			Bstr(v) = SysAllocString(Cvt::A2W(value).c_str());
+			Bstr(v) = bstr;
 			return v;
 		}
 
@@ -69,7 +67,7 @@ namespace GLib::Win
 			: v {Detail::Create()}
 		{}
 
-		Variant(const std::string & value)
+		explicit Variant(const std::string & value)
 			: v {Detail::Create(value)}
 		{}
 

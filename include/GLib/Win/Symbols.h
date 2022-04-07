@@ -183,7 +183,7 @@ namespace GLib::Win::Symbols
 
 			std::ostringstream searchPath;
 
-			auto const processPath = Cvt::P2A(std::filesystem::path(FileSystem::PathOfProcessHandle(duplicate.get())).parent_path());
+			const auto processPath = Cvt::P2A(std::filesystem::path(FileSystem::PathOfProcessHandle(duplicate.get())).parent_path());
 			searchPath << processPath << ";";
 
 			// set sym opts, add exe to sym path, legacy code, still needed?
@@ -299,7 +299,7 @@ namespace GLib::Win::Symbols
 
 		[[nodiscard]] std::optional<Line> TryGetLineFromAddress(uint64_t address) const
 		{
-			IMAGEHLP_LINEW64 tmpLine {sizeof(IMAGEHLP_LINEW64)};
+			IMAGEHLP_LINEW64 tmpLine {sizeof(IMAGEHLP_LINEW64), {}, {}, {}, {}};
 			ULONG displacement = 0;
 			BOOL result = SymGetLineFromAddrW64(Handle(), address, &displacement, &tmpLine);
 			if (Util::WarnAssertTrue(result, "SymGetLineFromAddrW64"))
@@ -311,7 +311,7 @@ namespace GLib::Win::Symbols
 
 		[[nodiscard]] std::optional<Line> TryGetLineFromInlineContext(uint64_t address, ULONG inlineContext) const
 		{
-			IMAGEHLP_LINEW64 tmpLine {sizeof(IMAGEHLP_LINEW64)};
+			IMAGEHLP_LINEW64 tmpLine {sizeof(IMAGEHLP_LINEW64), {}, {}, {}, {}};
 			ULONG displacement = 0;
 			BOOL result = SymGetLineFromInlineContextW(Handle(), address, inlineContext, 0, &displacement, &tmpLine);
 			if (Util::WarnAssertTrue(result, "SymGetLineFromInlineContext"))
@@ -368,7 +368,7 @@ namespace GLib::Win::Symbols
 		{
 			SymProcess sp = SymProcess::GetProcess(processHandle, baseOfImage, false);
 
-			uint64_t const loadBase = SymLoadModuleExW(sp.Handle(), imageFile, Cvt::A2W(imageName).c_str(), nullptr, baseOfImage, 0, nullptr, 0);
+			const uint64_t loadBase = SymLoadModuleExW(sp.Handle(), imageFile, Cvt::A2W(imageName).c_str(), nullptr, baseOfImage, 0, nullptr, 0);
 			Util::AssertTrue(0 != loadBase, "SymLoadModuleExW");
 
 			return handles.emplace(processId, std::move(sp)).first->second;
@@ -376,7 +376,7 @@ namespace GLib::Win::Symbols
 
 		[[nodiscard]] const SymProcess & GetProcess(ULONG processId) const
 		{
-			auto const it = handles.find(processId);
+			const auto it = handles.find(processId);
 			if (it == handles.end())
 			{
 				throw std::runtime_error("Process not found");

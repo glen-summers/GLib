@@ -33,7 +33,7 @@ namespace GLib::Win::Symbols
 
 		inline CONTEXT GetContext(const EXCEPTION_POINTERS & exceptionInfo)
 		{
-			return NativeTryCatch([&]() { return *(exceptionInfo.ContextRecord); });
+			return NativeTryCatch([&]() { return *exceptionInfo.ContextRecord; });
 		}
 
 		struct VirtualBase
@@ -78,14 +78,14 @@ namespace GLib::Win::Symbols
 #error unexpected target
 #endif
 
-					std::span<const ULONG> const throwInfo {WindowsCast<const ULONG *>(ei[throwInfoIndex]), catchableOffsetIndex + 1};
+					const std::span throwInfo {WindowsCast<const ULONG *>(ei[throwInfoIndex]), catchableOffsetIndex + 1};
 
-					ULONG const catchableOffset {throwInfo[catchableOffsetIndex]};
-					std::span<const ULONG> const catchables {WindowsCast<const ULONG *>(instance + catchableOffset), catchablesOffsetIndex + 1};
+					const ULONG catchableOffset {throwInfo[catchableOffsetIndex]};
+					const std::span catchables {WindowsCast<const ULONG *>(instance + catchableOffset), catchablesOffsetIndex + 1};
 
-					ULONG const catchablesOffset {catchables[catchablesOffsetIndex]};
-					std::span<const ULONG> const catchablesTypes {WindowsCast<const ULONG *>(instance + catchablesOffset), typeInfoOffsetIndex + 1};
-					ULONG const typeInfoOffset {catchablesTypes[typeInfoOffsetIndex]};
+					const ULONG catchablesOffset {catchables[catchablesOffsetIndex]};
+					const std::span catchablesTypes {WindowsCast<const ULONG *>(instance + catchablesOffset), typeInfoOffsetIndex + 1};
+					const ULONG typeInfoOffset {catchablesTypes[typeInfoOffsetIndex]};
 
 					name = WindowsCast<const type_info *>(instance + typeInfoOffset)->name();
 
@@ -192,8 +192,8 @@ namespace GLib::Win::Symbols
 	inline void Print(std::ostream & s, const EXCEPTION_POINTERS * exceptionInfo, unsigned int maxFrames)
 	{
 		constexpr ULONG cPlusPlusExceptionNumber = 0xe06d7363;
-		const EXCEPTION_RECORD & er = *(exceptionInfo->ExceptionRecord);
-		std::span<const ULONG_PTR> const info {er.ExceptionInformation, EXCEPTION_MAXIMUM_PARAMETERS};
+		const EXCEPTION_RECORD & er = *exceptionInfo->ExceptionRecord;
+		const std::span info {er.ExceptionInformation, EXCEPTION_MAXIMUM_PARAMETERS};
 
 		Formatter::Format(s, "Unhandled exception at {0} (code: {1:%08X})", er.ExceptionAddress, er.ExceptionCode);
 

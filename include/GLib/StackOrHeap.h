@@ -33,7 +33,7 @@ namespace GLib::Util
 			// could go back to stack if (heapInUse && newElementCount <= StackElementCount)
 		}
 
-		[[nodiscard]] size_t size() const
+		[[nodiscard]] size_t Size() const
 		{
 			return GetSize();
 		}

@@ -25,6 +25,6 @@ struct GLib::Eval::Visitor<Chunk>
 			return f(Value(chunk.Size));
 		}
 
-		throw std::runtime_error(std::string("Unknown property : '") + propertyName + '\'');
+		throw std::runtime_error("Unknown property : '" + propertyName + '\'');
 	}
 };

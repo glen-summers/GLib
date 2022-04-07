@@ -2,7 +2,6 @@
 
 #include <GLib/Xml/Utils.h>
 
-#include <array>
 #include <iomanip>
 #include <sstream>
 #include <stack>
@@ -13,7 +12,7 @@ namespace GLib::Xml
 	{
 		static constexpr int textDepthNotSet = -1;
 
-		bool const format;
+		const bool format;
 		bool elementOpen {};
 		bool isFirstElement {true};
 		int depth {};

@@ -9,8 +9,6 @@
 #include <GLib/Win/DebugStream.h>
 #endif
 
-#include <GLib/Scope.h>
-
 #include <sstream>
 
 #include <OleAuto.h>

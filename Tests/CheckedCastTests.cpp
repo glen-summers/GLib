@@ -56,7 +56,7 @@ BOOST_AUTO_TEST_CASE(SignedToUnsignedNotReverseSubranged)
 
 BOOST_AUTO_TEST_CASE(UnsignedToSignedSubranged)
 {
-	BOOST_TEST(1234 == CheckedCast<int>(1234u));
+	BOOST_TEST(1234 == CheckedCast<int>(1234U));
 
 	BOOST_CHECK_EXCEPTION(CheckedCast<int>(std::numeric_limits<unsigned int>::max()), Exception, IsOverflow);
 }

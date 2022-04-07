@@ -10,7 +10,7 @@ namespace GLib::Detail
 		Function function;
 
 	public:
-		explicit ScopedFunction(Function function)
+		explicit ScopedFunction(Function function) noexcept
 			: function(std::move(function))
 		{}
 

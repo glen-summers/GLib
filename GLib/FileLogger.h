@@ -20,8 +20,8 @@ class FileLogger
 	friend class GLib::Flog::Log;
 	friend class GLib::Flog::LogManager;
 
-	std::string const baseFileName;
-	std::filesystem::path const path;
+	const std::string baseFileName;
+	const std::filesystem::path path;
 	std::mutex streamMonitor;
 	StreamInfo streamInfo;
 	GLib::Flog::Level logLevel = GLib::Flog::Level::Info; // config

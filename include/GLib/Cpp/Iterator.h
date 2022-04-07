@@ -5,7 +5,6 @@
 #include <iterator>
 #include <optional>
 #include <sstream>
-#include <string_view>
 
 namespace GLib::Cpp
 {

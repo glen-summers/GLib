@@ -2,7 +2,6 @@
 
 #include <list>
 #include <string>
-#include <string_view>
 
 namespace GLib::Html
 {
@@ -14,7 +13,7 @@ namespace GLib::Html
 		std::string enumeration;
 		std::string_view condition;
 		std::list<Node> children; // use ostream for xml fragments, single optional child for the rest, polymorphic?
-		size_t const depth {};
+		const size_t depth {};
 
 	public:
 		Node() = default;

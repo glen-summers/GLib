@@ -5,30 +5,6 @@
 #include <stdexcept>
 #include <string>
 
-template <typename T>
-struct Reverse
-{
-	T & Iterable;
-};
-
-template <typename T>
-auto Begin(const Reverse<T> & w)
-{
-	return std::crbegin(w.iterable);
-}
-
-template <typename T>
-auto End(const Reverse<T> & w)
-{
-	return std::crend(w.iterable);
-}
-
-template <typename T>
-Reverse<T> Reverser(T && iterable)
-{
-	return {iterable};
-}
-
 inline bool Parse(std::string & name, unsigned int imbalance, char open, char close)
 {
 	std::ostringstream s;

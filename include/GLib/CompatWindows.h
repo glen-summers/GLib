@@ -50,16 +50,16 @@ namespace GLib::Compat
 
 		Util::WideCharBuffer tmp;
 		size_t len = 0;
-		errno_t err = _wgetenv_s(&len, tmp.Get(), tmp.size(), wideName.c_str());
+		errno_t err = _wgetenv_s(&len, tmp.Get(), tmp.Size(), wideName.c_str());
 		if (len == 0)
 		{
 			return {};
 		}
 
-		if (len > tmp.size())
+		if (len > tmp.Size())
 		{
 			tmp.EnsureSize(len);
-			err = _wgetenv_s(&len, tmp.Get(), tmp.size(), wideName.c_str());
+			err = _wgetenv_s(&len, tmp.Get(), tmp.Size(), wideName.c_str());
 		}
 		AssertTrue(err == 0, "_wgetenv_s", err);
 		return Cvt::W2A({tmp.Get(), len - 1});

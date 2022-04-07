@@ -10,7 +10,7 @@ namespace GLib::Win::Util
 {
 	class Uuid
 	{
-		UUID const id;
+		const UUID id;
 
 	public:
 		explicit Uuid(const UUID & id)

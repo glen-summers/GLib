@@ -5,7 +5,6 @@
 #include <GLib/Win/Process.h>
 #include <GLib/Win/Symbols.h>
 
-#include <GLib/Scope.h>
 #include <GLib/Split.h>
 
 #include <optional>
@@ -36,8 +35,8 @@ namespace GLib::Win
 		Symbols::Engine symbols;
 		std::map<std::string, std::string> driveMap;
 		Process mainProcess;
-		ULONG const debugProcessId;
-		bool const debugChildProcesses;
+		const ULONG debugProcessId;
+		const bool debugChildProcesses;
 		std::optional<ULONG> exitCode;
 		std::string pendingDebugOut;
 
@@ -73,15 +72,15 @@ namespace GLib::Win
 		bool ProcessEvents(ULONG timeout)
 		{
 			DEBUG_EVENT debugEvent {};
-			BOOL const result = WaitForDebugEventEx(&debugEvent, timeout);
+			const BOOL result = WaitForDebugEventEx(&debugEvent, timeout);
 			Util::WarnAssertTrue(result == TRUE || GetLastError() == ERROR_SEM_TIMEOUT, "WaitForDebugEventEx");
 			if (result == FALSE)
 			{
 				return !exitCode.has_value();
 			}
 
-			ULONG const processId = debugEvent.dwProcessId;
-			ULONG const threadId = debugEvent.dwThreadId;
+			const ULONG processId = debugEvent.dwProcessId;
+			const ULONG threadId = debugEvent.dwThreadId;
 			ULONG continueStatus = DBG_CONTINUE;
 
 			switch (debugEvent.dwDebugEventCode)
@@ -167,8 +166,8 @@ namespace GLib::Win
 		{
 			static_cast<void>(threadId);
 
-			std::string const logicalName = FileSystem::PathOfFileHandle(info.hFile, VOLUME_NAME_NT);
-			std::string const name = FileSystem::NormalisePath(logicalName, driveMap);
+			const std::string logicalName = FileSystem::PathOfFileHandle(info.hFile, VOLUME_NAME_NT);
+			const std::string name = FileSystem::NormalisePath(logicalName, driveMap);
 
 			Debug::Write("Attach Process: {0}, Pid: {1}", name, processId);
 
@@ -176,14 +175,14 @@ namespace GLib::Win
 				symbols.AddProcess(processId, info.hProcess, Detail::ConvertAddress(info.lpBaseOfImage), info.hFile, name);
 
 			IMAGE_DOS_HEADER header {};
-			process.ReadMemory(0, &header, sizeof(header));
+			process.ReadMemory(0, &header, sizeof header);
 			if (header.e_magic != IMAGE_DOS_SIGNATURE)
 			{
 				throw std::runtime_error("Unknown image header");
 			}
 
 			IMAGE_NT_HEADERS32 headers32 {};
-			process.ReadMemory(header.e_lfanew, &headers32, sizeof(headers32));
+			process.ReadMemory(header.e_lfanew, &headers32, sizeof headers32);
 
 			switch (headers32.FileHeader.Machine)
 			{
@@ -194,7 +193,7 @@ namespace GLib::Win
 				case IMAGE_FILE_MACHINE_AMD64:
 				{
 					IMAGE_NT_HEADERS64 headers64 {};
-					process.ReadMemory(header.e_lfanew, &headers64, sizeof(headers64));
+					process.ReadMemory(header.e_lfanew, &headers64, sizeof headers64);
 					On64BitProcess(headers64);
 					break;
 				}
@@ -230,8 +229,8 @@ namespace GLib::Win
 			static_cast<void>(processId);
 			static_cast<void>(threadId);
 
-			std::string const logicalName = FileSystem::PathOfFileHandle(info.hFile, VOLUME_NAME_NT);
-			std::string const name = FileSystem::NormalisePath(logicalName, driveMap);
+			const std::string logicalName = FileSystem::PathOfFileHandle(info.hFile, VOLUME_NAME_NT);
+			const std::string name = FileSystem::NormalisePath(logicalName, driveMap);
 
 			Debug::Stream() << "GDB LoadDll: " << name << " " << info.lpBaseOfDll << std::endl;
 		}

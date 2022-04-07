@@ -22,5 +22,5 @@ namespace GLib::Util
 		}
 
 		return static_cast<Target>(source);
-	};
+	}
 }

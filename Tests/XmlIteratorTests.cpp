@@ -16,7 +16,7 @@ BOOST_AUTO_TEST_CASE(EmptyElement)
 
 	std::vector<Xml::Element> expected {{"xml", Xml::ElementType::Empty}};
 	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), xml.begin(), xml.end());
-	BOOST_CHECK(xml.begin()->Attributes().Empty());
+	BOOST_CHECK(xml.begin()->GetAttributes().Empty());
 }
 
 BOOST_AUTO_TEST_CASE(ElementSpace)
@@ -94,10 +94,10 @@ BOOST_AUTO_TEST_CASE(IterateAttributes)
 	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), actual.begin(), actual.end());
 
 	std::vector<Xml::Attribute> expectedAttr0 = {{"a", "1", "", "a='1'"}, {"b", "2", "", "b='2'"}};
-	BOOST_CHECK_EQUAL_COLLECTIONS(expectedAttr0.begin(), expectedAttr0.end(), actual[0].Attributes().begin(), actual[0].Attributes().end());
+	BOOST_CHECK_EQUAL_COLLECTIONS(expectedAttr0.begin(), expectedAttr0.end(), actual[0].GetAttributes().begin(), actual[0].GetAttributes().end());
 
 	std::vector<Xml::Attribute> expectedAttr1 = {{"c", "3", "", "c='3'"}, {"d", "4", "", "d=\"4\""}};
-	BOOST_CHECK_EQUAL_COLLECTIONS(expectedAttr1.begin(), expectedAttr1.end(), actual[1].Attributes().begin(), actual[1].Attributes().end());
+	BOOST_CHECK_EQUAL_COLLECTIONS(expectedAttr1.begin(), expectedAttr1.end(), actual[1].GetAttributes().begin(), actual[1].GetAttributes().end());
 }
 
 BOOST_AUTO_TEST_CASE(AttributeSpace)

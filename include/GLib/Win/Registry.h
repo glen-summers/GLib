@@ -161,7 +161,7 @@ namespace GLib::Win
 		Key key;
 
 	public:
-		constexpr RegistryKey(Key key) noexcept
+		constexpr explicit RegistryKey(Key key) noexcept
 			: key(std::move(key))
 		{}
 
@@ -230,13 +230,13 @@ namespace GLib::Win
 
 		void SetInt32(std::string_view name, uint32_t value) const
 		{
-			LSTATUS result = RegSetValueExW(key.Get(), Cvt::A2W(name).c_str(), 0, REG_DWORD, Detail::ToBytes(&value), sizeof(value));
+			LSTATUS result = RegSetValueExW(key.Get(), Cvt::A2W(name).c_str(), 0, REG_DWORD, Detail::ToBytes(&value), sizeof value);
 			Util::AssertSuccess(result, "RegSetValueEx");
 		}
 
 		void SetInt64(std::string_view name, uint64_t value) const
 		{
-			LSTATUS result = RegSetValueExW(key.Get(), Cvt::A2W(name).c_str(), 0, REG_QWORD, Detail::ToBytes(&value), sizeof(value));
+			LSTATUS result = RegSetValueExW(key.Get(), Cvt::A2W(name).c_str(), 0, REG_QWORD, Detail::ToBytes(&value), sizeof value);
 			Util::AssertSuccess(result, "RegSetValueEx");
 		}
 
@@ -245,7 +245,7 @@ namespace GLib::Win
 			HKEY subKey;
 			LSTATUS result = RegOpenKeyExW(key.Get(), Cvt::A2W(path).c_str(), 0, Detail::Read, &subKey);
 			Util::AssertSuccess(result, "RegOpenKeyEx");
-			return {Detail::KeyHolder {subKey}};
+			return SubKey {Detail::KeyHolder {subKey}};
 		}
 
 		SubKey CreateSubKey(std::string_view path) const
@@ -254,7 +254,7 @@ namespace GLib::Win
 			LSTATUS result =
 				::RegCreateKeyExW(key.Get(), Cvt::A2W(path).c_str(), 0, nullptr, REG_OPTION_NON_VOLATILE, Detail::AllAccess, nullptr, &subKey, nullptr);
 			Util::AssertSuccess(result, "RegCreateKeyEx");
-			return {Detail::KeyHolder {subKey}};
+			return SubKey {Detail::KeyHolder {subKey}};
 		}
 
 		bool DeleteSubKey(const std::string & path) const

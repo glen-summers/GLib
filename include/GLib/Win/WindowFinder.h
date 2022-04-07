@@ -18,7 +18,7 @@ namespace GLib::Win
 			if (lengthWithoutTerminator != 0)
 			{
 				s.EnsureSize(lengthWithoutTerminator + 1);
-				lengthWithoutTerminator = ::GetWindowTextW(hWnd, s.Get(), static_cast<int>(s.size()));
+				lengthWithoutTerminator = ::GetWindowTextW(hWnd, s.Get(), static_cast<int>(s.Size()));
 				Util::AssertTrue(lengthWithoutTerminator != 0 || GetLastError() == 0, "GetWindowTextW");
 			}
 			return s.Get();
@@ -32,7 +32,7 @@ namespace GLib::Win
 		static BOOL CALLBACK EnumWindowsCallback(HWND handle, LPARAM param) noexcept
 		{
 			// todo setLastError when return false
-			return (*reinterpret_cast<const WindowEnumerator *>(param))(handle);
+			return (*Util::Detail::WindowsCast<const WindowEnumerator *>(param))(handle);
 		}
 
 	public:

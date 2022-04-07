@@ -2,8 +2,6 @@
 
 #include <GLib/Win/ErrorCheck.h>
 
-#include <algorithm>
-
 namespace GLib::Win
 {
 	template <typename T>

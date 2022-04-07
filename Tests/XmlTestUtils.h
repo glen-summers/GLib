@@ -32,10 +32,10 @@ namespace GLib::Xml
 			return false;
 		}
 
-		for (auto it1 = e1.Attributes().begin(), it2 = e2.Attributes().begin(); it1 != e1.Attributes().begin() && it2 != e2.Attributes().begin();
-				 ++it1, ++it2)
+		for (auto it1 = e1.GetAttributes().begin(), it2 = e2.GetAttributes().begin();
+				 it1 != e1.GetAttributes().begin() && it2 != e2.GetAttributes().begin(); ++it1, ++it2)
 		{
-			if (it1 == e1.Attributes().end() || it2 == e2.Attributes().end())
+			if (it1 == e1.GetAttributes().end() || it2 == e2.GetAttributes().end())
 			{
 				return false;
 			}
@@ -58,10 +58,10 @@ namespace GLib::Xml
 		s << "NameSpace: [" << e.NameSpace() << "], Name: [" << e.Name() << "], type : [" << static_cast<unsigned int>(e.Type()) << "], text : ["
 			<< e.Text() << ']';
 
-		if (!e.Attributes().Empty())
+		if (!e.GetAttributes().Empty())
 		{
 			s << std::endl;
-			for (const auto & a : e.Attributes())
+			for (const auto & a : e.GetAttributes())
 			{
 				s << "Attr: [" << a.NameSpace << "]:[" << a.Name << "]=[" << a.Value << ']' << std::endl;
 			}
@@ -73,7 +73,7 @@ namespace GLib::Xml
 	{
 		for (const auto & e : Holder {xml})
 		{
-			for (const auto & a : e.Attributes())
+			for (const auto & a : e.GetAttributes())
 			{
 				static_cast<void>(a);
 			}

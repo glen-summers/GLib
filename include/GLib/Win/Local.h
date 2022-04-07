@@ -3,8 +3,6 @@
 #include <GLib/Win/ErrorCheck.h>
 #include <GLib/Win/Transfer.h>
 
-#include <cassert>
-
 namespace GLib::Win
 {
 	namespace LocalDetail
