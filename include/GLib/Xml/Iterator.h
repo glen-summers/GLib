@@ -112,6 +112,109 @@ namespace GLib::Xml
 			throw std::runtime_error(s.str());
 		}
 
+		bool ProcessOldState(const std::string_view::const_iterator oldPtr, const State oldState, const State newState)
+		{
+			if (oldState == State::Text && newState == State::TextEntity)
+			{
+				return false;
+			}
+
+			if (oldState == State::Text)
+			{
+				element = {ElementType::Text, Utils::ToStringView({*lastPtr, oldPtr})};
+				lastPtr = oldPtr;
+				return true;
+			}
+
+			if (oldState == State::CommentEnd)
+			{
+				element = {ElementType::Comment, Utils::ToStringView({*lastPtr, ptr})};
+				lastPtr = ptr;
+				return true;
+			}
+
+			if (oldState == State::ElementName)
+			{
+				elementName.second = oldPtr;
+				elementType = ElementType::Open;
+				if (newState == State::AttributeSpace)
+				{
+					attributes = {ptr, ptr};
+					return false;
+				}
+			}
+
+			if (oldState == State::ElementEndName)
+			{
+				elementName.second = oldPtr;
+				elementType = ElementType::Close;
+				return false;
+			}
+
+			if (oldState == State::AttributeName)
+			{
+				attributeName.second = oldPtr;
+				return false;
+			}
+
+			return false;
+		}
+
+		bool ProcessNewState(const std::string_view::const_iterator oldPtr, const State newState)
+		{
+			if (newState == State::AttributeEnd)
+			{
+				manager->Push(Utils::ToStringView(attributeName), Utils::ToStringView({attributeValueStart, oldPtr}).substr(1), elementStack.size());
+				attributes.second = ptr;
+				return false;
+			}
+
+			if (newState == State::ElementName || newState == State::ElementEndName || newState == State::Bang)
+			{
+				elementName = {oldPtr, oldPtr};
+				return false;
+			}
+
+			if (newState == State::EmptyElement)
+			{
+				elementType = ElementType::Empty;
+				return false;
+			}
+
+			if (newState == State::AttributeName)
+			{
+				attributeName.first = oldPtr;
+				return false;
+			}
+
+			if (newState == State::AttributeValue)
+			{
+				attributeValueStart = oldPtr;
+				return false;
+			}
+
+			if (newState == State::Start)
+			{
+				// bug: white space at end is not in outerXml...
+				// don't yield for !doctype atm
+				// just set a member value for now?
+
+				if (elementName.first == elementName.second) // skip doctype
+				{
+					return false;
+				}
+
+				if (elementName.first != end && elementName.first != elementName.second)
+				{
+					ProcessElement(ptr);
+					lastPtr = ptr;
+					return true;
+				}
+			}
+
+			return false;
+		}
+
 		void Advance()
 		{
 			if (!lastPtr.has_value())
@@ -157,110 +260,14 @@ namespace GLib::Xml
 
 				if (newState != oldState)
 				{
-					switch (oldState)
+					if (ProcessOldState(oldPtr, oldState, newState))
 					{
-						case State::Text:
-						{
-							if (newState == State::TextEntity) // hack
-							{
-								break;
-							}
-
-							element = {ElementType::Text, Utils::ToStringView({*lastPtr, oldPtr})};
-							lastPtr = oldPtr;
-							return;
-						}
-
-						case State::CommentEnd:
-						{
-							element = {ElementType::Comment, Utils::ToStringView({*lastPtr, ptr})};
-							lastPtr = ptr;
-							return;
-						}
-
-						case State::ElementName:
-						{
-							elementName.second = oldPtr;
-							elementType = ElementType::Open;
-							if (newState == State::AttributeSpace)
-							{
-								attributes = {ptr, ptr};
-							}
-							break;
-						}
-
-						case State::ElementEndName:
-						{
-							elementName.second = oldPtr;
-							elementType = ElementType::Close;
-							break;
-						}
-
-						case State::AttributeName:
-						{
-							attributeName.second = oldPtr;
-							break;
-						}
-
-						default:;
+						return;
 					}
 
-					switch (newState)
+					if (ProcessNewState(oldPtr, newState))
 					{
-						case State::AttributeEnd:
-						{
-							manager->Push(Utils::ToStringView(attributeName), Utils::ToStringView({attributeValueStart, oldPtr}).substr(1), elementStack.size());
-							attributes.second = ptr;
-							break;
-						}
-
-						case State::ElementName:
-						case State::ElementEndName:
-						case State::Bang:
-						{
-							elementName = {oldPtr, oldPtr};
-							break;
-						}
-
-						case State::EmptyElement:
-						{
-							elementType = ElementType::Empty;
-							break;
-						}
-
-						case State::AttributeName:
-						{
-							attributeName.first = oldPtr;
-							break;
-						}
-
-						case State::AttributeValue:
-						{
-							attributeValueStart = oldPtr;
-							break;
-						}
-
-						case State::Start:
-						{
-							// bug: white space at end is not in outerXml...
-							// don't yield for !doctype atm
-							// just set a member value for now?
-
-							if (elementName.first == elementName.second) // skip doctype
-							{
-								break;
-							}
-
-							if (elementName.first != end && elementName.first != elementName.second)
-							{
-								ProcessElement(ptr);
-								lastPtr = ptr;
-								return;
-							}
-							break;
-						}
-
-						default:;
+						return;
 					}
 				}
 			}

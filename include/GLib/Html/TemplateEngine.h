@@ -15,7 +15,7 @@ namespace GLib::Html
 	{
 		using AttributeMap = std::unordered_map<std::pair<std::string_view, std::string_view>, Xml::Attribute, Util::PairHash>;
 
-		static constexpr auto nameSpace = std::string_view {"glib"};
+		static constexpr auto mainNameSpace = std::string_view {"glib"};
 		static constexpr auto block = std::string_view {"block"};
 		static constexpr auto each = std::string_view {"each"};
 		static constexpr auto if_ = std::string_view {"if"};
@@ -38,12 +38,12 @@ namespace GLib::Html
 		}
 
 	private:
-		static const char * EndOf(std::string_view value)
+		[[nodiscard]] static const char * EndOf(std::string_view value)
 		{
 			return value.data() + value.size();
 		}
 
-		Node Parse(const std::string_view xml)
+		[[nodiscard]] Node Parse(const std::string_view xml)
 		{
 			Node root;
 			Node * current = &root;
@@ -55,108 +55,122 @@ namespace GLib::Html
 			{
 				const Xml::Element & e = *it;
 
-				if (e.NameSpace() == nameSpace && e.Name() == block)
+				if (e.NameSpace() == mainNameSpace && e.Name() == block)
 				{
 					current = ProcessBlock(e, current);
 				}
 				else
 				{
-					switch (e.Type())
-					{
-						case Xml::ElementType::Open:
-						case Xml::ElementType::Empty:
-						{
-							textReplacement = ProcessElement(e, current, manager);
-							break;
-						}
-
-						case Xml::ElementType::Close:
-						{
-							current->AddFragment(e.OuterXml());
-							if (current->Depth() == e.Depth())
-							{
-								current = current->Parent();
-							}
-							break;
-						}
-
-						case Xml::ElementType::Text:
-						{
-							if (textReplacement.empty())
-							{
-								// loses whitespace
-								current->AddFragment(e.Text());
-							}
-							else
-							{
-								current->AddFragment(std::exchange(textReplacement, {}));
-							}
-
-							break;
-						}
-
-						case Xml::ElementType::Comment:
-						{
-							current->AddFragment(e.Text());
-							break;
-						}
-					}
+					current = ProcessNonBlock(current, manager, e);
 				}
 			}
 
 			return root;
 		}
 
-		Node * ProcessBlock(const Xml::Element & e, Node * node)
+		[[nodiscard]] static auto ProcessIfEach(const Xml::Element & e)
+		{
+			std::string_view eachValue;
+			std::string_view ifValue;
+			for (const auto && [name, value, nameSpace, rawValue] : e.GetAttributes())
+			{
+				if (name == each)
+				{
+					eachValue = value;
+				}
+				else if (name == if_)
+				{
+					ifValue = value;
+				}
+			}
+
+			if (eachValue.empty() && ifValue.empty())
+			{
+				throw std::runtime_error {"No action attribute"};
+			}
+
+			return make_tuple(eachValue, ifValue);
+		}
+
+		[[nodiscard]] Node * ProcessBlock(const Xml::Element & e, Node * node) const
 		{
 			switch (e.Type())
 			{
 				case Xml::ElementType::Open:
 				{
-					std::string_view eachValue;
-					std::string_view ifValue;
-					for (const Xml::Attribute & attr : e.GetAttributes())
-					{
-						if (attr.Name == each)
-						{
-							eachValue = attr.Value;
-						}
-						else if (attr.Name == if_)
-						{
-							ifValue = attr.Value;
-						}
-					}
-
-					if (eachValue.empty() && ifValue.empty())
-					{
-						throw std::runtime_error("No action attribute");
-					}
-
+					auto [eachValue, ifValue] = ProcessIfEach(e);
 					return AddBlock(eachValue, ifValue, node, e.Depth());
 				}
 
 				case Xml::ElementType::Empty:
 				{
-					throw std::runtime_error("No block content");
+					throw std::runtime_error {"No block content"};
 				}
 
 				case Xml::ElementType::Close:
 				{
 					if (node == nullptr)
 					{
-						throw std::logic_error("No parent node");
+						throw std::logic_error {"No parent node"};
 					}
 					return node->Parent();
 				}
 
-				default:
+				case Xml::ElementType::Text:
+				case Xml::ElementType::Comment:
 				{
-					throw std::logic_error("Unexpected enumeration value");
+					break;
 				}
 			}
+			throw std::logic_error {"Unexpected enumeration value"};
 		}
 
-		Node * AddBlock(std::string_view eachValue, std::string_view ifValue, Node * node, size_t depth)
+		[[nodiscard]] Node * ProcessNonBlock(Node * current, const Xml::NameSpaceManager & manager, const Xml::Element & e)
+		{
+			switch (e.Type())
+			{
+				case Xml::ElementType::Open:
+				case Xml::ElementType::Empty:
+				{
+					textReplacement = ProcessElement(e, current, manager);
+					break;
+				}
+
+				case Xml::ElementType::Close:
+				{
+					current->AddFragment(e.OuterXml());
+					if (current->Depth() == e.Depth())
+					{
+						current = current->Parent();
+					}
+					break;
+				}
+
+				case Xml::ElementType::Text:
+				{
+					if (textReplacement.empty())
+					{
+						// loses whitespace
+						current->AddFragment(e.Text());
+					}
+					else
+					{
+						current->AddFragment(std::exchange(textReplacement, {}));
+					}
+
+					break;
+				}
+
+				case Xml::ElementType::Comment:
+				{
+					current->AddFragment(e.Text());
+					break;
+				}
+			}
+			return current;
+		}
+
+		[[nodiscard]] Node * AddBlock(std::string_view eachValue, std::string_view ifValue, Node * node, size_t depth) const
 		{
 			if (!eachValue.empty())
 			{
@@ -164,16 +178,63 @@ namespace GLib::Html
 				std::regex_search(eachValue.begin(), eachValue.end(), m, varRegex);
 				if (m.empty())
 				{
-					throw std::runtime_error("Error in each value : " + std::string(eachValue));
+					throw std::runtime_error {"Error in each value : " + std::string {eachValue}};
 				}
 
-				return node->AddEnumeration(m[1], m[2], ifValue, depth);
+				node->AddEnumeration(m[1], m[2], ifValue, depth);
+				return node->Back();
 			}
 
-			return node->AddConditional(ifValue);
+			node->AddConditional(ifValue);
+			return node->Back();
 		}
 
-		std::string_view ProcessElement(const Xml::Element & e, Node *& node, const Xml::NameSpaceManager & manager)
+		[[nodiscard]] static Node * ProcessAttributes(Node * node, const Xml::NameSpaceManager & manager, AttributeMap atMap, Xml::Attributes attributes)
+		{
+			for (const auto && [name2, value2, nameSpace2, rawValue2] : attributes)
+			{
+				if (std::string_view prefix = Xml::NameSpaceManager::CheckForDeclaration(name2); !prefix.empty())
+				{
+					if (const std::string_view ns = manager.Get(prefix); ns == mainNameSpace)
+					{
+						continue;
+					}
+
+					node->AddFragment(" ");
+					node->AddFragment(rawValue2);
+				}
+				else
+				{
+					auto && [name, nameSpace] = manager.Normalise(name2);
+					if (nameSpace.empty())
+					{
+						node->AddFragment(" ");
+						node->AddFragment(name.data(), value2.data());
+						node->AddFragment(atMap[std::make_pair(nameSpace, name)].Value);
+						node->AddFragment(value2.data() - 1, value2.data());
+					}
+				}
+			}
+			return node;
+		}
+
+		[[nodiscard]] static Node * ProcessDeclarations(const Xml::Element & e, Node * node, const Xml::NameSpaceManager & manager,
+																										Xml::Attributes attributes)
+		{
+			const char * p = e.OuterXml().data();
+			for (const auto && [name, value, nameSpace, rawValue] : attributes)
+			{
+				if (std::string_view prefix = Xml::NameSpaceManager::CheckForDeclaration(name); !prefix.empty() && manager.Get(prefix) == mainNameSpace)
+				{
+					node->AddFragment(p, name.data() - 1); // -1 minus space prefix
+					p = EndOf(rawValue);
+				}
+			}
+			node->AddFragment(p, EndOf(e.OuterXml()));
+			return node;
+		}
+
+		[[nodiscard]] std::string_view ProcessElement(const Xml::Element & e, Node *& node, const Xml::NameSpaceManager & manager) const
 		{
 			AttributeMap atMap;
 			bool modified = false;
@@ -181,54 +242,61 @@ namespace GLib::Html
 			std::string_view ifValue;
 			std::string_view eachValue;
 
-			std::string_view attr = e.GetAttributes().Value();
-			Xml::Attributes attributes {attr, nullptr};
+			std::string_view attributesValue = e.GetAttributes().Value();
+			Xml::Attributes attributes {attributesValue, nullptr};
 			bool pop {};
 
 			// handle duplicate attr names?
-			for (const Xml::Attribute & a : attributes)
+			for (const Xml::Attribute && a : attributes)
 			{
 				if (!Xml::NameSpaceManager::IsDeclaration(a.Name))
 				{
-					auto [name, nameSpaceValue] = manager.Normalise(a.Name);
-					atMap.emplace(std::make_pair(nameSpaceValue, name), a);
+					auto [name, nameSpace] = manager.Normalise(a.Name);
+					atMap.emplace(std::make_pair(nameSpace, name), a);
 				}
 			}
 
-			for (auto [namespaceName, a] : atMap)
+			for (auto && [nameSpaceName, a] : atMap)
 			{
-				if (namespaceName.first == nameSpace)
+				if (nameSpaceName.first != mainNameSpace)
 				{
-					if (namespaceName.second == if_)
-					{
-						ifValue = a.Value;
-						modified = true;
-					}
-					else if (namespaceName.second == each)
-					{
-						eachValue = a.Value;
-						modified = true;
-					}
-					else if (namespaceName.second == text)
-					{
-						if (e.Type() != Xml::ElementType::Open)
-						{
-							throw std::runtime_error("Misplaced Attribute");
-						}
-						textValue = a.Value;
-						modified = true;
-					}
-					else
-					{
-						auto existingIt = atMap.find(std::make_pair("", namespaceName.second));
-						if (existingIt == atMap.end())
-						{
-							throw std::runtime_error(std::string("Attribute not found : '") + std::string(namespaceName.second) + "'");
-						}
-						existingIt->second.Value = a.Value;
-						modified = true;
-					}
+					continue;
 				}
+
+				if (nameSpaceName.second == if_)
+				{
+					ifValue = a.Value;
+					modified = true;
+					continue;
+				}
+
+				if (nameSpaceName.second == each)
+				{
+					eachValue = a.Value;
+					modified = true;
+					continue;
+				}
+
+				if (nameSpaceName.second == text && e.Type() != Xml::ElementType::Open)
+				{
+					throw std::runtime_error {"Misplaced Attribute"};
+				}
+
+				if (nameSpaceName.second == text && e.Type() == Xml::ElementType::Open)
+				{
+					textValue = a.Value;
+					modified = true;
+					continue;
+				}
+
+				if (auto existingIt = atMap.find(std::make_pair("", nameSpaceName.second)); existingIt != atMap.end())
+				{
+					existingIt->second.Value = a.Value;
+					modified = true;
+					continue;
+				}
+
+				throw std::runtime_error {"Attribute not found : '" + std::string {nameSpaceName.second} + "'"};
 			}
 
 			if (!eachValue.empty())
@@ -240,63 +308,26 @@ namespace GLib::Html
 					throw std::runtime_error("Error in each value : " + std::string(eachValue));
 				}
 
-				node = node->AddEnumeration(m[1], m[2], ifValue, e.Depth());
+				node->AddEnumeration(m[1], m[2], ifValue, e.Depth());
+				node = node->Back();
 				pop = e.Type() == Xml::ElementType::Empty;
 			}
 			else if (!ifValue.empty())
 			{
-				node = node->AddEnumeration({}, {}, ifValue, e.Depth());
+				node->AddEnumeration({}, {}, ifValue, e.Depth());
+				node = node->Back();
 				pop = e.Type() == Xml::ElementType::Empty;
 			}
 
 			if (modified)
 			{
-				node->AddFragment(e.OuterXml().data(), attr.data() - 1);
-
-				for (const Xml::Attribute & a : attributes)
-				{
-					std::string_view prefix = Xml::NameSpaceManager::CheckForDeclaration(a.Name);
-					if (!prefix.empty())
-					{
-						std::string_view ns = manager.Get(prefix);
-						if (ns == nameSpace)
-						{
-							continue;
-						}
-
-						node->AddFragment(" ");
-						node->AddFragment(a.RawValue);
-					}
-					else
-					{
-						auto [name, nameSpaceValue] = manager.Normalise(a.Name);
-						if (nameSpaceValue.empty())
-						{
-							node->AddFragment(" ");
-							node->AddFragment(name.data(), a.Value.data());
-							node->AddFragment(atMap[std::make_pair(nameSpaceValue, name)].Value);
-							node->AddFragment(a.Value.data() - 1, a.Value.data());
-						}
-					}
-				}
-				node->AddFragment(EndOf(attr), EndOf(e.OuterXml()));
+				node->AddFragment(e.OuterXml().data(), attributesValue.data() - 1);
+				node = ProcessAttributes(node, manager, atMap, attributes);
+				node->AddFragment(EndOf(attributesValue), EndOf(e.OuterXml()));
 			}
 			else
 			{
-				const char * p = e.OuterXml().data();
-				for (const Xml::Attribute & a : attributes)
-				{
-					std::string_view prefix = Xml::NameSpaceManager::CheckForDeclaration(a.Name);
-					if (!prefix.empty())
-					{
-						if (manager.Get(prefix) == nameSpace)
-						{
-							node->AddFragment(p, a.Name.data() - 1); // -1 minus space prefix
-							p = EndOf(a.RawValue);
-						}
-					}
-				}
-				node->AddFragment(p, EndOf(e.OuterXml()));
+				node = ProcessDeclarations(e, node, manager, attributes);
 			}
 
 			if (pop)
@@ -311,13 +342,13 @@ namespace GLib::Html
 		{
 			// todo eval during parse, store bool or property to evaluate
 			std::string_view condition = node.Condition();
+			if (condition == "false")
+			{
+				return;
+			}
+
 			if (!condition.empty() && condition != "true")
 			{
-				if (condition == "false")
-				{
-					return;
-				}
-
 				std::match_results<std::string_view::const_iterator> m;
 				std::regex_search(condition.begin(), condition.end(), m, propRegex);
 				if (m.empty())
@@ -339,18 +370,19 @@ namespace GLib::Html
 
 			if (!node.Enumeration().empty())
 			{
-				evaluator.ForEach(node.Enumeration(),
-													[&](const Eval::ValueBase & value)
-													{
-														evaluator.Push(node.Variable(), value);
+				auto subGenerate = [&](const Eval::ValueBase & value)
+				{
+					evaluator.Push(node.Variable(), value);
 
-														for (const Node & child : node.Children())
-														{
-															Generate(child, out);
-														}
+					for (const Node & child : node.Children())
+					{
+						Generate(child, out);
+					}
 
-														evaluator.Pop(node.Variable());
-													});
+					evaluator.Pop(node.Variable());
+				};
+
+				evaluator.ForEach(node.Enumeration(), subGenerate);
 				return;
 			}
 

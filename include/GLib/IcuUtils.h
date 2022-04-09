@@ -21,7 +21,7 @@ namespace GLib::IcuUtils
 	{
 		inline void AssertNoError(UErrorCode error, std::string_view msg)
 		{
-			if (U_FAILURE(error) != FALSE)
+			if (U_FAILURE(error) != UBool {})
 			{
 				throw std::runtime_error(std::string(msg) + " : " + u_errorName(error));
 			}

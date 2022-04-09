@@ -167,51 +167,22 @@ namespace GLib::Cpp
 					return Close(oldState);
 				}
 
-				if (newState == State::None)
+				//
+				if (newState == State::None && oldState == State::CommentAsterisk && Set(State::CommentBlock, ptr))
 				{
-					switch (oldState)
-					{
-						case State::CommentAsterisk:
-						{
-							if (Set(State::CommentBlock, ptr))
-							{
-								return;
-							}
-							break;
-						}
-						case State::CommentLine:
-						case State::String:
-						case State::RawString:
-						case State::CharacterLiteral:
-						{
-							if (Set(oldState, ptr))
-							{
-								return;
-							}
-							break;
-						}
-						default:;
-					}
+					return;
 				}
 
-				switch (oldState)
+				if ((oldState == State::CommentLine || oldState == State::String || oldState == State::RawString || oldState == State::CharacterLiteral) &&
+						Set(oldState, ptr))
 				{
-					case State::WhiteSpace:
-					case State::CommentLine:
-					case State::Directive:
-					case State::Code:
-					{
-						if (Set(oldState, ptr - 1))
-						{
-							return;
-						}
-						break;
-					}
+					return;
+				}
 
-					default:
-					{
-						break;
-					}
+				if ((oldState == State::WhiteSpace || oldState == State::CommentLine || oldState == State::Directive || oldState == State::Code) &&
+						Set(oldState, ptr - 1))
+				{
+					return;
 				}
 			}
 		}
