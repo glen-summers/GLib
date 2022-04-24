@@ -13,14 +13,29 @@ EXTERN_C IMAGE_DOS_HEADER __ImageBase; // NOLINT required
 
 namespace GLib::Win::Util
 {
+	namespace Exp
+	{
+		template <typename T>
+		concept ULong = std::same_as<T, ULONG>;
+
+		template <typename T>
+		concept Status = std::same_as<T, LSTATUS>;
+
+		template <typename T>
+		concept BOOL = std::same_as<T, ::BOOL>;
+
+		template <typename T>
+		concept Bool = std::same_as<T, bool>;
+	}
+
 	namespace Detail
 	{
-		inline bool IsError(ULONG value)
+		inline bool IsError(Exp::ULong auto value)
 		{
 			return IS_ERROR(value); // NOLINT bad macro
 		}
 
-		inline std::string FormatErrorMessage(std::string_view message, ULONG error, const wchar_t * moduleName = {})
+		inline std::string FormatErrorMessage(std::string_view message, Exp::ULong auto error, const wchar_t * moduleName = {})
 		{
 			std::ostringstream stm;
 			stm << message << " : ";
@@ -33,7 +48,7 @@ namespace GLib::Win::Util
 			return stm.str();
 		}
 
-		__declspec(noreturn) inline void Throw(std::string_view message, ULONG result)
+		__declspec(noreturn) inline void Throw(std::string_view message, Exp::ULong auto result)
 		{
 			std::string formattedMessage = FormatErrorMessage(message, result);
 
@@ -43,99 +58,87 @@ namespace GLib::Win::Util
 			throw WinException(formattedMessage, result);
 		}
 
-		// only allow specific parameters to prevent accidental int -> boolean and misinterpreting win32 results
-		// https://stackoverflow.com/questions/175689/can-you-use-keyword-explicit-to-prevent-automatic-conversion-of-method-parameter
-		class Checker
+		inline bool AssertTrue(Exp::Bool auto result, std::string_view message, Exp::ULong auto errorCode)
 		{
-		public:
-			template <typename T>
-			static bool AssertTrue(T value, std::string_view message, ULONG errorCode) = delete;
-
-			template <typename T>
-			static bool WarnAssertTrue(T value, std::string_view message, ULONG errorCode) = delete;
-
-			template <typename T>
-			static bool AssertSuccess(T value, std::string_view message) = delete;
-
-			template <typename T>
-			static bool WarnAssertSuccess(T value, std::string_view message) = delete;
-
-			static bool AssertTrue(bool result, std::string_view message, ULONG errorCode)
+			if (!result)
 			{
-				if (!result)
-				{
-					Throw(message, errorCode);
-				}
-				return result;
+				Throw(message, errorCode);
 			}
+			return result;
+		}
 
-			static bool AssertTrue(BOOL result, std::string_view message, ULONG errorCode)
-			{
-				return AssertTrue(result != FALSE, message, errorCode);
-			}
+		inline bool AssertTrue(Exp::BOOL auto result, std::string_view message, Exp::ULong auto errorCode)
+		{
+			return AssertTrue(result != FALSE, message, errorCode);
+		}
 
-			static bool WarnAssertTrue(bool result, std::string_view message, ULONG errorCode) noexcept
-			{
+		inline bool WarnAssertTrue(Exp::Bool auto result, std::string_view message, Exp::ULong auto errorCode) noexcept
+		{
 #ifdef _DEBUG // || defined(GLIB_DEBUG)
-				if (!result)
-				{
-					Debug::Stream() << "GLib warning: " << FormatErrorMessage(message, errorCode) << std::endl;
-				}
+			if (!result)
+			{
+				Debug::Stream() << "GLib warning: " << FormatErrorMessage(message, errorCode) << std::endl;
+			}
 #else
-				static_cast<void>(message);
-				static_cast<void>(errorCode);
+			static_cast<void>(message);
+			static_cast<void>(errorCode);
 #endif
-				return result;
-			}
+			return result;
+		}
 
-			static bool WarnAssertTrue(BOOL result, std::string_view message, ULONG errorCode) noexcept
-			{
-				return WarnAssertTrue(result != FALSE, message, errorCode);
-			}
+		inline bool WarnAssertTrue(Exp::BOOL auto result, std::string_view message, Exp::ULong auto errorCode) noexcept
+		{
+			return WarnAssertTrue(result != FALSE, message, errorCode);
+		}
 
-			static bool AssertSuccess(ULONG result, std::string_view message)
-			{
-				return AssertTrue(result == ERROR_SUCCESS, message, result);
-			}
+		inline bool AssertSuccess(Exp::ULong auto result, std::string_view message)
+		{
+			return AssertTrue(result == ERROR_SUCCESS, message, result);
+		}
 
-			static bool WarnAssertSuccess(ULONG result, std::string_view message) noexcept
-			{
-				return WarnAssertTrue(result == ERROR_SUCCESS, message, result);
-			}
+		inline bool WarnAssertSuccess(Exp::ULong auto result, std::string_view message) noexcept
+		{
+			return WarnAssertTrue(result == ERROR_SUCCESS, message, result);
+		}
 
-			static bool AssertSuccess(LSTATUS result, std::string_view message)
-			{
-				return AssertTrue(result == ERROR_SUCCESS, message, static_cast<ULONG>(result));
-			}
+		inline bool AssertSuccess(Exp::Status auto result, std::string_view message)
+		{
+			return AssertTrue(result == ERROR_SUCCESS, message, static_cast<ULONG>(result));
+		}
 
-			static bool WarnAssertSuccess(LSTATUS result, std::string_view message) noexcept
-			{
-				return WarnAssertTrue(result == ERROR_SUCCESS, message, static_cast<ULONG>(result));
-			}
-		};
+		inline bool WarnAssertSuccess(Exp::Status auto result, std::string_view message) noexcept
+		{
+			return WarnAssertTrue(result == ERROR_SUCCESS, message, static_cast<ULONG>(result));
+		}
 	}
 
-	template <typename T>
-	bool AssertTrue(T result, std::string_view message)
+	inline bool AssertTrue(Exp::Bool auto result, std::string_view message)
 	{
-		return Detail::Checker::AssertTrue(result, message, GetLastError());
+		return Detail::AssertTrue(result, message, GetLastError());
 	}
 
-	template <typename T>
-	bool WarnAssertTrue(T result, std::string_view message)
+	inline bool AssertTrue(Exp::BOOL auto result, std::string_view message)
 	{
-		return Detail::Checker::WarnAssertTrue(result, message, GetLastError());
+		return Detail::AssertTrue(result, message, GetLastError());
 	}
 
-	template <typename T>
-	bool AssertSuccess(T errorCode, std::string_view message)
+	inline bool WarnAssertTrue(Exp::Bool auto result, std::string_view message)
 	{
-		return Detail::Checker::AssertSuccess(errorCode, message);
+		return Detail::WarnAssertTrue(result, message, GetLastError());
 	}
 
-	template <typename T>
-	bool WarnAssertSuccess(T errorCode, std::string_view message)
+	inline bool WarnAssertTrue(Exp::BOOL auto result, std::string_view message)
 	{
-		return Detail::Checker::WarnAssertSuccess(errorCode, message);
+		return Detail::WarnAssertTrue(result, message, GetLastError());
+	}
+
+	inline bool AssertSuccess(Exp::Status auto errorCode, std::string_view message)
+	{
+		return Detail::AssertSuccess(errorCode, message);
+	}
+
+	inline bool WarnAssertSuccess(Exp::Status auto errorCode, std::string_view message)
+	{
+		return Detail::WarnAssertSuccess(errorCode, message);
 	}
 }
