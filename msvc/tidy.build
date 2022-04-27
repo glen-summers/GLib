@@ -4,7 +4,13 @@
 		<TidyInclude Include="$(Source)\include"/>
 		<TidyInclude Include="$(Boost)"/>
 
-		<TidyIgnoreWarning Include="no-pragma-once-outside-header"/>
+		<TidyWarning Include="all"/>
+		<TidyWarning Include="extra"/>
+		<TidyWarning Include="extra-semi"/>
+		<TidyWarning Include="extra-qualification"/>
+		<TidyWarning Include="language-extension-token"/>
+		<TidyWarning Include="no-pragma-once-outside-header"/>
+		<!-- more?-->
 
 		<TidyFlags Condition="'$(Fix)'=='true'" Include="-fix"/>
 		<TidyFlags Include="--quiet"/>
@@ -17,7 +23,7 @@
 			<TidyFound>$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildBinPath), $(TidySig)))</TidyFound>
 			<Tidy>$(TidyFound)\$(TidySig)</Tidy>
 
-			<TidyCmd>@(TidyFlags, ' ') -- -I@(TidyInclude, ' -I') -std=c++20 -D@(Defs,' -D') -x c++ -W@(TidyIgnoreWarning, ' -W')</TidyCmd>
+			<TidyCmd>@(TidyFlags, ' ') -- -I@(TidyInclude, ' -I') -std=c++20 -D@(Defs,' -D') -x c++ -W@(TidyWarning, ' -W')</TidyCmd>
 		</PropertyGroup>
 
 		<Message Text="TidyCmd = $(TidyCmd)"/>

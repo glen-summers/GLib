@@ -18,6 +18,12 @@ namespace GLib::Win
 	void CheckHr(HRESULT hr, std::string_view message);
 	void WarnHr(HRESULT hr, std::string_view message) noexcept;
 
+	template <typename T>
+	auto GetUuId()
+	{
+		return __uuidof(T); // NOLINT
+	}
+
 	namespace ComPtrDetail
 	{
 		constexpr ULONG ContextAll = CLSCTX_ALL; // NOLINT bad macro
@@ -58,7 +64,7 @@ namespace GLib::Win
 		ComPtr<Target> value;
 		if (source)
 		{
-			CheckHr(source->QueryInterface(__uuidof(Target), GetAddress(value).Void()), "QueryInterface");
+			CheckHr(source->QueryInterface(GetUuId<Target>(), GetAddress(value).Void()), "QueryInterface");
 		}
 		return value;
 	}

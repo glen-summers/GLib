@@ -47,7 +47,7 @@ public:
 
 private:
 	static WideStrings A2W(const Strings & strings);
-	void AddLine(const std::wstring & fileName, unsigned lineNumber, const GLib::Win::Symbols::SymProcess & symProcess, uint64_t address,
+	void AddLine(const std::wstring & fileName, unsigned int lineNumber, const GLib::Win::Symbols::SymProcess & symProcess, uint64_t address,
 							 Process & process);
 
 	void OnCreateProcess(ULONG processId, ULONG threadId, const CREATE_PROCESS_DEBUG_INFO & info) override;

@@ -237,7 +237,7 @@ BOOST_AUTO_TEST_CASE(QiMissInDebugOut)
 {
 	GLib::Win::ComPtr<ITest1Extended> p12 = GLib::Win::Make<ImplementsITest1ExtendedAndITest1ExtendedAlt>();
 	GLib::Win::ComPtr<IUnknown> unk;
-	HRESULT hr = p12->QueryInterface(__uuidof(IClassFactory), GetAddress(unk).Void());
+	HRESULT hr = p12->QueryInterface(GLib::Win::GetUuId<IClassFactory>(), GetAddress(unk).Void());
 	BOOST_TEST(hr == E_NOINTERFACE);
 }
 

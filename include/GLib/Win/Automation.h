@@ -50,7 +50,7 @@ namespace GLib::Win
 	public:
 		Automation()
 		{
-			CheckHr(CoCreateInstance(__uuidof(CUIAutomation), nullptr, ComPtrDetail::ContextAll, __uuidof(IUIAutomation), GetAddress(automation).Void()),
+			CheckHr(CoCreateInstance(GetUuId<CUIAutomation>(), nullptr, ComPtrDetail::ContextAll, GetUuId<IUIAutomation>(), GetAddress(automation).Void()),
 							"CoCreateInstance");
 		}
 

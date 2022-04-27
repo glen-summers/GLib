@@ -36,7 +36,6 @@ namespace GLib::Win
 		std::map<std::string, std::string> driveMap;
 		Process mainProcess;
 		const ULONG debugProcessId;
-		const bool debugChildProcesses;
 		std::optional<ULONG> exitCode;
 		std::string pendingDebugOut;
 
@@ -45,7 +44,6 @@ namespace GLib::Win
 			: driveMap(FileSystem::DriveMap())
 			, mainProcess(path, {}, debugChildProcesses ? DEBUG_PROCESS : DEBUG_ONLY_THIS_PROCESS)
 			, debugProcessId(mainProcess.Id())
-			, debugChildProcesses(debugChildProcesses)
 		{}
 
 		Debugger(const Debugger &) = delete;

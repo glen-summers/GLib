@@ -16,6 +16,9 @@ Checks: '*,
 -modernize-use-trailing-return-type,
 -google-readability-namespace-comments,
 -google-runtime-int,
--misc-no-recursion
+-misc-no-recursion,
+-clang-analyzer-*,
+-clang-diagnostics-*
 '
+
 HeaderFilterRegex: '^.*\\GLib\\.*$'

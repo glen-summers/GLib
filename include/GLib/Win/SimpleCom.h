@@ -38,7 +38,7 @@ namespace GLib::Win
 		template <typename T, typename Last>
 		HRESULT Qi(T * t, const IID & iid, void ** ppvObject)
 		{
-			if (iid == __uuidof(Last))
+			if (iid == GetUuId<Last>())
 			{
 				auto * i = Cast<Last>(t);
 				i->AddRef();
@@ -62,7 +62,7 @@ namespace GLib::Win
 		template <typename T, typename First, typename Second, typename... Rest>
 		HRESULT Qi(T * t, const IID & iid, void ** ppvObject)
 		{
-			if (iid == __uuidof(First)) // just call above?
+			if (iid == GetUuId<First>()) // just call above?
 			{
 				auto * i = Cast<First>(t);
 				i->AddRef();
@@ -104,7 +104,7 @@ namespace GLib::Win
 			{
 				return E_POINTER;
 			}
-			if (id == __uuidof(IUnknown))
+			if (id == GetUuId<IUnknown>())
 			{
 				auto i = static_cast<IUnknown *>(static_cast<DefaultInterface *>(this));
 				i->AddRef();
