@@ -27,7 +27,7 @@ namespace GLib::Win
 
 	class WindowFinder
 	{
-		using WindowEnumerator = std::function<bool(HWND)>;
+		using WindowEnumerator = std::function<BOOL(HWND)>;
 
 		static BOOL CALLBACK EnumWindowsCallback(HWND handle, LPARAM param) noexcept
 		{
@@ -43,7 +43,7 @@ namespace GLib::Win
 			auto wideWindowText = Cvt::A2W(windowText);
 
 			HWND ret {};
-			WindowEnumerator func = [&](HWND wnd) noexcept -> bool
+			WindowEnumerator func = [&](HWND wnd) noexcept -> BOOL
 			{
 				ULONG windowPid = 0;
 				GetWindowThreadProcessId(wnd, &windowPid);
@@ -58,10 +58,10 @@ namespace GLib::Win
 				}
 				catch (const std::exception &)
 				{}
-				return true;
+				return TRUE;
 			};
 
-			BOOL result = EnumDesktopWindows(desktop, EnumWindowsCallback, reinterpret_cast<LPARAM>(&func));
+			BOOL result = EnumDesktopWindows(desktop, EnumWindowsCallback, Util::Detail::WindowsCast<LPARAM>(&func));
 			Util::AssertTrue(result, "EnumDesktopWindows");
 			return ret;
 		}

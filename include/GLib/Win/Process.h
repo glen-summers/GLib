@@ -84,7 +84,7 @@ namespace GLib::Win
 		void WaitForInputIdle(const std::chrono::duration<R, P> & duration) const
 		{
 			auto count = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
-			ULONG timeoutMilliseconds = GLib::Util::CheckedCast<ULONG>(count);
+			auto timeoutMilliseconds = GLib::Util::CheckedCast<ULONG>(count);
 			CheckWaitResult(::WaitForInputIdle(p.get(), timeoutMilliseconds));
 		}
 
@@ -99,7 +99,7 @@ namespace GLib::Win
 		}
 
 		template <UINT ExitCode = 1>
-		Detail::TerminatorHolder<ExitCode> ScopedTerminator() const
+		[[nodiscard]] Detail::TerminatorHolder<ExitCode> ScopedTerminator() const
 		{
 			return Detail::TerminatorHolder<ExitCode>(p.get());
 		}

@@ -5,10 +5,6 @@
 namespace GLib::Util
 {
 	template <typename... Types>
-	struct TypeList
-	{};
-
-	template <typename... Types>
 	struct Tuple;
 
 	template <>
@@ -18,7 +14,7 @@ namespace GLib::Util
 	template <typename First, typename... Rest>
 	struct Tuple<First, Rest...> : Tuple<Rest...>
 	{
-		using Type = TypeList<First, Rest...>;
+		using Type = Tuple<First, Rest...>;
 	};
 
 	template <template <typename> typename Predicate, typename... Types>

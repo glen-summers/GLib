@@ -8,6 +8,8 @@
 #endif
 
 #include <objbase.h>
+
+#include <memory>
 #include <type_traits>
 
 namespace GLib::Win
@@ -21,7 +23,7 @@ namespace GLib::Win
 	template <typename T>
 	auto GetUuId()
 	{
-		return __uuidof(T); // NOLINT
+		return __uuidof(T); // NOLINT(clang-diagnostic-language-extension-token) required
 	}
 
 	namespace ComPtrDetail
@@ -122,7 +124,7 @@ namespace GLib::Win
 			return *this;
 		}
 
-		ComPtr & operator=(const ComPtr & right) noexcept // NOLINT does not handle self-assignment, clang-tidy bug?
+		ComPtr & operator=(const ComPtr & right) noexcept // NOLINT(bugprone-unhandled-self-assignment,cert-oop54-cpp) clang-tidy bug?
 		{
 			ComPtr {right}.Swap(*this);
 			return *this;
@@ -236,7 +238,7 @@ namespace GLib::Win
 	template <typename T, typename I, typename... Args>
 	ComPtr<I> Make(Args &&... args)
 	{
-		return ComPtr<I>::Attach(static_cast<I *>(new T(std::forward<Args>(args)...)));
+		return ComPtr<I>::Attach(static_cast<I *>(std::make_unique<T>(args...).release()));
 	}
 
 	template <typename T, typename... Args>

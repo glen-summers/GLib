@@ -29,7 +29,7 @@ struct Struct
 struct User
 {
 	std::string Name;
-	int Age;
+	uint16_t Age;
 	std::list<std::string> Hobbies;
 };
 

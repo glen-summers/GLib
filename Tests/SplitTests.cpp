@@ -7,23 +7,23 @@
 
 #include "TestUtils.h"
 
-BOOST_AUTO_TEST_SUITE(SplitTests)
+AUTO_TEST_SUITE(SplitTests)
 
-BOOST_AUTO_TEST_CASE(TestString)
+AUTO_TEST_CASE(TestString)
 {
 	GLib::Util::Splitter s("a<->bc<->def<->ghijkl", "<->");
 	std::vector<std::string> expected {"a", "bc", "def", "ghijkl"};
-	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), s.begin(), s.end());
+	CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), s.begin(), s.end());
 }
 
-BOOST_AUTO_TEST_CASE(TestStringView)
+AUTO_TEST_CASE(TestStringView)
 {
 	GLib::Util::SplitterView s("a<->bc<->def<->ghijkl", "<->");
 	std::vector<std::string_view> expected {"a", "bc", "def", "ghijkl"};
-	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), s.begin(), s.end());
+	CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), s.begin(), s.end());
 }
 
-BOOST_AUTO_TEST_CASE(TestFor)
+AUTO_TEST_CASE(TestFor)
 {
 	std::vector<std::string> result;
 	for (const auto & value : GLib::Util::Splitter("a<->bc<->def<->ghijkl", "<->"))
@@ -32,70 +32,70 @@ BOOST_AUTO_TEST_CASE(TestFor)
 	}
 
 	std::vector<std::string> expected {"a", "bc", "def", "ghijkl"};
-	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), result.begin(), result.end());
+	CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), result.begin(), result.end());
 }
 
-BOOST_AUTO_TEST_CASE(TestEmptyString)
+AUTO_TEST_CASE(TestEmptyString)
 {
 	GLib::Util::Splitter s("");
 	std::vector<std::string> expected {""};
-	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), s.begin(), s.end());
+	CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), s.begin(), s.end());
 }
 
-BOOST_AUTO_TEST_CASE(TestEmptyoken)
+AUTO_TEST_CASE(TestEmptyoken)
 {
 	GLib::Util::Splitter s(",");
 	std::vector<std::string> expected {"", ""};
-	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), s.begin(), s.end());
+	CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), s.begin(), s.end());
 }
 
-BOOST_AUTO_TEST_CASE(TestEmptyokens)
+AUTO_TEST_CASE(TestEmptyokens)
 {
 	GLib::Util::Splitter s(",,,");
 	std::vector<std::string> expected {"", "", "", ""};
-	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), s.begin(), s.end());
+	CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), s.begin(), s.end());
 }
 
-BOOST_AUTO_TEST_CASE(TestWhitespace1)
+AUTO_TEST_CASE(TestWhitespace1)
 {
 	GLib::Util::Splitter s("      ");
 	std::vector<std::string> expected {"      "};
-	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), s.begin(), s.end());
+	CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), s.begin(), s.end());
 }
 
-BOOST_AUTO_TEST_CASE(TestWhitespace2)
+AUTO_TEST_CASE(TestWhitespace2)
 {
 	GLib::Util::Splitter s(" ,  ,  , ");
 	std::vector<std::string> expected {" ", "  ", "  ", " "};
-	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), s.begin(), s.end());
+	CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), s.begin(), s.end());
 }
 
-BOOST_AUTO_TEST_CASE(TestNoMatch)
+AUTO_TEST_CASE(TestNoMatch)
 {
 	GLib::Util::Splitter s("Splitter");
 	std::vector<std::string> expected {"Splitter"};
-	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), s.begin(), s.end());
+	CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), s.begin(), s.end());
 }
 
-BOOST_AUTO_TEST_CASE(TestFunc)
+AUTO_TEST_CASE(TestFunc)
 {
 	std::vector<std::string> expected {"a", "b", "c", "d"};
 	std::vector<std::string> actual;
 	std::string value = "a,b,c,d";
 	GLib::Util::Split(value, std::back_inserter(actual));
-	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), actual.begin(), actual.end());
+	CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), actual.begin(), actual.end());
 }
 
-BOOST_AUTO_TEST_CASE(TestViewFunc)
+AUTO_TEST_CASE(TestViewFunc)
 {
 	std::vector<std::string_view> expected {"a", "b", "c", "d"};
 	std::vector<std::string_view> actual;
 	std::string_view value = "a,b,c,d";
 	GLib::Util::Split(value, std::back_inserter(actual));
-	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), actual.begin(), actual.end());
+	CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), actual.begin(), actual.end());
 }
 
-BOOST_AUTO_TEST_CASE(TestWFunc)
+AUTO_TEST_CASE(TestWFunc)
 {
 	std::vector<std::string> expected {"a", "b", "c", "d"};
 	std::vector<std::wstring> actual;
@@ -104,12 +104,12 @@ BOOST_AUTO_TEST_CASE(TestWFunc)
 
 	// workaround wstring generates boost compile errors
 	std::vector<std::string> u8Actual;
-	std::transform(actual.begin(), actual.end(), std::back_inserter(u8Actual), [](const std::wstring w) -> std::string { return GLib::Cvt::W2A(w); });
+	std::transform(actual.begin(), actual.end(), std::back_inserter(u8Actual), [](const std::wstring & w) -> std::string { return GLib::Cvt::W2A(w); });
 
-	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), u8Actual.begin(), u8Actual.end());
+	CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), u8Actual.begin(), u8Actual.end());
 }
 
-BOOST_AUTO_TEST_CASE(EmptyDeliminatorIsError)
+AUTO_TEST_CASE(EmptyDeliminatorIsError)
 {
 	std::string value = "a,b,c,d";
 	std::vector<std::string> actual;
@@ -117,7 +117,7 @@ BOOST_AUTO_TEST_CASE(EmptyDeliminatorIsError)
 	GLIB_CHECK_LOGIC_EXCEPTION({ GLib::Util::Split(value, std::back_inserter(actual), {}); }, "Delimiter is empty");
 }
 
-BOOST_AUTO_TEST_CASE(ConsecutiveFindTest)
+AUTO_TEST_CASE(ConsecutiveFindTest)
 {
 	using Pair = std::pair<int, size_t>;
 	const std::vector values {1, 1, 2, 3, 3, 3};
@@ -132,10 +132,10 @@ BOOST_AUTO_TEST_CASE(ConsecutiveFindTest)
 		result.emplace_back(*it, std::distance(it, next));
 	}
 
-	BOOST_CHECK_EQUAL_COLLECTIONS(expected.cbegin(), expected.cend(), result.cbegin(), result.cend());
+	CHECK_EQUAL_COLLECTIONS(expected.cbegin(), expected.cend(), result.cbegin(), result.cend());
 }
 
-BOOST_AUTO_TEST_CASE(ConsecutiveFindPred)
+AUTO_TEST_CASE(ConsecutiveFindPred)
 {
 	using Pair = std::pair<int, std::string>;
 	auto pred = [](const Pair & p1, const Pair & p2) { return p1.second != p2.second; };
@@ -152,7 +152,7 @@ BOOST_AUTO_TEST_CASE(ConsecutiveFindPred)
 		result.emplace_back(it->second, std::distance(it, next));
 	}
 
-	BOOST_CHECK_EQUAL_COLLECTIONS(expected.cbegin(), expected.cend(), result.cbegin(), result.cend());
+	CHECK_EQUAL_COLLECTIONS(expected.cbegin(), expected.cend(), result.cbegin(), result.cend());
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+AUTO_TEST_SUITE_END()

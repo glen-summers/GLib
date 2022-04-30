@@ -278,7 +278,7 @@ namespace GLib
 			// handle T==wide string?
 			static_cast<void>(unused);
 			FormatterDetail::CheckEmptyFormat(format);
-			stm << value;
+			stm << value; // NOLINT(cppcoreguidelines-pro-bounds-array-to-pointer-decay,hicpp-no-array-decay)
 		}
 	};
 

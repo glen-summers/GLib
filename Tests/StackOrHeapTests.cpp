@@ -2,58 +2,61 @@
 
 #include <boost/test/unit_test.hpp>
 
-namespace
+#include <GLib/Scope.h>
+
+#include "TestUtils.h"
+
+constexpr auto sz50 = SZ(50);
+constexpr auto sz99 = SZ(99);
+constexpr auto sz100 = SZ(100);
+constexpr auto sz199 = SZ(199);
+constexpr auto sz200 = SZ(200);
+
+AUTO_TEST_SUITE(StackOrHeapTests)
+
+AUTO_TEST_CASE(Alloc)
 {
-	constexpr auto operator"" _size(unsigned long long int n)
-	{
-		return static_cast<size_t>(n);
-	}
-}
+	GLib::Util::StackOrHeap<char, sz100> s;
+	CHECK(sz100 == s.Size());
+	TEST(nullptr != s.Get());
 
-BOOST_AUTO_TEST_SUITE(StackOrHeapTests)
-
-BOOST_AUTO_TEST_CASE(Alloc)
-{
-	GLib::Util::StackOrHeap<char, 100_size> s;
-	BOOST_CHECK(100_size == s.Size());
-	BOOST_TEST(nullptr != s.Get());
-
-	std::string * ss = new (s.Get()) std::string(99_size, '-');
-	BOOST_TEST(*ss == std::string(99_size, '-'));
+	auto * ss = new (s.Get()) std::string(sz99, '-'); // NOLINT(cppcoreguidelines-owning-memory)
+	TEST(*ss == std::string(sz99, '-'));
 	ss->std::string::~string();
 }
 
-BOOST_AUTO_TEST_CASE(Realloc)
+AUTO_TEST_CASE(Realloc)
 {
-	GLib::Util::StackOrHeap<char, 100_size> s;
+	GLib::Util::StackOrHeap<char, sz100> s;
 
-	BOOST_CHECK(100_size == s.Size());
+	CHECK(sz100 == s.Size());
 
-	s.EnsureSize(50_size);
-	BOOST_CHECK(100_size == s.Size());
+	s.EnsureSize(sz50);
+	CHECK(sz100 == s.Size());
 
 	{
-		std::string * ss = new (s.Get()) std::string(99_size, '-');
-		BOOST_TEST(*ss == std::string(99_size, '-'));
-		ss->std::string::~string();
+		auto * ss = new (s.Get()) std::string(sz99, '-'); // NOLINT(cppcoreguidelines-owning-memory)
+		auto scope = GLib::Detail::Scope([&]() { ss->std::string::~string(); });
+		TEST(*ss == std::string(sz99, '-'));
+		static_cast<void>(scope);
 	}
 
-	s.EnsureSize(200_size);
-	BOOST_CHECK(200_size == s.Size());
+	s.EnsureSize(sz200);
+	CHECK(sz200 == s.Size());
 
 	{
-		std::string * sss = new (s.Get()) std::string(199_size, '-');
-		BOOST_TEST(*sss == std::string(199_size, '-'));
-		sss->std::string::~string();
+		auto * sss = new (s.Get()) std::string(sz199, '-'); // NOLINT(cppcoreguidelines-owning-memory)
+		auto scope = GLib::Detail::Scope([&]() { sss->std::string::~string(); });
+		TEST(*sss == std::string(sz199, '-'));
+		static_cast<void>(scope);
 	}
 }
 
-BOOST_AUTO_TEST_CASE(Const)
+AUTO_TEST_CASE(Const)
 {
-	const GLib::Util::StackOrHeap<char, 100_size> s;
-
-	BOOST_CHECK(100_size == s.Size());
-	BOOST_TEST(nullptr != s.Get());
+	const GLib::Util::StackOrHeap<char, sz100> s;
+	CHECK(sz100 == s.Size());
+	TEST(nullptr != s.Get());
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+AUTO_TEST_SUITE_END()

@@ -11,7 +11,7 @@ struct Xyzzy
 	}
 };
 
-inline std::ostream & operator<<(std::ostream & s, const Xyzzy &)
+inline std::ostream & operator<<(std::ostream & s, const Xyzzy & /*unused*/)
 {
 	return s << "plover";
 }
@@ -19,7 +19,7 @@ inline std::ostream & operator<<(std::ostream & s, const Xyzzy &)
 struct Xyzzy2
 {};
 
-inline std::ostream & operator<<(std::ostream & s, const Xyzzy2 &)
+inline std::ostream & operator<<(std::ostream & s, const Xyzzy2 & /*unused*/)
 {
 	return s << "plover2";
 }

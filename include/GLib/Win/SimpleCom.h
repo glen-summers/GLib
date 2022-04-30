@@ -76,7 +76,7 @@ namespace GLib::Win
 		struct __declspec(novtable) Implements;
 
 		template <typename... Interfaces>
-		struct __declspec(novtable) Implements<GLib::Util::TypeList<Interfaces...>> : Interfaces...
+		struct __declspec(novtable) Implements<GLib::Util::Tuple<Interfaces...>> : Interfaces...
 		{};
 	}
 
@@ -106,7 +106,7 @@ namespace GLib::Win
 			}
 			if (id == GetUuId<IUnknown>())
 			{
-				auto i = static_cast<IUnknown *>(static_cast<DefaultInterface *>(this));
+				auto * i = static_cast<IUnknown *>(static_cast<DefaultInterface *>(this));
 				i->AddRef();
 				*ppvObject = i;
 				return S_OK;

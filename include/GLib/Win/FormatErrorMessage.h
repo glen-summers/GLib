@@ -24,7 +24,7 @@ namespace GLib::Win::Util
 
 		enum class Flags : ULONG
 		{
-			AllocateBuffer = FORMAT_MESSAGE_ALLOCATE_BUFFER, // NOLINT
+			AllocateBuffer = FORMAT_MESSAGE_ALLOCATE_BUFFER, // NOLINT bad macros
 			FromSystem = FORMAT_MESSAGE_FROM_SYSTEM,				 // NOLINT
 			IgnoreInserts = FORMAT_MESSAGE_IGNORE_INSERTS,	 // NOLINT
 			FromHandle = FORMAT_MESSAGE_FROM_HMODULE,				 // NOLINT
@@ -32,7 +32,7 @@ namespace GLib::Win::Util
 
 		inline ULONG Make(Lang l1, Lang l2)
 		{
-			return MAKELANGID(static_cast<WORD>(l1), static_cast<WORD>(l2)); // NOLINT
+			return MAKELANGID(static_cast<WORD>(l1), static_cast<WORD>(l2)); // NOLINT(hicpp-signed-bitwise) bad macro
 		}
 
 		inline Flags operator|(Flags a, Flags b)

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstdlib>
+#include <exception>
 #include <utility>
 
 namespace GLib::Detail
@@ -21,12 +23,19 @@ namespace GLib::Detail
 
 		~ScopedFunction()
 		{
-			function();
+			try
+			{
+				function();
+			}
+			catch (const std::exception &)
+			{
+				std::abort();
+			}
 		}
 	};
 
 	template <typename Function>
-	auto Scope(Function && exit)
+	auto Scope(Function && exit) noexcept
 	{
 		return Detail::ScopedFunction<Function>(std::forward<Function>(exit));
 	}

@@ -206,8 +206,13 @@ docker system df
 	</Target>
 
 	<Target Name="TidyTests">
-		<MSBuild Projects="Tidy.build" Targets="TidyTests" Properties="FileName=$(FileName);Source=$(Source)"/>
+		<MSBuild Projects="Tidy.build" Targets="TidyTests" Properties="Source=$(Source)"/>
 	</Target>
+
+	<Target Name="TidyTestsFix">
+		<MSBuild Projects="Tidy.build" Targets="TidyTests" Properties="Source=$(Source);Fix=true"/>
+	</Target>
+
 	<!-- fwds -->
 
 </Project>

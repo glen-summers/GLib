@@ -7,6 +7,8 @@
 
 #include "Xyzzy.h"
 
+#include "TestUtils.h"
+
 namespace
 {
 	bool IsInvalidFormat(const std::logic_error & e)
@@ -49,18 +51,19 @@ namespace
 
 using GLib::Formatter;
 
-BOOST_AUTO_TEST_SUITE(FormatterTests)
+AUTO_TEST_SUITE(FormatterTests)
 
-BOOST_AUTO_TEST_CASE(BasicTest)
+AUTO_TEST_CASE(BasicTest)
 {
-	std::string s = Formatter::Format("{0} {1} {2} {3}", 1, "2", std::string("3"), reinterpret_cast<void *>(4));
-	if constexpr (sizeof(void *) == 8)
+	std::string s = Formatter::Format("{0} {1} {2} {3}", 1, "2", std::string("3"),
+																		reinterpret_cast<void *>(4)); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
+	if constexpr (sizeof(void *) == SZ(8))
 	{
-		BOOST_TEST(s == "1 2 3 0000000000000004");
+		TEST(s == "1 2 3 0000000000000004");
 	}
-	else if constexpr (sizeof(void *) == 4)
+	else if constexpr (sizeof(void *) == SZ(4))
 	{
-		BOOST_TEST(s == "1 2 3 00000004");
+		TEST(s == "1 2 3 00000004");
 	}
 	else
 	{
@@ -68,252 +71,273 @@ BOOST_AUTO_TEST_CASE(BasicTest)
 	}
 }
 
-BOOST_AUTO_TEST_CASE(TestEmptyFormatOk)
+AUTO_TEST_CASE(TestEmptyFormatOk)
 {
 	std::string s = Formatter::Format("", 1, 2, 3);
-	BOOST_TEST(s.empty());
+	TEST(s.empty());
 }
 
-BOOST_AUTO_TEST_CASE(TestEscapes)
+AUTO_TEST_CASE(TestEscapes)
 {
-	BOOST_TEST(GLib::FormatterDetail::IsFormattable<Xyzzy>::value);
+	TEST(GLib::FormatterDetail::IsFormattable<Xyzzy>::value);
 
 	std::string s = Formatter::Format("{0} {{1}} {2} {3:{{4}}}", "a", "b", "c", Xyzzy());
-	BOOST_TEST("a {1} c {4}:plover" == s);
+	TEST("a {1} c {4}:plover" == s);
 }
 
-BOOST_AUTO_TEST_CASE(NoArgumentsThrows)
+AUTO_TEST_CASE(NoArgumentsThrows)
 {
-	BOOST_CHECK_EXCEPTION(Formatter::Format("{0}"), std::logic_error, IsNoArguments);
+	CHECK_EXCEPTION(Formatter::Format("{0}"), std::logic_error, IsNoArguments);
 }
 
-BOOST_AUTO_TEST_CASE(TestInvalidEscapeThrows)
+AUTO_TEST_CASE(TestInvalidEscapeThrows)
 {
-	BOOST_CHECK_EXCEPTION(Formatter::Format("{0}}", 0), std::logic_error, IsInvalidFormat);
+	CHECK_EXCEPTION(Formatter::Format("{0}}", 0), std::logic_error, IsInvalidFormat);
 }
 
-BOOST_AUTO_TEST_CASE(TestInvalidEndBrace)
+AUTO_TEST_CASE(TestInvalidEndBrace)
 {
-	BOOST_CHECK_EXCEPTION(Formatter::Format("xyz {", 0), std::logic_error, IsInvalidFormat);
+	CHECK_EXCEPTION(Formatter::Format("xyz {", 0), std::logic_error, IsInvalidFormat);
 }
 
-BOOST_AUTO_TEST_CASE(TestInvalidIndexSpecifier)
+AUTO_TEST_CASE(TestInvalidIndexSpecifier)
 {
-	BOOST_CHECK_EXCEPTION(Formatter::Format("{x}", 0), std::logic_error, IsInvalidFormat);
-	BOOST_CHECK_EXCEPTION(Formatter::Format("{0,x}", 0), std::logic_error, IsInvalidFormat);
+	CHECK_EXCEPTION(Formatter::Format("{x}", 0), std::logic_error, IsInvalidFormat);
+	CHECK_EXCEPTION(Formatter::Format("{0,x}", 0), std::logic_error, IsInvalidFormat);
 }
 
-BOOST_AUTO_TEST_CASE(TestInvalidTrailingIndexSpecifier)
+AUTO_TEST_CASE(TestInvalidTrailingIndexSpecifier)
 {
-	BOOST_CHECK_EXCEPTION(Formatter::Format("{0", 0), std::logic_error, IsInvalidFormat);
-	BOOST_CHECK_EXCEPTION(Formatter::Format("{0,", 0), std::logic_error, IsInvalidFormat);
-	BOOST_CHECK_EXCEPTION(Formatter::Format("{0,-", 0), std::logic_error, IsInvalidFormat);
-	BOOST_CHECK_EXCEPTION(Formatter::Format("{0,-1", 0), std::logic_error, IsInvalidFormat);
+	CHECK_EXCEPTION(Formatter::Format("{0", 0), std::logic_error, IsInvalidFormat);
+	CHECK_EXCEPTION(Formatter::Format("{0,", 0), std::logic_error, IsInvalidFormat);
+	CHECK_EXCEPTION(Formatter::Format("{0,-", 0), std::logic_error, IsInvalidFormat);
+	CHECK_EXCEPTION(Formatter::Format("{0,-1", 0), std::logic_error, IsInvalidFormat);
 }
 
-BOOST_AUTO_TEST_CASE(TestInvalidTrailingColon)
+AUTO_TEST_CASE(TestInvalidTrailingColon)
 {
-	BOOST_CHECK_EXCEPTION(Formatter::Format("{0:", 0), std::logic_error, IsInvalidFormat);
-	BOOST_CHECK_EXCEPTION(Formatter::Format("{0,x}", 0), std::logic_error, IsInvalidFormat);
+	CHECK_EXCEPTION(Formatter::Format("{0:", 0), std::logic_error, IsInvalidFormat);
+	CHECK_EXCEPTION(Formatter::Format("{0,x}", 0), std::logic_error, IsInvalidFormat);
 }
 
-BOOST_AUTO_TEST_CASE(TestInvalidTrailingFormatBrace)
+AUTO_TEST_CASE(TestInvalidTrailingFormatBrace)
 {
-	BOOST_CHECK_EXCEPTION(Formatter::Format("{0:{", 0), std::logic_error, IsInvalidFormat);
+	CHECK_EXCEPTION(Formatter::Format("{0:{", 0), std::logic_error, IsInvalidFormat);
 }
 
-BOOST_AUTO_TEST_CASE(TestInvalidCharacterAfterIndex)
+AUTO_TEST_CASE(TestInvalidCharacterAfterIndex)
 {
-	BOOST_CHECK_EXCEPTION(Formatter::Format("{0x", 0), std::logic_error, IsInvalidFormat);
+	CHECK_EXCEPTION(Formatter::Format("{0x", 0), std::logic_error, IsInvalidFormat);
 }
 
-BOOST_AUTO_TEST_CASE(TestSpacesOk)
+AUTO_TEST_CASE(TestSpacesOk)
 {
-	std::string s = Formatter::Format("{0    }", 1234);
-	BOOST_TEST("1234" == s);
+	std::string s = Formatter::Format("{0    }", I32(1234));
+	TEST("1234" == s);
 
-	s = Formatter::Format("{0    ,   -10   }", 1234);
-	BOOST_TEST("1234      " == s);
+	s = Formatter::Format("{0    ,   -10   }", I32(1234));
+	TEST("1234      " == s);
 }
 
-BOOST_AUTO_TEST_CASE(TestRepeatedInsert)
+AUTO_TEST_CASE(TestRepeatedInsert)
 {
-	std::string s = Formatter::Format("{0} {0:%x}", 1234);
-	BOOST_TEST("1234 4d2" == s);
+	std::string s = Formatter::Format("{0} {0:%x}", I32(1234));
+	TEST("1234 4d2" == s);
 }
 
-BOOST_AUTO_TEST_CASE(TestSprintfFormatPassThrough)
+AUTO_TEST_CASE(TestSprintfFormatPassThrough)
 {
-	std::string s = Formatter::Format("{0:%#.8X}", 1234);
-	BOOST_TEST("0X000004D2" == s);
+	std::string s = Formatter::Format("{0:%#.8X}", I32(1234));
+	TEST("0X000004D2" == s);
 }
 
-BOOST_AUTO_TEST_CASE(TestSprintfFormatException)
+AUTO_TEST_CASE(TestSprintfFormatException)
 {
-	BOOST_CHECK_EXCEPTION(Formatter::Format("{0:x}", 1234), std::logic_error,
-												[](const std::logic_error & e) { return e.what() == std::string("Invalid format : 'x' for Type: int"); });
+	CHECK_EXCEPTION(Formatter::Format("{0:x}", I32(1234)), std::logic_error,
+									[](const std::logic_error & e) { return e.what() == std::string("Invalid format : 'x' for Type: int"); });
 }
 
-BOOST_AUTO_TEST_CASE(TestSprintfFormatLengthNoException)
+AUTO_TEST_CASE(TestSprintfFormatLengthNoException)
 {
-	std::string s = Formatter::Format("{0:%#40.8x}", 1234);
-	BOOST_TEST("                              0x000004d2" == s);
+	std::string s = Formatter::Format("{0:%#40.8x}", I32(1234));
+	TEST("                              0x000004d2" == s);
 }
 
-BOOST_AUTO_TEST_CASE(TestCharLiteral)
+AUTO_TEST_CASE(TestCharLiteral)
 {
 	std::string s = Formatter::Format("{0}", "abcd");
-	BOOST_TEST("abcd" == s);
+	TEST("abcd" == s);
 }
 
-BOOST_AUTO_TEST_CASE(TestString)
+AUTO_TEST_CASE(TestString)
 {
 	std::string value = "abcd";
 	std::string s = Formatter::Format("{0}", value);
-	BOOST_TEST("abcd" == s);
+	TEST("abcd" == s);
 }
 
-BOOST_AUTO_TEST_CASE(TestBool)
+AUTO_TEST_CASE(TestBool)
 {
 	std::string s = Formatter::Format("{0}:{1}", true, false);
-	BOOST_TEST("1:0" == s);
+	TEST("1:0" == s);
 
 	std::ostringstream stm;
 	stm << std::boolalpha;
 	Formatter::Format(stm, "{0}:{1}", true, false);
-	BOOST_TEST("true:false" == stm.str());
+	TEST("true:false" == stm.str());
 }
 
-BOOST_AUTO_TEST_CASE(TestInt)
+AUTO_TEST_CASE(TestInt)
 {
-	std::string s = Formatter::Format("{0}", -2000000000);
-	BOOST_TEST("-2000000000" == s);
+	std::string s = Formatter::Format("{0}", -I32(2000000000));
+	TEST("-2000000000" == s);
 }
 
-BOOST_AUTO_TEST_CASE(TestIntFormat)
+AUTO_TEST_CASE(TestIntFormat)
 {
-	std::string s = Formatter::Format("{0:%x}", -2000000000);
-	BOOST_TEST("88ca6c00" == s);
+	std::string s = Formatter::Format("{0:%x}", -I32(2000000000));
+	TEST("88ca6c00" == s);
 }
 
-BOOST_AUTO_TEST_CASE(TestUnisgnedInt)
+AUTO_TEST_CASE(TestUnisgnedInt)
 {
-	std::string s = Formatter::Format("{0}", 4000000000U);
-	BOOST_TEST("4000000000" == s);
+	std::string s = Formatter::Format("{0}", U32(4000000000));
+	TEST("4000000000" == s);
 }
 
-BOOST_AUTO_TEST_CASE(TestUnisgnedIntFormat)
+AUTO_TEST_CASE(TestUnisgnedIntFormat)
 {
-	std::string s = Formatter::Format("{0:%x}", 0x12345678U);
-	BOOST_TEST("12345678" == s);
+	std::string s = Formatter::Format("{0:%x}", H32(12345678));
+	TEST("12345678" == s);
 }
 
-BOOST_AUTO_TEST_CASE(TestLong)
+AUTO_TEST_CASE(TestLong)
 {
-	std::string s = Formatter::Format("{0}", 1234567890123456789L);
-	BOOST_TEST("1234567890123456789" == s);
+	std::string s = Formatter::Format("{0}", I64(1234567890123456789));
+	TEST("1234567890123456789" == s);
 }
 
-BOOST_AUTO_TEST_CASE(TestLongFormat)
+AUTO_TEST_CASE(TestLongFormat)
 {
-	std::string s = Formatter::Format("{0:%lx}", 0x12345678L);
-	BOOST_TEST("12345678" == s);
+	std::string s = Formatter::Format("{0:%lx}", H32(12345678));
+	TEST("12345678" == s);
 }
 
-BOOST_AUTO_TEST_CASE(TestUnsignedLong)
+AUTO_TEST_CASE(TestUnsignedLong)
 {
-	std::string s = Formatter::Format("{0}", 1234567890123456789UL);
-	BOOST_TEST("1234567890123456789" == s);
+	std::string s = Formatter::Format("{0}", U64(1234567890123456789));
+	TEST("1234567890123456789" == s);
 }
 
-BOOST_AUTO_TEST_CASE(TestUnsignedLongFormat)
+AUTO_TEST_CASE(TestUnsignedLongFormat)
 {
-	std::string s = Formatter::Format("{0:%lx}", 0x12345678UL);
-	BOOST_TEST("12345678" == s);
+	std::string s = Formatter::Format("{0:%lx}", H32(12345678));
+	TEST("12345678" == s);
 }
 
-BOOST_AUTO_TEST_CASE(TestLongLong)
+AUTO_TEST_CASE(TestLongLong)
 {
-	std::string s = Formatter::Format("{0}", 1234567890123456789LL);
-	BOOST_TEST("1234567890123456789" == s);
+	std::string s = Formatter::Format("{0}", I64(1234567890123456789));
+	TEST("1234567890123456789" == s);
 }
 
-BOOST_AUTO_TEST_CASE(TestLongLongFormat)
+AUTO_TEST_CASE(TestLongLongFormat)
 {
-	std::string s = Formatter::Format("{0:%llx}", 0x123456789abcfdefLL);
-	BOOST_TEST("123456789abcfdef" == s);
+	std::string s = Formatter::Format("{0:%llx}", H64(123456789abcdef0));
+	TEST("123456789abcdef0" == s);
 }
 
-BOOST_AUTO_TEST_CASE(TestULongLong)
+AUTO_TEST_CASE(TestULongLong)
 {
-	std::string s = Formatter::Format("{0}", 12345678901234567890ULL);
-	BOOST_TEST("12345678901234567890" == s);
+	std::string s = Formatter::Format("{0}", U64(12345678901234567890));
+	TEST("12345678901234567890" == s);
 }
 
-BOOST_AUTO_TEST_CASE(TestULongLongFormat)
+AUTO_TEST_CASE(TestULongLongFormat)
 {
-	std::string s = Formatter::Format("{0:%llx}", 0x123456789abcfdefULL);
-	BOOST_TEST("123456789abcfdef" == s);
+	std::string s = Formatter::Format("{0:%llx}", H64(123456789abcdef0));
+	TEST("123456789abcdef0" == s);
 }
 
-BOOST_AUTO_TEST_CASE(TestFloat)
+AUTO_TEST_CASE(TestFloat)
 {
-	std::string s = Formatter::Format("{0}", 1.234f);
-	BOOST_TEST("1.234" == s);
+	auto foo = FL(1.234);
+
+	std::string s = Formatter::Format("{0}", foo);
+	TEST("1.234" == s);
 }
 
-BOOST_AUTO_TEST_CASE(TestFloatFormat)
+AUTO_TEST_CASE(TestFloatFormat)
 {
-	std::string s = Formatter::Format("{0:%.2f}", 1.2345678f);
-	BOOST_TEST("1.23" == s);
+	std::string s = Formatter::Format("{0:%.2f}", FL(1.2345678));
+	TEST("1.23" == s);
 }
 
-BOOST_AUTO_TEST_CASE(TestDouble)
+AUTO_TEST_CASE(TestDouble)
 {
-	std::string s = Formatter::Format("{0}", 1.234);
-	BOOST_TEST("1.234" == s);
+	std::string s = Formatter::Format("{0}", DB(1.234));
+	TEST("1.234" == s);
 }
 
-BOOST_AUTO_TEST_CASE(TestDoubleFormat)
+AUTO_TEST_CASE(TestDoubleFormat)
 {
-	std::string s = Formatter::Format("{0:%.2f}", 1.23456789012345);
-	BOOST_TEST("1.23" == s);
+	std::string s = Formatter::Format("{0:%.2f}", DB(1.23456789012345));
+	TEST("1.23" == s);
 }
 
-BOOST_AUTO_TEST_CASE(TestLongDouble)
+AUTO_TEST_CASE(TestLongDouble)
 {
-	std::string s = Formatter::Format("{0}", 1.234L);
-	BOOST_TEST("1.234" == s);
+	std::string s = Formatter::Format("{0}", LD(1.234));
+	TEST("1.234" == s);
 }
 
-BOOST_AUTO_TEST_CASE(TestLongDoubleFormat)
+AUTO_TEST_CASE(TestLongDoubleFormat)
 {
-	std::string s = Formatter::Format("{0:%.2Lf}", 1.23456789012345L);
-	BOOST_TEST("1.23" == s);
+	std::string s = Formatter::Format("{0:%.2Lf}", LD(1.23456789012345));
+	TEST("1.23" == s);
 }
 
-BOOST_AUTO_TEST_CASE(TestPointer)
+AUTO_TEST_CASE(TestPointer32)
 {
-	if constexpr (sizeof(void *) == 8)
+	if constexpr (sizeof(void *) == sizeof(uint32_t))
 	{
-		auto p = reinterpret_cast<void *>(0x123456789abcfdefULL);
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable : 4312) // x64 -> warning C4312: 'type cast': conversion from 'T' to 'const void *' of greater size
+#endif
+
+#ifdef __GNUG__
+#pragma GCC diagnostic push
+//#pragma GCC diagnostic ignored "-Werror=int-to-pointer-cast"
+#endif
+
+		// -Werror=int-to-pointer-cast
+		const auto * p = reinterpret_cast<const void *>(H32(1234abcd)); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast, performance-no-int-to-ptr)
 
 		std::string s = Formatter::Format("{0}", p);
-		BOOST_TEST("123456789abcfdef" == s);
+		TEST("1234ABCD" == s);
 	}
-	else if constexpr (sizeof(void *) == 4)
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
+
+#if __GNUG__
+#pragma GCC diagnostic pop
+#endif
+}
+
+AUTO_TEST_CASE(TestPointer64)
+{
+	if constexpr (sizeof(void *) == sizeof(uint64_t))
 	{
-		auto p = reinterpret_cast<void *>(0x1234abcdUL);
+		auto * p = reinterpret_cast<void *>(H64(123456789abcdef0)); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast, performance-no-int-to-ptr)
 		std::string s = Formatter::Format("{0}", p);
-		BOOST_TEST("1234abcd" == s);
-	}
-	else
-	{
-		throw std::runtime_error("unexpected pointer size");
+		TEST("123456789ABCDEF0" == s);
 	}
 }
 
-BOOST_AUTO_TEST_CASE(TestTimePointDefaultFormat)
+AUTO_TEST_CASE(TestTimePointDefaultFormat)
 {
 	const int offset = 1900;
 	const int yr = 1601;
@@ -322,75 +346,74 @@ BOOST_AUTO_TEST_CASE(TestTimePointDefaultFormat)
 	std::ostringstream s;
 	s.imbue(std::locale(UnitedKingdomLocale));
 	Formatter::Format(s, "{0}", tm);
-	BOOST_TEST("01 Jan 1601, 00:00:00" == s.str());
+	TEST("01 Jan 1601, 00:00:00" == s.str());
 }
 
-BOOST_AUTO_TEST_CASE(TestTimePoint)
+AUTO_TEST_CASE(TestTimePoint)
 {
 	const tm tm = MakeTm(0, 0, 18, 6, 10, 67, 0, 0, 1);
 
 	std::ostringstream s;
 	s.imbue(std::locale(UnitedKingdomLocale));
 	Formatter::Format(s, "{0:%d %b %Y, %H:%M:%S}", tm);
-	BOOST_TEST("06 Nov 1967, 18:00:00" == s.str());
+	TEST("06 Nov 1967, 18:00:00" == s.str());
 }
 
-BOOST_AUTO_TEST_CASE(TestPad)
+AUTO_TEST_CASE(TestPad)
 {
 	std::string s = Formatter::Format("{0},{1,4},{2}", 0, 1, 2);
-	BOOST_TEST("0,   1,2" == s);
+	TEST("0,   1,2" == s);
 
 	s = Formatter::Format("{0},{1,-4},{2}", 0, 1, 2);
-	BOOST_TEST("0,1   ,2" == s);
+	TEST("0,1   ,2" == s);
 }
 
-BOOST_AUTO_TEST_CASE(CustomTypeNoFormat)
+AUTO_TEST_CASE(CustomTypeNoFormat)
 {
 	Xyzzy plugh;
 	std::string s = Formatter::Format("{0}", plugh);
-	BOOST_TEST("plover" == s);
+	TEST("plover" == s);
 }
 
-BOOST_AUTO_TEST_CASE(CustomTypeFormat)
+AUTO_TEST_CASE(CustomTypeFormat)
 {
 	Xyzzy plugh;
 	std::string s = Formatter::Format("{0:fmt}", plugh);
-	BOOST_TEST("fmt:plover" == s);
+	TEST("fmt:plover" == s);
 }
 
-BOOST_AUTO_TEST_CASE(CustomTypeNonEmptyFormatException)
+AUTO_TEST_CASE(CustomTypeNonEmptyFormatException)
 {
-	BOOST_CHECK_EXCEPTION(Xyzzy2 plugh; Formatter::Format("{0:lentilCustard}", plugh), std::logic_error,
-																			[](const std::logic_error & e)
-																			{ return e.what() == std::string("Unexpected non-empty format : lentilCustard"); });
+	CHECK_EXCEPTION(Xyzzy2 plugh; Formatter::Format("{0:lentilCustard}", plugh), std::logic_error,
+																[](const std::logic_error & e) { return e.what() == std::string("Unexpected non-empty format : lentilCustard"); });
 }
 
-BOOST_AUTO_TEST_CASE(MoneyTest)
+AUTO_TEST_CASE(MoneyTest)
 {
-	GLib::Money m {123456.7};
+	GLib::Money m {FL(123456.7)};
 
 	std::ostringstream s;
 	s.imbue(std::locale(UnitedKingdomLocale));
 	Formatter::Format(s, "{0}", m);
-	auto expected = "\xc2\xa3"
-									"1,234.57";
-	BOOST_TEST(expected == s.str());
+	const auto * expected = "\xc2\xa3"
+													"1,234.57";
+	TEST(expected == s.str());
 }
 
-BOOST_AUTO_TEST_CASE(TestLargeObject)
+AUTO_TEST_CASE(TestLargeObject)
 {
 	CopyCheck c1;
-	BOOST_CHECK(c1.Copies() == 0 && c1.Moves() == 0);
+	CHECK(c1.Copies() == 0 && c1.Moves() == 0);
 
-	CopyCheck c2(c1);
-	BOOST_CHECK(c2.Copies() == 1 && c1.Moves() == 0);
+	CopyCheck c2(c1); // NOLINT(performance-unnecessary-copy-initialization) test copy
+	CHECK(c2.Copies() == 1 && c1.Moves() == 0);
 
 	CopyCheck c3;
 	std::string s = Formatter::Format("{0}", c3);
-	BOOST_TEST("0:0" == s);
+	TEST("0:0" == s);
 
 	s = Formatter::Format("{0}", CopyCheck());
-	BOOST_TEST("0:0" == s);
+	TEST("0:0" == s);
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+AUTO_TEST_SUITE_END()

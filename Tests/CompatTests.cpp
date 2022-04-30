@@ -12,21 +12,25 @@ struct UnmangleStruct
 class UnmangleClass
 {};
 
-BOOST_AUTO_TEST_SUITE(CompatTests)
+AUTO_TEST_SUITE(CompatTests)
 
-BOOST_AUTO_TEST_CASE(LocalTimeZero)
+AUTO_TEST_CASE(LocalTimeZero)
 {
 	auto tz = GLib::Compat::GetEnv("TZ");
 	GLib::Compat::SetEnv("TZ", "GMST0GMDT-1,M3.3.0,M10.1.0");
 	GLib::Compat::TzSet();
 
 	auto scope = GLib::Detail::Scope(
-		[&]() noexcept
+		[&]()
 		{
 			if (tz)
+			{
 				GLib::Compat::SetEnv("TZ", tz->c_str());
+			}
 			else
+			{
 				GLib::Compat::UnsetEnv("TZ");
+			}
 			GLib::Compat::TzSet();
 		});
 
@@ -34,25 +38,25 @@ BOOST_AUTO_TEST_CASE(LocalTimeZero)
 	GLib::Compat::LocalTime(tm, 0);
 	static_cast<void>(scope);
 
-	BOOST_TEST(tm.tm_sec == 0);
-	BOOST_TEST(tm.tm_min == 0);
-	BOOST_TEST(tm.tm_hour == 0);
-	BOOST_TEST(tm.tm_mday == 1);
-	BOOST_TEST(tm.tm_mon == 0);
-	BOOST_TEST(tm.tm_year == 70);
-	BOOST_TEST(tm.tm_wday == 4);
-	BOOST_TEST(tm.tm_yday == 0);
-	BOOST_TEST(tm.tm_isdst == 0);
+	TEST(tm.tm_sec == 0);
+	TEST(tm.tm_min == 0);
+	TEST(tm.tm_hour == 0);
+	TEST(tm.tm_mday == 1);
+	TEST(tm.tm_mon == 0);
+	TEST(tm.tm_year == 70);
+	TEST(tm.tm_wday == 4);
+	TEST(tm.tm_yday == 0);
+	TEST(tm.tm_isdst == 0);
 }
 
-BOOST_AUTO_TEST_CASE(LocalTimeSpecific)
+AUTO_TEST_CASE(LocalTimeSpecific)
 {
 	auto tz = GLib::Compat::GetEnv("TZ");
 	GLib::Compat::SetEnv("TZ", "CST");
 	GLib::Compat::TzSet();
 
 	auto scope = GLib::Detail::Scope(
-		[&]() noexcept
+		[&]()
 		{
 			if (tz)
 			{
@@ -66,37 +70,38 @@ BOOST_AUTO_TEST_CASE(LocalTimeSpecific)
 		});
 
 	tm tm {};
-	GLib::Compat::LocalTime(tm, 1569056285);
+	const auto testTime = 1569056285;
+	GLib::Compat::LocalTime(tm, testTime);
 	static_cast<void>(scope);
 
-	BOOST_TEST(tm.tm_sec == 5);
-	BOOST_TEST(tm.tm_min == 58);
-	BOOST_TEST(tm.tm_hour == 8);
-	BOOST_TEST(tm.tm_mday == 21);
-	BOOST_TEST(tm.tm_mon == 8);
-	BOOST_TEST(tm.tm_year == 119);
-	BOOST_TEST(tm.tm_wday == 6);
-	BOOST_TEST(tm.tm_yday == 263);
-	BOOST_TEST(tm.tm_isdst == 0);
+	TEST(tm.tm_sec == 5);
+	TEST(tm.tm_min == 58);
+	TEST(tm.tm_hour == 8);
+	TEST(tm.tm_mday == 21);
+	TEST(tm.tm_mon == 8);
+	TEST(tm.tm_year == 119);
+	TEST(tm.tm_wday == 6);
+	TEST(tm.tm_yday == 263);
+	TEST(tm.tm_isdst == 0);
 }
 
-BOOST_AUTO_TEST_CASE(GmTime)
+AUTO_TEST_CASE(GmTime)
 {
 	tm tm {};
 	GLib::Compat::GmTime(tm, 0);
 
-	BOOST_TEST(tm.tm_sec == 0);
-	BOOST_TEST(tm.tm_min == 0);
-	BOOST_TEST(tm.tm_hour == 0);
-	BOOST_TEST(tm.tm_mday == 1);
-	BOOST_TEST(tm.tm_mon == 0);
-	BOOST_TEST(tm.tm_year == 70);
-	BOOST_TEST(tm.tm_wday == 4);
-	BOOST_TEST(tm.tm_yday == 0);
-	BOOST_TEST(tm.tm_isdst == 0);
+	TEST(tm.tm_sec == 0);
+	TEST(tm.tm_min == 0);
+	TEST(tm.tm_hour == 0);
+	TEST(tm.tm_mday == 1);
+	TEST(tm.tm_mon == 0);
+	TEST(tm.tm_year == 70);
+	TEST(tm.tm_wday == 4);
+	TEST(tm.tm_yday == 0);
+	TEST(tm.tm_isdst == 0);
 }
 
-BOOST_AUTO_TEST_CASE(StrError)
+AUTO_TEST_CASE(StrError)
 {
 	GLIB_CHECK_RUNTIME_EXCEPTION({ GLib::Compat::AssertTrue(false, "error", ENOENT); }, "error : No such file or directory");
 
@@ -105,13 +110,13 @@ BOOST_AUTO_TEST_CASE(StrError)
 	GLib::Compat::AssertTrue(true, "no error", 0);
 }
 
-BOOST_AUTO_TEST_CASE(Unmangle)
+AUTO_TEST_CASE(Unmangle)
 {
-	BOOST_TEST("UnmangleStruct" == GLib::Compat::Unmangle(typeid(UnmangleStruct).name()));
-	BOOST_TEST("UnmangleClass" == GLib::Compat::Unmangle(typeid(UnmangleClass).name()));
+	TEST("UnmangleStruct" == GLib::Compat::Unmangle(typeid(UnmangleStruct).name()));
+	TEST("UnmangleClass" == GLib::Compat::Unmangle(typeid(UnmangleClass).name()));
 }
 
-BOOST_AUTO_TEST_CASE(ProcessName)
+AUTO_TEST_CASE(ProcessName)
 {
 	auto name = GLib::Compat::ProcessName();
 	auto exe = name.rfind(".exe");
@@ -119,37 +124,38 @@ BOOST_AUTO_TEST_CASE(ProcessName)
 	{
 		name.erase(exe);
 	}
-	BOOST_TEST("Tests" == name);
+	TEST("Tests" == name);
 }
 
-BOOST_AUTO_TEST_CASE(CommandLine)
+AUTO_TEST_CASE(CommandLine)
 {
 	if (GLib::Compat::CommandLine().find(GLib::Compat::ProcessName()) == std::string::npos)
 	{
-		BOOST_FAIL(GLib::Compat::CommandLine() + " -- " + GLib::Compat::ProcessName());
+		FAIL(GLib::Compat::CommandLine() + " -- " + GLib::Compat::ProcessName());
 	}
 }
 
-BOOST_AUTO_TEST_CASE(Env)
+AUTO_TEST_CASE(Env)
 {
-	auto testVar = "TestVar";
-	BOOST_CHECK(false == GLib::Compat::GetEnv(testVar).has_value());
+	const auto * testVar = "TestVar";
+	CHECK(false == GLib::Compat::GetEnv(testVar).has_value());
 
 	GLib::Compat::SetEnv(testVar, "Value");
-	BOOST_TEST("Value" == *GLib::Compat::GetEnv(testVar));
+	TEST("Value" == *GLib::Compat::GetEnv(testVar));
 
 	GLib::Compat::SetEnv(testVar, "NuValue");
-	BOOST_TEST("NuValue" == *GLib::Compat::GetEnv(testVar));
+	TEST("NuValue" == *GLib::Compat::GetEnv(testVar));
 
 	GLib::Compat::SetEnv(testVar, "Euro \xE2\x82\xAC");
-	BOOST_TEST("Euro \xE2\x82\xAC" == *GLib::Compat::GetEnv(testVar));
+	TEST("Euro \xE2\x82\xAC" == *GLib::Compat::GetEnv(testVar));
 
-	auto valueLongerThanDefaultBuffer = std::string(300, '-');
+	const auto size = 300;
+	auto valueLongerThanDefaultBuffer = std::string(size, '-');
 	GLib::Compat::SetEnv(testVar, valueLongerThanDefaultBuffer.c_str());
-	BOOST_TEST(valueLongerThanDefaultBuffer == *GLib::Compat::GetEnv(testVar));
+	TEST(valueLongerThanDefaultBuffer == *GLib::Compat::GetEnv(testVar));
 
 	GLib::Compat::UnsetEnv(testVar);
-	BOOST_CHECK(false == GLib::Compat::GetEnv(testVar).has_value());
+	CHECK(false == GLib::Compat::GetEnv(testVar).has_value());
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+AUTO_TEST_SUITE_END()

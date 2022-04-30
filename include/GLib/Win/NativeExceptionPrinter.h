@@ -21,7 +21,7 @@ namespace GLib::Win::Symbols
 		template <typename Function>
 		auto NativeTryCatch(Function function) -> decltype(function())
 		{
-			__try
+			__try // NOLINT(clang-diagnostic-language-extension-token) required
 			{
 				return function();
 			}
@@ -192,12 +192,12 @@ namespace GLib::Win::Symbols
 	inline void Print(std::ostream & s, const EXCEPTION_POINTERS * exceptionInfo, unsigned int maxFrames)
 	{
 		constexpr ULONG cPlusPlusExceptionNumber = 0xe06d7363;
-		const EXCEPTION_RECORD & er = *exceptionInfo->ExceptionRecord;
-		const std::span info {er.ExceptionInformation, EXCEPTION_MAXIMUM_PARAMETERS};
+		const EXCEPTION_RECORD * er = exceptionInfo->ExceptionRecord;
+		const std::span info {er->ExceptionInformation};
 
-		Formatter::Format(s, "Unhandled exception at {0} (code: {1:%08X})", er.ExceptionAddress, er.ExceptionCode);
+		Formatter::Format(s, "Unhandled exception at {0} (code: {1:%08X})", er->ExceptionAddress, er->ExceptionCode);
 
-		switch (er.ExceptionCode)
+		switch (er->ExceptionCode)
 		{
 			case STATUS_ACCESS_VIOLATION:
 			{
@@ -220,10 +220,10 @@ namespace GLib::Win::Symbols
 
 			default:
 			{
-				if (er.NumberParameters != 0)
+				if (er->NumberParameters != 0)
 				{
 					s << "\tException parameters: ";
-					for (ULONG i = 0; i < er.NumberParameters; ++i)
+					for (ULONG i = 0; i < er->NumberParameters; ++i)
 					{
 						if (i != 0)
 						{
@@ -239,7 +239,7 @@ namespace GLib::Win::Symbols
 
 		STACKFRAME64 frame = {};
 		CONTEXT context = Detail::GetContext(*exceptionInfo);
-		ULONG machineType;
+		ULONG machineType {};
 
 #if defined(_M_IX86)
 		machineType = IMAGE_FILE_MACHINE_I386;

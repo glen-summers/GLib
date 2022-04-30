@@ -17,7 +17,9 @@ namespace GLib::Cpp
 	}
 }
 
-using namespace GLib::Cpp;
+using GLib::Cpp::Fragment;
+using GLib::Cpp::Holder;
+using GLib::Cpp::State;
 
 void Parse(std::string_view code, bool showWhiteSpace = {})
 {
@@ -31,54 +33,54 @@ void Parse(std::string_view code, bool showWhiteSpace = {})
 	}
 }
 
-BOOST_AUTO_TEST_SUITE(CppIteratorTests)
+AUTO_TEST_SUITE(CppIteratorTests)
 
-BOOST_AUTO_TEST_CASE(Empty)
+AUTO_TEST_CASE(Empty)
 {
 	Holder code {R"()", false};
 
 	std::vector<Fragment> expected {};
 
-	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), code.begin(), code.end());
+	CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), code.begin(), code.end());
 }
 
-BOOST_AUTO_TEST_CASE(Code0)
+AUTO_TEST_CASE(Code0)
 {
 	Holder code {"void", false};
 
 	std::vector<Fragment> expected {{State::Code, "void"}};
 
-	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), code.begin(), code.end());
+	CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), code.begin(), code.end());
 }
 
-BOOST_AUTO_TEST_CASE(Code1)
+AUTO_TEST_CASE(Code1)
 {
 	Holder code {R"(void foo)", true};
 
 	std::vector<Fragment> expected {{State::Code, "void"}, {State::WhiteSpace, " "}, {State::Code, "foo"}};
 
-	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), code.begin(), code.end());
+	CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), code.begin(), code.end());
 }
 
-BOOST_AUTO_TEST_CASE(CodeNoWs)
+AUTO_TEST_CASE(CodeNoWs)
 {
 	Holder code {R"(void foo)", false};
 
 	std::vector<Fragment> expected {{State::Code, "void foo"}};
 
-	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), code.begin(), code.end());
+	CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), code.begin(), code.end());
 }
 
-BOOST_AUTO_TEST_CASE(CommentBlock)
+AUTO_TEST_CASE(CommentBlock)
 {
 	Holder code {R"(/***/)", false};
 
 	std::vector<Fragment> expected {{State::CommentBlock, {"/***/"}}};
 
-	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), code.begin(), code.end());
+	CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), code.begin(), code.end());
 }
 
-BOOST_AUTO_TEST_CASE(CommentWhiteSpace)
+AUTO_TEST_CASE(CommentWhiteSpace)
 {
 	Holder code {R"(/**/ 
 ;)",
@@ -86,10 +88,10 @@ BOOST_AUTO_TEST_CASE(CommentWhiteSpace)
 
 	std::vector<Fragment> expected {{State::CommentBlock, {"/**/"}}, {State::WhiteSpace, {" "}}, {State::Code, {"\n;"}}};
 
-	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), code.begin(), code.end());
+	CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), code.begin(), code.end());
 }
 
-BOOST_AUTO_TEST_CASE(CommentLineContinue)
+AUTO_TEST_CASE(CommentLineContinue)
 {
 	Holder code {R"(// hello\
 continue
@@ -105,55 +107,55 @@ continue
 		{State::WhiteSpace, {"\n"}},
 	};
 
-	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), code.begin(), code.end());
+	CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), code.begin(), code.end());
 }
 
-BOOST_AUTO_TEST_CASE(CommentLineNotContinue)
+AUTO_TEST_CASE(CommentLineNotContinue)
 {
 	Holder code {"// hello \\ not continuation", false};
 
 	std::vector<Fragment> expected {{State::CommentLine, {"// hello \\ not continuation"}}};
 
-	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), code.begin(), code.end());
+	CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), code.begin(), code.end());
 }
 
-BOOST_AUTO_TEST_CASE(CommentLineNotContinueEnd)
+AUTO_TEST_CASE(CommentLineNotContinueEnd)
 {
 	Holder code {"// hello not continuation \\/", false};
 
 	std::vector<Fragment> expected {{State::CommentLine, {"// hello not continuation \\/"}}};
 
-	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), code.begin(), code.end());
+	CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), code.begin(), code.end());
 }
 
-BOOST_AUTO_TEST_CASE(CommentStar)
+AUTO_TEST_CASE(CommentStar)
 {
 	Holder code {"/* * */", false};
 
 	std::vector<Fragment> expected {{State::CommentBlock, {"/* * */"}}};
 
-	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), code.begin(), code.end());
+	CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), code.begin(), code.end());
 }
 
-BOOST_AUTO_TEST_CASE(NotCommentStart)
+AUTO_TEST_CASE(NotCommentStart)
 {
 	Holder code {"int foo=bar/baz;", true};
 
 	std::vector<Fragment> expected {{State::Code, {"int"}}, {State::WhiteSpace, {" "}}, {State::Code, {"foo=bar"}}, {State::Code, {"/baz;"}}};
 
-	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), code.begin(), code.end());
+	CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), code.begin(), code.end());
 }
 
-BOOST_AUTO_TEST_CASE(CommentFromStateCode)
+AUTO_TEST_CASE(CommentFromStateCode)
 {
 	Holder code {"bar//comment\n;", false};
 
 	std::vector<Fragment> expected {{State::Code, {"bar"}}, {State::CommentLine, {"//comment\n"}}, {State::Code, {";"}}};
 
-	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), code.begin(), code.end());
+	CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), code.begin(), code.end());
 }
 
-BOOST_AUTO_TEST_CASE(String)
+AUTO_TEST_CASE(String)
 {
 	Holder code {R"(auto fred = "this is a string";)", true};
 
@@ -168,19 +170,19 @@ BOOST_AUTO_TEST_CASE(String)
 		{State::Code, {";"}},
 	};
 
-	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), code.begin(), code.end());
+	CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), code.begin(), code.end());
 }
 
-BOOST_AUTO_TEST_CASE(StringFromStateCode)
+AUTO_TEST_CASE(StringFromStateCode)
 {
 	Holder code {R"(;"hello";)", false};
 
 	std::vector<Fragment> expected {{State::Code, {";"}}, {State::String, {R"("hello")"}}, {State::Code, {";"}}};
 
-	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), code.begin(), code.end());
+	CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), code.begin(), code.end());
 }
 
-BOOST_AUTO_TEST_CASE(StringContinue)
+AUTO_TEST_CASE(StringContinue)
 {
 	Holder code {R"--("abc\
 def")--",
@@ -189,28 +191,28 @@ def")--",
 	std::vector<Fragment> expected {{State::String, {R"--("abc\
 def")--"}}};
 
-	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), code.begin(), code.end());
+	CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), code.begin(), code.end());
 }
 
-BOOST_AUTO_TEST_CASE(StringNotContinue)
+AUTO_TEST_CASE(StringNotContinue)
 {
 	Holder code {R"--("\\abc\\")--", false};
 
 	std::vector<Fragment> expected {{State::String, {R"--("\\abc\\")--"}}};
 
-	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), code.begin(), code.end());
+	CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), code.begin(), code.end());
 }
 
-BOOST_AUTO_TEST_CASE(StringWithQuotes)
+AUTO_TEST_CASE(StringWithQuotes)
 {
 	Holder code {R"--("\"abc\"")--", false};
 
 	std::vector<Fragment> expected {{State::String, {R"--("\"abc\"")--"}}};
 
-	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), code.begin(), code.end());
+	CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), code.begin(), code.end());
 }
 
-BOOST_AUTO_TEST_CASE(RawString)
+AUTO_TEST_CASE(RawString)
 {
 	Holder code {R"--(auto fred = R"(this is a raw string)";)--", true};
 
@@ -220,10 +222,10 @@ BOOST_AUTO_TEST_CASE(RawString)
 		{State::Code, {";"}},
 	};
 
-	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), code.begin(), code.end());
+	CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), code.begin(), code.end());
 }
 
-BOOST_AUTO_TEST_CASE(RawStringPrefix)
+AUTO_TEST_CASE(RawStringPrefix)
 {
 	Holder code {R"--(auto fred = R"==(this is a raw string)==";)--", true};
 
@@ -233,47 +235,47 @@ BOOST_AUTO_TEST_CASE(RawStringPrefix)
 		{State::Code, {";"}},
 	};
 
-	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), code.begin(), code.end());
+	CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), code.begin(), code.end());
 }
 
-BOOST_AUTO_TEST_CASE(RawStringIgnored)
+AUTO_TEST_CASE(RawStringIgnored)
 {
 	Holder code {R"(R"--(hello)--)--")", false};
 
 	std::vector<Fragment> expected {{State::Code, "R"}, {State::RawString, "\"--(hello)--)--\""}};
 
-	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), code.begin(), code.end());
+	CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), code.begin(), code.end());
 }
 
-BOOST_AUTO_TEST_CASE(RawStringPrefixTooLong)
+AUTO_TEST_CASE(RawStringPrefixTooLong)
 {
 	std::string_view code = R"(R"12345678901234567(content)12345678901234567")";
 
 	GLIB_CHECK_RUNTIME_EXCEPTION(Parse(code), "Illegal character: '7' (0x37) at line: 1, state: RawStringPrefix");
 }
 
-BOOST_AUTO_TEST_CASE(RawStringPrefixErrorSpace)
+AUTO_TEST_CASE(RawStringPrefixErrorSpace)
 {
 	std::string_view code = R"(R" (content) ")";
 
 	GLIB_CHECK_RUNTIME_EXCEPTION(Parse(code, true), "Illegal character: ' ' (0x20) at line: 1, state: RawStringPrefix");
 }
 
-BOOST_AUTO_TEST_CASE(RawStringPrefixErrorCloseParenthesis)
+AUTO_TEST_CASE(RawStringPrefixErrorCloseParenthesis)
 {
 	std::string_view code = R"--(R")(content)(")--";
 
 	GLIB_CHECK_RUNTIME_EXCEPTION(Parse(code), "Illegal character: ')' (0x29) at line: 1, state: RawStringPrefix");
 }
 
-BOOST_AUTO_TEST_CASE(RawStringPrefixBackslash)
+AUTO_TEST_CASE(RawStringPrefixBackslash)
 {
 	std::string_view code = R"--(R"\(content)\")--";
 
 	GLIB_CHECK_RUNTIME_EXCEPTION(Parse(code), "Illegal character: '\\' (0x5c) at line: 1, state: RawStringPrefix");
 }
 
-BOOST_AUTO_TEST_CASE(RawStringNewLine)
+AUTO_TEST_CASE(RawStringNewLine)
 {
 	Holder code {
 		R"--(R"(1
@@ -288,10 +290,10 @@ BOOST_AUTO_TEST_CASE(RawStringNewLine)
 3)")--"}},
 	};
 
-	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), code.begin(), code.end());
+	CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), code.begin(), code.end());
 }
 
-BOOST_AUTO_TEST_CASE(Main)
+AUTO_TEST_CASE(Main)
 {
 	Holder code {
 		R"--(#include <iostream>
@@ -347,19 +349,19 @@ int main() // main
 		{State::WhiteSpace, {"\n"}},
 	};
 
-	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), code.begin(), code.end());
+	CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), code.begin(), code.end());
 }
 
-BOOST_AUTO_TEST_CASE(SystemInclude)
+AUTO_TEST_CASE(SystemInclude)
 {
 	Holder code {R"--(#include <experimental/filesystem>)--", false};
 
 	std::vector<Fragment> expected {{State::Directive, {"#include <experimental"}}, {State::Directive, {"/filesystem>"}}};
 
-	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), code.begin(), code.end());
+	CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), code.begin(), code.end());
 }
 
-BOOST_AUTO_TEST_CASE(CharacterLiteral)
+AUTO_TEST_CASE(CharacterLiteral)
 {
 	Holder code {R"(auto char1='"';
 auto char2='\"';
@@ -378,37 +380,37 @@ auto char3='\\';
 		{State::Code, {";"}},		 {State::WhiteSpace, {"\n"}},
 	};
 
-	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), code.begin(), code.end());
+	CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), code.begin(), code.end());
 }
 
-BOOST_AUTO_TEST_CASE(CharacterLiteralFromStateNone)
+AUTO_TEST_CASE(CharacterLiteralFromStateNone)
 {
 	Holder code {R"('\x00';)", false};
 
 	std::vector<Fragment> expected {{State::CharacterLiteral, {R"('\x00')"}}, {State::Code, {";"}}};
 
-	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), code.begin(), code.end());
+	CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), code.begin(), code.end());
 }
 
-BOOST_AUTO_TEST_CASE(CharacterLiteralFromStateWhitespace)
+AUTO_TEST_CASE(CharacterLiteralFromStateWhitespace)
 {
 	Holder code {R"( '\x00';)", true};
 
 	std::vector<Fragment> expected {{State::WhiteSpace, {" "}}, {State::CharacterLiteral, {R"('\x00')"}}, {State::Code, {";"}}};
 
-	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), code.begin(), code.end());
+	CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), code.begin(), code.end());
 }
 
-BOOST_AUTO_TEST_CASE(NotCharacterLiteral)
+AUTO_TEST_CASE(NotCharacterLiteral)
 {
 	Holder code {R"(0xFFFF'FFFFU;)", false};
 
 	std::vector<Fragment> expected {{State::Code, {"0xFFFF'FFFFU;"}}};
 
-	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), code.begin(), code.end());
+	CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), code.begin(), code.end());
 }
 
-BOOST_AUTO_TEST_CASE(Guard)
+AUTO_TEST_CASE(Guard)
 {
 	Holder code {R"(/* comment */
 #ifndef file_included // another comment
@@ -430,10 +432,10 @@ BOOST_AUTO_TEST_CASE(Guard)
 		{State::WhiteSpace, "\n"},
 	};
 
-	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), code.begin(), code.end());
+	CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), code.begin(), code.end());
 }
 
-BOOST_AUTO_TEST_CASE(DirectiveContinue)
+AUTO_TEST_CASE(DirectiveContinue)
 {
 	Holder code {R"(#include \
 "foo")",
@@ -441,49 +443,49 @@ BOOST_AUTO_TEST_CASE(DirectiveContinue)
 
 	std::vector<Fragment> expected {{State::Directive, "#include \\\n\"foo\""}};
 
-	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), code.begin(), code.end());
+	CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), code.begin(), code.end());
 }
 
-BOOST_AUTO_TEST_CASE(TerminationError)
+AUTO_TEST_CASE(TerminationError)
 {
 	std::string_view code = R"("stringNotClosed)";
 
 	GLIB_CHECK_RUNTIME_EXCEPTION(Parse(code), "Termination error, State: String, StartLine: 1");
 }
 
-BOOST_AUTO_TEST_CASE(DirectiveNotContinue)
+AUTO_TEST_CASE(DirectiveNotContinue)
 {
 	auto code = Holder {R"(# define foo \ //)", false};
 
 	std::vector<Fragment> expected {{State::Directive, "# define foo \\ "}, {State::CommentLine, "//"}};
 
-	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), code.begin(), code.end());
+	CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), code.begin(), code.end());
 }
 
-BOOST_AUTO_TEST_CASE(Html)
+AUTO_TEST_CASE(Html)
 {
 	std::string_view code = ";";
 
 	std::ostringstream stm;
 	Htmlify(code, true, stm);
 
-	auto expected = ";";
-	BOOST_TEST(expected == stm.str());
+	const auto * expected = ";";
+	TEST(expected == stm.str());
 }
 
-BOOST_AUTO_TEST_CASE(Html2)
+AUTO_TEST_CASE(Html2)
 {
 	std::string_view code = "#include \"foo.h\"";
 
 	std::ostringstream stm;
 	Htmlify(code, true, stm);
 
-	auto expected = "<span class=\"d\">#include\xC2\xB7&quot;foo.h&quot;</span>";
+	const auto * expected = "<span class=\"d\">#include\xC2\xB7&quot;foo.h&quot;</span>";
 
-	BOOST_TEST(expected == stm.str());
+	TEST(expected == stm.str());
 }
 
-BOOST_AUTO_TEST_CASE(Html3)
+AUTO_TEST_CASE(Html3)
 {
 	std::string_view code = R"(/*
 1
@@ -494,99 +496,99 @@ BOOST_AUTO_TEST_CASE(Html3)
 	std::ostringstream stm;
 	Htmlify(code, true, stm);
 
-	auto expected = R"(<span class="c">/*</span>
+	const auto * expected = R"(<span class="c">/*</span>
 <span class="c">1</span>
 <span class="c">2</span>
 <span class="c">3</span>
 <span class="c">*/</span>)";
 
-	BOOST_TEST(expected == stm.str());
+	TEST(expected == stm.str());
 }
 
-BOOST_AUTO_TEST_CASE(KeywordAndCommonType)
+AUTO_TEST_CASE(KeywordAndCommonType)
 {
 	std::string_view code = "auto v=std::vector{};";
 
 	std::ostringstream stm;
 	Htmlify(code, true, stm);
 
-	auto expected = "<span class=\"k\">auto</span>"
-									"<span class=\"w\">\xC2\xB7</span>"
-									"v="
-									"std::<span class=\"t\">vector</span>"
-									"{};";
+	const auto * expected = "<span class=\"k\">auto</span>"
+													"<span class=\"w\">\xC2\xB7</span>"
+													"v="
+													"std::<span class=\"t\">vector</span>"
+													"{};";
 
 	TestUtils::Compare(stm.str(), expected);
 }
 
-BOOST_AUTO_TEST_CASE(SymbolNameCleanup)
+AUTO_TEST_CASE(SymbolNameCleanup)
 {
 	std::string value = "NoCleanUp";
 	RemoveTemplateDefinitions(value);
-	BOOST_TEST("NoCleanUp" == value);
+	TEST("NoCleanUp" == value);
 
 	value = "Foo<T1,T2>::Bar<T3>";
 	RemoveTemplateDefinitions(value);
-	BOOST_TEST("Foo<T>::Bar<T>" == value);
+	TEST("Foo<T>::Bar<T>" == value);
 
 	value = "Foo<Bar, Baz>::Qux<Quux, Quuz>";
 	RemoveTemplateDefinitions(value);
-	BOOST_TEST("Foo<T>::Qux<T>" == value);
+	TEST("Foo<T>::Qux<T>" == value);
 
 	value = "Foo<Bar, Baz<Qux<Quux, Quuz>>>::Corge";
 	RemoveTemplateDefinitions(value);
-	BOOST_TEST("Foo<T>::Corge" == value);
+	TEST("Foo<T>::Corge" == value);
 }
 
-BOOST_AUTO_TEST_CASE(SymbolNamePreOps)
+AUTO_TEST_CASE(SymbolNamePreOps)
 {
 	std::string value = "Foo<Bar>::operator->";
 	RemoveTemplateDefinitions(value);
-	BOOST_TEST("Foo<T>::operator->" == value);
+	TEST("Foo<T>::operator->" == value);
 
 	value = "operator> Foo<Bar>";
 	RemoveTemplateDefinitions(value);
-	BOOST_TEST("operator> Foo<T>" == value);
+	TEST("operator> Foo<T>" == value);
 
 	value = "operator>> Foo<Bar>";
 	RemoveTemplateDefinitions(value);
-	BOOST_TEST("operator>> Foo<T>" == value);
+	TEST("operator>> Foo<T>" == value);
 
 	value = "operator< Foo<Bar>";
 	RemoveTemplateDefinitions(value);
-	BOOST_TEST("operator< Foo<T>" == value);
+	TEST("operator< Foo<T>" == value);
 
 	value = "operator<< Foo<Bar>";
 	RemoveTemplateDefinitions(value);
-	BOOST_TEST("operator<< Foo<T>" == value);
+	TEST("operator<< Foo<T>" == value);
 }
 
-BOOST_AUTO_TEST_CASE(SymbolNamePostOps)
+AUTO_TEST_CASE(SymbolNamePostOps)
 {
 	std::string value = "Foo<Bar> operator>";
 	RemoveTemplateDefinitions(value);
-	BOOST_TEST("Foo<T> operator>" == value);
+	TEST("Foo<T> operator>" == value);
 
 	value = "Foo<Bar> operator>>";
 	RemoveTemplateDefinitions(value);
-	BOOST_TEST("Foo<T> operator>>" == value);
+	TEST("Foo<T> operator>>" == value);
 
 	value = "Foo<Bar> operator<";
 	RemoveTemplateDefinitions(value);
-	BOOST_TEST("Foo<T> operator<" == value);
+	TEST("Foo<T> operator<" == value);
 
 	value = "Foo<Bar> operator<<";
 	RemoveTemplateDefinitions(value);
-	BOOST_TEST("Foo<T> operator<<" == value);
+	TEST("Foo<T> operator<<" == value);
 }
 
-BOOST_AUTO_TEST_CASE(SymbolNameError)
+AUTO_TEST_CASE(SymbolNameError)
 {
 	std::string value = ">foo<";
 	GLIB_CHECK_RUNTIME_EXCEPTION({ RemoveTemplateDefinitions(value); }, "Unable to parse symbol: >foo<");
 }
 
-BOOST_AUTO_TEST_CASE(UnterminatedBug)
+AUTO_TEST_CASE(UnterminatedBug)
 {
 	std::string_view code = R"(//\)"; // test compilers have no error
 	std::ostringstream stm;
@@ -616,7 +618,7 @@ void ScanFile(const std::filesystem::path & p, std::ostream & s)
 	}
 }
 
-BOOST_AUTO_TEST_CASE(BulkTest)
+AUTO_TEST_CASE(BulkTest)
 {
 	auto source = std::filesystem::path {__FILE__}.parent_path().parent_path();
 	std::unordered_set<std::string_view> extensions {".c", ".cpp", ".h", ".hpp"};
@@ -656,10 +658,10 @@ BOOST_AUTO_TEST_CASE(BulkTest)
 
 	auto state = boost::unit_test::unit_test_log.set_threshold_level(boost::unit_test::log_level::log_messages);
 	static_cast<void>(state);
-	BOOST_TEST_MESSAGE(s.str());
+	TEST_MESSAGE(s.str());
 	// static_cast<void>(boost::unit_test::unit_test_log.set_threshold_level(state)); // does no restore
 	static_cast<void>(boost::unit_test::unit_test_log.set_threshold_level(boost::unit_test::log_level::log_nothing));
 }
 #endif // BULK_TEST
 
-BOOST_AUTO_TEST_SUITE_END()
+AUTO_TEST_SUITE_END()

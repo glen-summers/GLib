@@ -85,13 +85,13 @@ namespace GLib
 			template <>
 			inline void FormatPointer<sizeof(uint32_t)>(std::ostream & stm, void * const & value)
 			{
-				ToStringImpl("", stm, value, "%08x");
+				ToStringImpl("", stm, value, "%08X");
 			}
 
 			template <>
 			inline void FormatPointer<sizeof(uint64_t)>(std::ostream & stm, void * const & value)
 			{
-				ToStringImpl("", stm, value, "%016llx");
+				ToStringImpl("", stm, value, "%016llX");
 			}
 		}
 

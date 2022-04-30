@@ -12,8 +12,8 @@ namespace GLib::Win
 
 	namespace Detail
 	{
-		inline static constexpr ULONG Read = KEY_READ;
-		inline static constexpr ULONG AllAccess = KEY_ALL_ACCESS;
+		inline static constexpr ULONG Read = KEY_READ;						// NOLINT(hicpp-signed-bitwise) bad macro
+		inline static constexpr ULONG AllAccess = KEY_ALL_ACCESS; // NOLINT(hicpp-signed-bitwise) bad macro
 		inline static constexpr size_t Position = 30;
 		inline static constexpr size_t Length = 8;
 		inline static constexpr auto TopBitsSet = 0xffffffff00000000;
@@ -83,11 +83,11 @@ namespace GLib::Win
 			ULONG_PTR value;
 
 		public:
-			constexpr RootKeyHolder(ULONG_PTR value)
+			explicit constexpr RootKeyHolder(ULONG_PTR value)
 				: value(value)
 			{}
 
-			HKEY Get() const
+			[[nodiscard]] HKEY Get() const
 			{
 				return Util::Detail::WindowsCast<HKEY>(value);
 			}
@@ -165,7 +165,7 @@ namespace GLib::Win
 			: key(std::move(key))
 		{}
 
-		bool KeyExists(std::string_view path) const
+		[[nodiscard]] bool KeyExists(std::string_view path) const
 		{
 			HKEY resultKey {};
 			LSTATUS result = RegOpenKeyW(key.Get(), Cvt::A2W(path).c_str(), &resultKey);
@@ -177,22 +177,22 @@ namespace GLib::Win
 			return exists;
 		}
 
-		std::string GetString(std::string_view valueName) const
+		[[nodiscard]] std::string GetString(std::string_view valueName) const
 		{
 			return Detail::GetString(key.Get(), Cvt::A2W(valueName));
 		}
 
-		uint32_t GetInt32(std::string_view valueName) const
+		[[nodiscard]] uint32_t GetInt32(std::string_view valueName) const
 		{
 			return Detail::GetScalar<uint32_t>(key.Get(), Cvt::A2W(valueName));
 		}
 
-		uint64_t GetInt64(std::string_view valueName) const
+		[[nodiscard]] uint64_t GetInt64(std::string_view valueName) const
 		{
 			return Detail::GetScalar<uint64_t>(key.Get(), Cvt::A2W(valueName));
 		}
 
-		RegistryValue Get(std::string_view valueName) const
+		[[nodiscard]] RegistryValue Get(std::string_view valueName) const
 		{
 			auto wideName = Cvt::A2W(valueName);
 			ULONG bytes {};
@@ -240,24 +240,24 @@ namespace GLib::Win
 			Util::AssertSuccess(result, "RegSetValueEx");
 		}
 
-		SubKey OpenSubKey(std::string_view path) const
+		[[nodiscard]] SubKey OpenSubKey(std::string_view path) const
 		{
-			HKEY subKey;
+			HKEY subKey {};
 			LSTATUS result = RegOpenKeyExW(key.Get(), Cvt::A2W(path).c_str(), 0, Detail::Read, &subKey);
 			Util::AssertSuccess(result, "RegOpenKeyEx");
 			return SubKey {Detail::KeyHolder {subKey}};
 		}
 
-		SubKey CreateSubKey(std::string_view path) const
+		[[nodiscard]] SubKey CreateSubKey(std::string_view path) const
 		{
-			HKEY subKey;
+			HKEY subKey {};
 			LSTATUS result =
 				::RegCreateKeyExW(key.Get(), Cvt::A2W(path).c_str(), 0, nullptr, REG_OPTION_NON_VOLATILE, Detail::AllAccess, nullptr, &subKey, nullptr);
 			Util::AssertSuccess(result, "RegCreateKeyEx");
 			return SubKey {Detail::KeyHolder {subKey}};
 		}
 
-		bool DeleteSubKey(const std::string & path) const
+		[[nodiscard]] bool DeleteSubKey(std::string_view path) const
 		{
 			return Detail::Found(::RegDeleteTreeW(key.Get(), Cvt::A2W(path).c_str()), "RegDeleteKey");
 		}
@@ -278,8 +278,8 @@ namespace GLib::Win
 	namespace RegistryKeys
 	{
 		// STRICT means HKEY_CLASSES_ROOT etc have value of struct Key__* and cant be used in constexpr, so copying definitions
-		inline static constexpr RegistryKey ClassesRoot = RootKey(Detail::ClassesRoot);
-		inline static constexpr RegistryKey CurrentUser = RootKey(Detail::CurrentUser);
-		inline static constexpr RegistryKey LocalMachine = RootKey(Detail::LocalMachine);
+		inline static constexpr RegistryKey ClassesRoot {RootKey {Detail::RootKeyHolder {Detail::ClassesRoot}}};
+		inline static constexpr RegistryKey CurrentUser {RootKey {Detail::RootKeyHolder {Detail::CurrentUser}}};
+		inline static constexpr RegistryKey LocalMachine {RootKey {Detail::RootKeyHolder {Detail::LocalMachine}}};
 	}
 }

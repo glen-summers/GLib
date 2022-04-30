@@ -58,7 +58,7 @@ Coverage() {
 		lcov -directory "${CMakeBuildDir}" --capture --output-file "${Name}.Info" || error_exit "lcov info"
 		lcov -a "${Name}.Base" -a "${Name}.Info" --output-file "${Name}.Total" || error_exit "lcov total"
 		lcov --remove "${Name}.Total" '/usr/include/*' '*/boost/*' '*/Tests/*' --output-file "${Name}.info.cleaned" || error_exit "lcov remove"
-		genhtml -o "${Name}" "${Name}.info.cleaned" || error_exit "genhtml"
+		genhtml --demangle-cpp -o "${Name}" "${Name}.info.cleaned" || error_exit "genhtml"
 		echo "html coverage generated at: ${Name}/index.html"
 		ls ${Name}.info.cleaned
 }

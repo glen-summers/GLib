@@ -43,14 +43,16 @@
 		<Exec Command='"$(Tidy)" %(Relative.Identity) $(TidyCmd)' WorkingDirectory="$(Source)"/>
 	</Target>
 
-	<Target Name="TidyTests" DependsOnTargets="FindTidy"> <!-- check -->
+	<Target Name="TidyTests" DependsOnTargets="FindTidy">
 		<ItemGroup>
 			<FileToCheck Include="$(Source)/Tests/**/*.cpp"/>
-			<!--FileToCheck Include="$(Source)/Tests/**/*.h"/-->
 			<Relative Include="$([MSBuild]::MakeRelative($(Source), %(FileToCheck.FullPath)))"/>
 		</ItemGroup>
 
-		<!-- vvslow, split and run in parallel? or add compilation database json? -->
-		<Exec Command='"$(Tidy)" %(Relative.Identity) $(TidyCmd)' WorkingDirectory="$(Source)"/>
+		<PropertyGroup>
+			<Identity>@(Relative -> '%(Identity)', ' ')</Identity>
+		</PropertyGroup>
+
+		<Exec Command='"$(Tidy)" $(Identity) $(TidyCmd)' WorkingDirectory="$(Source)"/>
 	</Target>
 </Project>

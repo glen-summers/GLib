@@ -4,6 +4,11 @@
 
 #include <typeindex>
 
+#include "TestUtils.h"
+
+using GLib::Util::Tuple;
+using GLib::Util::TypeFilter;
+
 namespace Interfaces
 {
 	struct IFoo
@@ -63,23 +68,34 @@ namespace Predicates
 
 namespace Util
 {
-	struct TypeIndex
+	class TypeIndex
 	{
+		std::type_index value;
+
+	public:
+		explicit TypeIndex(std::type_index value)
+			: value {value}
+		{}
+
 		friend bool operator==(const TypeIndex & lhs, const TypeIndex & rhs) = default;
 		friend bool operator!=(const TypeIndex & lhs, const TypeIndex & rhs) = default;
-		std::type_index Value;
+
+		[[nodiscard]] std::type_index Value() const
+		{
+			return value;
+		}
 	};
 
 	std::ostream & operator<<(std::ostream & s, const TypeIndex & ti)
 	{
-		return s << ti.Value.name();
+		return s << ti.Value().name();
 	}
 
 	template <typename First, typename... Rest>
 	struct ToTypeId;
 
 	template <typename First>
-	struct ToTypeId<GLib::Util::TypeList<First>>
+	struct ToTypeId<Tuple<First>>
 	{
 		static void Append(std::list<TypeIndex> & l)
 		{
@@ -88,7 +104,7 @@ namespace Util
 	};
 
 	template <typename First, typename Second>
-	struct ToTypeId<GLib::Util::TypeList<First, Second>>
+	struct ToTypeId<Tuple<First, Second>>
 	{
 		static void Append(std::list<TypeIndex> & l)
 		{
@@ -98,57 +114,66 @@ namespace Util
 	};
 
 	template <typename First, typename Second, typename... Rest>
-	struct ToTypeId<GLib::Util::TypeList<First, Second, Rest...>>
+	struct ToTypeId<Tuple<First, Second, Rest...>>
 	{
 		static void Append(std::list<TypeIndex> & l)
 		{
 			l.emplace_back(typeid(First));
-			ToTypeId<GLib::Util::TypeList<Second, Rest...>>::Append(l);
+			ToTypeId<Tuple<Second, Rest...>>::Append(l);
 		}
 	};
+
+	template <typename T>
+	inline Util::TypeIndex Index()
+	{
+		return Util::TypeIndex {typeid(T)};
+	}
 }
 
-BOOST_AUTO_TEST_SUITE(TypeFilterTests)
+using Util::Index;
+using Util::ToTypeId;
 
-BOOST_AUTO_TEST_CASE(TestTypeListCompare)
+AUTO_TEST_SUITE(TypeFilterTests)
+
+AUTO_TEST_CASE(TestTypeListCompare)
 {
-	std::list<Util::TypeIndex> expected {{typeid(int)}, {typeid(long)}};
+	std::list<Util::TypeIndex> expected {Index<int>(), Index<long>()};
 
 	std::list<Util::TypeIndex> actual;
-	Util::ToTypeId<GLib::Util::Tuple<int, long>::Type>::Append(actual);
+	ToTypeId<Tuple<int, long>::Type>::Append(actual);
 
-	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), actual.begin(), actual.end());
+	CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), actual.begin(), actual.end());
 }
 
-BOOST_AUTO_TEST_CASE(TestIntegralFilter)
+AUTO_TEST_CASE(TestIntegralFilter)
 {
-	using Result = GLib::Util::TypeFilter<std::is_integral, int, float, long>::TupleType::Type;
-	std::list<Util::TypeIndex> expected {{typeid(int)}, {typeid(long)}};
+	using Result = TypeFilter<std::is_integral, int, float, long>::TupleType::Type;
+	std::list<Util::TypeIndex> expected {Index<int>(), Index<long>()};
 
 	std::list<Util::TypeIndex> actual;
-	Util::ToTypeId<Result>::Append(actual);
-	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), actual.begin(), actual.end());
+	ToTypeId<Result>::Append(actual);
+	CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), actual.begin(), actual.end());
 }
 
-BOOST_AUTO_TEST_CASE(TestInterfaceFilter)
+AUTO_TEST_CASE(TestInterfaceFilter)
 {
-	using Result = GLib::Util::TypeFilter<Predicates::IsDerivedFromFoo, Interfaces::IFoo, Interfaces::IBar, Interfaces::IFooDerived>::TupleType::Type;
-	std::list<Util::TypeIndex> expected {{typeid(Interfaces::IFooDerived)}};
+	using Result = TypeFilter<Predicates::IsDerivedFromFoo, Interfaces::IFoo, Interfaces::IBar, Interfaces::IFooDerived>::TupleType::Type;
+	std::list<Util::TypeIndex> expected {Index<Interfaces::IFooDerived>()};
 
 	std::list<Util::TypeIndex> actual;
-	Util::ToTypeId<Result>::Append(actual);
-	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), actual.begin(), actual.end());
+	ToTypeId<Result>::Append(actual);
+	CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), actual.begin(), actual.end());
 }
 
-BOOST_AUTO_TEST_CASE(TestSelfFilter)
+AUTO_TEST_CASE(TestSelfFilter)
 {
 	using Result =
 		GLib::Util::SelfTypeFilter<GLib::TypePredicates::HasNoInheritor, Interfaces::IFoo, Interfaces::IFooDerived, Interfaces::IBar>::TupleType::Type;
-	std::list<Util::TypeIndex> expected {{typeid(Interfaces::IFooDerived)}, {typeid(Interfaces::IBar)}};
+	std::list<Util::TypeIndex> expected {Index<Interfaces::IFooDerived>(), Index<Interfaces::IBar>()};
 
 	std::list<Util::TypeIndex> actual;
-	Util::ToTypeId<Result>::Append(actual);
-	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), actual.begin(), actual.end());
+	ToTypeId<Result>::Append(actual);
+	CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), actual.begin(), actual.end());
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+AUTO_TEST_SUITE_END()

@@ -17,6 +17,12 @@ namespace GLib::Win::Debug
 		Stream() << value << std::endl;
 	}
 
+	template <typename T>
+	void Write(const T * value)
+	{
+		Stream() << value << std::endl;
+	}
+
 	inline void Write(std::string_view value)
 	{
 		Stream() << value << std::endl;

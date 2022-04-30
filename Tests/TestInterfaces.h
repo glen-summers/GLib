@@ -135,17 +135,11 @@ public:
 	}
 };
 
-namespace GLib
+namespace GLib::Win::Detail
 {
-	namespace Win
+	template <>
+	inline ITest1 * Cast<ITest1, ImplementsITest1ExtendedAndITest1ExtendedAlt>(ImplementsITest1ExtendedAndITest1ExtendedAlt * t)
 	{
-		namespace Detail
-		{
-			template <>
-			inline ITest1 * Cast<ITest1, ImplementsITest1ExtendedAndITest1ExtendedAlt>(ImplementsITest1ExtendedAndITest1ExtendedAlt * t)
-			{
-				return static_cast<ITest1Extended *>(t);
-			}
-		}
+		return static_cast<ITest1Extended *>(t);
 	}
 }

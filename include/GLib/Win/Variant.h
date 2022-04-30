@@ -13,17 +13,17 @@ namespace GLib::Win
 
 		inline VARTYPE Vt(const VARIANT & v)
 		{
-			return v.vt;
+			return v.vt; // NOLINT(cppcoreguidelines-pro-type-union-access)
 		}
 
 		inline VARTYPE & Vt(VARIANT & v)
 		{
-			return v.vt;
+			return v.vt; // NOLINT(cppcoreguidelines-pro-type-union-access)
 		}
 
 		inline BSTR & Bstr(VARIANT & v)
 		{
-			return v.bstrVal;
+			return v.bstrVal; // NOLINT(cppcoreguidelines-pro-type-union-access)
 		}
 
 		inline VARIANT Create(const std::string & value)
@@ -84,12 +84,12 @@ namespace GLib::Win
 			WarnHr(VariantClear(&v), "VariantClear");
 		}
 
-		VARTYPE Type() const
+		[[nodiscard]] VARTYPE Type() const
 		{
 			return Detail::Vt(v);
 		}
 
-		std::string ToString() const
+		[[nodiscard]] std::string ToString() const
 		{
 			VARIANT tmp {};
 			CheckHr(VariantChangeType(&tmp, &v, 0, VT_BSTR), "VariantChangeType");
@@ -112,8 +112,8 @@ namespace GLib::Win
 
 		bool operator==(const Variant & other) const noexcept
 		{
-			auto * v1 = const_cast<VARIANT *>(&v);
-			auto * v2 = const_cast<VARIANT *>(&other.v);
+			auto * v1 = const_cast<VARIANT *>(&v);			 // NOLINT(cppcoreguidelines-pro-type-const-cast) required
+			auto * v2 = const_cast<VARIANT *>(&other.v); // NOLINT(cppcoreguidelines-pro-type-const-cast)
 			return VarCmp(v1, v2, 0) == VARCMP_EQ;
 		}
 

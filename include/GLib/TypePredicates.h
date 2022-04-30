@@ -32,5 +32,4 @@ namespace GLib::TypePredicates
 	template <typename T, typename First, typename... Rest>
 	struct HasNoInheritor<T, First, Rest...> : std::bool_constant<!IsBaseOf<T, First>::value && !IsBaseOfAny<T, Rest...>::value>
 	{};
-
 }
