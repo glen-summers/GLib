@@ -1,4 +1,4 @@
-FROM ubuntu:22.04 AS cpp
+FROM ubuntu:22.10 AS cpp
 LABEL description="C++ utils etc."
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
 	ca-certificates \

@@ -38,7 +38,7 @@ namespace GLib::Util
 			return GetSize();
 		}
 
-		T * Get()
+		[[nodiscard]] T * Get()
 		{
 			return HeapInUse() ? &std::get<1>(storage)[0] : std::get<0>(storage).data();
 		}

@@ -72,7 +72,10 @@ namespace GLib::Win
 		{
 			void operator()(HWND hWnd) const noexcept
 			{
-				Util::WarnAssertTrue(DestroyWindow(hWnd), "DestroyWindow");
+				if (IsWindow(hWnd))
+				{
+					Util::WarnAssertTrue(DestroyWindow(hWnd), "DestroyWindow");
+				}
 			}
 		};
 
@@ -86,11 +89,11 @@ namespace GLib::Win
 				static_cast<void>(icon);
 				static_cast<void>(menu);
 				// hash+more
-				return Formatter::Format("GTL:{0}", static_cast<void *>(&proc));
+				return Formatter::Format("GTL:{0}", static_cast<void *>(proc));
 			}
 		};
 
-		inline std::string RegisterClass(int icon, int menu, WNDPROC proc)
+		std::string Register(int icon, int menu, WNDPROC proc)
 		{
 			std::wstring className = Cvt::A2W(ClassInfoStore::Register(icon, menu, proc));
 			auto * instance = Instance();
@@ -121,21 +124,21 @@ namespace GLib::Win
 			return Cvt::W2A(className);
 		}
 
-		inline void AssociateHandle(Window * value, HWND handle)
+		void AssociateHandle(Window * value, HWND handle)
 		{
 			SetLastError(ERROR_SUCCESS); // SetWindowLongPtr does not set last error on success
 			auto ret = SetWindowLongPtrW(handle, GWLP_USERDATA, Util::Detail::WindowsCast<LONG_PTR>(value));
 			Util::AssertTrue(ret != 0 || GetLastError() == ERROR_SUCCESS, "SetWindowLongPtr");
 		}
 
-		inline Window * FromHandle(HWND hWnd)
+		Window * FromHandle(HWND hWnd)
 		{
 			return Util::Detail::WindowsCast<Window *>(GetWindowLongPtrW(hWnd, GWLP_USERDATA));
 		}
 
-		inline WindowHandle Create(ULONG style, int icon, int menu, const std::string & title, WNDPROC proc, Window * param)
+		WindowHandle Create(ULONG style, int icon, int menu, const std::string & title, WNDPROC proc, Window * param)
 		{
-			std::string className = RegisterClassW(icon, menu, proc);
+			std::string className = Register(icon, menu, proc);
 			WindowHandle handle(CreateWindowExW(0, Cvt::A2W(className).c_str(), Cvt::A2W(title).c_str(), style, CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, nullptr,
 																					nullptr, Instance(), param));
 			Util::AssertTrue(!!handle, "CreateWindowExW");
@@ -148,7 +151,7 @@ namespace GLib::Win
 			return handle;
 		}
 
-		inline HACCEL LoadAccel(int id)
+		HACCEL LoadAccel(int id)
 		{
 			HACCEL accel = LoadAcceleratorsW(Instance(), MakeIntResource(id));
 			Util::AssertTrue(accel != nullptr, "LoadAcceleratorsW");

@@ -38,7 +38,7 @@ namespace GLib
 			}
 
 			template <typename T>
-			static void ToStringImpl(const char * defaultFormat, std::ostream & stm, const T & value, const std::string & format)
+			void ToStringImpl(const char * defaultFormat, std::ostream & stm, const T & value, const std::string & format)
 			{
 				std::string f = CheckFormat(defaultFormat, format, Compat::Unmangle(typeid(T).name()));
 				constexpr auto initialBufferSize = 21;

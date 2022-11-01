@@ -15,24 +15,42 @@
 
 namespace GLib::Compat
 {
+	inline void ThrowErrorNumber(std::string_view prefix, const errno_t errorNumber)
+	{
+		if (errorNumber != 0)
+		{
+			Util::CharBuffer soh;
+			while (strerror_s(soh.Get(), soh.Size(), errorNumber) != 0)
+			{
+				soh.EnsureSize(soh.Size() * 2);
+			}
+
+			if (const errno_t err = strerror_s(soh.Get(), soh.Size(), errorNumber) != 0)
+			{
+				throw std::runtime_error {"strerror_s Failed"};
+			}
+			else
+			{
+				throw std::runtime_error {std::string {prefix} + " : " + soh.Get()};
+			}
+		}
+	}
+
 	inline void LocalTime(tm & tm, const time_t & t)
 	{
-		localtime_s(&tm, &t);
+		ThrowErrorNumber(__func__, localtime_s(&tm, &t));
 	}
 
 	inline void GmTime(tm & tm, const time_t & t)
 	{
-		gmtime_s(&tm, &t);
+		ThrowErrorNumber(__func__, gmtime_s(&tm, &t));
 	}
 
-	inline void AssertTrue(bool value, const char * prefix, errno_t error)
+	inline void AssertTrue(bool value, std::string_view prefix, errno_t error)
 	{
 		if (!value)
 		{
-			constexpr auto errorBufferSize = 256;
-			std::array<char, errorBufferSize> err {};
-			strerror_s(err.data(), err.size(), error);
-			throw std::runtime_error(std::string(prefix) + " : " + err.data());
+			ThrowErrorNumber(prefix, error);
 		}
 	}
 

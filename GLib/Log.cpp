@@ -4,7 +4,6 @@
 
 #include <GLib/Flogging.h>
 
-using GLib::Flog::Level;
 using GLib::Flog::Log;
 
 void Log::Write(Level level, std::string_view message) const
