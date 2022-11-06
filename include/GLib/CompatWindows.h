@@ -6,7 +6,6 @@
 #include <GLib/StackOrHeap.h>
 #include <GLib/Win/FileSystem.h>
 
-#include <array>
 #include <ctime>
 #include <filesystem>
 #include <optional>
@@ -25,14 +24,11 @@ namespace GLib::Compat
 				soh.EnsureSize(soh.Size() * 2);
 			}
 
-			if (const errno_t err = strerror_s(soh.Get(), soh.Size(), errorNumber) != 0)
+			if (strerror_s(soh.Get(), soh.Size(), errorNumber) != 0)
 			{
 				throw std::runtime_error {"strerror_s Failed"};
 			}
-			else
-			{
-				throw std::runtime_error {std::string {prefix} + " : " + soh.Get()};
-			}
+			throw std::runtime_error {std::string {prefix} + " : " + soh.Get()};
 		}
 	}
 

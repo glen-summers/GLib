@@ -3,6 +3,7 @@
 #if defined(__linux__) && defined(__GNUG__)
 
 #include <algorithm>
+#include <array>
 #include <filesystem>
 #include <fstream>
 #include <optional>

@@ -45,7 +45,7 @@ namespace GLib::Util
 			class Iterator
 			{
 				const Splitter * const splitter;
-				std::size_t current, nextDelimiter;
+				size_t current, nextDelimiter;
 
 			public:
 				// ReSharper disable All

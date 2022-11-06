@@ -248,7 +248,7 @@ namespace GLib::Win
 	}
 
 	template <typename T1, typename T2>
-	inline bool operator==(const ComPtr<T1> & t1, const ComPtr<T2> & t2)
+	bool operator==(const ComPtr<T1> & t1, const ComPtr<T2> & t2)
 	{
 		return Get(ComCast<IUnknown>(t1)) == Get(ComCast<IUnknown>(t2));
 	}

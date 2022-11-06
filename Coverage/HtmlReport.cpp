@@ -19,6 +19,7 @@
 #include <GLib/Xml/Printer.h>
 
 #include <fstream>
+#include <ranges>
 #include <set>
 
 using GLib::Cvt::P2A;
@@ -62,7 +63,7 @@ HtmlReport::HtmlReport(std::string testName, const std::filesystem::path & htmlP
 	}
 	bool multipleDrives = drives.size() > 1;
 
-	for (const auto & [_, data] : coverageData)
+	for (const auto & data : coverageData | std::views::values)
 	{
 		auto [rootPath, subPath] = Reduce(data.Path(), rootPaths);
 
@@ -99,7 +100,7 @@ std::filesystem::path HtmlReport::Initialise(const std::filesystem::path & path)
 std::set<std::filesystem::path> HtmlReport::RootPaths(const CoverageData & data)
 {
 	std::set<std::filesystem::path> rootPaths;
-	for (const auto & [path, _] : data)
+	for (const auto & path : data | std::views::keys)
 	{
 		rootPaths.insert(path.parent_path());
 	}

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <ranges>
+
 #include "Address.h"
 #include "Types.h"
 
@@ -48,7 +50,7 @@ public:
 	{
 		for (const auto & [file, addressLines] : address.FileLines())
 		{
-			for (const auto & [line, _] : addressLines) // map merge method?
+			for (const auto & line : addressLines | std::views::keys) // map merge method?
 			{
 				fileLines[file][line] |= address.Visited();
 			}
@@ -101,9 +103,9 @@ public:
 	size_t CoveredLines() const
 	{
 		size_t total {};
-		for (const auto & [_1, lines] : fileLines)
+		for (const auto & lines : fileLines | std::views::values)
 		{
-			for (const auto & [_2, isCovered] : lines)
+			for (const auto & isCovered : lines | std::views::values)
 			{
 				// improve? keep tally?
 				if (isCovered)
@@ -118,7 +120,7 @@ public:
 	size_t AllLines() const
 	{
 		size_t total {};
-		for (const auto & [_, lines] : fileLines)
+		for (const auto & lines : fileLines | std::views::values)
 		{
 			total += lines.size();
 		}

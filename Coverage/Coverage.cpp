@@ -10,7 +10,7 @@
 WideStrings Coverage::A2W(const Strings & strings)
 {
 	WideStrings wideStrings;
-	std::transform(strings.begin(), strings.end(), std::inserter(wideStrings, wideStrings.begin()), GLib::Cvt::A2W);
+	std::ranges::transform(strings, std::inserter(wideStrings, wideStrings.begin()), GLib::Cvt::A2W);
 	return wideStrings;
 }
 
@@ -108,7 +108,7 @@ void Coverage::CaptureData(ULONG processId)
 	}
 	Process & process = pit->second;
 
-	for (const auto & [addressValue, address] : process.Addresses())
+	for (const auto & address : process.Addresses() | std::views::values)
 	{
 		auto symbolId = address.SymbolId();
 		auto symbol = symProcess.GetSymbolFromIndex(symbolId);
@@ -192,11 +192,11 @@ CoverageData Coverage::GetCoverageData() const
 
 	CaseInsensitiveMap<wchar_t, Functions> fileNameToFunctionMap;
 
-	for (const auto & [pid, process] : processes)
+	for (const auto & process : processes | std::views::values)
 	{
-		for (const auto & [id, function] : process.IndexToFunction())
+		for (const auto & function : process.IndexToFunction() | std::views::values)
 		{
-			for (const auto & [fileName, lineCoverage] : function.FileLines())
+			for (const auto & fileName : function.FileLines() | std::views::keys)
 			{
 				fileNameToFunctionMap[fileName].emplace(function);
 			}

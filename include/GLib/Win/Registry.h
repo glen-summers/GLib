@@ -18,7 +18,7 @@ namespace GLib::Win
 		inline static constexpr size_t Length = 8;
 		inline static constexpr auto TopBitsSet = 0xffffffff00000000;
 
-		constexpr ULONG_PTR SignExtend(uint32_t value)
+		inline constexpr ULONG_PTR SignExtend(uint32_t value)
 		{
 			if constexpr (sizeof(ULONG_PTR) == sizeof(uint32_t))
 			{
@@ -31,7 +31,7 @@ namespace GLib::Win
 			}
 		}
 
-		constexpr uint32_t Hex(char number)
+		inline constexpr uint32_t Hex(char number)
 		{
 			constexpr auto ten = 0x0a;
 			return number >= '0' && number <= '9'		? number - '0'
@@ -40,7 +40,7 @@ namespace GLib::Win
 																							: throw std::runtime_error {"!"};
 		}
 
-		constexpr uint32_t ToInt32(std::string_view s)
+		inline constexpr uint32_t ToInt32(std::string_view s)
 		{
 			uint32_t result {};
 			for (auto c : s)

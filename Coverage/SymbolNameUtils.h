@@ -85,9 +85,9 @@ inline void RemoveTemplateDefinitions(std::string & name)
 	}
 	else
 	{
-		std::reverse(name.begin(), name.end());
+		std::ranges::reverse(name);
 		ok = Parse(name, right - left, '>', '<');
-		std::reverse(name.begin(), name.end());
+		std::ranges::reverse(name);
 	}
 
 	if (!ok)

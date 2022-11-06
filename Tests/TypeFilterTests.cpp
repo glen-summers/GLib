@@ -124,9 +124,9 @@ namespace Util
 	};
 
 	template <typename T>
-	inline Util::TypeIndex Index()
+	TypeIndex Index()
 	{
-		return Util::TypeIndex {typeid(T)};
+		return TypeIndex {typeid(T)};
 	}
 }
 
@@ -137,7 +137,7 @@ AUTO_TEST_SUITE(TypeFilterTests)
 
 AUTO_TEST_CASE(TestTypeListCompare)
 {
-	std::list<Util::TypeIndex> expected {Index<int>(), Index<long>()};
+	std::list expected {Index<int>(), Index<long>()};
 
 	std::list<Util::TypeIndex> actual;
 	ToTypeId<Tuple<int, long>::Type>::Append(actual);
@@ -148,7 +148,7 @@ AUTO_TEST_CASE(TestTypeListCompare)
 AUTO_TEST_CASE(TestIntegralFilter)
 {
 	using Result = TypeFilter<std::is_integral, int, float, long>::TupleType::Type;
-	std::list<Util::TypeIndex> expected {Index<int>(), Index<long>()};
+	std::list expected {Index<int>(), Index<long>()};
 
 	std::list<Util::TypeIndex> actual;
 	ToTypeId<Result>::Append(actual);
@@ -158,7 +158,7 @@ AUTO_TEST_CASE(TestIntegralFilter)
 AUTO_TEST_CASE(TestInterfaceFilter)
 {
 	using Result = TypeFilter<Predicates::IsDerivedFromFoo, Interfaces::IFoo, Interfaces::IBar, Interfaces::IFooDerived>::TupleType::Type;
-	std::list<Util::TypeIndex> expected {Index<Interfaces::IFooDerived>()};
+	std::list expected {Index<Interfaces::IFooDerived>()};
 
 	std::list<Util::TypeIndex> actual;
 	ToTypeId<Result>::Append(actual);
@@ -169,7 +169,7 @@ AUTO_TEST_CASE(TestSelfFilter)
 {
 	using Result =
 		GLib::Util::SelfTypeFilter<GLib::TypePredicates::HasNoInheritor, Interfaces::IFoo, Interfaces::IFooDerived, Interfaces::IBar>::TupleType::Type;
-	std::list<Util::TypeIndex> expected {Index<Interfaces::IFooDerived>(), Index<Interfaces::IBar>()};
+	std::list expected {Index<Interfaces::IFooDerived>(), Index<Interfaces::IBar>()};
 
 	std::list<Util::TypeIndex> actual;
 	ToTypeId<Result>::Append(actual);

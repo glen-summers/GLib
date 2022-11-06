@@ -219,7 +219,7 @@ namespace boost::test_tools::tt_detail
 	template <typename K, typename V>
 	struct print_log_value<std::pair<K, V>>
 	{
-		inline void operator()(std::ostream & str, const std::pair<K, V> & item)
+		void operator()(std::ostream & str, const std::pair<K, V> & item)
 		{
 			str << '{' << item.first << ',' << item.second << '}';
 		}
@@ -228,7 +228,7 @@ namespace boost::test_tools::tt_detail
 	template <>
 	struct print_log_value<std::wstring>
 	{
-		inline void operator()(std::ostream & str, const std::wstring & item)
+		void operator()(std::ostream & str, const std::wstring & item)
 		{
 			str << GLib::Cvt::W2A(item);
 		}

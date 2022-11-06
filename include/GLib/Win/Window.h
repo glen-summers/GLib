@@ -89,11 +89,11 @@ namespace GLib::Win
 				static_cast<void>(icon);
 				static_cast<void>(menu);
 				// hash+more
-				return Formatter::Format("GTL:{0}", static_cast<void *>(proc));
+				return Formatter::Format("GTL:{0}", static_cast<void *>(proc)); // NOLINT(clang-diagnostic-microsoft-cast)
 			}
 		};
 
-		std::string Register(int icon, int menu, WNDPROC proc)
+		inline std::string Register(int icon, int menu, WNDPROC proc)
 		{
 			std::wstring className = Cvt::A2W(ClassInfoStore::Register(icon, menu, proc));
 			auto * instance = Instance();
@@ -124,19 +124,19 @@ namespace GLib::Win
 			return Cvt::W2A(className);
 		}
 
-		void AssociateHandle(Window * value, HWND handle)
+		inline void AssociateHandle(Window * value, HWND handle)
 		{
 			SetLastError(ERROR_SUCCESS); // SetWindowLongPtr does not set last error on success
 			auto ret = SetWindowLongPtrW(handle, GWLP_USERDATA, Util::Detail::WindowsCast<LONG_PTR>(value));
 			Util::AssertTrue(ret != 0 || GetLastError() == ERROR_SUCCESS, "SetWindowLongPtr");
 		}
 
-		Window * FromHandle(HWND hWnd)
+		inline Window * FromHandle(HWND hWnd)
 		{
 			return Util::Detail::WindowsCast<Window *>(GetWindowLongPtrW(hWnd, GWLP_USERDATA));
 		}
 
-		WindowHandle Create(ULONG style, int icon, int menu, const std::string & title, WNDPROC proc, Window * param)
+		inline WindowHandle Create(ULONG style, int icon, int menu, const std::string & title, WNDPROC proc, Window * param)
 		{
 			std::string className = Register(icon, menu, proc);
 			WindowHandle handle(CreateWindowExW(0, Cvt::A2W(className).c_str(), Cvt::A2W(title).c_str(), style, CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, nullptr,
@@ -151,7 +151,7 @@ namespace GLib::Win
 			return handle;
 		}
 
-		HACCEL LoadAccel(int id)
+		inline HACCEL LoadAccel(int id)
 		{
 			HACCEL accel = LoadAcceleratorsW(Instance(), MakeIntResource(id));
 			Util::AssertTrue(accel != nullptr, "LoadAcceleratorsW");

@@ -93,7 +93,7 @@ namespace GLib::Win::FileSystem
 	{
 		GLib::Util::WideCharBuffer s;
 
-		unsigned int length = 0;
+		unsigned int length {};
 		for (;;)
 		{
 			// this could return prefix "\\?\"
@@ -122,7 +122,7 @@ namespace GLib::Win::FileSystem
 	{
 		GLib::Util::WideCharBuffer s;
 
-		ULONG requiredSize = 0;
+		ULONG requiredSize {};
 		for (;;)
 		{
 			auto size = static_cast<ULONG>(s.Size());

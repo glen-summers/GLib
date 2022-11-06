@@ -35,7 +35,7 @@ namespace boost::test_tools::tt_detail
 	template <>
 	struct print_log_value<Variant>
 	{
-		inline void operator()(std::ostream & str, const Variant & item)
+		void operator()(std::ostream & str, const Variant & item)
 		{
 			str << item.Type();
 		}

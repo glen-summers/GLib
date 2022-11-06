@@ -18,9 +18,6 @@ namespace GLib::Win
 
 	inline std::string LoadResourceString(HINSTANCE instance, unsigned int id, LPCWSTR resourceType)
 	{
-		auto [p, size] = LoadResource<char>(instance, id, resourceType);
-		std::string s {p, size};
-		s.erase(remove(s.begin(), s.end(), '\r'), s.end());
-		return s;
+		return std::make_from_tuple<std::string>(LoadResource<char>(instance, id, resourceType));
 	}
-}
+};

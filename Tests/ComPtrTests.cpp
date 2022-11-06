@@ -31,7 +31,7 @@ namespace boost::test_tools::tt_detail
 	template <typename T>
 	struct print_log_value<GLib::Win::ComPtr<T>>
 	{
-		inline void operator()(std::ostream & str, const GLib::Win::ComPtr<T> & item)
+		void operator()(std::ostream & str, const GLib::Win::ComPtr<T> & item)
 		{
 			str << "ptr: " << Get(item) << ", Ref: " << UseCount(item);
 		}
