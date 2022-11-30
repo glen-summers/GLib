@@ -18,9 +18,9 @@ public:
 	{}
 
 	StreamInfo() = default;
-	StreamInfo(const StreamInfo &) = delete;
+	StreamInfo(StreamInfo const &) = delete;
 	StreamInfo(StreamInfo &&) = delete;
-	StreamInfo & operator=(const StreamInfo &) = delete;
+	StreamInfo & operator=(StreamInfo const &) = delete;
 	StreamInfo & operator=(StreamInfo &&) noexcept = default; // NOLINT(bugprone-exception-escape) ofstream move can throw
 	~StreamInfo() = default;
 
@@ -29,7 +29,7 @@ public:
 		return stream;
 	}
 
-	const std::filesystem::path & Path() const
+	std::filesystem::path const & Path() const
 	{
 		return path;
 	}

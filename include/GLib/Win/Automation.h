@@ -17,7 +17,7 @@ namespace GLib::Win
 		{}
 
 		template <typename T>
-		ComPtr<T> GetCurrentPattern(long id)
+		ComPtr<T> GetCurrentPattern(long const id)
 		{
 			ComPtr<IUnknown> pattern;
 			CheckHr(element->GetCurrentPattern(id, GetAddress(pattern).Raw()), "GetCurrentPattern");
@@ -54,7 +54,7 @@ namespace GLib::Win
 							"CoCreateInstance");
 		}
 
-		Element ElementFromHandle(HWND hWnd) const
+		Element ElementFromHandle(HWND const hWnd) const
 		{
 			ComPtr<IUIAutomationElement> element;
 			CheckHr(automation->ElementFromHandle(hWnd, GetAddress(element).Raw()), "ElementFromHandle");

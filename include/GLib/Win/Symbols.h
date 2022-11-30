@@ -24,14 +24,14 @@ namespace GLib::Win::Symbols
 	{
 		struct Cleanup
 		{
-			void operator()(HANDLE handle) const noexcept
+			void operator()(HANDLE const handle) const noexcept
 			{
 				Util::WarnAssertTrue(SymCleanup(handle), "SymCleanup");
 			}
 		};
 		using SymbolHandle = std::unique_ptr<void, Cleanup>;
 
-		inline Handle Duplicate(HANDLE handle)
+		inline Handle Duplicate(HANDLE const handle)
 		{
 			HANDLE duplicatedHandle = nullptr;
 			Util::AssertTrue(DuplicateHandle(GetCurrentProcess(), handle, GetCurrentProcess(), &duplicatedHandle, 0, FALSE, DUPLICATE_SAME_ACCESS),
@@ -57,7 +57,7 @@ namespace GLib::Win::Symbols
 		uint64_t displacement {};
 
 	public:
-		Symbol(ULONG index, ULONG typeIndex, enum SymTagEnum tag, std::string name, uint64_t displacement)
+		Symbol(ULONG const index, ULONG const typeIndex, enum SymTagEnum const tag, std::string name, const uint64_t displacement)
 			: index(index)
 			, typeIndex(typeIndex)
 			, tag(tag)
@@ -65,9 +65,9 @@ namespace GLib::Win::Symbols
 			, displacement(displacement)
 		{}
 
-		Symbol(const Symbol &) = delete;
+		Symbol(Symbol const &) = delete;
 		Symbol(Symbol &&) = default;
-		Symbol & operator=(const Symbol &) = delete;
+		Symbol & operator=(Symbol const &) = delete;
 		Symbol & operator=(Symbol &&) = delete;
 		~Symbol() = default;
 
@@ -76,7 +76,7 @@ namespace GLib::Win::Symbols
 			return index;
 		}
 
-		void Index(ULONG value)
+		void Index(ULONG const value)
 		{
 			index = value;
 		}
@@ -86,7 +86,7 @@ namespace GLib::Win::Symbols
 			return typeIndex;
 		}
 
-		void TypeIndex(ULONG value)
+		void TypeIndex(ULONG const value)
 		{
 			typeIndex = value;
 		}
@@ -96,12 +96,12 @@ namespace GLib::Win::Symbols
 			return tag;
 		}
 
-		void Tag(enum SymTagEnum value)
+		void Tag(enum SymTagEnum const value)
 		{
 			tag = value;
 		}
 
-		[[nodiscard]] const std::string & Name() const
+		[[nodiscard]] std::string const & Name() const
 		{
 			return name;
 		}
@@ -125,16 +125,16 @@ namespace GLib::Win::Symbols
 		unsigned int displacement;
 
 	public:
-		Line(unsigned int lineNumber, std::string fileName, uint64_t address, unsigned int displacement)
+		Line(unsigned int const lineNumber, std::string fileName, uint64_t const address, unsigned int const displacement)
 			: lineNumber(lineNumber)
 			, fileName(move(fileName))
 			, address(address)
 			, displacement(displacement)
 		{}
 
-		Line(const Line &) = delete;
+		Line(Line const &) = delete;
 		Line(Line &&) = default;
-		Line & operator=(const Line &) = delete;
+		Line & operator=(Line const &) = delete;
 		Line & operator=(Line &&) = delete;
 		~Line() = default;
 
@@ -143,7 +143,7 @@ namespace GLib::Win::Symbols
 			return lineNumber;
 		}
 
-		[[nodiscard]] const std::string & FileName() const
+		[[nodiscard]] std::string const & FileName() const
 		{
 			return fileName;
 		}
@@ -166,7 +166,7 @@ namespace GLib::Win::Symbols
 		uint64_t baseOfImage {};
 
 	public:
-		SymProcess(Handle handle, uint64_t baseOfImage)
+		SymProcess(Handle handle, uint64_t const baseOfImage)
 			: process(std::move(handle))
 			, symbolHandle(process.Handle().get())
 			, baseOfImage(baseOfImage)
@@ -177,22 +177,22 @@ namespace GLib::Win::Symbols
 			return GetProcess(GetCurrentProcess(), 0, true);
 		}
 
-		static SymProcess GetProcess(HANDLE handle, uint64_t baseOfImage, bool invasive)
+		static SymProcess GetProcess(HANDLE const handle, uint64_t const baseOfImage, bool const invasive)
 		{
 			auto duplicate = Detail::Duplicate(handle);
 
 			std::ostringstream searchPath;
 
-			const auto processPath = Cvt::P2A(std::filesystem::path(FileSystem::PathOfProcessHandle(duplicate.get())).parent_path());
+			auto const processPath = Cvt::P2A(std::filesystem::path(FileSystem::PathOfProcessHandle(duplicate.get())).parent_path());
 			searchPath << processPath << ";";
 
 			// set sym opts, add exe to sym path, legacy code, still needed?
-			if (auto value = Compat::GetEnv("_NT_SYMBOL_PATH"))
+			if (auto const value = Compat::GetEnv("_NT_SYMBOL_PATH"))
 			{
 				searchPath << *value << ";";
 			}
 
-			if (auto value = Compat::GetEnv("PATH"))
+			if (auto const value = Compat::GetEnv("PATH"))
 			{
 				searchPath << *value << ";";
 			}
@@ -207,23 +207,23 @@ namespace GLib::Win::Symbols
 			return process.Handle().get();
 		}
 
-		[[nodiscard]] const Process & Process() const
+		[[nodiscard]] Process const & Process() const
 		{
 			return process;
 		}
 
-		void ReadMemory(uint64_t address, void * buffer, size_t size, bool fromBase = true) const
+		void ReadMemory(uint64_t const address, void * const buffer, size_t const size, bool const fromBase = true) const
 		{
 			process.ReadMemory(fromBase ? baseOfImage + address : address, buffer, size);
 		}
 
-		void WriteMemory(uint64_t address, const void * buffer, size_t size, bool fromBase = true) const
+		void WriteMemory(uint64_t const address, void const * const buffer, size_t const size, bool const fromBase = true) const
 		{
 			process.WriteMemory(fromBase ? baseOfImage + address : address, buffer, size);
 		}
 
 		template <typename T>
-		[[nodiscard]] T Read(uint64_t address, bool absolute = false) const
+		[[nodiscard]] T Read(uint64_t const address, bool const absolute = false) const
 		{
 			T value;
 			ReadMemory(address, &value, sizeof(T), absolute);
@@ -231,56 +231,56 @@ namespace GLib::Win::Symbols
 		}
 
 		template <typename T>
-		void Write(uint64_t address, const T & value, bool absolute = false) const
+		void Write(uint64_t const address, T const & value, bool const absolute = false) const
 		{
 			WriteMemory(address, &value, sizeof(T), absolute);
 		}
 
-		[[nodiscard]] Symbol GetSymbolFromIndex(ULONG index) const
+		[[nodiscard]] Symbol GetSymbolFromIndex(ULONG const index) const
 		{
 			std::array<SYMBOL_INFOW, 2 + MAX_SYM_NAME * sizeof(wchar_t) / sizeof(SYMBOL_INFO)> buffer {};
 			auto * const symBuf = buffer.data();
 			symBuf->SizeOfStruct = sizeof(SYMBOL_INFOW);
 			symBuf->MaxNameLen = MAX_SYM_NAME;
 
-			BOOL result = SymFromIndexW(Handle(), baseOfImage, index, symBuf);
+			BOOL const result = SymFromIndexW(Handle(), baseOfImage, index, symBuf);
 			Util::AssertTrue(result, "SymFromIndexW");
 
 			return {symBuf->Index,
 							symBuf->TypeIndex,
 							static_cast<enum SymTagEnum>(symBuf->Tag),
-							Cvt::W2A(std::wstring_view {static_cast<const wchar_t *>(symBuf->Name)}),
+							Cvt::W2A(std::wstring_view {static_cast<wchar_t const *>(symBuf->Name)}),
 							{}};
 		}
 
-		[[nodiscard]] ULONG GetSymbolIdFromAddress(uint64_t address) const
+		[[nodiscard]] ULONG GetSymbolIdFromAddress(uint64_t const address) const
 		{
 			SYMBOL_INFOW buffer {};
 			auto * const symBuf = &buffer;
 			symBuf->SizeOfStruct = sizeof(SYMBOL_INFOW);
 			uint64_t displacement = 0;
-			BOOL result = SymFromAddrW(Handle(), address, &displacement, symBuf);
+			BOOL const result = SymFromAddrW(Handle(), address, &displacement, symBuf);
 			Util::AssertTrue(result, "SymFromAddrW");
 			return symBuf->Index;
 		}
 
-		[[nodiscard]] std::optional<Symbol> TryGetSymbolFromAddress(uint64_t address) const
+		[[nodiscard]] std::optional<Symbol> TryGetSymbolFromAddress(uint64_t const address) const
 		{
 			std::array<SYMBOL_INFOW, 2 + MAX_SYM_NAME * sizeof(wchar_t) / sizeof(SYMBOL_INFO)> buffer {};
 			auto * const symBuf = buffer.data();
 			symBuf->SizeOfStruct = sizeof(SYMBOL_INFOW);
 			symBuf->MaxNameLen = MAX_SYM_NAME;
 			uint64_t displacement = 0;
-			BOOL result = SymFromAddrW(Handle(), address, &displacement, symBuf);
+			BOOL const result = SymFromAddrW(Handle(), address, &displacement, symBuf);
 			if (Util::WarnAssertTrue(result, "SymFromAddrW"))
 			{
 				return Symbol {symBuf->Index, symBuf->TypeIndex, static_cast<enum SymTagEnum>(symBuf->Tag),
-											 Cvt::W2A(std::wstring_view {static_cast<const wchar_t *>(symBuf->Name)}), displacement};
+											 Cvt::W2A(std::wstring_view {static_cast<wchar_t const *>(symBuf->Name)}), displacement};
 			}
 			return {};
 		}
 
-		[[nodiscard]] std::optional<Symbol> TryGetSymbolFromInlineContext(uint64_t address, ULONG context) const
+		[[nodiscard]] std::optional<Symbol> TryGetSymbolFromInlineContext(uint64_t const address, ULONG const context) const
 		{
 			std::array<SYMBOL_INFOW, 2 + MAX_SYM_NAME * sizeof(wchar_t) / sizeof(SYMBOL_INFOW)> buffer {};
 			auto * const symBuf = buffer.data();
@@ -288,20 +288,20 @@ namespace GLib::Win::Symbols
 			symBuf->MaxNameLen = MAX_SYM_NAME;
 			uint64_t displacement = 0;
 
-			auto result = SymFromInlineContextW(Handle(), address, context, &displacement, symBuf);
+			auto const result = SymFromInlineContextW(Handle(), address, context, &displacement, symBuf);
 			if (Util::WarnAssertTrue(result, "SymFromInlineContext"))
 			{
 				return Symbol {symBuf->Index, symBuf->TypeIndex, static_cast<enum SymTagEnum>(symBuf->Tag),
-											 Cvt::W2A(std::wstring_view {static_cast<const wchar_t *>(symBuf->Name)}), displacement};
+											 Cvt::W2A(std::wstring_view {static_cast<wchar_t const *>(symBuf->Name)}), displacement};
 			}
 			return {};
 		}
 
-		[[nodiscard]] std::optional<Line> TryGetLineFromAddress(uint64_t address) const
+		[[nodiscard]] std::optional<Line> TryGetLineFromAddress(uint64_t const address) const
 		{
 			IMAGEHLP_LINEW64 tmpLine {sizeof(IMAGEHLP_LINEW64), {}, {}, {}, {}};
 			ULONG displacement = 0;
-			BOOL result = SymGetLineFromAddrW64(Handle(), address, &displacement, &tmpLine);
+			BOOL const result = SymGetLineFromAddrW64(Handle(), address, &displacement, &tmpLine);
 			if (Util::WarnAssertTrue(result, "SymGetLineFromAddrW64"))
 			{
 				return Line {tmpLine.LineNumber, Cvt::W2A(tmpLine.FileName), tmpLine.Address, displacement};
@@ -309,11 +309,11 @@ namespace GLib::Win::Symbols
 			return {};
 		}
 
-		[[nodiscard]] std::optional<Line> TryGetLineFromInlineContext(uint64_t address, ULONG inlineContext) const
+		[[nodiscard]] std::optional<Line> TryGetLineFromInlineContext(uint64_t const address, ULONG const inlineContext) const
 		{
 			IMAGEHLP_LINEW64 tmpLine {sizeof(IMAGEHLP_LINEW64), {}, {}, {}, {}};
 			ULONG displacement = 0;
-			BOOL result = SymGetLineFromInlineContextW(Handle(), address, inlineContext, 0, &displacement, &tmpLine);
+			BOOL const result = SymGetLineFromInlineContextW(Handle(), address, inlineContext, 0, &displacement, &tmpLine);
 			if (Util::WarnAssertTrue(result, "SymGetLineFromInlineContext"))
 			{
 				return Line {tmpLine.LineNumber, Cvt::W2A(tmpLine.FileName), tmpLine.Address, displacement};
@@ -321,7 +321,7 @@ namespace GLib::Win::Symbols
 			return {};
 		}
 
-		[[nodiscard]] std::optional<Symbol> TryGetClassParent(ULONG symbolId) const
+		[[nodiscard]] std::optional<Symbol> TryGetClassParent(ULONG const symbolId) const
 		{
 			ULONG typeIndexOfClassParent {};
 
@@ -347,7 +347,7 @@ namespace GLib::Win::Symbols
 		}
 
 	private:
-		[[nodiscard]] uint64_t Address(uint64_t address, bool fromBase) const
+		[[nodiscard]] uint64_t Address(uint64_t const address, bool const fromBase) const
 		{
 			return fromBase ? baseOfImage + address : address;
 		}
@@ -360,23 +360,24 @@ namespace GLib::Win::Symbols
 	public:
 		Engine()
 		{
-			auto flags = SYMOPT_DEBUG | static_cast<ULONG>(SYMOPT_UNDNAME) | static_cast<ULONG>(SYMOPT_LOAD_LINES);
+			auto constexpr flags = SYMOPT_DEBUG | static_cast<ULONG>(SYMOPT_UNDNAME) | static_cast<ULONG>(SYMOPT_LOAD_LINES);
 			SymSetOptions(SymGetOptions() | flags);
 		}
 
-		SymProcess & AddProcess(ULONG processId, HANDLE processHandle, uint64_t baseOfImage, HANDLE imageFile, const std::string & imageName)
+		SymProcess & AddProcess(ULONG const processId, HANDLE const processHandle, const uint64_t baseOfImage, HANDLE const imageFile,
+														std::string const & imageName)
 		{
 			SymProcess sp = SymProcess::GetProcess(processHandle, baseOfImage, false);
 
-			const uint64_t loadBase = SymLoadModuleExW(sp.Handle(), imageFile, Cvt::A2W(imageName).c_str(), nullptr, baseOfImage, 0, nullptr, 0);
+			uint64_t const loadBase = SymLoadModuleExW(sp.Handle(), imageFile, Cvt::A2W(imageName).c_str(), nullptr, baseOfImage, 0, nullptr, 0);
 			Util::AssertTrue(0 != loadBase, "SymLoadModuleExW");
 
 			return handles.emplace(processId, std::move(sp)).first->second;
 		}
 
-		[[nodiscard]] const SymProcess & GetProcess(ULONG processId) const
+		[[nodiscard]] SymProcess const & GetProcess(ULONG const processId) const
 		{
-			const auto it = handles.find(processId);
+			auto const it = handles.find(processId);
 			if (it == handles.end())
 			{
 				throw std::runtime_error("Process not found");
@@ -384,7 +385,7 @@ namespace GLib::Win::Symbols
 			return it->second;
 		}
 
-		void RemoveProcess(ULONG processId)
+		void RemoveProcess(ULONG const processId)
 		{
 			if (handles.erase(processId) == 0)
 			{
@@ -392,16 +393,16 @@ namespace GLib::Win::Symbols
 			}
 		}
 
-		void SourceFiles(std::function<void(PSOURCEFILEW)> f, HANDLE process, void * base) const
+		void SourceFiles(std::function<void(PSOURCEFILEW)> f, HANDLE const process, void * base) const
 		{
 			static_cast<void>(this);
 			Util::AssertTrue(SymEnumSourceFilesW(process, Detail::ConvertBase(base), nullptr, EnumSourceFiles, &f), "SymEnumSourceFilesW");
 		}
 
-		void Lines(std::function<void(PSRCCODEINFOW)> f, HANDLE process, void * base) const
+		void Lines(std::function<void(PSRCCODEINFOW)> f, HANDLE const process, void * base) const
 		{
 			static_cast<void>(this);
-			auto result = SymEnumLinesW(process, Detail::ConvertBase(base), nullptr, nullptr, EnumLines, &f);
+			auto const result = SymEnumLinesW(process, Detail::ConvertBase(base), nullptr, nullptr, EnumLines, &f);
 			Util::AssertTrue(result == TRUE || GetLastError() == ERROR_NOT_SUPPORTED, "SymEnumLinesW");
 		}
 
@@ -414,19 +415,19 @@ namespace GLib::Win::Symbols
 		}
 
 	private:
-		static BOOL CALLBACK EnumSourceFiles(PSOURCEFILEW sourceFileInfo, PVOID context)
+		static BOOL CALLBACK EnumSourceFiles(SOURCEFILEW * const sourceFileInfo, void * const context)
 		{
 			(*static_cast<std::function<void(PSOURCEFILEW)> *>(context))(sourceFileInfo);
 			return TRUE;
 		}
 
-		static BOOL CALLBACK EnumLines(PSRCCODEINFOW lineInfo, PVOID context)
+		static BOOL CALLBACK EnumLines(SRCCODEINFOW * const lineInfo, void * const context)
 		{
 			(*static_cast<std::function<void(PSRCCODEINFOW)> *>(context))(lineInfo);
 			return TRUE;
 		}
 
-		static BOOL CALLBACK EnumProcesses(HANDLE hProcess, PVOID context)
+		static BOOL CALLBACK EnumProcesses(HANDLE const hProcess, void * const context)
 		{
 			(*static_cast<std::function<void(HANDLE)> *>(context))(hProcess);
 			return TRUE;

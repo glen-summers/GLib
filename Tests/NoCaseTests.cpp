@@ -24,7 +24,7 @@ AUTO_TEST_CASE(NoCaseLessChar)
 	TEST(GLib::NoCaseLess<char>()("a", "b"));
 	TEST(!GLib::NoCaseLess<char>()("b", "a"));
 
-	CaseInsensitiveSet<char> set {"AbCdE", "aBcDe"};
+	CaseInsensitiveSet<char> const set {"AbCdE", "aBcDe"};
 	TEST(size_t {1} == set.size());
 }
 
@@ -33,7 +33,7 @@ AUTO_TEST_CASE(NoCaseHashChar)
 	TEST(GLib::NoCaseHash<char>()("AbCdE") == GLib::NoCaseHash<char>()("aBcDe"));
 	TEST(GLib::NoCaseEquality<char>()("AbCdE", "aBcDe"));
 
-	UnorderedCaseInsensitiveSet<char> set {"AbCdE", "aBcDe"};
+	UnorderedCaseInsensitiveSet<char> const set {"AbCdE", "aBcDe"};
 	TEST(size_t {1} == set.size());
 }
 

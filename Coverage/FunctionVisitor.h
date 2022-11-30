@@ -9,7 +9,7 @@
 template <>
 struct GLib::Eval::Visitor<FunctionCoverage>
 {
-	static void Visit(const FunctionCoverage & fc, const std::string & propertyName, const ValueVisitor & f)
+	static void Visit(FunctionCoverage const & fc, std::string const & propertyName, ValueVisitor const & f)
 	{
 		if (propertyName == "name")
 		{

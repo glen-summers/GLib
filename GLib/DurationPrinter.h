@@ -12,13 +12,13 @@ inline std::ostream & operator<<(std::ostream & s, std::chrono::nanoseconds dura
 		return s << std::setprecision(1) << std::fixed << std::chrono::duration<double>(duration).count() * toMilliseconds << "ms";
 	}
 
-	auto day = std::chrono::duration_cast<std::chrono::days>(duration);
+	auto const day = std::chrono::duration_cast<std::chrono::days>(duration);
 	duration -= day;
-	auto hours = std::chrono::duration_cast<std::chrono::hours>(duration);
+	auto const hours = std::chrono::duration_cast<std::chrono::hours>(duration);
 	duration -= hours;
-	auto minutes = std::chrono::duration_cast<std::chrono::minutes>(duration);
+	auto const minutes = std::chrono::duration_cast<std::chrono::minutes>(duration);
 	duration -= minutes;
-	auto seconds = std::chrono::duration_cast<std::chrono::seconds>(duration);
+	auto const seconds = std::chrono::duration_cast<std::chrono::seconds>(duration);
 	duration -= seconds;
 	auto milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
 

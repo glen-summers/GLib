@@ -26,7 +26,7 @@ public:
 		return stream.Stream();
 	}
 
-	const Scope & Top() const
+	Scope const & Top() const
 	{
 		return scopes.top();
 	}
@@ -42,7 +42,7 @@ public:
 		return std::make_tuple(top, std::exchange(pending, false));
 	}
 
-	void Push(const Scope & scope) const
+	void Push(Scope const & scope) const
 	{
 		scopes.push(scope);
 		pending = true;
@@ -63,12 +63,12 @@ public:
 		return threadName;
 	}
 
-	void ThreadName(std::string_view name) const
+	void ThreadName(std::string_view const name) const
 	{
 		threadName = name;
 	}
 
-	void Put(char c) const
+	void Put(char const c) const
 	{
 		stream.Stream().put(c);
 	}

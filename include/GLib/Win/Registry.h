@@ -18,7 +18,7 @@ namespace GLib::Win
 		inline static constexpr size_t Length = 8;
 		inline static constexpr auto TopBitsSet = 0xffffffff00000000;
 
-		inline constexpr ULONG_PTR SignExtend(uint32_t value)
+		constexpr ULONG_PTR SignExtend(uint32_t const value)
 		{
 			if constexpr (sizeof(ULONG_PTR) == sizeof(uint32_t))
 			{
@@ -31,7 +31,7 @@ namespace GLib::Win
 			}
 		}
 
-		inline constexpr uint32_t Hex(char number)
+		constexpr uint32_t Hex(char const number)
 		{
 			constexpr auto ten = 0x0a;
 			return number >= '0' && number <= '9'		? number - '0'
@@ -40,10 +40,10 @@ namespace GLib::Win
 																							: throw std::runtime_error {"!"};
 		}
 
-		inline constexpr uint32_t ToInt32(std::string_view s)
+		inline constexpr uint32_t ToInt32(std::string_view const s)
 		{
 			uint32_t result {};
-			for (auto c : s)
+			for (auto const c : s)
 			{
 				result <<= 4U;
 				result += Hex(c);
@@ -57,7 +57,7 @@ namespace GLib::Win
 
 		struct KeyCloser
 		{
-			void operator()(HKEY key) const noexcept
+			void operator()(HKEY const key) const noexcept
 			{
 				Util::WarnAssertSuccess(RegCloseKey(key), "RegCloseKey");
 			}
@@ -68,7 +68,7 @@ namespace GLib::Win
 			std::unique_ptr<HKEY__, KeyCloser> p;
 
 		public:
-			explicit KeyHolder(HKEY key)
+			explicit KeyHolder(HKEY const key)
 				: p(key)
 			{}
 
@@ -83,7 +83,7 @@ namespace GLib::Win
 			ULONG_PTR value;
 
 		public:
-			explicit constexpr RootKeyHolder(ULONG_PTR value)
+			explicit constexpr RootKeyHolder(ULONG_PTR const value)
 				: value(value)
 			{}
 
@@ -100,12 +100,12 @@ namespace GLib::Win
 		}
 
 		template <typename T>
-		const BYTE * ToBytes(const T * value)
+		BYTE const * ToBytes(T const * value)
 		{
-			return Util::Detail::WindowsCast<const BYTE *>(value);
+			return Util::Detail::WindowsCast<BYTE const *>(value);
 		}
 
-		inline bool Found(LSTATUS result, std::string_view message)
+		inline bool Found(LSTATUS const result, std::string_view const message)
 		{
 			if (result == ERROR_FILE_NOT_FOUND)
 			{
@@ -114,19 +114,19 @@ namespace GLib::Win
 			return Util::AssertSuccess(result, message);
 		}
 
-		inline void SetString(HKEY key, std::string_view name, std::string_view value, ULONG type)
+		inline void SetString(HKEY const key, std::string_view const name, std::string_view const value, ULONG const type)
 		{
-			auto wideName = Cvt::A2W(name);
-			auto wideValue = Cvt::A2W(value);
-			auto valueSize = static_cast<ULONG>((wideName.size() + 1) * sizeof(wchar_t));
-			const auto * valueBytes = ToBytes(wideValue.c_str());
+			auto const wideName = Cvt::A2W(name);
+			auto const wideValue = Cvt::A2W(value);
+			auto const valueSize = static_cast<ULONG>((wideName.size() + 1) * sizeof(wchar_t));
+			auto const * valueBytes = ToBytes(wideValue.c_str());
 			Util::AssertSuccess(RegSetValueExW(key, wideName.c_str(), 0, type, valueBytes, valueSize), "RegSetValueEx");
 		}
 
-		inline std::string GetString(HKEY key, const std::wstring & valueName)
+		inline std::string GetString(HKEY const key, std::wstring const & valueName)
 		{
 			ULONG size {};
-			ULONG flags = static_cast<ULONG>(RRF_RT_REG_SZ) | static_cast<ULONG>(RRF_RT_REG_EXPAND_SZ);
+			ULONG constexpr flags = static_cast<ULONG>(RRF_RT_REG_SZ) | static_cast<ULONG>(RRF_RT_REG_EXPAND_SZ);
 			LSTATUS result = RegGetValueW(key, nullptr, valueName.c_str(), flags, nullptr, nullptr, &size);
 			Util::AssertSuccess(result, "RegGetValue");
 
@@ -138,12 +138,12 @@ namespace GLib::Win
 		}
 
 		template <typename T>
-		T GetScalar(HKEY key, const std::wstring & valueName)
+		T GetScalar(HKEY const key, std::wstring const & valueName)
 		{
 			ULONG actualTypeCode {};
 			T value {};
 			ULONG bytes {sizeof(T)};
-			LSTATUS result = RegQueryValueExW(key, valueName.c_str(), nullptr, &actualTypeCode, Detail::ToBytes(&value), &bytes);
+			LSTATUS const result = RegQueryValueExW(key, valueName.c_str(), nullptr, &actualTypeCode, Detail::ToBytes(&value), &bytes);
 			Util::AssertSuccess(result, "RegQueryValueEx");
 			return value;
 		}
@@ -165,11 +165,11 @@ namespace GLib::Win
 			: key(std::move(key))
 		{}
 
-		[[nodiscard]] bool KeyExists(std::string_view path) const
+		[[nodiscard]] bool KeyExists(std::string_view const path) const
 		{
 			HKEY resultKey {};
-			LSTATUS result = RegOpenKeyW(key.Get(), Cvt::A2W(path).c_str(), &resultKey);
-			bool exists = Detail::Found(result, "RegOpenKey");
+			LSTATUS const result = RegOpenKeyW(key.Get(), Cvt::A2W(path).c_str(), &resultKey);
+			bool const exists = Detail::Found(result, "RegOpenKey");
 			if (exists)
 			{
 				Detail::KeyCloser()(resultKey);
@@ -177,27 +177,27 @@ namespace GLib::Win
 			return exists;
 		}
 
-		[[nodiscard]] std::string GetString(std::string_view valueName) const
+		[[nodiscard]] std::string GetString(std::string_view const valueName) const
 		{
 			return Detail::GetString(key.Get(), Cvt::A2W(valueName));
 		}
 
-		[[nodiscard]] uint32_t GetInt32(std::string_view valueName) const
+		[[nodiscard]] uint32_t GetInt32(std::string_view const valueName) const
 		{
 			return Detail::GetScalar<uint32_t>(key.Get(), Cvt::A2W(valueName));
 		}
 
-		[[nodiscard]] uint64_t GetInt64(std::string_view valueName) const
+		[[nodiscard]] uint64_t GetInt64(std::string_view const valueName) const
 		{
 			return Detail::GetScalar<uint64_t>(key.Get(), Cvt::A2W(valueName));
 		}
 
-		[[nodiscard]] RegistryValue Get(std::string_view valueName) const
+		[[nodiscard]] RegistryValue Get(std::string_view const valueName) const
 		{
-			auto wideName = Cvt::A2W(valueName);
+			auto const wideName = Cvt::A2W(valueName);
 			ULONG bytes {};
 			ULONG actualTypeCode {};
-			LSTATUS result = RegQueryValueExW(key.Get(), wideName.c_str(), nullptr, &actualTypeCode, nullptr, &bytes);
+			LSTATUS const result = RegQueryValueExW(key.Get(), wideName.c_str(), nullptr, &actualTypeCode, nullptr, &bytes);
 			Util::AssertSuccess(result, "RegQueryValueEx");
 
 			switch (actualTypeCode)
@@ -223,54 +223,54 @@ namespace GLib::Win
 			throw std::runtime_error("Unsupported type");
 		}
 
-		void SetString(std::string_view name, std::string_view value)
+		void SetString(std::string_view const name, std::string_view const value)
 		{
 			Detail::SetString(key.Get(), name, value, REG_SZ);
 		}
 
-		void SetInt32(std::string_view name, uint32_t value) const
+		void SetInt32(std::string_view const name, uint32_t const value) const
 		{
-			LSTATUS result = RegSetValueExW(key.Get(), Cvt::A2W(name).c_str(), 0, REG_DWORD, Detail::ToBytes(&value), sizeof value);
+			LSTATUS const result = RegSetValueExW(key.Get(), Cvt::A2W(name).c_str(), 0, REG_DWORD, Detail::ToBytes(&value), sizeof value);
 			Util::AssertSuccess(result, "RegSetValueEx");
 		}
 
-		void SetInt64(std::string_view name, uint64_t value) const
+		void SetInt64(std::string_view const name, uint64_t const value) const
 		{
-			LSTATUS result = RegSetValueExW(key.Get(), Cvt::A2W(name).c_str(), 0, REG_QWORD, Detail::ToBytes(&value), sizeof value);
+			LSTATUS const result = RegSetValueExW(key.Get(), Cvt::A2W(name).c_str(), 0, REG_QWORD, Detail::ToBytes(&value), sizeof value);
 			Util::AssertSuccess(result, "RegSetValueEx");
 		}
 
-		[[nodiscard]] SubKey OpenSubKey(std::string_view path) const
+		[[nodiscard]] SubKey OpenSubKey(std::string_view const path) const
 		{
 			HKEY subKey {};
-			LSTATUS result = RegOpenKeyExW(key.Get(), Cvt::A2W(path).c_str(), 0, Detail::Read, &subKey);
+			LSTATUS const result = RegOpenKeyExW(key.Get(), Cvt::A2W(path).c_str(), 0, Detail::Read, &subKey);
 			Util::AssertSuccess(result, "RegOpenKeyEx");
 			return SubKey {Detail::KeyHolder {subKey}};
 		}
 
-		[[nodiscard]] SubKey CreateSubKey(std::string_view path) const
+		[[nodiscard]] SubKey CreateSubKey(std::string_view const path) const
 		{
 			HKEY subKey {};
-			LSTATUS result =
+			LSTATUS const result =
 				::RegCreateKeyExW(key.Get(), Cvt::A2W(path).c_str(), 0, nullptr, REG_OPTION_NON_VOLATILE, Detail::AllAccess, nullptr, &subKey, nullptr);
 			Util::AssertSuccess(result, "RegCreateKeyEx");
 			return SubKey {Detail::KeyHolder {subKey}};
 		}
 
-		[[nodiscard]] bool DeleteSubKey(std::string_view path) const
+		[[nodiscard]] bool DeleteSubKey(std::string_view const path) const
 		{
 			return Detail::Found(::RegDeleteTreeW(key.Get(), Cvt::A2W(path).c_str()), "RegDeleteKey");
 		}
 	};
 
 	template <typename T>
-	auto operator/(const RegistryKey<T> & key, std::string_view name)
+	auto operator/(RegistryKey<T> const & key, std::string_view const name)
 	{
 		return key.OpenSubKey(name);
 	}
 
 	template <typename T>
-	RegistryValue operator&(const RegistryKey<T> & key, std::string_view name)
+	RegistryValue operator&(RegistryKey<T> const & key, std::string_view const name)
 	{
 		return key.Get(name);
 	}

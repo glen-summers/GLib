@@ -8,8 +8,8 @@ namespace GLib::Win
 {
 	class WinException : public std::runtime_error
 	{
-		const ULONG errorCode;
-		const HRESULT hResult;
+		ULONG const errorCode;
+		HRESULT const hResult;
 
 	public:
 		[[nodiscard]] ULONG ErrorCode() const
@@ -22,14 +22,14 @@ namespace GLib::Win
 			return hResult;
 		}
 
-		WinException(const std::string & message, ULONG dwErr)
+		WinException(std::string const & message, ULONG const dwErr)
 			: runtime_error(message)
 			, errorCode(dwErr)
 			, hResult(HRESULT_FROM_WIN32(dwErr))
 		{}
 
 	protected:
-		WinException(const std::string & message, HRESULT hr)
+		WinException(std::string const & message, HRESULT const hr)
 			: runtime_error(message)
 			, errorCode(static_cast<unsigned int>(hr))
 			, hResult(hr)

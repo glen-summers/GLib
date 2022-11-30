@@ -14,9 +14,9 @@ namespace Interfaces
 	struct IFoo
 	{
 		IFoo() = default;
-		IFoo(const IFoo &) = delete;
+		IFoo(IFoo const &) = delete;
 		IFoo(IFoo &&) = delete;
-		IFoo & operator=(const IFoo &) = delete;
+		IFoo & operator=(IFoo const &) = delete;
 		IFoo & operator=(IFoo &&) = delete;
 		virtual ~IFoo() = default;
 
@@ -26,9 +26,9 @@ namespace Interfaces
 	struct IFooDerived : IFoo
 	{
 		IFooDerived() = default;
-		IFooDerived(const IFooDerived &) = delete;
+		IFooDerived(IFooDerived const &) = delete;
 		IFooDerived(IFooDerived &&) = delete;
-		IFooDerived & operator=(const IFooDerived &) = delete;
+		IFooDerived & operator=(IFooDerived const &) = delete;
 		IFooDerived & operator=(IFooDerived &&) = delete;
 		~IFooDerived() override = default;
 
@@ -38,9 +38,9 @@ namespace Interfaces
 	struct IBar
 	{
 		IBar() = default;
-		IBar(const IBar &) = delete;
+		IBar(IBar const &) = delete;
 		IBar(IBar &&) = delete;
-		IBar & operator=(const IBar &) = delete;
+		IBar & operator=(IBar const &) = delete;
 		IBar & operator=(IBar &&) = delete;
 		virtual ~IBar() = default;
 
@@ -50,9 +50,9 @@ namespace Interfaces
 	struct IBaz
 	{
 		IBaz() = default;
-		IBaz(const IBaz &) = delete;
+		IBaz(IBaz const &) = delete;
 		IBaz(IBaz &&) = delete;
-		IBaz & operator=(const IBaz &) = delete;
+		IBaz & operator=(IBaz const &) = delete;
 		IBaz & operator=(IBaz &&) = delete;
 		virtual ~IBaz() = default;
 
@@ -77,8 +77,8 @@ namespace Util
 			: value {value}
 		{}
 
-		friend bool operator==(const TypeIndex & lhs, const TypeIndex & rhs) = default;
-		friend bool operator!=(const TypeIndex & lhs, const TypeIndex & rhs) = default;
+		friend bool operator==(TypeIndex const & lhs, TypeIndex const & rhs) = default;
+		friend bool operator!=(TypeIndex const & lhs, TypeIndex const & rhs) = default;
 
 		[[nodiscard]] std::type_index Value() const
 		{
@@ -86,7 +86,7 @@ namespace Util
 		}
 	};
 
-	std::ostream & operator<<(std::ostream & s, const TypeIndex & ti)
+	std::ostream & operator<<(std::ostream & s, TypeIndex const & ti)
 	{
 		return s << ti.Value().name();
 	}

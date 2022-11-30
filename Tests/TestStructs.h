@@ -42,7 +42,7 @@ struct HasNoToString
 template <>
 struct GLib::Eval::Visitor<User>
 {
-	static void Visit(const User & user, const std::string & propertyName, const ValueVisitor & f)
+	static void Visit(User const & user, std::string const & propertyName, ValueVisitor const & f)
 	{
 		if (propertyName == "name")
 		{
@@ -63,7 +63,7 @@ struct GLib::Eval::Visitor<User>
 template <>
 struct GLib::Eval::Visitor<Struct>
 {
-	static void Visit(const Struct & value, const std::string & propertyName, const ValueVisitor & f)
+	static void Visit(Struct const & value, std::string const & propertyName, ValueVisitor const & f)
 	{
 		if (propertyName == "Nested")
 		{

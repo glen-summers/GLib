@@ -11,12 +11,12 @@ enum class CoverageLevel : uint8_t
 
 constexpr unsigned int HundredPercent = 100;
 
-inline unsigned int Percentage(size_t value, size_t amount)
+inline unsigned int Percentage(size_t const value, size_t const amount)
 {
 	return static_cast<unsigned int>(HundredPercent * value / amount);
 }
 
-inline std::ostream & operator<<(std::ostream & s, CoverageLevel coverageLevel)
+inline std::ostream & operator<<(std::ostream & s, CoverageLevel const coverageLevel)
 {
 	switch (coverageLevel)
 	{
@@ -35,10 +35,10 @@ inline std::ostream & operator<<(std::ostream & s, CoverageLevel coverageLevel)
 	return s;
 }
 
-inline CoverageLevel GetCoverageLevel(unsigned int coveragePercent)
+inline CoverageLevel GetCoverageLevel(unsigned int const coveragePercent)
 {
-	const uint8_t lowValue = 70; // config
-	const uint8_t highValue = 90;
+	constexpr uint8_t lowValue = 70; // config
+	constexpr uint8_t highValue = 90;
 
 	return coveragePercent < lowValue ? CoverageLevel::Red : coveragePercent < highValue ? CoverageLevel::Amber : CoverageLevel::Green;
 }

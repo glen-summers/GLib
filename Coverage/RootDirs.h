@@ -5,7 +5,7 @@
 
 namespace Detail
 {
-	inline bool CommonRoot(const std::filesystem::path & p1, const std::filesystem::path & p2, std::filesystem::path & root)
+	inline bool CommonRoot(std::filesystem::path const & p1, std::filesystem::path const & p2, std::filesystem::path & root)
 	{
 		// assert, are absolute etc.
 		bool result = false;
@@ -43,10 +43,10 @@ inline void RootDirectories(std::set<std::filesystem::path> & paths)
 	}
 }
 
-inline std::tuple<std::filesystem::path, std::filesystem::path> Reduce(const std::filesystem::path & path,
-																																			 const std::set<std::filesystem::path> & paths)
+inline std::tuple<std::filesystem::path, std::filesystem::path> Reduce(std::filesystem::path const & path,
+																																			 std::set<std::filesystem::path> const & paths)
 {
-	for (const auto & p : paths)
+	for (auto const & p : paths)
 	{
 		// avoid as calls GetFinalPathNameByHandleW?
 		auto rel = relative(path, p);

@@ -6,9 +6,6 @@ Checks: '*,
 
 -bugprone-easily-swappable-parameters,
 
--clang-analyzer-*,
--clang-diagnostics-*,
-
 -cppcoreguidelines-macro-usage,
 
 -fuchsia-default-arguments-calls,
@@ -28,7 +25,9 @@ Checks: '*,
 -misc-no-recursion,
 -modernize-use-trailing-return-type,
 
--readability-function-cognitive-complexity
+# tmp
+#-readability-function-cognitive-complexity
+-readability*
 '
 
 HeaderFilterRegex: '^.*\\GLib\\.*$'

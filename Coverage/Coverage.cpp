@@ -7,15 +7,15 @@
 #include "HtmlReport.h"
 #include "SymbolNameUtils.h"
 
-WideStrings Coverage::A2W(const Strings & strings)
+WideStrings Coverage::A2W(Strings const & strings)
 {
 	WideStrings wideStrings;
 	std::ranges::transform(strings, std::inserter(wideStrings, wideStrings.begin()), GLib::Cvt::A2W);
 	return wideStrings;
 }
 
-void Coverage::AddLine(const std::wstring & fileName, unsigned int lineNumber, const GLib::Win::Symbols::SymProcess & symProcess, uint64_t address,
-											 Process & process)
+void Coverage::AddLine(std::wstring const & fileName, unsigned int const lineNumber, GLib::Win::Symbols::SymProcess const & symProcess,
+											 uint64_t const address, Process & process)
 {
 	// filter out unknown source lines, looks like these cause the out of memory exceptions in ReportGenerator
 	if (lineNumber == fooFoo || lineNumber == feeFee)
@@ -33,15 +33,15 @@ void Coverage::AddLine(const std::wstring & fileName, unsigned int lineNumber, c
 		bool include = includes.empty();
 		bool exclude = false;
 
-		for (const auto & value : includes)
+		for (auto const & value : includes)
 		{
-			const bool isMatch = _wcsnicmp(value.c_str(), fileName.c_str(), value.size()) == 0;
+			bool const isMatch = _wcsnicmp(value.c_str(), fileName.c_str(), value.size()) == 0;
 			include |= isMatch;
 		}
 
-		for (const auto & value : excludes)
+		for (auto const & value : excludes)
 		{
-			const bool isMatch = _wcsnicmp(value.c_str(), fileName.c_str(), value.size()) == 0;
+			bool const isMatch = _wcsnicmp(value.c_str(), fileName.c_str(), value.size()) == 0;
 			exclude |= isMatch;
 		}
 
@@ -62,8 +62,8 @@ void Coverage::AddLine(const std::wstring & fileName, unsigned int lineNumber, c
 	auto it = process.Addresses().find(address);
 	if (it == process.Addresses().end())
 	{
-		ULONG id = symProcess.GetSymbolIdFromAddress(address);
-		const auto oldByte = symProcess.Read<unsigned char>(address);
+		ULONG const id = symProcess.GetSymbolIdFromAddress(address);
+		auto const oldByte = symProcess.Read<unsigned char>(address);
 		it = process.AddAddress(address, Address {oldByte, id});
 	}
 	it->second.AddFileLine(fileName, lineNumber);
@@ -71,10 +71,10 @@ void Coverage::AddLine(const std::wstring & fileName, unsigned int lineNumber, c
 	symProcess.Write(address, debugBreakByte);
 }
 
-void Coverage::OnCreateProcess(ULONG processId, ULONG threadId, const CREATE_PROCESS_DEBUG_INFO & info)
+void Coverage::OnCreateProcess(ULONG const processId, ULONG const threadId, CREATE_PROCESS_DEBUG_INFO const & info)
 {
 	Debugger::OnCreateProcess(processId, threadId, info);
-	const GLib::Win::Symbols::SymProcess & process = Symbols().GetProcess(processId);
+	GLib::Win::Symbols::SymProcess const & process = Symbols().GetProcess(processId);
 
 	log.Info("+Process Pid:{0}, Path:{1}", processId, GLib::Win::FileSystem::PathOfProcessHandle(process.Process().Handle().get()));
 
@@ -88,27 +88,28 @@ void Coverage::OnCreateProcess(ULONG processId, ULONG threadId, const CREATE_PRO
 	threadInfo.hThread = info.hThread;
 	OnCreateThread(processId, threadId, threadInfo);
 
-	GLib::Flog::ScopeLog scopeLog(log, GLib::Flog::Level::Info, "EnumLines");
+	GLib::Flog::ScopeLog const scopeLog(log, GLib::Flog::Level::Info, "EnumLines");
 
-	Symbols().Lines([&](PSRCCODEINFOW lineInfo) { AddLine(&lineInfo->FileName[0], lineInfo->LineNumber, process, lineInfo->Address, it->second); },
+	Symbols().Lines([&](SRCCODEINFOW const * const lineInfo)
+									{ AddLine(&lineInfo->FileName[0], lineInfo->LineNumber, process, lineInfo->Address, it->second); },
 									process.Handle(), info.lpBaseOfImage);
 
 	static_cast<void>(scopeLog);
 }
 
-void Coverage::CaptureData(ULONG processId)
+void Coverage::CaptureData(ULONG const processId)
 {
-	GLib::Flog::ScopeLog scopeLog(log, GLib::Flog::Level::Info, "CaptureData");
+	GLib::Flog::ScopeLog const scopeLog(log, GLib::Flog::Level::Info, "CaptureData");
 
-	const GLib::Win::Symbols::SymProcess & symProcess = Symbols().GetProcess(processId);
-	auto pit = processes.find(processId);
+	GLib::Win::Symbols::SymProcess const & symProcess = Symbols().GetProcess(processId);
+	auto const pit = processes.find(processId);
 	if (pit == processes.end())
 	{
 		throw std::runtime_error("Process not found");
 	}
 	Process & process = pit->second;
 
-	for (const auto & address : process.Addresses() | std::views::values)
+	for (auto const & address : process.Addresses() | std::views::values)
 	{
 		auto symbolId = address.SymbolId();
 		auto symbol = symProcess.GetSymbolFromIndex(symbolId);
@@ -117,13 +118,13 @@ void Coverage::CaptureData(ULONG processId)
 		if (it == process.IndexToFunction().end())
 		{
 			std::string parentName;
-			std::optional<GLib::Win::Symbols::Symbol> parent = symProcess.TryGetClassParent(symbolId);
+			std::optional<GLib::Win::Symbols::Symbol> const parent = symProcess.TryGetClassParent(symbolId);
 			if (parent)
 			{
 				parentName = parent->Name();
 			}
 
-			const auto & [nameSpace, typeName, functionName] = CleanupFunctionNames(symbol.Name(), parentName);
+			auto const & [nameSpace, typeName, functionName] = CleanupFunctionNames(symbol.Name(), parentName);
 			it = process.AddFunction(symbol.Index(), nameSpace, typeName, functionName);
 		}
 		it->second.Accumulate(address);
@@ -132,43 +133,43 @@ void Coverage::CaptureData(ULONG processId)
 	static_cast<void>(scopeLog);
 }
 
-void Coverage::OnExitProcess(ULONG processId, ULONG threadId, const EXIT_PROCESS_DEBUG_INFO & info)
+void Coverage::OnExitProcess(ULONG const processId, ULONG const threadId, EXIT_PROCESS_DEBUG_INFO const & info)
 {
 	CaptureData(processId);
 	Debugger::OnExitProcess(processId, threadId, info);
 	log.Info("-Process Pid:{0}, Exited code: {1} ({1:%x})", processId, info.dwExitCode);
 }
 
-void Coverage::OnCreateThread(ULONG processId, ULONG threadId, const CREATE_THREAD_DEBUG_INFO & info)
+void Coverage::OnCreateThread(ULONG const processId, ULONG const threadId, CREATE_THREAD_DEBUG_INFO const & info)
 {
 	processes.at(processId).AddThread(threadId, info.hThread);
 }
 
-void Coverage::OnExitThread(ULONG processId, ULONG threadId, const EXIT_THREAD_DEBUG_INFO & info)
+void Coverage::OnExitThread(ULONG const processId, ULONG const threadId, EXIT_THREAD_DEBUG_INFO const & info)
 {
 	static_cast<void>(info);
 	processes.at(processId).RemoveThread(threadId);
 }
 
-ULONG Coverage::OnException(ULONG processId, ULONG threadId, const EXCEPTION_DEBUG_INFO & info)
+ULONG Coverage::OnException(ULONG const processId, ULONG const threadId, EXCEPTION_DEBUG_INFO const & info)
 {
-	const bool isBreakpoint = info.ExceptionRecord.ExceptionCode == EXCEPTION_BREAKPOINT;
+	bool const isBreakpoint = info.ExceptionRecord.ExceptionCode == EXCEPTION_BREAKPOINT;
 
 	if (info.dwFirstChance != 0 && isBreakpoint)
 	{
-		const uint64_t address = GLib::Win::Detail::ConvertAddress(info.ExceptionRecord.ExceptionAddress);
-		auto & process = processes.at(processId);
+		uint64_t const address = GLib::Win::Detail::ConvertAddress(info.ExceptionRecord.ExceptionAddress);
+		auto const & process = processes.at(processId);
 
-		auto it = process.Addresses().find(address);
+		auto const it = process.Addresses().find(address);
 		if (it != process.Addresses().end())
 		{
-			const GLib::Win::Symbols::SymProcess & p = Symbols().GetProcess(processId);
+			GLib::Win::Symbols::SymProcess const & p = Symbols().GetProcess(processId);
 
-			const Address & a = it->second;
+			Address const & a = it->second;
 			p.Write(address, a.OldData());
 			a.Visit();
 
-			HANDLE threadHandle = process.FindThread(threadId);
+			HANDLE const threadHandle = process.FindThread(threadId);
 
 			CONTEXT ctx {};
 			ctx.ContextFlags = CONTEXT_ALL; // NOLINT bad macro
@@ -188,15 +189,15 @@ ULONG Coverage::OnException(ULONG processId, ULONG threadId, const EXCEPTION_DEB
 
 CoverageData Coverage::GetCoverageData() const
 {
-	GLib::Flog::ScopeLog scopeLog(log, GLib::Flog::Level::Info, "GetCoverageData");
+	GLib::Flog::ScopeLog const scopeLog(log, GLib::Flog::Level::Info, "GetCoverageData");
 
 	CaseInsensitiveMap<wchar_t, Functions> fileNameToFunctionMap;
 
-	for (const auto & process : processes | std::views::values)
+	for (auto const & process : processes | std::views::values)
 	{
-		for (const auto & function : process.IndexToFunction() | std::views::values)
+		for (auto const & function : process.IndexToFunction() | std::views::values)
 		{
-			for (const auto & fileName : function.FileLines() | std::views::keys)
+			for (auto const & fileName : function.FileLines() | std::views::keys)
 			{
 				fileNameToFunctionMap[fileName].emplace(function);
 			}
@@ -205,7 +206,7 @@ CoverageData Coverage::GetCoverageData() const
 
 	CoverageData coverageData;
 
-	for (const auto & [filePath, functions] : fileNameToFunctionMap)
+	for (auto const & [filePath, functions] : fileNameToFunctionMap)
 	{
 		auto fileIt = coverageData.find(filePath);
 		if (fileIt == coverageData.end())
@@ -215,9 +216,9 @@ CoverageData Coverage::GetCoverageData() const
 
 		FileCoverageData & fileCoverageData = fileIt->second;
 
-		for (const auto & function : functions)
+		for (auto const & function : functions)
 		{
-			const FileLines & fileLines = function.FileLines();
+			FileLines const & fileLines = function.FileLines();
 
 			auto justFileNameIt = fileLines.find(filePath);
 			if (justFileNameIt == fileLines.end())
@@ -227,7 +228,7 @@ CoverageData Coverage::GetCoverageData() const
 
 			fileCoverageData.AddFunction(function);
 
-			for (const auto & [line, covered] : justFileNameIt->second)
+			for (auto const & [line, covered] : justFileNameIt->second)
 			{
 				fileCoverageData.AddLine(line, covered);
 			}
@@ -238,7 +239,7 @@ CoverageData Coverage::GetCoverageData() const
 	return coverageData;
 }
 
-std::tuple<std::string, std::string, std::string> Coverage::CleanupFunctionNames(const std::string & name, const std::string & typeName) const
+std::tuple<std::string, std::string, std::string> Coverage::CleanupFunctionNames(std::string const & name, std::string const & typeName) const
 {
 	std::string nameSpace;
 	std::string functionName = name;
@@ -253,7 +254,7 @@ std::tuple<std::string, std::string, std::string> Coverage::CleanupFunctionNames
 		std::regex_search(className, m, nameSpaceRegex);
 		if (!m.empty())
 		{
-			size_t len = m[0].str().size();
+			size_t const len = m[0].str().size();
 			if (len >= 2)
 			{
 				nameSpace = className.substr(0, len - 2);
@@ -278,7 +279,7 @@ std::tuple<std::string, std::string, std::string> Coverage::CleanupFunctionNames
 		std::regex_search(functionName, m, nameSpaceRegex);
 		if (!m.empty())
 		{
-			size_t len = m[0].str().size();
+			size_t const len = m[0].str().size();
 			if (len >= 2)
 			{
 				nameSpace = functionName.substr(0, len - 2);

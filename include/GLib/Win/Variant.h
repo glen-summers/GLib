@@ -11,7 +11,7 @@ namespace GLib::Win
 			return v;
 		}
 
-		inline VARTYPE Vt(const VARIANT & v)
+		inline VARTYPE Vt(VARIANT const & v)
 		{
 			return v.vt; // NOLINT(cppcoreguidelines-pro-type-union-access)
 		}
@@ -26,7 +26,7 @@ namespace GLib::Win
 			return v.bstrVal; // NOLINT(cppcoreguidelines-pro-type-union-access)
 		}
 
-		inline VARIANT Create(const std::string & value)
+		inline VARIANT Create(std::string const & value)
 		{
 			auto * bstr = SysAllocString(Cvt::A2W(value).c_str());
 			if (bstr == nullptr)
@@ -41,7 +41,7 @@ namespace GLib::Win
 			return v;
 		}
 
-		inline VARIANT Copy(const VARIANT & v)
+		inline VARIANT Copy(VARIANT const & v)
 		{
 			VARIANT copy;
 			VariantInit(&copy);
@@ -51,7 +51,7 @@ namespace GLib::Win
 
 		inline VARIANT Move(VARIANT & other)
 		{
-			VARIANT v {other};
+			VARIANT const v {other};
 			VariantInit(&other);
 			return v;
 		}
@@ -67,11 +67,11 @@ namespace GLib::Win
 			: v {Detail::Create()}
 		{}
 
-		explicit Variant(const std::string & value)
+		explicit Variant(std::string const & value)
 			: v {Detail::Create(value)}
 		{}
 
-		Variant(const Variant & other)
+		Variant(Variant const & other)
 			: v {Detail::Copy(other.v)}
 		{}
 
@@ -96,7 +96,7 @@ namespace GLib::Win
 			return Cvt::W2A(Detail::Bstr(tmp));
 		}
 
-		Variant & operator=(const Variant & other)
+		Variant & operator=(Variant const & other)
 		{
 			Variant {other}.Swap(*this);
 			CheckHr(VariantCopy(&v, &other.v), "VariantCopy");
@@ -110,14 +110,14 @@ namespace GLib::Win
 			return *this;
 		}
 
-		bool operator==(const Variant & other) const noexcept
+		bool operator==(Variant const & other) const noexcept
 		{
 			auto * v1 = const_cast<VARIANT *>(&v);			 // NOLINT(cppcoreguidelines-pro-type-const-cast) required
 			auto * v2 = const_cast<VARIANT *>(&other.v); // NOLINT(cppcoreguidelines-pro-type-const-cast)
 			return VarCmp(v1, v2, 0) == VARCMP_EQ;
 		}
 
-		bool operator!=(const Variant & other) const noexcept
+		bool operator!=(Variant const & other) const noexcept
 		{
 			return !(*this == other);
 		}

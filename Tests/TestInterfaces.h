@@ -36,9 +36,9 @@ template <typename T>
 struct DeleteCounter
 {
 	DeleteCounter() = default;
-	DeleteCounter(const DeleteCounter &) = delete;
+	DeleteCounter(DeleteCounter const &) = delete;
 	DeleteCounter(DeleteCounter &&) = delete;
-	DeleteCounter & operator=(const DeleteCounter &) = delete;
+	DeleteCounter & operator=(DeleteCounter const &) = delete;
 	DeleteCounter & operator=(DeleteCounter &&) = delete;
 
 	~DeleteCounter()
@@ -51,10 +51,10 @@ struct DeleteCounter
 		DeleteCount(0);
 	}
 
-	static int DeleteCount(int add = 0)
+	static int DeleteCount(int const add = 0)
 	{
 		static int deleteCount = 0;
-		const int d = deleteCount += add;
+		int const d = deleteCount += add;
 		if (add == 0)
 		{
 			deleteCount = 0;
@@ -69,9 +69,9 @@ class ImplementsITest1 final : public GLib::Win::Unknown<ImplementsITest1, ITest
 
 public:
 	ImplementsITest1() = default;
-	ImplementsITest1(const ImplementsITest1 &) = delete;
+	ImplementsITest1(ImplementsITest1 const &) = delete;
 	ImplementsITest1(ImplementsITest1 &&) = delete;
-	ImplementsITest1 & operator=(const ImplementsITest1 &) = delete;
+	ImplementsITest1 & operator=(ImplementsITest1 const &) = delete;
 	ImplementsITest1 & operator=(ImplementsITest1 &&) = delete;
 	~ImplementsITest1() override = default;
 
@@ -87,9 +87,9 @@ class ImplementsITest1AndITest2 final : public GLib::Win::Unknown<ImplementsITes
 
 public:
 	ImplementsITest1AndITest2() = default;
-	ImplementsITest1AndITest2(const ImplementsITest1AndITest2 &) = delete;
+	ImplementsITest1AndITest2(ImplementsITest1AndITest2 const &) = delete;
 	ImplementsITest1AndITest2(ImplementsITest1AndITest2 &&) = delete;
-	ImplementsITest1AndITest2 & operator=(const ImplementsITest1AndITest2 &) = delete;
+	ImplementsITest1AndITest2 & operator=(ImplementsITest1AndITest2 const &) = delete;
 	ImplementsITest1AndITest2 & operator=(ImplementsITest1AndITest2 &&) = delete;
 	~ImplementsITest1AndITest2() override = default;
 
@@ -113,9 +113,9 @@ class ImplementsITest1ExtendedAndITest1ExtendedAlt final
 
 public:
 	ImplementsITest1ExtendedAndITest1ExtendedAlt() = default;
-	ImplementsITest1ExtendedAndITest1ExtendedAlt(const ImplementsITest1ExtendedAndITest1ExtendedAlt &) = delete;
+	ImplementsITest1ExtendedAndITest1ExtendedAlt(ImplementsITest1ExtendedAndITest1ExtendedAlt const &) = delete;
 	ImplementsITest1ExtendedAndITest1ExtendedAlt(ImplementsITest1ExtendedAndITest1ExtendedAlt &&) = delete;
-	ImplementsITest1ExtendedAndITest1ExtendedAlt & operator=(const ImplementsITest1ExtendedAndITest1ExtendedAlt &) = delete;
+	ImplementsITest1ExtendedAndITest1ExtendedAlt & operator=(ImplementsITest1ExtendedAndITest1ExtendedAlt const &) = delete;
 	ImplementsITest1ExtendedAndITest1ExtendedAlt & operator=(ImplementsITest1ExtendedAndITest1ExtendedAlt &&) = delete;
 	~ImplementsITest1ExtendedAndITest1ExtendedAlt() override = default;
 

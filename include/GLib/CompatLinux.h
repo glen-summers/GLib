@@ -18,7 +18,7 @@
 
 namespace GLib::Compat
 {
-	inline void AssertTrue(bool value, const char * prefix, int error)
+	inline void AssertTrue(bool value, char const * prefix, int const error)
 	{
 		if (!value)
 		{
@@ -29,37 +29,37 @@ namespace GLib::Compat
 		}
 	}
 
-	inline void LocalTime(tm & tm, const time_t & t)
+	inline void LocalTime(tm & tm, time_t const & t)
 	{
 		auto result = localtime_r(&t, &tm);
 		AssertTrue(result != nullptr, "LocalTime", errno);
 	}
 
-	inline void GmTime(tm & tm, const time_t & t)
+	inline void GmTime(tm & tm, time_t const & t)
 	{
 		auto result = gmtime_r(&t, &tm);
 		AssertTrue(result != nullptr, "GmTime", errno);
 	}
 
-	inline void SetEnv(const char * name, const char * value)
+	inline void SetEnv(char const * name, char const * value)
 	{
 		int result = setenv(name, value, 1);
 		AssertTrue(result != -1, "setenv", errno);
 	}
 
-	inline std::optional<std::string> GetEnv(const char * name)
+	inline std::optional<std::string> GetEnv(char const * name)
 	{
-		const char * value = getenv(name);
+		char const * value = getenv(name);
 		return value != nullptr ? std::optional<std::string> {value} : std::nullopt;
 	}
 
-	inline void UnsetEnv(const char * name)
+	inline void UnsetEnv(char const * name)
 	{
 		int result = unsetenv(name);
 		AssertTrue(result != -1, "UnsetEnv", errno);
 	}
 
-	inline std::string Unmangle(const std::string & name)
+	inline std::string Unmangle(std::string const & name)
 	{
 		int status = -1;
 		std::unique_ptr<char, void (*)(void *)> res {abi::__cxa_demangle(name.c_str(), NULL, NULL, &status), std::free};

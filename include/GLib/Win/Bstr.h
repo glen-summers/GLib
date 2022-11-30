@@ -13,20 +13,20 @@ namespace GLib::Win
 	{
 		BSTR value {}; // use unique_ptr?
 
-		explicit Bstr(BSTR value)
+		explicit Bstr(BSTR const value)
 			: value(value)
 		{}
 
 	public:
 		Bstr() = default;
 
-		Bstr(const Bstr &) = delete;
+		Bstr(Bstr const &) = delete;
 
 		Bstr(Bstr && other) noexcept
 			: value {std::exchange(other.value, nullptr)}
 		{}
 
-		Bstr & operator=(const Bstr & other) = delete;
+		Bstr & operator=(Bstr const & other) = delete;
 
 		Bstr & operator=(Bstr && other) noexcept
 		{
@@ -49,13 +49,13 @@ namespace GLib::Win
 			return value != nullptr ? Cvt::W2A(value) : std::string {};
 		}
 
-		static auto Attach(BSTR value)
+		static auto Attach(BSTR const value)
 		{
 			return Bstr(value);
 		}
 
 	private:
-		Bstr(BSTR other, bool ignored) noexcept
+		Bstr(BSTR const other, bool const ignored) noexcept
 			: value(other)
 		{
 			static_cast<void>(ignored);

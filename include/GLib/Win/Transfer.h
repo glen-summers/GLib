@@ -16,9 +16,9 @@ namespace GLib::Win
 			, rawValue()
 		{}
 
-		Transfer(const Transfer & ref) = delete;
+		Transfer(Transfer const & ref) = delete;
 		Transfer(Transfer && ref) = delete;
-		Transfer & operator=(const Transfer &) = delete;
+		Transfer & operator=(Transfer const &) = delete;
 		Transfer & operator=(Transfer &&) = delete;
 
 		~Transfer()

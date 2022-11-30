@@ -90,15 +90,15 @@ namespace GLib::Win
 		using PtrType = ComPtr<DefaultInterface>;
 
 		Unknown() = default;
-		Unknown(const Unknown &) = delete;
+		Unknown(Unknown const &) = delete;
 		Unknown(Unknown &&) = delete;
-		Unknown & operator=(const Unknown &) = delete;
+		Unknown & operator=(Unknown const &) = delete;
 		Unknown & operator=(Unknown &&) = delete;
 
 	protected:
 		virtual ~Unknown() = default;
 
-		HRESULT STDMETHODCALLTYPE QueryInterface(const IID & id, void ** ppvObject) override
+		HRESULT STDMETHODCALLTYPE QueryInterface(IID const & id, void ** ppvObject) override
 		{
 			if (ppvObject == nullptr)
 			{
@@ -121,7 +121,7 @@ namespace GLib::Win
 
 		ULONG STDMETHODCALLTYPE Release() override
 		{
-			const ULONG ret = --ref;
+			ULONG const ret = --ref;
 			if (ret == 0)
 			{
 				delete this;

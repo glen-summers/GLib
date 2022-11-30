@@ -43,7 +43,7 @@ namespace GLib::Cpp
 		using reference = void;
 		// ReSharper restore All
 
-		Iterator(std::string_view::const_iterator begin, std::string_view::const_iterator end, bool emitWhitespace)
+		Iterator(std::string_view::const_iterator begin, std::string_view::const_iterator const end, bool const emitWhitespace)
 			: engine(emitWhitespace)
 			, ptr(begin)
 			, end(end)
@@ -54,12 +54,12 @@ namespace GLib::Cpp
 
 		Iterator() = default;
 
-		bool operator==(const Iterator & other) const
+		bool operator==(Iterator const & other) const
 		{
 			return lastPtr == other.lastPtr;
 		}
 
-		bool operator!=(const Iterator & it) const
+		bool operator!=(Iterator const & it) const
 		{
 			return !(*this == it);
 		}
@@ -70,18 +70,18 @@ namespace GLib::Cpp
 			return *this;
 		}
 
-		const Fragment & operator*() const
+		Fragment const & operator*() const
 		{
 			return fragment;
 		}
 
-		const Fragment * operator->() const
+		Fragment const * operator->() const
 		{
 			return &fragment;
 		}
 
 	private:
-		[[noreturn]] static void IllegalCharacter(char c, unsigned int lineNumber, State state, unsigned int startLine)
+		[[noreturn]] static void IllegalCharacter(char const c, unsigned int const lineNumber, State const state, unsigned int const startLine)
 		{
 			std::ostringstream s;
 			s << "Illegal character: ";
@@ -112,11 +112,11 @@ namespace GLib::Cpp
 			return ret;
 		}
 
-		void Close(State lastState)
+		void Close(State const lastState)
 		{
 			if (lastState != State::None)
 			{
-				auto endState = engine.Push('\n');
+				auto const endState = engine.Push('\n');
 				if (endState != State::None && endState != State::WhiteSpace)
 				{
 					std::ostringstream s;
@@ -140,13 +140,13 @@ namespace GLib::Cpp
 
 			for (;;)
 			{
-				const auto oldState = engine.GetState();
+				auto const oldState = engine.GetState();
 
 				State newState {};
 
 				if (ptr != end)
 				{
-					char c = *ptr++;
+					char const c = *ptr++;
 					newState = engine.Push(c);
 					if (newState == State::Error)
 					{
@@ -190,11 +190,11 @@ namespace GLib::Cpp
 
 	class Holder
 	{
-		std::string_view value;
-		bool emitWhitespace;
+		std::string_view const value;
+		bool const emitWhitespace;
 
 	public:
-		explicit Holder(std::string_view value, bool emitWhitespace = true)
+		explicit Holder(std::string_view const value, bool const emitWhitespace = true)
 			: value(value)
 			, emitWhitespace(emitWhitespace)
 		{}

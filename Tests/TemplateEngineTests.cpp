@@ -40,11 +40,11 @@ AUTO_TEST_CASE(Nop2)
 
 AUTO_TEST_CASE(ForEach)
 {
-	const std::vector<User> users {{"Fred", 42, {"FC00"}}, {"Jim", 43, {"FD00"}}, {"Sheila", 44, {"FE00"}}};
+	std::vector<User> const users {{"Fred", 42, {"FC00"}}, {"Jim", 43, {"FD00"}}, {"Sheila", 44, {"FE00"}}};
 	Evaluator evaluator;
 	evaluator.SetCollection("users", users);
 
-	const auto * xml = R"(<xml xmlns:gl='glib'>
+	auto const * xml = R"(<xml xmlns:gl='glib'>
 <gl:block each="user : ${users}">
 	<User name='${user.name}' />
 </gl:block>
@@ -53,7 +53,7 @@ AUTO_TEST_CASE(ForEach)
 	std::ostringstream stm;
 	Generate(evaluator, xml, stm);
 
-	const auto * expected = R"(<xml>
+	auto const * expected = R"(<xml>
 	<User name='Fred' />
 	<User name='Jim' />
 	<User name='Sheila' />
@@ -64,12 +64,12 @@ AUTO_TEST_CASE(ForEach)
 
 AUTO_TEST_CASE(NestedForEach)
 {
-	const std::vector<User> users {{"Fred", 42, {"FC00"}}, {"Jim", 43, {"FD00"}}, {"Sheila", 44, {"FE00"}}};
+	std::vector<User> const users {{"Fred", 42, {"FC00"}}, {"Jim", 43, {"FD00"}}, {"Sheila", 44, {"FE00"}}};
 
 	Evaluator evaluator;
 	evaluator.SetCollection("users", users);
 
-	const auto * xml = R"(<xml xmlns:gl='glib'>
+	auto const * xml = R"(<xml xmlns:gl='glib'>
 <gl:block each="user : ${users}">
 	<User name='${user.name}'>
 <gl:block each="hobby : ${user.hobbies}">
@@ -82,7 +82,7 @@ AUTO_TEST_CASE(NestedForEach)
 	std::ostringstream stm;
 	Generate(evaluator, xml, stm);
 
-	const auto * expected = R"(<xml>
+	auto const * expected = R"(<xml>
 	<User name='Fred'>
 		<Hobby value='FC00'/>
 	</User>
@@ -99,18 +99,18 @@ AUTO_TEST_CASE(NestedForEach)
 
 AUTO_TEST_CASE(ForEachAttr)
 {
-	const std::vector<User> users {{"Fred", 42, {"FC00"}}, {"Jim", 43, {"FD00"}}, {"Sheila", 44, {"FE00"}}};
+	std::vector<User> const users {{"Fred", 42, {"FC00"}}, {"Jim", 43, {"FD00"}}, {"Sheila", 44, {"FE00"}}};
 	Evaluator evaluator;
 	evaluator.SetCollection("users", users);
 
-	const auto * xml = R"(<xml xmlns:gl='glib'>
+	auto const * xml = R"(<xml xmlns:gl='glib'>
 <User gl:each="user : ${users}" name='${user.name}'/>
 </xml>)";
 
 	std::ostringstream stm;
 	Generate(evaluator, xml, stm);
 
-	const auto * expected = R"(<xml>
+	auto const * expected = R"(<xml>
 <User name='Fred'/>
 <User name='Jim'/>
 <User name='Sheila'/>
@@ -148,14 +148,14 @@ AUTO_TEST_CASE(IfAttr)
 {
 	Evaluator evaluator;
 
-	const auto * xml = R"(<xml xmlns:gl='glib'>
+	auto const * xml = R"(<xml xmlns:gl='glib'>
 <User gl:if="false"/>
 </xml>)";
 
 	std::ostringstream stm;
 	Generate(evaluator, xml, stm);
 
-	const auto * expected = R"(<xml>
+	auto const * expected = R"(<xml>
 </xml>)";
 
 	TEST(stm.str() == expected);
@@ -165,8 +165,8 @@ AUTO_TEST_CASE(ReplaceAttribute)
 {
 	Evaluator evaluator;
 
-	const auto * xml = "<xml xmlns:gl='glib' attr='value' gl:attr='replacedValue'/>";
-	const auto * expected = R"(<xml attr='replacedValue'/>)";
+	auto const * xml = "<xml xmlns:gl='glib' attr='value' gl:attr='replacedValue'/>";
+	auto const * expected = R"(<xml attr='replacedValue'/>)";
 
 	std::ostringstream stm;
 	Generate(evaluator, xml, stm);
@@ -178,8 +178,8 @@ AUTO_TEST_CASE(ReplaceAttributeKeepsOtherXmlNs)
 {
 	Evaluator evaluator;
 
-	const auto * xml = "<xml xmlns:gl='glib' xmlns:foo='bar' attr='value' gl:attr='replacedValue'/>";
-	const auto * expected = R"(<xml xmlns:foo='bar' attr='replacedValue'/>)";
+	auto const * xml = "<xml xmlns:gl='glib' xmlns:foo='bar' attr='value' gl:attr='replacedValue'/>";
+	auto const * expected = R"(<xml xmlns:foo='bar' attr='replacedValue'/>)";
 
 	std::ostringstream stm;
 	Generate(evaluator, xml, stm);
@@ -191,8 +191,8 @@ AUTO_TEST_CASE(ReplaceText)
 {
 	Evaluator evaluator;
 
-	const auto * xml = "<xml xmlns:gl='glib' gl:text='new'>old</xml>";
-	const auto * exp = "<xml>new</xml>";
+	auto const * xml = "<xml xmlns:gl='glib' gl:text='new'>old</xml>";
+	auto const * exp = "<xml>new</xml>";
 
 	std::ostringstream stm;
 	Generate(evaluator, xml, stm);
@@ -204,8 +204,8 @@ AUTO_TEST_CASE(ReplaceTextAndAttr)
 {
 	Evaluator evaluator;
 
-	const auto * xml = R"(<xml xmlns:gl='glib' gl:attr='newAttr' gl:text='new' attr='oldAttr'>old</xml>)";
-	const auto * exp = R"(<xml attr='newAttr'>new</xml>)";
+	auto const * xml = R"(<xml xmlns:gl='glib' gl:attr='newAttr' gl:text='new' attr='oldAttr'>old</xml>)";
+	auto const * exp = R"(<xml attr='newAttr'>new</xml>)";
 
 	std::ostringstream stm;
 	Generate(evaluator, xml, stm);
@@ -217,11 +217,11 @@ AUTO_TEST_CASE(BugReplaceLosesWhiteSpace)
 {
 	Evaluator evaluator;
 
-	const auto * xml = R"(<xml xmlns:gl='glib' gl:text='new'>
+	auto const * xml = R"(<xml xmlns:gl='glib' gl:text='new'>
 old
 </xml>)";
 
-	const auto * exp = R"(<xml>new</xml>)";
+	auto const * exp = R"(<xml>new</xml>)";
 
 	std::ostringstream stm;
 	Generate(evaluator, xml, stm);
@@ -231,17 +231,17 @@ old
 
 AUTO_TEST_CASE(If)
 {
-	const auto * xml = R"(<xml xmlns:gl='glib'>
+	auto const * xml = R"(<xml xmlns:gl='glib'>
 <gl:block if='${value}'>
 	<td>In Block</td>
 </gl:block>
 </xml>)";
 
-	const auto * expectedYes = R"(<xml>
+	auto const * expectedYes = R"(<xml>
 	<td>In Block</td>
 </xml>)";
 
-	const auto * expectedNo = R"(<xml>
+	auto const * expectedNo = R"(<xml>
 </xml>)";
 
 	std::ostringstream stm;
@@ -260,25 +260,25 @@ AUTO_TEST_CASE(If)
 
 AUTO_TEST_CASE(IfEach)
 {
-	const auto * xml = R"(<xml xmlns:gl='glib'>
+	auto const * xml = R"(<xml xmlns:gl='glib'>
 <gl:block if='${value}' each='var : ${vars}'>
 	<td>${var}</td>
 </gl:block>
 </xml>)";
 
-	const auto * expectedYes = R"(<xml>
+	auto const * expectedYes = R"(<xml>
 	<td>1</td>
 	<td>2</td>
 	<td>3</td>
 </xml>)";
 
-	const auto * expectedNo = R"(<xml>
+	auto const * expectedNo = R"(<xml>
 </xml>)";
 
 	std::ostringstream stm;
 	Evaluator evaluator;
 
-	std::vector vars {1, 2, 3};
+	std::vector const vars {1, 2, 3};
 	evaluator.SetCollection("vars", vars);
 	evaluator.Set("value", true);
 	Generate(evaluator, xml, stm);

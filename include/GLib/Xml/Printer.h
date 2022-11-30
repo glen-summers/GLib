@@ -12,7 +12,7 @@ namespace GLib::Xml
 	{
 		static constexpr int textDepthNotSet = -1;
 
-		const bool format;
+		bool const format;
 		bool elementOpen {};
 		bool isFirstElement {true};
 		int depth {};
@@ -21,7 +21,7 @@ namespace GLib::Xml
 		std::stack<std::string> stack;
 
 	public:
-		explicit Printer(bool format = true)
+		explicit Printer(bool const format = true)
 			: format(format)
 			, textDepth(textDepthNotSet)
 		{}
@@ -31,12 +31,12 @@ namespace GLib::Xml
 			s << R"(<?xml version="1.0" encoding="UTF-8" ?>)" << std::endl;
 		}
 
-		void OpenElement(const std::string & name)
+		void OpenElement(std::string const & name)
 		{
 			OpenElement(name, format);
 		}
 
-		void OpenElement(const std::string & name, bool elementFormat)
+		void OpenElement(std::string const & name, bool const elementFormat)
 		{
 			CloseJustOpenedElement();
 			stack.push(name);
@@ -54,7 +54,7 @@ namespace GLib::Xml
 			++depth;
 		}
 
-		void PushAttribute(std::string_view name, std::string_view value)
+		void PushAttribute(std::string_view const name, std::string_view const value)
 		{
 			AssertTrue(elementOpen, "Element not open");
 			s << ' ' << name << R"(=")";
@@ -62,19 +62,19 @@ namespace GLib::Xml
 			s << '"';
 		}
 
-		void PushAttribute(std::string_view name, int64_t value)
+		void PushAttribute(std::string_view const name, const int64_t value)
 		{
 			PushAttribute(name, std::to_string(value).c_str());
 		}
 
-		void PushText(std::string_view text)
+		void PushText(std::string_view const text)
 		{
 			textDepth = depth - 1;
 			CloseJustOpenedElement();
 			Text(text);
 		}
 
-		void PushDocType(std::string_view docType)
+		void PushDocType(std::string_view const docType)
 		{
 			s << "<!DOCTYPE " << docType << '>' << std::endl;
 		}
@@ -84,10 +84,10 @@ namespace GLib::Xml
 			CloseElement(format);
 		}
 
-		void CloseElement(bool elementFormat)
+		void CloseElement(bool const elementFormat)
 		{
 			--depth;
-			const auto name = stack.top();
+			auto const name = stack.top();
 			stack.pop();
 			if (elementOpen)
 			{
@@ -142,12 +142,12 @@ namespace GLib::Xml
 			}
 		}
 
-		void Text(std::string_view value)
+		void Text(std::string_view const value)
 		{
 			Utils::Escape(value, s);
 		}
 
-		static void AssertTrue(bool value, const char * message)
+		static void AssertTrue(bool const value, char const * message)
 		{
 			if (!value)
 			{

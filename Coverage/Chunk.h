@@ -13,7 +13,7 @@ struct Chunk
 template <>
 struct GLib::Eval::Visitor<Chunk>
 {
-	static void Visit(const Chunk & chunk, const std::string & propertyName, const ValueVisitor & f)
+	static void Visit(Chunk const & chunk, std::string const & propertyName, ValueVisitor const & f)
 	{
 		if (propertyName == "cover")
 		{

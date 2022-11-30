@@ -13,13 +13,13 @@
 namespace
 {
 	template <typename T>
-	T * ConstCast(const T * t)
+	T * ConstCast(T const * t)
 	{
 		return const_cast<T *>(t); // NOLINT(cppcoreguidelines-pro-type-const-cast) required
 	}
 
 	template <typename T>
-	unsigned int UseCount(const GLib::Win::ComPtr<T> & ptr)
+	unsigned int UseCount(GLib::Win::ComPtr<T> const & ptr)
 	{
 		T * p = ConstCast<T>(Get(ptr));
 		return !p ? 0 : (p->AddRef(), p->Release());
@@ -31,7 +31,7 @@ namespace boost::test_tools::tt_detail
 	template <typename T>
 	struct print_log_value<GLib::Win::ComPtr<T>>
 	{
-		void operator()(std::ostream & str, const GLib::Win::ComPtr<T> & item)
+		void operator()(std::ostream & str, GLib::Win::ComPtr<T> const & item)
 		{
 			str << "ptr: " << Get(item) << ", Ref: " << UseCount(item);
 		}
@@ -99,14 +99,14 @@ AUTO_TEST_CASE(InitialisedComPtrHasOneUseCount)
 
 AUTO_TEST_CASE(CtorFromSameType)
 {
-	GLib::Win::ComPtr p1(GLib::Win::Make<ImplementsITest1>());
+	GLib::Win::ComPtr const p1(GLib::Win::Make<ImplementsITest1>());
 	TEST(1U == UseCount(p1));
 
 	GLib::Win::ComPtr p2(p1);
 	TEST(2U == UseCount(p1));
 	TEST(2U == UseCount(p2));
 
-	GLib::Win::ComPtr p2m(std::move(p2));
+	GLib::Win::ComPtr const p2m(std::move(p2));
 	TEST(2U == UseCount(p1));
 	TEST(0U == UseCount(p2));
 	TEST(2U == UseCount(p2m));
@@ -115,21 +115,21 @@ AUTO_TEST_CASE(CtorFromSameType)
 AUTO_TEST_CASE(CtorFromRawValue)
 {
 	GLib::Win::ComPtr p1(GLib::Win::Make<ImplementsITest1>());
-	GLib::Win::ComPtr<ITest1> p2(Get(p1));
+	GLib::Win::ComPtr<ITest1> const p2(Get(p1));
 	TEST(2U == UseCount(p1));
 	TEST(2U == UseCount(p2));
 }
 
 AUTO_TEST_CASE(CtorFromOtherType)
 {
-	GLib::Win::ComPtr p1(GLib::Win::Make<ImplementsITest1ExtendedAndITest1ExtendedAlt>());
+	GLib::Win::ComPtr const p1(GLib::Win::Make<ImplementsITest1ExtendedAndITest1ExtendedAlt>());
 	TEST(1U == UseCount(p1));
 
 	GLib::Win::ComPtr<ITest1> p2(p1);
 	TEST(2U == UseCount(p1));
 	TEST(2U == UseCount(p2));
 
-	GLib::Win::ComPtr p2m(std::move(p2));
+	GLib::Win::ComPtr const p2m(std::move(p2));
 	TEST(2U == UseCount(p1));
 	TEST(0U == UseCount(p2));
 	TEST(2U == UseCount(p2m));
@@ -191,7 +191,7 @@ AUTO_TEST_CASE(SelfAssign)
 AUTO_TEST_CASE(SelfAssignBug)
 {
 	GLib::Win::ComPtr<ITest1> p1(GLib::Win::Make<ImplementsITest1>());
-	const auto * raw = Get(p1);
+	auto const * raw = Get(p1);
 	p1 = p1; // NOLINT(clang-diagnostic-self-assign-overloaded) test
 
 	TEST(p1);
@@ -202,13 +202,13 @@ AUTO_TEST_CASE(SelfAssignBug)
 
 AUTO_TEST_CASE(CallMethod)
 {
-	GLib::Win::ComPtr test(GLib::Win::Make<ImplementsITest1>());
+	GLib::Win::ComPtr const test(GLib::Win::Make<ImplementsITest1>());
 	TEST(S_OK == test->Test1Method());
 }
 
 AUTO_TEST_CASE(QiOk)
 {
-	GLib::Win::ComPtr p1(GLib::Win::Make<ImplementsITest1AndITest2>());
+	GLib::Win::ComPtr const p1(GLib::Win::Make<ImplementsITest1AndITest2>());
 	GLib::Win::ComPtr<ITest1> p2 = GLib::Win::ComCast<ITest1>(p1);
 	TEST(2U == UseCount(p1));
 	TEST(2U == UseCount(p2));
@@ -219,18 +219,18 @@ AUTO_TEST_CASE(QiOk)
 
 AUTO_TEST_CASE(MultipleInheritance)
 {
-	GLib::Win::ComPtr<ITest1Extended> p12 = GLib::Win::Make<ImplementsITest1ExtendedAndITest1ExtendedAlt>();
+	GLib::Win::ComPtr<ITest1Extended> const p12 = GLib::Win::Make<ImplementsITest1ExtendedAndITest1ExtendedAlt>();
 	p12->Test1Method();
 	p12->Test1ExtendedMethod();
 
-	GLib::Win::ComPtr<ITest1ExtendedAlt> p13 = GLib::Win::ComCast<ITest1ExtendedAlt>(p12);
+	GLib::Win::ComPtr<ITest1ExtendedAlt> const p13 = GLib::Win::ComCast<ITest1ExtendedAlt>(p12);
 	p13->Test1Method();
 	p13->ITest1ExtendedMethodAlt();
 }
 
 AUTO_TEST_CASE(ComCast)
 {
-	GLib::Win::ComPtr<ITest1Extended> p12 = GLib::Win::Make<ImplementsITest1ExtendedAndITest1ExtendedAlt>();
+	GLib::Win::ComPtr<ITest1Extended> const p12 = GLib::Win::Make<ImplementsITest1ExtendedAndITest1ExtendedAlt>();
 
 	CHECK(true == static_cast<bool>(GLib::Win::ComCast<ITest1>(p12)));
 
@@ -244,7 +244,7 @@ AUTO_TEST_CASE(ComCast)
 
 AUTO_TEST_CASE(QiMissInDebugOut)
 {
-	GLib::Win::ComPtr<ITest1Extended> p12 = GLib::Win::Make<ImplementsITest1ExtendedAndITest1ExtendedAlt>();
+	GLib::Win::ComPtr<ITest1Extended> const p12 = GLib::Win::Make<ImplementsITest1ExtendedAndITest1ExtendedAlt>();
 	GLib::Win::ComPtr<IUnknown> unk;
 	HRESULT hr = p12->QueryInterface(GLib::Win::GetUuId<IClassFactory>(), GetAddress(unk).Void());
 	TEST(hr == E_NOINTERFACE);
@@ -252,7 +252,7 @@ AUTO_TEST_CASE(QiMissInDebugOut)
 
 AUTO_TEST_CASE(ComCastOkWithCastOverloadFix)
 {
-	GLib::Win::ComPtr<ITest1Extended> p12 = GLib::Win::Make<ImplementsITest1ExtendedAndITest1ExtendedAlt>();
+	GLib::Win::ComPtr<ITest1Extended> const p12 = GLib::Win::Make<ImplementsITest1ExtendedAndITest1ExtendedAlt>();
 	TEST(static_cast<bool>(GLib::Win::ComCast<ITest1ExtendedAlt>(p12)));
 }
 

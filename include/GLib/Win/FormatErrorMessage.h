@@ -46,7 +46,7 @@ namespace GLib::Win::Util
 		}
 	}
 
-	inline void FormatErrorMessage(std::ostream & stm, ULONG error, const wchar_t * moduleName = nullptr)
+	inline void FormatErrorMessage(std::ostream & stm, ULONG const error, wchar_t const * const moduleName = nullptr)
 	{
 		wchar_t * pszMsg = nullptr;
 		auto flags = Detail::Flags::AllocateBuffer | Detail::Flags::FromSystem | Detail::Flags::IgnoreInserts;
@@ -55,9 +55,9 @@ namespace GLib::Win::Util
 			flags |= Detail::Flags::FromHandle;
 		}
 
-		HMODULE module(moduleName != nullptr ? LoadLibraryW(moduleName) : nullptr);
+		HMODULE const module(moduleName != nullptr ? LoadLibraryW(moduleName) : nullptr);
 		auto * requiredCast = Detail::WindowsCast<LPWSTR>(&pszMsg);
-		auto result =
+		auto const result =
 			FormatMessageW(static_cast<ULONG>(flags), module, error, Make(Detail::Lang::Neutral, Detail::Lang::SubDefault), requiredCast, 0, nullptr);
 		if (module != nullptr)
 		{
@@ -66,7 +66,7 @@ namespace GLib::Win::Util
 
 		if (result != 0)
 		{
-			size_t len = wcslen(pszMsg);
+			size_t const len = wcslen(pszMsg);
 			std::wstring_view wMsg {pszMsg, len};
 			constexpr std::wstring_view ending = L"\r\n";
 			if (std::equal(ending.rbegin(), ending.rend(), wMsg.rbegin()))

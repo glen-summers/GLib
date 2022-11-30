@@ -11,12 +11,12 @@ namespace
 {
 	using Exception = std::runtime_error;
 
-	bool IsOverflow(const Exception & e)
+	bool IsOverflow(Exception const & e)
 	{
 		return e.what() == std::string("Overflow");
 	}
 
-	bool IsUnderflow(const Exception & e)
+	bool IsUnderflow(Exception const & e)
 	{
 		return e.what() == std::string("Underflow");
 	}

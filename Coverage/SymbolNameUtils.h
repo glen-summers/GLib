@@ -5,12 +5,12 @@
 #include <stdexcept>
 #include <string>
 
-inline bool Parse(std::string & name, unsigned int imbalance, char open, char close)
+inline bool Parse(std::string & name, unsigned int imbalance, char const open, char const close)
 {
 	std::ostringstream s;
 	unsigned int depth {};
 
-	for (auto c : name)
+	for (auto const c : name)
 	{
 		if (c == open)
 		{
@@ -53,7 +53,7 @@ inline void RemoveTemplateDefinitions(std::string & name)
 	int left {};
 	int right {};
 
-	for (auto c : name)
+	for (auto const c : name)
 	{
 		switch (c)
 		{

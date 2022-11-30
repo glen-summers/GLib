@@ -19,7 +19,7 @@ namespace GLib
 	{
 		namespace Detail
 		{
-			inline std::string CheckFormat(const char * defaultFormat, const std::string & format, const std::string & type)
+			inline std::string CheckFormat(char const * defaultFormat, std::string const & format, std::string const & type)
 			{
 				std::string f = format.empty() ? defaultFormat : format;
 				if (*f.begin() != '%')
@@ -29,7 +29,7 @@ namespace GLib
 				return f;
 			}
 
-			inline void CheckFormatEmpty(const std::string & format)
+			inline void CheckFormatEmpty(std::string const & format)
 			{
 				if (!format.empty())
 				{
@@ -38,12 +38,12 @@ namespace GLib
 			}
 
 			template <typename T>
-			void ToStringImpl(const char * defaultFormat, std::ostream & stm, const T & value, const std::string & format)
+			void ToStringImpl(char const * defaultFormat, std::ostream & stm, T const & value, std::string const & format)
 			{
-				std::string f = CheckFormat(defaultFormat, format, Compat::Unmangle(typeid(T).name()));
+				std::string const f = CheckFormat(defaultFormat, format, Compat::Unmangle(typeid(T).name()));
 				constexpr auto initialBufferSize = 21;
 				Util::StackOrHeap<char, initialBufferSize> s;
-				const int len = snprintf(nullptr, 0, f.c_str(), value); // NOLINT until c++/20 Format impl
+				int const len = snprintf(nullptr, 0, f.c_str(), value); // NOLINT until c++/20 Format impl
 				Compat::AssertTrue(len >= 0, "ToString", errno);
 				s.EnsureSize(static_cast<size_t>(len) + 1);
 				snprintf(s.Get(), s.Size(), f.c_str(), value); // NOLINT until c++/20 Format impl
@@ -52,9 +52,9 @@ namespace GLib
 			}
 
 			template <>
-			inline void ToStringImpl(const char * defaultFormat, std::ostream & stm, const std::tm & value, const std::string & format)
+			inline void ToStringImpl(char const * defaultFormat, std::ostream & stm, std::tm const & value, std::string const & format)
 			{
-				std::string f = CheckFormat(defaultFormat, format, "tm");
+				std::string const f = CheckFormat(defaultFormat, format, "tm");
 				// stream to wide to correctly convert locale symbols, is there a better better way? maybe when code convert gets fixed
 				std::wstringstream wideStream;
 				static_cast<void>(wideStream.imbue(stm.getloc()));
@@ -63,7 +63,7 @@ namespace GLib
 			}
 
 			template <>
-			inline void ToStringImpl(const char * defaultFormat, std::ostream & stm, const Money & value, const std::string & format)
+			inline void ToStringImpl(char const * defaultFormat, std::ostream & stm, Money const & value, std::string const & format)
 			{
 				static_cast<void>(defaultFormat);
 				CheckFormatEmpty(format);
@@ -98,72 +98,72 @@ namespace GLib
 		class Printf
 		{
 		public:
-			static void Format(std::ostream & stm, const char & value, const std::string & format)
+			static void Format(std::ostream & stm, char const & value, std::string const & format)
 			{
 				Detail::ToStringImpl("%c", stm, value, format);
 			}
 
-			static void Format(std::ostream & stm, const unsigned char & value, const std::string & format)
+			static void Format(std::ostream & stm, unsigned char const & value, std::string const & format)
 			{
 				Detail::ToStringImpl("%u", stm, value, format);
 			}
 
-			static void Format(std::ostream & stm, const short & value, const std::string & format)
+			static void Format(std::ostream & stm, short const & value, std::string const & format)
 			{
 				Detail::ToStringImpl("%d", stm, value, format);
 			}
 
-			static void Format(std::ostream & stm, const unsigned short & value, const std::string & format)
+			static void Format(std::ostream & stm, unsigned short const & value, std::string const & format)
 			{
 				Detail::ToStringImpl("%u", stm, value, format);
 			}
 
-			static void Format(std::ostream & stm, const int & value, const std::string & format)
+			static void Format(std::ostream & stm, int const & value, std::string const & format)
 			{
 				Detail::ToStringImpl("%d", stm, value, format);
 			}
 
-			static void Format(std::ostream & stm, const unsigned int & value, const std::string & format)
+			static void Format(std::ostream & stm, unsigned int const & value, std::string const & format)
 			{
 				Detail::ToStringImpl("%u", stm, value, format);
 			}
 
-			static void Format(std::ostream & stm, const long & value, const std::string & format)
+			static void Format(std::ostream & stm, long const & value, std::string const & format)
 			{
 				Detail::ToStringImpl("%ld", stm, value, format);
 			}
 
-			static void Format(std::ostream & stm, const unsigned long & value, const std::string & format)
+			static void Format(std::ostream & stm, unsigned long const & value, std::string const & format)
 			{
 				Detail::ToStringImpl("%lu", stm, value, format);
 			}
 
-			static void Format(std::ostream & stm, const long long & value, const std::string & format)
+			static void Format(std::ostream & stm, long long const & value, std::string const & format)
 			{
 				Detail::ToStringImpl("%lld", stm, value, format);
 			}
 
-			static void Format(std::ostream & stm, const unsigned long long & value, const std::string & format)
+			static void Format(std::ostream & stm, unsigned long long const & value, std::string const & format)
 			{
 				Detail::ToStringImpl("%llu", stm, value, format);
 			}
 
-			static void Format(std::ostream & stm, const float & value, const std::string & format)
+			static void Format(std::ostream & stm, float const & value, std::string const & format)
 			{
 				Detail::ToStringImpl("%g", stm, value, format);
 			}
 
-			static void Format(std::ostream & stm, const double & value, const std::string & format)
+			static void Format(std::ostream & stm, double const & value, std::string const & format)
 			{
 				Detail::ToStringImpl("%g", stm, value, format);
 			}
 
-			static void Format(std::ostream & stm, const long double & value, const std::string & format)
+			static void Format(std::ostream & stm, long double const & value, std::string const & format)
 			{
 				Detail::ToStringImpl("%Lg", stm, value, format);
 			}
 
-			static void Format(std::ostream & stm, void * const & value, const std::string & format)
+			static void Format(std::ostream & stm, void * const & value, std::string const & format)
 			{
 				if (format.empty())
 				{
@@ -176,12 +176,12 @@ namespace GLib
 			}
 
 			// actually not printf calls, move to a shared c++ policy?
-			static void Format(std::ostream & stm, const std::tm & value, const std::string & format)
+			static void Format(std::ostream & stm, std::tm const & value, std::string const & format)
 			{
 				Detail::ToStringImpl("%d %b %Y, %H:%M:%S", stm, value, format);
 			}
 
-			static void Format(std::ostream & stm, const Money & value, const std::string & format)
+			static void Format(std::ostream & stm, Money const & value, std::string const & format)
 			{
 				// assert format is empty
 				Detail::ToStringImpl("", stm, value, format);
@@ -189,7 +189,7 @@ namespace GLib
 
 		private:
 			template <typename T>
-			static void Format(std::ostream & stm, const T & value, const std::string & fmt);
+			static void Format(std::ostream & stm, T const & value, std::string const & fmt);
 		};
 	}
 }

@@ -14,7 +14,7 @@
 
 namespace GLib::Compat
 {
-	inline void ThrowErrorNumber(std::string_view prefix, const errno_t errorNumber)
+	inline void ThrowErrorNumber(std::string_view const prefix, errno_t const errorNumber)
 	{
 		if (errorNumber != 0)
 		{
@@ -32,17 +32,17 @@ namespace GLib::Compat
 		}
 	}
 
-	inline void LocalTime(tm & tm, const time_t & t)
+	inline void LocalTime(tm & tm, time_t const & t)
 	{
 		ThrowErrorNumber(__func__, localtime_s(&tm, &t));
 	}
 
-	inline void GmTime(tm & tm, const time_t & t)
+	inline void GmTime(tm & tm, time_t const & t)
 	{
 		ThrowErrorNumber(__func__, gmtime_s(&tm, &t));
 	}
 
-	inline void AssertTrue(bool value, std::string_view prefix, errno_t error)
+	inline void AssertTrue(bool const value, std::string_view const prefix, errno_t const error)
 	{
 		if (!value)
 		{
@@ -50,17 +50,17 @@ namespace GLib::Compat
 		}
 	}
 
-	inline void SetEnv(const char * name, const char * value)
+	inline void SetEnv(char const * name, char const * value)
 	{
-		auto wideName = Cvt::A2W(name);
-		auto wideValue = Cvt::A2W(value);
-		errno_t err = _wputenv_s(wideName.c_str(), wideValue.c_str());
+		auto const wideName = Cvt::A2W(name);
+		auto const wideValue = Cvt::A2W(value);
+		errno_t const err = _wputenv_s(wideName.c_str(), wideValue.c_str());
 		AssertTrue(err == 0, "_wputenv_s", err);
 	}
 
-	inline std::optional<std::string> GetEnv(const char * name)
+	inline std::optional<std::string> GetEnv(char const * name)
 	{
-		auto wideName = Cvt::A2W(name);
+		auto const wideName = Cvt::A2W(name);
 
 		Util::WideCharBuffer tmp;
 		size_t len = 0;
@@ -79,12 +79,12 @@ namespace GLib::Compat
 		return Cvt::W2A({tmp.Get(), len - 1});
 	}
 
-	inline void UnsetEnv(const char * name)
+	inline void UnsetEnv(char const * name)
 	{
 		SetEnv(name, "");
 	}
 
-	inline std::string Unmangle(const std::string & name)
+	inline std::string Unmangle(std::string const & name)
 	{
 		constexpr std::string_view Class = "class ";
 		constexpr std::string_view Struct = "struct ";

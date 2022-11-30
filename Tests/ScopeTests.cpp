@@ -11,7 +11,7 @@ AUTO_TEST_CASE(SimpleTest)
 {
 	bool deScoped = false;
 	{
-		auto scope = GLib::Detail::Scope([&]() noexcept { deScoped = true; });
+		auto const scope = GLib::Detail::Scope([&]() noexcept { deScoped = true; });
 		TEST(!deScoped);
 		static_cast<void>(scope);
 	}
@@ -22,8 +22,8 @@ AUTO_TEST_CASE(TwoScopes)
 {
 	int deScoped = 0;
 	{
-		auto scope1 = GLib::Detail::Scope([&]() noexcept { deScoped += 1; });
-		auto scope2 = GLib::Detail::Scope([&]() noexcept { deScoped += 2; });
+		auto const scope1 = GLib::Detail::Scope([&]() noexcept { deScoped += 1; });
+		auto const scope2 = GLib::Detail::Scope([&]() noexcept { deScoped += 2; });
 		TEST(0 == deScoped);
 		static_cast<void>(scope2);
 		static_cast<void>(scope1);

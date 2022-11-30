@@ -14,19 +14,19 @@ namespace GLib::Xml
 		std::stack<std::pair<size_t, std::pair<std::string_view, std::string_view>>> nameSpaceStack;
 
 	public:
-		static bool IsDeclaration(std::string_view value)
+		static bool IsDeclaration(std::string_view const value)
 		{
 			return value.compare(0, xmlNameSpace.size(), xmlNameSpace) == 0;
 		}
 
-		static std::string_view CheckForDeclaration(std::string_view value)
+		static std::string_view CheckForDeclaration(std::string_view const value)
 		{
 			return IsDeclaration(value) ? value.substr(xmlNameSpace.size()) : std::string_view {};
 		}
 
-		[[nodiscard]] std::string_view Get(std::string_view prefix) const
+		[[nodiscard]] std::string_view Get(std::string_view const prefix) const
 		{
-			auto nit = nameSpaces.find(prefix);
+			auto const nit = nameSpaces.find(prefix);
 			if (nit == nameSpaces.end())
 			{
 				throw std::runtime_error("Namespace not found"); // +detail
@@ -35,15 +35,15 @@ namespace GLib::Xml
 		}
 
 		// rename?
-		void Push(std::string_view qualifiedName, std::string_view value, size_t depth)
+		void Push(std::string_view const qualifiedName, std::string_view const value, const size_t depth)
 		{
-			std::string_view prefix = CheckForDeclaration(qualifiedName);
+			std::string_view const prefix = CheckForDeclaration(qualifiedName);
 			if (prefix.empty())
 			{
 				return;
 			}
 
-			auto nit = nameSpaces.find(prefix);
+			auto const nit = nameSpaces.find(prefix);
 			if (nit != nameSpaces.end())
 			{
 				nameSpaceStack.push({depth, {prefix, nit->second}});
@@ -55,7 +55,7 @@ namespace GLib::Xml
 			}
 		}
 
-		void Pop(size_t depth)
+		void Pop(size_t const depth)
 		{
 			while (!nameSpaceStack.empty() && depth == nameSpaceStack.top().first)
 			{
@@ -69,7 +69,7 @@ namespace GLib::Xml
 			}
 		}
 
-		static void ValidateName(size_t colon, std::string_view value)
+		static void ValidateName(size_t const colon, std::string_view const value)
 		{
 			if (colon == 0 || value.find(':', colon + 1) != std::string_view::npos)
 			{
@@ -79,12 +79,12 @@ namespace GLib::Xml
 
 		[[nodiscard]] std::tuple<std::string_view, std::string_view> Normalise(std::string_view name) const
 		{
-			const size_t colon = name.find(':');
+			size_t const colon = name.find(':');
 			if (colon != std::string_view::npos)
 			{
 				ValidateName(colon, name);
-				auto prefix = name.substr(0, colon);
-				auto it = nameSpaces.find(prefix);
+				auto const prefix = name.substr(0, colon);
+				auto const it = nameSpaces.find(prefix);
 				if (it == nameSpaces.end())
 				{
 					throw std::runtime_error(std::string("NameSpace ") + std::string(prefix) + " not found");

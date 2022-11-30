@@ -12,23 +12,23 @@ namespace GLib::Win::Debug
 	}
 
 	template <typename T>
-	void Write(const T & value)
+	void Write(T const & value)
 	{
 		Stream() << value << std::endl;
 	}
 
 	template <typename T>
-	void Write(const T * value)
+	void Write(T const * value)
 	{
 		Stream() << value << std::endl;
 	}
 
-	inline void Write(std::string_view value)
+	inline void Write(std::string_view const value)
 	{
 		Stream() << value << std::endl;
 	}
 
-	inline void Write(std::wstring_view value)
+	inline void Write(std::wstring_view const value)
 	{
 		Stream() << Cvt::W2A(value) << std::endl;
 	}

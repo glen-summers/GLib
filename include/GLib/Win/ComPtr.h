@@ -35,9 +35,9 @@ namespace GLib::Win
 		{
 		public:
 			Restricted() = delete;
-			Restricted(const Restricted &) = delete;
+			Restricted(Restricted const &) = delete;
 			Restricted(Restricted &&) = delete;
-			Restricted & operator=(const Restricted &) = delete;
+			Restricted & operator=(Restricted const &) = delete;
 			Restricted & operator=(Restricted &&) = delete;
 			virtual ~Restricted() = delete;
 
@@ -61,7 +61,7 @@ namespace GLib::Win
 	}
 
 	template <typename Target, typename Source>
-	ComPtr<Target> ComCast(const Source & source)
+	ComPtr<Target> ComCast(Source const & source)
 	{
 		ComPtr<Target> value;
 		if (source)
@@ -81,7 +81,7 @@ namespace GLib::Win
 		friend U * Get(ComPtr<U> & p) noexcept; // NOLINT(readability-redundant-declaration) (bug: needed but clang-tidy -fix deletes this line)
 
 		template <typename U>
-		friend const U * Get(const ComPtr<U> & p) noexcept; // NOLINT(readability-redundant-declaration) (bug: needed but clang-tidy -fix deletes this)
+		friend U const * Get(ComPtr<U> const & p) noexcept; // NOLINT(readability-redundant-declaration) (bug: needed but clang-tidy -fix deletes this)
 
 		T * p {};
 
@@ -96,11 +96,11 @@ namespace GLib::Win
 		{}
 
 		template <typename U>
-		explicit ComPtr(const ComPtr<U> & other) noexcept
+		explicit ComPtr(ComPtr<U> const & other) noexcept
 			: p(InternalAddRef(other.p))
 		{}
 
-		ComPtr(const ComPtr & other) noexcept
+		ComPtr(ComPtr const & other) noexcept
 			: p(InternalAddRef(other.p))
 		{}
 
@@ -124,14 +124,14 @@ namespace GLib::Win
 			return *this;
 		}
 
-		ComPtr & operator=(const ComPtr & right) noexcept // NOLINT(bugprone-unhandled-self-assignment,cert-oop54-cpp) clang-tidy bug?
+		ComPtr & operator=(ComPtr const & right) noexcept // NOLINT(bugprone-unhandled-self-assignment,cert-oop54-cpp) clang-tidy bug?
 		{
 			ComPtr {right}.Swap(*this);
 			return *this;
 		}
 
 		template <typename U>
-		ComPtr & operator=(const ComPtr<U> & right) noexcept
+		ComPtr & operator=(ComPtr<U> const & right) noexcept
 		{
 			ComPtr {right}.Swap(*this);
 			return *this;
@@ -170,7 +170,7 @@ namespace GLib::Win
 		}
 
 	private:
-		ComPtr(T * other, bool ignored) noexcept
+		ComPtr(T * other, bool const ignored) noexcept
 			: p(other)
 		{
 			static_cast<void>(ignored);
@@ -200,25 +200,25 @@ namespace GLib::Win
 	};
 
 	template <class T>
-	bool operator==(const ComPtr<T> & p, nullptr_t) noexcept
+	bool operator==(ComPtr<T> const & p, nullptr_t) noexcept
 	{
 		return !p;
 	}
 
 	template <class T>
-	bool operator==(nullptr_t, const ComPtr<T> & p) noexcept
+	bool operator==(nullptr_t, ComPtr<T> const & p) noexcept
 	{
 		return !p;
 	}
 
 	template <class T>
-	bool operator!=(const ComPtr<T> & p, nullptr_t) noexcept
+	bool operator!=(ComPtr<T> const & p, nullptr_t) noexcept
 	{
 		return !!p;
 	}
 
 	template <class T>
-	bool operator!=(nullptr_t, const ComPtr<T> & p) noexcept
+	bool operator!=(nullptr_t, ComPtr<T> const & p) noexcept
 	{
 		return !!p;
 	}
@@ -230,7 +230,7 @@ namespace GLib::Win
 	}
 
 	template <typename T>
-	const T * Get(const ComPtr<T> & p) noexcept
+	T const * Get(ComPtr<T> const & p) noexcept
 	{
 		return p.p;
 	}
@@ -248,7 +248,7 @@ namespace GLib::Win
 	}
 
 	template <typename T1, typename T2>
-	bool operator==(const ComPtr<T1> & t1, const ComPtr<T2> & t2)
+	bool operator==(ComPtr<T1> const & t1, ComPtr<T2> const & t2)
 	{
 		return Get(ComCast<IUnknown>(t1)) == Get(ComCast<IUnknown>(t2));
 	}

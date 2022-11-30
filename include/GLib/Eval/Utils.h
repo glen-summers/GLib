@@ -48,19 +48,19 @@ namespace GLib::Eval::Utils
 		};
 	}
 
-	inline std::string ToString(const bool & value)
+	inline std::string ToString(bool const & value)
 	{
 		return value ? "true" : "false";
 	}
 
 	template <typename T, std::enable_if_t<Detail::HasToString<T>::value> * = nullptr>
-	std::string ToString(const T & value)
+	std::string ToString(T const & value)
 	{
 		return std::to_string(value);
 	}
 
 	template <typename T, std::enable_if_t<!Detail::HasToString<T>::value && Detail::CanStream<T>::value> * = nullptr>
-	std::string ToString(const T & value)
+	std::string ToString(T const & value)
 	{
 		std::ostringstream s;
 		s << value;
@@ -68,13 +68,13 @@ namespace GLib::Eval::Utils
 	}
 
 	template <typename T, std::enable_if_t<!Detail::HasToString<T>::value && !Detail::CanStream<T>::value> * = nullptr>
-	std::string ToString(const T & value)
+	std::string ToString(T const & value)
 	{
 		static_cast<void>(value);
 		throw std::runtime_error(std::string("Cannot convert type to string : ") + Compat::Unmangle(typeid(T).name()));
 	}
 
-	inline std::string ToString(const std::string & value)
+	inline std::string ToString(std::string const & value)
 	{
 		return value;
 	}

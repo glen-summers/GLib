@@ -30,13 +30,13 @@ namespace GLib::Win::FileSystem
 		std::vector<std::string> drives;
 		GLib::Util::WideCharBuffer s;
 
-		ULONG sizeWithFinalTerminator = GetLogicalDriveStringsW(0, nullptr);
+		ULONG const sizeWithFinalTerminator = GetLogicalDriveStringsW(0, nullptr);
 		s.EnsureSize(sizeWithFinalTerminator - 1);
-		auto size = GetLogicalDriveStringsW(static_cast<ULONG>(s.Size()), s.Get());
+		auto const size = GetLogicalDriveStringsW(static_cast<ULONG>(s.Size()), s.Get());
 		Util::AssertTrue(size != 0 && size < sizeWithFinalTerminator, "GetLogicalDriveStringsW");
 
 		std::wstring_view pp {s.Get(), size};
-		const wchar_t nul = u'\0';
+		constexpr wchar_t nul = u'\0';
 		for (size_t pos = 0, next = pp.find(nul, pos); next != std::wstring_view::npos; pos = next + 1, next = pp.find(nul, pos))
 		{
 			drives.push_back(Cvt::W2A(pp.substr(pos, next - 1 - pos)));
@@ -51,9 +51,9 @@ namespace GLib::Win::FileSystem
 		std::map<std::string, std::string> result;
 		GLib::Util::WideCharBuffer s;
 
-		for (const auto & logicalDrive : LogicalDrives())
+		for (auto const & logicalDrive : LogicalDrives())
 		{
-			ULONG length = QueryDosDeviceW(Cvt::A2W(logicalDrive).c_str(), s.Get(), static_cast<ULONG>(s.Size()));
+			ULONG const length = QueryDosDeviceW(Cvt::A2W(logicalDrive).c_str(), s.Get(), static_cast<ULONG>(s.Size()));
 			Util::AssertTrue(length != 0, "QueryDosDeviceW");
 
 			s.EnsureSize(length);
@@ -64,7 +64,7 @@ namespace GLib::Win::FileSystem
 		return result;
 	}
 
-	inline std::string PathOfFileHandle(HANDLE fileHandle, ULONG flags)
+	inline std::string PathOfFileHandle(HANDLE const fileHandle, ULONG const flags)
 	{
 		GLib::Util::WideCharBuffer s;
 		ULONG length = GetFinalPathNameByHandleW(fileHandle, nullptr, 0, flags);
@@ -75,12 +75,12 @@ namespace GLib::Win::FileSystem
 		return Cvt::W2A(std::wstring_view {s.Get(), length});
 	}
 
-	inline std::string NormalisePath(const std::string & path, const std::map<std::string, std::string> & driveMap)
+	inline std::string NormalisePath(std::string const & path, std::map<std::string, std::string> const & driveMap)
 	{
 		// todo: network drives
-		for (const auto & [deviceName, logicalName] : driveMap)
+		for (auto const & [deviceName, logicalName] : driveMap)
 		{
-			size_t compareSize = logicalName.size();
+			size_t const compareSize = logicalName.size();
 			if (IcuUtils::CompareNoCase(path, logicalName, compareSize) == IcuUtils::CompareResult::Equal)
 			{
 				return deviceName + path.substr(compareSize);
@@ -89,7 +89,7 @@ namespace GLib::Win::FileSystem
 		throw std::runtime_error("Drive not mapped"); // or just return path?
 	}
 
-	inline std::string PathOfModule(HMODULE module)
+	inline std::string PathOfModule(HMODULE const module)
 	{
 		GLib::Util::WideCharBuffer s;
 
@@ -97,7 +97,7 @@ namespace GLib::Win::FileSystem
 		for (;;)
 		{
 			// this could return prefix "\\?\"
-			ULONG len = GetModuleFileNameW(module, s.Get(), static_cast<unsigned int>(s.Size()));
+			ULONG const len = GetModuleFileNameW(module, s.Get(), static_cast<unsigned int>(s.Size()));
 			Util::AssertTrue(len != 0, "GetModuleFileNameW");
 			if (len < s.Size())
 			{
@@ -118,7 +118,7 @@ namespace GLib::Win::FileSystem
 		return Cvt::W2A(std::wstring_view {s.Get(), length});
 	}
 
-	inline std::string PathOfProcessHandle(HANDLE process)
+	inline std::string PathOfProcessHandle(HANDLE const process)
 	{
 		GLib::Util::WideCharBuffer s;
 
@@ -145,16 +145,16 @@ namespace GLib::Win::FileSystem
 		return Cvt::W2A(std::wstring_view {s.Get(), requiredSize});
 	}
 
-	inline Handle CreateAutoDeleteFile(const std::string & name)
+	inline Handle CreateAutoDeleteFile(std::string const & name)
 	{
-		HANDLE h = CreateFileW(Cvt::A2W(name).c_str(), Detail::Access, 0, nullptr, Detail::Create, Detail::Flags, nullptr);
+		HANDLE const h = CreateFileW(Cvt::A2W(name).c_str(), Detail::Access, 0, nullptr, Detail::Create, Detail::Flags, nullptr);
 		Util::AssertTrue(h != nullptr, "CreateFileW");
 		return Handle(h);
 	}
 
-	inline std::string LongPath(const std::string & name)
+	inline std::string LongPath(std::string const & name)
 	{
-		auto ws = Cvt::A2W(name);
+		auto const ws = Cvt::A2W(name);
 		size_t lenNoTerminator = GetLongPathNameW(ws.c_str(), nullptr, 0);
 		Util::AssertTrue(lenNoTerminator != 0, "GetLongPathNameW");
 

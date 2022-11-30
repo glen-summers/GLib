@@ -11,7 +11,7 @@
 
 #include "TestUtils.h"
 
-std::string ToString(const std::chrono::nanoseconds & duration)
+std::string ToString(std::chrono::nanoseconds const & duration)
 {
 	std::ostringstream s;
 	s << duration;
@@ -37,7 +37,7 @@ struct Fred
 
 AUTO_TEST_CASE(BasicTest)
 {
-	auto log = GLib::Flog::LogManager::GetLog<Fred>();
+	auto const log = GLib::Flog::LogManager::GetLog<Fred>();
 	log.Info("Hello");
 	log.Info("Format: {0} , {1}", 1, 2);
 
@@ -49,11 +49,11 @@ AUTO_TEST_CASE(BasicTest)
 
 AUTO_TEST_CASE(LogLevel)
 {
-	auto log = GLib::Flog::LogManager::GetLog<Fred>();
+	auto const log = GLib::Flog::LogManager::GetLog<Fred>();
 
-	auto currentLevel = GLib::Flog::LogManager::SetLevel(GLib::Flog::Level::Error);
+	auto const currentLevel = GLib::Flog::LogManager::SetLevel(GLib::Flog::Level::Error);
 
-	auto scope = GLib::Detail::Scope([=]() { GLib::Flog::LogManager::SetLevel(currentLevel); });
+	auto const scope = GLib::Detail::Scope([=]() { GLib::Flog::LogManager::SetLevel(currentLevel); });
 
 	log.Info("info");
 	log.Error("error");
@@ -68,14 +68,14 @@ AUTO_TEST_CASE(LogLevel)
 
 AUTO_TEST_CASE(LogFileSize)
 {
-	auto log = GLib::Flog::LogManager::GetLog<Fred>();
+	auto const log = GLib::Flog::LogManager::GetLog<Fred>();
 
 	log.Info("Start");
-	auto path1 = GLib::Flog::LogManager::GetLogPath();
+	auto const path1 = GLib::Flog::LogManager::GetLogPath();
 
-	auto currentSize = GLib::Flog::LogManager::SetMaxFileSize(SZ(1024));
+	auto const currentSize = GLib::Flog::LogManager::SetMaxFileSize(SZ(1024));
 
-	auto scope = GLib::Detail::Scope([=]() { GLib::Flog::LogManager::SetMaxFileSize(currentSize); });
+	auto const scope = GLib::Detail::Scope([=]() { GLib::Flog::LogManager::SetMaxFileSize(currentSize); });
 
 	log.Info(std::string(SZ(100), 'x'));
 	TEST(path1 == GLib::Flog::LogManager::GetLogPath());
@@ -89,16 +89,16 @@ AUTO_TEST_CASE(LogFileSize)
 AUTO_TEST_CASE(ProcessName)
 {
 	{
-		auto log = GLib::Flog::LogManager::GetLog<Fred>();
+		auto const log = GLib::Flog::LogManager::GetLog<Fred>();
 		log.Info("Hello");
 	}
 
 	std::ifstream in(GLib::Flog::LogManager::GetLogPath());
 	std::string contents((std::istreambuf_iterator(in)), std::istreambuf_iterator<char>());
 
-	auto processName = GLib::Compat::ProcessName();
-	auto processPath = GLib::Compat::ProcessPath();
-	auto bitness = std::to_string(I32(8) * sizeof(void *));
+	auto const processName = GLib::Compat::ProcessName();
+	auto const processPath = GLib::Compat::ProcessPath();
+	auto const bitness = std::to_string(I32(8) * sizeof(void *));
 
 	TEST(contents.find("ProcessName : (" + bitness + " bit) " + processName) != std::string::npos);
 	TEST(contents.find("FullPath    : " + processPath) != std::string::npos);
@@ -108,12 +108,12 @@ AUTO_TEST_CASE(SetThreadName)
 {
 	GLib::Flog::LogManager::SetThreadName("TestThread");
 
-	auto log = GLib::Flog::LogManager::GetLog<Fred>();
+	auto const log = GLib::Flog::LogManager::GetLog<Fred>();
 	log.Info("Hello");
 	GLib::Flog::LogManager::SetThreadName({});
 
 	std::ifstream in(GLib::Flog::LogManager::GetLogPath());
-	std::string contents((std::istreambuf_iterator(in)), std::istreambuf_iterator<char>());
+	std::string const contents((std::istreambuf_iterator(in)), std::istreambuf_iterator<char>());
 
 	TEST(contents.find("] : INFO     : ThreadName       : TestThread") != std::string::npos);
 	TEST(contents.find(": [ TestThread ] : INFO     : FlogTests::Fred  : Hello") != std::string::npos);
@@ -122,16 +122,16 @@ AUTO_TEST_CASE(SetThreadName)
 
 AUTO_TEST_CASE(TestOneScope)
 {
-	auto log = GLib::Flog::LogManager::GetLog<Fred>();
+	auto const log = GLib::Flog::LogManager::GetLog<Fred>();
 	log.Info("Start");
 	{
-		GLib::Flog::ScopeLog scope1(log, GLib::Flog::Level::Info, "Scoop");
+		GLib::Flog::ScopeLog const scope1(log, GLib::Flog::Level::Info, "Scoop");
 		static_cast<void>(scope1);
 	}
 	log.Info("End");
 
 	std::ifstream in(GLib::Flog::LogManager::GetLogPath());
-	std::string contents((std::istreambuf_iterator(in)), std::istreambuf_iterator<char>());
+	std::string const contents((std::istreambuf_iterator(in)), std::istreambuf_iterator<char>());
 
 	TEST(contents.find("] : INFO     : FlogTests::Fred  : Start") != std::string::npos);
 	TEST(contents.find("] : INFO     : FlogTests::Fred  : <==> Scoop") != std::string::npos);
@@ -140,17 +140,17 @@ AUTO_TEST_CASE(TestOneScope)
 
 AUTO_TEST_CASE(TestOneScopeWithInnerLog)
 {
-	auto log = GLib::Flog::LogManager::GetLog<Fred>();
+	auto const log = GLib::Flog::LogManager::GetLog<Fred>();
 	log.Info("Start");
 	{
-		GLib::Flog::ScopeLog scope1(log, GLib::Flog::Level::Info, "Scoop");
+		GLib::Flog::ScopeLog const scope1(log, GLib::Flog::Level::Info, "Scoop");
 		log.Info("Middle");
 		static_cast<void>(scope1);
 	}
 	log.Info("End");
 
 	std::ifstream in(GLib::Flog::LogManager::GetLogPath());
-	std::string contents((std::istreambuf_iterator(in)), std::istreambuf_iterator<char>());
+	std::string const contents((std::istreambuf_iterator(in)), std::istreambuf_iterator<char>());
 
 	TEST(contents.find("] : INFO     : FlogTests::Fred  : Start") != std::string::npos);
 	TEST(contents.find("] : INFO     : FlogTests::Fred  : ==> Scoop") != std::string::npos);
@@ -161,15 +161,15 @@ AUTO_TEST_CASE(TestOneScopeWithInnerLog)
 
 AUTO_TEST_CASE(TestNestedScopes)
 {
-	auto log = GLib::Flog::LogManager::GetLog<Fred>();
+	auto const log = GLib::Flog::LogManager::GetLog<Fred>();
 	log.Info("Start");
-	GLib::Flog::ScopeLog scope1(log, GLib::Flog::Level::Info, "Scoop1");
+	GLib::Flog::ScopeLog const scope1(log, GLib::Flog::Level::Info, "Scoop1");
 	log.Info("s1");
 	{
-		GLib::Flog::ScopeLog scope2(log, GLib::Flog::Level::Info, "Scoop2", "--");
+		GLib::Flog::ScopeLog const scope2(log, GLib::Flog::Level::Info, "Scoop2", "--");
 		log.Info("s2");
 		{
-			GLib::Flog::ScopeLog scope3(log, GLib::Flog::Level::Info, "Scoop3", "++");
+			GLib::Flog::ScopeLog const scope3(log, GLib::Flog::Level::Info, "Scoop3", "++");
 			log.Info("s3");
 			static_cast<void>(scope3);
 		}
@@ -178,7 +178,7 @@ AUTO_TEST_CASE(TestNestedScopes)
 	log.Info("End");
 
 	std::ifstream in(GLib::Flog::LogManager::GetLogPath());
-	std::string contents((std::istreambuf_iterator(in)), std::istreambuf_iterator<char>());
+	std::string const contents((std::istreambuf_iterator(in)), std::istreambuf_iterator<char>());
 
 	static_cast<void>(scope1);
 
@@ -196,13 +196,13 @@ AUTO_TEST_CASE(TestNestedScopes)
 
 AUTO_TEST_CASE(TestInterlevedLogs)
 {
-	auto log1 = GLib::Flog::LogManager::GetLog("Jim");
-	auto log2 = GLib::Flog::LogManager::GetLog("Sheila");
+	auto const log1 = GLib::Flog::LogManager::GetLog("Jim");
+	auto const log2 = GLib::Flog::LogManager::GetLog("Sheila");
 	log1.Info("1");
 	log2.Info("2");
 
 	std::ifstream in(GLib::Flog::LogManager::GetLogPath());
-	std::string contents((std::istreambuf_iterator(in)), std::istreambuf_iterator<char>());
+	std::string const contents((std::istreambuf_iterator(in)), std::istreambuf_iterator<char>());
 
 	TEST(contents.find("] : INFO     : Jim              : 1") != std::string::npos);
 	TEST(contents.find("] : INFO     : Sheila           : 2") != std::string::npos);
@@ -210,11 +210,11 @@ AUTO_TEST_CASE(TestInterlevedLogs)
 
 AUTO_TEST_CASE(TestPendingScopeOverPrefixChange)
 {
-	auto log1 = GLib::Flog::LogManager::GetLog("Jim");
-	auto log2 = GLib::Flog::LogManager::GetLog("Sheila");
-	GLib::Flog::ScopeLog scope1(log1, GLib::Flog::Level::Info, "Scoop1");
+	auto const log1 = GLib::Flog::LogManager::GetLog("Jim");
+	auto const log2 = GLib::Flog::LogManager::GetLog("Sheila");
+	GLib::Flog::ScopeLog const scope1(log1, GLib::Flog::Level::Info, "Scoop1");
 	{
-		GLib::Flog::ScopeLog scope2(log2, GLib::Flog::Level::Info, "Scoop2");
+		GLib::Flog::ScopeLog const scope2(log2, GLib::Flog::Level::Info, "Scoop2");
 		static_cast<void>(scope2);
 	}
 	static_cast<void>(scope1);

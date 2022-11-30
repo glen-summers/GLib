@@ -22,23 +22,23 @@ FileLogger::~FileLogger()
 	CloseStream(); //
 }
 
-const LogState & FileLogger::GetLogState() noexcept
+LogState const & FileLogger::GetLogState() noexcept
 {
 	thread_local LogState state;
 	return state;
 }
 
-void FileLogger::Write(GLib::Flog::Level level, std::string_view prefix, std::string_view message)
+void FileLogger::Write(GLib::Flog::Level const level, std::string_view const prefix, std::string_view const message)
 {
 	Instance().InternalWrite(level, prefix, message);
 }
 
-void FileLogger::Write(char c)
+void FileLogger::Write(char const c)
 {
 	logState.Put(c);
 }
 
-extern "C" void GLib::Flog::Detail::Write(char c)
+extern "C" void GLib::Flog::Detail::Write(char const c)
 {
 	FileLogger::Write(c);
 }
@@ -62,7 +62,7 @@ StreamInfo FileLogger::GetStream() const
 	// 	s << "_" << std::put_time(&tm, "%Y-%m-%d");
 	// }
 	std::filesystem::path logFileName = (path / baseFileName).replace_extension(".log"); // combine, check trailing etc.
-	const unsigned int date = GetDate();
+	unsigned int const date = GetDate();
 
 	constexpr int maxTries = 1000;
 
@@ -111,7 +111,7 @@ StreamInfo FileLogger::GetStream() const
 	throw std::runtime_error("Exhausted possible stream names " + GLib::Cvt::P2A(logFileName));
 }
 
-void FileLogger::InternalWrite(GLib::Flog::Level level, std::string_view prefix, std::string_view message)
+void FileLogger::InternalWrite(GLib::Flog::Level const level, std::string_view const prefix, std::string_view const message)
 {
 	// ShouldTrace ...
 	if (level < logLevel)
@@ -123,13 +123,13 @@ void FileLogger::InternalWrite(GLib::Flog::Level level, std::string_view prefix,
 	WriteToStream(level, prefix, message);
 }
 
-void FileLogger::WriteToStream(GLib::Flog::Level level, std::string_view prefix, std::string_view message)
+void FileLogger::WriteToStream(GLib::Flog::Level const level, std::string_view const prefix, std::string_view const message)
 {
 	std::lock_guard guard(streamMonitor);
 	{
 		try
 		{
-			const size_t newEntrySize = message.size();
+			size_t const newEntrySize = message.size();
 			HandleFileRollover(newEntrySize);
 			EnsureStreamIsOpen();
 			if (!ResourcesAvailable(newEntrySize))
@@ -140,12 +140,12 @@ void FileLogger::WriteToStream(GLib::Flog::Level level, std::string_view prefix,
 			// flags etc.
 			// move some formatting out of lock
 
-			auto now = std::chrono::system_clock::now();
-			const std::time_t t = std::chrono::system_clock::to_time_t(now);
+			auto const now = std::chrono::system_clock::now();
+			std::time_t const t = std::chrono::system_clock::to_time_t(now);
 			std::tm tm {};
 			GLib::Compat::LocalTime(tm, t);
 
-			const auto ms = static_cast<int>(std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count() % 1000);
+			auto const ms = static_cast<int>(std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count() % 1000);
 
 			auto & s = streamInfo.Stream();
 			s << std::left << std::put_time(&tm, "%d %b %Y, %H:%M:%S") << "." << std::setw(3) << std::setfill('0') << ms;
@@ -170,12 +170,12 @@ void FileLogger::EnsureStreamIsOpen()
 	}
 }
 
-void FileLogger::HandleFileRollover(size_t newEntrySize)
+void FileLogger::HandleFileRollover(size_t const newEntrySize)
 {
 	if (streamInfo)
 	{
 		// auto oldPath = streamInfo.Path();
-		const auto size = streamInfo.Stream().tellp();
+		auto const size = streamInfo.Stream().tellp();
 		if (newEntrySize + size >= maxFileSize || streamInfo.Date() != GetDate())
 		{
 			CloseStream();
@@ -215,17 +215,17 @@ void FileLogger::WriteHeader(std::ostream & writer)
 {
 	writer << headerFooterSeparator << std::endl;
 
-	const std::time_t t = std::time(nullptr);
+	std::time_t const t = std::time(nullptr);
 	std::tm tm {};
 	GLib::Compat::LocalTime(tm, t);
 	std::tm gtm {};
 	GLib::Compat::GmTime(gtm, t);
 
-	std::string name = GLib::Compat::ProcessName();
-	std::string path = GLib::Compat::ProcessPath();
+	std::string const name = GLib::Compat::ProcessName();
+	std::string const path = GLib::Compat::ProcessPath();
 	std::string cmd = GLib::Compat::CommandLine();
 
-	size_t pos = cmd.find(path);
+	size_t const pos = cmd.find(path);
 	if (pos != std::string::npos)
 	{
 		cmd.erase(pos, path.size());
@@ -249,7 +249,7 @@ void FileLogger::WriteHeader(std::ostream & writer)
 
 void FileLogger::WriteFooter(std::ostream & writer)
 {
-	const std::time_t t = std::time(nullptr);
+	std::time_t const t = std::time(nullptr);
 	std::tm tm {};
 	GLib::Compat::LocalTime(tm, t);
 
@@ -259,7 +259,7 @@ void FileLogger::WriteFooter(std::ostream & writer)
 	writer.flush();
 }
 
-bool FileLogger::ResourcesAvailable(size_t newEntrySize) const
+bool FileLogger::ResourcesAvailable(size_t const newEntrySize) const
 {
 	return streamInfo && GetFreeDiskSpace(path) - newEntrySize >= reserveDiskSpace;
 }
@@ -271,7 +271,7 @@ void FileLogger::CommitPendingScope()
 		return;
 	}
 
-	const Scope & scope = logState.Top();
+	Scope const & scope = logState.Top();
 	std::ostringstream s; // use thread stream
 	s << std::setw(logState.Depth()) << "" << scope.Stem() << "> " << scope.ScopeText();
 
@@ -288,13 +288,13 @@ void FileLogger::ScopeStart(GLib::Flog::Level level, std::string_view prefix, st
 	logState.Push({level, prefix, scope, stem});
 }
 
-void FileLogger::CommitBuffer(GLib::Flog::Level level, std::string_view prefix)
+void FileLogger::CommitBuffer(GLib::Flog::Level const level, std::string_view const prefix)
 {
 	Write(level, prefix, logState.Get());
 	logState.Reset(); // had AV here
 }
 
-void FileLogger::ScopeEnd(std::string_view prefix)
+void FileLogger::ScopeEnd(std::string_view const prefix)
 {
 	auto [scope, pending] = logState.TopAndPop();
 
@@ -332,7 +332,7 @@ size_t FileLogger::SetMaxFileSize(size_t size)
 }
 
 // use map, use config, set field width
-std::ostream & FileLogger::TranslateLevel(std::ostream & stream, GLib::Flog::Level level)
+std::ostream & FileLogger::TranslateLevel(std::ostream & stream, GLib::Flog::Level const level)
 {
 	switch (level)
 	{
@@ -361,14 +361,14 @@ std::ostream & FileLogger::TranslateLevel(std::ostream & stream, GLib::Flog::Lev
 	return stream;
 }
 
-std::ostream & FileLogger::ThreadName(std::ostream & stream, std::string_view threadName)
+std::ostream & FileLogger::ThreadName(std::ostream & stream, std::string_view const threadName)
 {
 	return !threadName.empty() ? stream << threadName : stream << std::this_thread::get_id();
 }
 
 unsigned FileLogger::GetDate()
 {
-	const std::time_t t = std::time(nullptr);
+	std::time_t const t = std::time(nullptr);
 	std::tm tm {};
 	GLib::Compat::LocalTime(tm, t);
 	constexpr auto tmEpochYear = 1900;
@@ -376,7 +376,7 @@ unsigned FileLogger::GetDate()
 	return ((tmEpochYear + tm.tm_year) * shiftTwoDecimals + tm.tm_mon + 1) * shiftTwoDecimals + tm.tm_mday;
 }
 
-uintmax_t FileLogger::GetFreeDiskSpace(const std::filesystem::path & path)
+uintmax_t FileLogger::GetFreeDiskSpace(std::filesystem::path const & path)
 {
 	return space(path).available;
 }

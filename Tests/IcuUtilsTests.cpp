@@ -24,8 +24,8 @@ AUTO_TEST_CASE(CompareSimpleCases2)
 
 AUTO_TEST_CASE(DiaeresisCompare)
 {
-	const auto * lowercaseUWithDiaeresis = "\xc3\xbc";
-	const auto * uppercaseUWithDiaeresis = "\xc3\x9c";
+	auto const * lowercaseUWithDiaeresis = "\xc3\xbc";
+	auto const * uppercaseUWithDiaeresis = "\xc3\x9c";
 
 	TEST(0 == static_cast<int>(GLib::IcuUtils::CompareNoCase(lowercaseUWithDiaeresis, uppercaseUWithDiaeresis)));
 	TEST(-1 == static_cast<int>(GLib::IcuUtils::CompareNoCase("u", lowercaseUWithDiaeresis)));
@@ -34,7 +34,7 @@ AUTO_TEST_CASE(DiaeresisCompare)
 
 AUTO_TEST_CASE(StartWithNoCasePartialDecode)
 {
-	const auto * s = "abcd"
+	auto const * s = "abcd"
 									 "\xc3\xbc"
 									 "defg";
 

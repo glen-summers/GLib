@@ -27,7 +27,8 @@ namespace GLib::Xml
 		std::string_view text; // value?
 
 	public:
-		Element(std::string_view qName, std::string_view name, std::string_view nameSpace, ElementType type, Attributes attributes = {})
+		Element(std::string_view const qName, std::string_view const name, std::string_view const nameSpace, ElementType const type,
+						Attributes const attributes = {})
 			: qName(qName)
 			, name(name)
 			, nameSpace(nameSpace)
@@ -35,14 +36,14 @@ namespace GLib::Xml
 			, attributes(attributes)
 		{}
 
-		Element(std::string_view name, ElementType type, Attributes attributes = {})
+		Element(std::string_view const name, ElementType const type, Attributes const attributes = {})
 			: qName(name)
 			, name(name)
 			, type(type)
 			, attributes(attributes)
 		{}
 
-		Element(ElementType type, std::string_view text)
+		Element(ElementType const type, std::string_view const text)
 			: type(type)
 			, text(text)
 		{}
@@ -74,7 +75,7 @@ namespace GLib::Xml
 			return type;
 		}
 
-		[[nodiscard]] const Attributes & GetAttributes() const
+		[[nodiscard]] Attributes const & GetAttributes() const
 		{
 			return attributes;
 		}

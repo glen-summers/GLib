@@ -13,7 +13,7 @@ class FunctionCoverage
 	unsigned int coverableLines;
 
 public:
-	FunctionCoverage(std::string nameSpace, std::string className, std::string functionName, unsigned int line, unsigned int coveredLines,
+	FunctionCoverage(std::string nameSpace, std::string className, std::string functionName, unsigned int const line, unsigned int const coveredLines,
 									 unsigned int coverableLines)
 		: nameSpace {std::move(nameSpace)}
 		, className {std::move(className)}
@@ -23,22 +23,22 @@ public:
 		, coverableLines {coverableLines}
 	{}
 
-	[[nodiscard]] const std::string & NameSpace() const
+	[[nodiscard]] std::string const & NameSpace() const
 	{
 		return nameSpace;
 	}
 
-	[[nodiscard]] const std::string & ClassName() const
+	[[nodiscard]] std::string const & ClassName() const
 	{
 		return className;
 	}
 
-	[[nodiscard]] const std::string & FunctionName() const
+	[[nodiscard]] std::string const & FunctionName() const
 	{
 		return functionName;
 	}
 
-	[[nodiscard]] const unsigned int & Line() const
+	[[nodiscard]] unsigned int const & Line() const
 	{
 		return line;
 	}
@@ -54,7 +54,7 @@ public:
 	}
 };
 
-inline bool operator<(const FunctionCoverage & f1, const FunctionCoverage & f2)
+inline bool operator<(FunctionCoverage const & f1, FunctionCoverage const & f2)
 {
 	// default sort by line, html has to resort itself
 	return std::tie(f1.Line(), f1.NameSpace(), f1.ClassName(), f1.FunctionName()) <

@@ -10,16 +10,16 @@ namespace GLib::Util
 	namespace Detail
 	{
 		template <typename CharType>
-		const CharType * DefaultDelimiter();
+		CharType const * DefaultDelimiter();
 
 		template <>
-		inline const char * DefaultDelimiter()
+		inline char const * DefaultDelimiter()
 		{
 			return ",";
 		}
 
 		template <>
-		inline const wchar_t * DefaultDelimiter()
+		inline wchar_t const * DefaultDelimiter()
 		{
 			return L",";
 		}
@@ -32,7 +32,7 @@ namespace GLib::Util
 			StringType delimiter;
 
 		public:
-			explicit Splitter(StringType value, const StringType & delimiter = DefaultDelimiter<typename StringType::value_type>())
+			explicit Splitter(StringType value, StringType const & delimiter = DefaultDelimiter<typename StringType::value_type>())
 				: value(move(value))
 				, delimiter(delimiter)
 			{
@@ -44,7 +44,7 @@ namespace GLib::Util
 
 			class Iterator
 			{
-				const Splitter * const splitter;
+				Splitter const * const splitter;
 				size_t current, nextDelimiter;
 
 			public:
@@ -56,7 +56,7 @@ namespace GLib::Util
 				using reference = void;
 				// ReSharper restore All
 
-				explicit Iterator(const Splitter & splitter)
+				explicit Iterator(Splitter const & splitter)
 					: splitter(&splitter)
 					, current(0)
 					, nextDelimiter(splitter.value.find(splitter.delimiter, 0))
@@ -68,12 +68,12 @@ namespace GLib::Util
 					, nextDelimiter(StringType::npos)
 				{}
 
-				bool operator==(const Iterator & it) const
+				bool operator==(Iterator const & it) const
 				{
 					return current == it.current;
 				}
 
-				bool operator!=(const Iterator & it) const
+				bool operator!=(Iterator const & it) const
 				{
 					return !(*this == it);
 				}
@@ -116,7 +116,7 @@ namespace GLib::Util
 	using SplitterView = Detail::Splitter<std::string_view>;
 
 	template <typename StringType, typename OutputIterator>
-	void Split(const StringType & value, OutputIterator it, const StringType & delimiter = Detail::DefaultDelimiter<typename StringType::value_type>())
+	void Split(StringType const & value, OutputIterator it, StringType const & delimiter = Detail::DefaultDelimiter<typename StringType::value_type>())
 	{
 		Detail::Splitter<StringType> splitter {value, delimiter};
 		std::copy(splitter.begin(), splitter.end(), it);

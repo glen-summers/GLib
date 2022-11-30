@@ -9,7 +9,7 @@ namespace GLib::Xml::Utils
 {
 	using PtrPair = std::pair<std::string_view::const_iterator, std::string_view::const_iterator>;
 
-	inline std::string_view ToStringView(const PtrPair & value)
+	inline std::string_view ToStringView(PtrPair const & value)
 	{
 		return {&value.first[0], static_cast<size_t>(value.second - value.first)};
 	}
@@ -31,9 +31,9 @@ namespace GLib::Xml::Utils
 		{
 			std::string_view replacement;
 			size_t pos = std::string::npos;
-			for (const auto & [escaped, unescaped] : Entities)
+			for (auto const & [escaped, unescaped] : Entities)
 			{
-				const size_t find = value.find(unescaped, startPos);
+				size_t const find = value.find(unescaped, startPos);
 				if (find != std::string::npos && find < pos)
 				{
 					pos = find;

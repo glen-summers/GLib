@@ -10,7 +10,7 @@ namespace GLib::Eval
 {
 	// move?
 	template <typename T, std::enable_if_t<std::is_class<T>::value> * = nullptr>
-	void VisitProperty(const T & value, const std::string & propertyName)
+	void VisitProperty(T const & value, std::string const & propertyName)
 	{
 		Visitor<T>::Visit(propertyName, value);
 	}
@@ -18,14 +18,14 @@ namespace GLib::Eval
 	class Evaluator
 	{
 		std::unordered_map<std::string, ValuePtr> values;
-		std::unordered_map<std::string, const ValueBase &> localValues;
+		std::unordered_map<std::string, ValueBase const &> localValues;
 
 	public:
 		template <typename ValueType>
-		void Set(const std::string & name, ValueType value)
+		void Set(std::string const & name, ValueType value)
 		{
 			ValuePtr v = MakeValue(value);
-			auto it = values.find(name);
+			auto const it = values.find(name);
 
 			if (it == values.end())
 			{
@@ -39,10 +39,10 @@ namespace GLib::Eval
 
 		// specialise add with IsCollection? allow value types?
 		template <typename Container>
-		void SetCollection(const std::string & name, const Container & container)
+		void SetCollection(std::string const & name, Container const & container)
 		{
 			auto v = std::make_unique<Collection<Container>>(container);
-			auto it = values.find(name);
+			auto const it = values.find(name);
 
 			if (it == values.end())
 			{
@@ -54,9 +54,9 @@ namespace GLib::Eval
 			}
 		}
 
-		void Remove(const std::string & name)
+		void Remove(std::string const & name)
 		{
-			const auto it = values.find(name);
+			auto const it = values.find(name);
 			if (it == values.end())
 			{
 				throw std::runtime_error("Value not found : " + name);
@@ -64,7 +64,7 @@ namespace GLib::Eval
 			values.erase(it);
 		}
 
-		void Push(const std::string & name, const ValueBase & value)
+		void Push(std::string const & name, ValueBase const & value)
 		{
 			if (!localValues.emplace(name, value).second)
 			{
@@ -72,7 +72,7 @@ namespace GLib::Eval
 			}
 		}
 
-		void Pop(const std::string & name)
+		void Pop(std::string const & name)
 		{
 			if (localValues.erase(name) == 0)
 			{
@@ -80,32 +80,32 @@ namespace GLib::Eval
 			}
 		}
 
-		void ForEach(const std::string & name, const ValueVisitor & visitor) const
+		void ForEach(std::string const & name, ValueVisitor const & visitor) const
 		{
-			Evaluate(name, [&](const ValueBase & value) { value.ForEach(visitor); });
+			Evaluate(name, [&](ValueBase const & value) { value.ForEach(visitor); });
 		}
 
-		[[nodiscard]] std::string Evaluate(const std::string & name) const
+		[[nodiscard]] std::string Evaluate(std::string const & name) const
 		{
 			std::string result;
-			Evaluate(name, [&](const ValueBase & value) { result = value.ToString(); });
+			Evaluate(name, [&](ValueBase const & value) { result = value.ToString(); });
 			return result;
 		}
 
 	private:
-		void Evaluate(const std::string & value, const ValueVisitor & visitor) const
+		void Evaluate(std::string const & value, ValueVisitor const & visitor) const
 		{
-			const auto & s = Util::Splitter {value, "."};
+			auto const & s = Util::Splitter {value, "."};
 			auto it = s.begin();
 
-			const auto lit = localValues.find(*it);
+			auto const lit = localValues.find(*it);
 			if (lit != localValues.end())
 			{
 				++it;
 				return SubEvaluate(lit->second, it, s.end(), visitor);
 			}
 
-			const auto vit = values.find(*it);
+			auto const vit = values.find(*it);
 			if (vit == values.end())
 			{
 				throw std::runtime_error("Value not found : " + *it);
@@ -114,13 +114,13 @@ namespace GLib::Eval
 			SubEvaluate(*vit->second, it, s.end(), visitor);
 		}
 
-		static void SubEvaluate(const ValueBase & value, Util::Splitter::Iterator & it, const Util::Splitter::Iterator & end,
-														const ValueVisitor & visitor)
+		static void SubEvaluate(ValueBase const & value, Util::Splitter::Iterator & it, Util::Splitter::Iterator const & end,
+														ValueVisitor const & visitor)
 		{
 			if (it != end)
 			{
 				value.VisitProperty(*it,
-														[&](const ValueBase & subValue)
+														[&](ValueBase const & subValue)
 														{
 															++it;
 															SubEvaluate(subValue, it, end, visitor);

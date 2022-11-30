@@ -10,11 +10,11 @@ class FileCoverageData;
 
 class HtmlReport
 {
-	inline static const auto log = GLib::Flog::LogManager::GetLog<HtmlReport>();
+	inline static auto const log = GLib::Flog::LogManager::GetLog<HtmlReport>();
 
 	std::string testName;
 	std::string time;
-	const std::filesystem::path & htmlPath;
+	std::filesystem::path const & htmlPath;
 	std::set<std::filesystem::path> rootPaths;
 	std::filesystem::path cssPath;
 	std::string rootTemplate;
@@ -25,13 +25,13 @@ class HtmlReport
 	bool showWhiteSpace;
 
 public:
-	HtmlReport(std::string testName, const std::filesystem::path & htmlPath, const CoverageData & coverageData, bool showWhiteSpace);
+	HtmlReport(std::string testName, std::filesystem::path const & htmlPath, CoverageData const & coverageData, bool showWhiteSpace);
 
 private:
 	void GenerateRootIndex() const;
 	void GenerateIndices() const;
-	void GenerateSourceFile(const std::filesystem::path & subPath, const FileCoverageData & data) const;
+	void GenerateSourceFile(std::filesystem::path const & subPath, FileCoverageData const & data) const;
 
-	static std::filesystem::path Initialise(const std::filesystem::path & path);
-	static std::set<std::filesystem::path> RootPaths(const CoverageData & data);
+	static std::filesystem::path Initialise(std::filesystem::path const & path);
+	static std::set<std::filesystem::path> RootPaths(CoverageData const & data);
 };

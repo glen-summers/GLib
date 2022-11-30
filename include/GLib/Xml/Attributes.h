@@ -8,7 +8,7 @@ namespace GLib::Xml
 	class Attributes
 	{
 		std::string_view data;
-		const NameSpaceManager * manager = nullptr;
+		NameSpaceManager const * manager = nullptr;
 
 	public:
 		Attributes() = default;
@@ -17,7 +17,7 @@ namespace GLib::Xml
 			: data {data}
 		{}
 
-		Attributes(std::string_view data, const NameSpaceManager * manager)
+		Attributes(std::string_view const data, NameSpaceManager const * manager)
 			: data(data)
 			, manager(manager)
 		{}

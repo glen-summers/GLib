@@ -11,7 +11,7 @@ namespace GLib::Eval
 {
 	struct ValueBase;
 	using ValuePtr = std::unique_ptr<ValueBase>;
-	using ValueVisitor = std::function<void(const ValueBase &)>;
+	using ValueVisitor = std::function<void(ValueBase const &)>;
 
 	template <typename ValueType>
 	class Value;
@@ -26,7 +26,7 @@ namespace GLib::Eval
 	}
 
 	template <typename T, std::enable_if_t<!Utils::Detail::IsContainer<T>::value> * = nullptr>
-	void ForEach(T value, const ValueVisitor & f)
+	void ForEach(T value, ValueVisitor const & f)
 	{
 		static_cast<void>(value);
 		static_cast<void>(f);
@@ -34,9 +34,9 @@ namespace GLib::Eval
 	}
 
 	template <typename T, std::enable_if_t<Utils::Detail::IsContainer<T>::value> * = nullptr>
-	void ForEach(T collection, const ValueVisitor & f)
+	void ForEach(T collection, ValueVisitor const & f)
 	{
-		for (const auto & value : collection)
+		for (auto const & value : collection)
 		{
 			f(Value(value));
 		}
@@ -45,16 +45,16 @@ namespace GLib::Eval
 	struct ValueBase
 	{
 		ValueBase() = default;
-		ValueBase(const ValueBase &) = delete;
+		ValueBase(ValueBase const &) = delete;
 		ValueBase(ValueBase &&) = delete;
-		ValueBase & operator=(const ValueBase &) = delete;
+		ValueBase & operator=(ValueBase const &) = delete;
 		ValueBase & operator=(ValueBase &&) = delete;
 		virtual ~ValueBase() = default;
 
 		[[nodiscard]] virtual std::string ToString() const = 0; // +format/stream?
 
-		virtual void VisitProperty(const std::string & propertyName, const ValueVisitor & f) const = 0;
-		virtual void ForEach(const ValueVisitor & f) const = 0;
+		virtual void VisitProperty(std::string const & propertyName, ValueVisitor const & f) const = 0;
+		virtual void ForEach(ValueVisitor const & f) const = 0;
 	};
 
 	template <typename ValueType>
@@ -72,12 +72,12 @@ namespace GLib::Eval
 			return Utils::ToString(value);
 		}
 
-		void VisitProperty(const std::string & propertyName, const ValueVisitor & visitor) const override
+		void VisitProperty(std::string const & propertyName, ValueVisitor const & visitor) const override
 		{
 			Visitor<ValueType>::Visit(value, propertyName, visitor);
 		}
 
-		void ForEach(const ValueVisitor & f) const override
+		void ForEach(ValueVisitor const & f) const override
 		{
 			return Eval::ForEach(value, f);
 		}
@@ -86,7 +86,7 @@ namespace GLib::Eval
 	template <typename Value>
 	struct Visitor
 	{
-		static void Visit(const Value & value, const std::string & propertyName, const ValueVisitor & visitor)
+		static void Visit(Value const & value, std::string const & propertyName, ValueVisitor const & visitor)
 		{
 			static_cast<void>(value);
 			static_cast<void>(visitor);

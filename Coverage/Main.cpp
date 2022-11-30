@@ -11,17 +11,17 @@
 
 using namespace std::string_literals;
 
-int main(int argc, char * argv[]) // NOLINT(bugprone-exception-escape) potential exception from catch block
+int main(int const argc, char * argv[]) // NOLINT(bugprone-exception-escape) potential exception from catch block
 {
-	auto log = GLib::Flog::LogManager::GetLog("Main");
+	auto const log = GLib::Flog::LogManager::GetLog("Main");
 	int errorCode = 0;
 	std::string errorMessage;
 
 	try
 	{
-		const auto * const desc {"Generates C++ HTML code coverage report"};
-		const auto * const syntax {"Coverage <Executable> <Report> [-sub] [-ws] [-i IncludePath]... [-x excludePath]..."};
-		const auto * const detail {R"(
+		auto const * const desc {"Generates C++ HTML code coverage report"};
+		auto const * const syntax {"Coverage <Executable> <Report> [-sub] [-ws] [-i IncludePath]... [-x excludePath]..."};
+		auto const * const detail {R"(
 Executable: Path to executable
 Report    : Directory path for the generated report
 [-sub]    : Generates coverage for sub processes of main executable
@@ -40,13 +40,13 @@ Coverage c:\Build\Main.exe C:\Report -ws -i C:\MainCode C:\Utils\ -x C:\External
 			return errorCode;
 		}
 
-		const std::span args {argv, static_cast<size_t>(argc)};
+		std::span const args {argv, static_cast<size_t>(argc)};
 
 		auto it = args.begin();
-		auto end = args.end();
+		auto const end = args.end();
 		++it;
-		const char * const executable = *it++;
-		const char * const reportPath = *it++;
+		char const * const executable = *it++;
+		char const * const reportPath = *it++;
 		bool debugChildProcesses {};
 		bool showWhiteSpace {};
 
@@ -54,7 +54,7 @@ Coverage c:\Build\Main.exe C:\Report -ws -i C:\MainCode C:\Utils\ -x C:\External
 		Strings excludes;
 		while (it != end)
 		{
-			const auto * const arg = *it++;
+			auto const * const arg = *it++;
 			if (strcmp(arg, "-i") == 0)
 			{
 				if (it == end)
@@ -85,18 +85,18 @@ Coverage c:\Build\Main.exe C:\Report -ws -i C:\MainCode C:\Utils\ -x C:\External
 			}
 		}
 
-		GLib::Flog::ScopeLog scopeLog {log, GLib::Flog::Level::Info, "Total"};
+		GLib::Flog::ScopeLog const scopeLog {log, GLib::Flog::Level::Info, "Total"};
 
 		Coverage dbg(executable, debugChildProcesses, includes, excludes);
 		constexpr unsigned timeoutMilliseconds = 1000;
 		while (dbg.ProcessEvents(timeoutMilliseconds))
 		{}
 
-		HtmlReport report(executable, reportPath, dbg.GetCoverageData(), showWhiteSpace);
+		HtmlReport const report(executable, reportPath, dbg.GetCoverageData(), showWhiteSpace);
 		static_cast<void>(report);
 		static_cast<void>(scopeLog);
 	}
-	catch (const std::exception & e)
+	catch (std::exception const & e)
 	{
 		errorCode = 1;
 		errorMessage = e.what();

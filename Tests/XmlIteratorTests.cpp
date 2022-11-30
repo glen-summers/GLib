@@ -90,7 +90,7 @@ AUTO_TEST_CASE(IterateAttributes)
 
 	// std::vector<Element> actual {xml.begin(), xml.end()}; error
 	std::vector<Element> actual;
-	for (const auto & e : xml)
+	for (auto const & e : xml)
 	{
 		actual.push_back(e);
 	}
@@ -141,7 +141,7 @@ AUTO_TEST_CASE(XmlDecl)
 
 AUTO_TEST_CASE(XmlDeclMustBeFirst)
 {
-	const auto * xml = R"(<!-- baad -->
+	auto const * xml = R"(<!-- baad -->
 <?xml version="1.0"?>
 <xml/>)";
 
@@ -276,7 +276,7 @@ AUTO_TEST_CASE(DocType)
 
 AUTO_TEST_CASE(DocTypeTwiceIsError)
 {
-	const auto * xml {R"(<!DOCTYPE blah>
+	auto const * xml {R"(<!DOCTYPE blah>
 <!DOCTYPE blah>
 <Xml/>)"};
 
@@ -402,7 +402,7 @@ AUTO_TEST_CASE(ErrorMeansError)
 
 AUTO_TEST_CASE(EndOfTheWorld)
 {
-	Holder xml("<xml/>");
+	Holder const xml("<xml/>");
 	auto end = xml.end();
 	GLIB_CHECK_RUNTIME_EXCEPTION({ ++end; }, "++end");
 }
@@ -444,7 +444,7 @@ AUTO_TEST_CASE(AttributeEntities)
 
 AUTO_TEST_CASE(AttributeEntity)
 {
-	Attributes attr("attr='&customEntity;'");
+	Attributes const attr("attr='&customEntity;'");
 
 	std::vector<Attribute> expected {{"attr", "&customEntity;", "", "attr='&customEntity;'"}};
 	CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), attr.begin(), attr.end());
@@ -453,7 +453,7 @@ AUTO_TEST_CASE(AttributeEntity)
 // move to another file
 AUTO_TEST_CASE(AttributeIteratorAll)
 {
-	Attributes attr {"a='1' b='2' xmlns:foo='bar'"};
+	Attributes const attr {"a='1' b='2' xmlns:foo='bar'"};
 
 	std::vector<Attribute> expected {{"a", "1", {}, "a='1'"}, {"b", "2", {}, "b='2'"}, {"xmlns:foo", "bar", {}, "xmlns:foo='bar'"}};
 
@@ -463,7 +463,7 @@ AUTO_TEST_CASE(AttributeIteratorAll)
 AUTO_TEST_CASE(AttributeIteratorEnum)
 {
 	GLib::Xml::NameSpaceManager man;
-	Attributes attr {"a='1' b='2' xmlns:foo='bar'", &man};
+	Attributes const attr {"a='1' b='2' xmlns:foo='bar'", &man};
 
 	std::vector<Attribute> expected {{"a", "1", {}, "a='1'"}, {"b", "2", {}, "b='2'"}};
 
@@ -473,17 +473,17 @@ AUTO_TEST_CASE(AttributeIteratorEnum)
 AUTO_TEST_CASE(AttributeIteratorInvalidChars)
 {
 	GLIB_CHECK_RUNTIME_EXCEPTION(
-		for (const auto & a
+		for (auto const & a
 				 : Attributes {"0='baad'"}) { static_cast<void>(a); };
 		, "Illegal character: '0' (0x30)");
 
 	GLIB_CHECK_RUNTIME_EXCEPTION(
-		for (const auto & a
+		for (auto const & a
 				 : Attributes {"baad=baad"}) { static_cast<void>(a); };
 		, "Illegal character: 'b' (0x62)");
 
 	GLIB_CHECK_RUNTIME_EXCEPTION(
-		for (const auto & a
+		for (auto const & a
 				 : Attributes {"baad='-<-'"}) { static_cast<void>(a); };
 		, "Illegal character: '<' (0x3c)");
 }

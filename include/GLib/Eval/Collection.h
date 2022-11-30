@@ -8,9 +8,9 @@ namespace GLib::Eval
 	struct CollectionBase : ValueBase
 	{
 		CollectionBase() = default;
-		CollectionBase(const CollectionBase &) = delete;
+		CollectionBase(CollectionBase const &) = delete;
 		CollectionBase(CollectionBase &&) = delete;
-		CollectionBase & operator=(const CollectionBase &) = delete;
+		CollectionBase & operator=(CollectionBase const &) = delete;
 		CollectionBase & operator=(CollectionBase &&) = delete;
 
 		~CollectionBase() override = default;
@@ -19,10 +19,10 @@ namespace GLib::Eval
 	template <typename Container>
 	class Collection : public CollectionBase
 	{
-		const Container & container;
+		Container const & container;
 
 	public:
-		explicit Collection(const Container & container)
+		explicit Collection(Container const & container)
 			: container(container)
 		{}
 
@@ -43,7 +43,7 @@ namespace GLib::Eval
 			return stm.str();
 		}
 
-		void VisitProperty(const std::string & propertyName, const ValueVisitor & visitor) const override
+		void VisitProperty(std::string const & propertyName, ValueVisitor const & visitor) const override
 		{
 			static_cast<void>(propertyName);
 			static_cast<void>(visitor);
@@ -51,9 +51,9 @@ namespace GLib::Eval
 			// size?
 		}
 
-		void ForEach(const ValueVisitor & f) const override
+		void ForEach(ValueVisitor const & f) const override
 		{
-			for (const auto & value : container)
+			for (auto const & value : container)
 			{
 				f(Value<typename Container::value_type> {value});
 			}
@@ -61,7 +61,7 @@ namespace GLib::Eval
 	};
 
 	template <typename T>
-	Collection<T> MakeCollection(const T & container)
+	Collection<T> MakeCollection(T const & container)
 	{
 		return Collection<T>(container);
 	}

@@ -11,7 +11,7 @@
 template <>
 struct GLib::NoCaseLess<wchar_t>
 {
-	bool operator()(const std::wstring & s1, const std::wstring & s2) const
+	bool operator()(std::wstring const & s1, std::wstring const & s2) const
 	{
 		return _wcsicmp(s1.c_str(), s2.c_str()) < 0;
 	}

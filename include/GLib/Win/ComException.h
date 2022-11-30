@@ -7,7 +7,7 @@ namespace GLib::Win
 	class ComException : public WinException
 	{
 	public:
-		ComException(const std::string & message, HRESULT hr)
+		ComException(std::string const & message, HRESULT const hr)
 			: WinException(message, hr)
 		{}
 	};

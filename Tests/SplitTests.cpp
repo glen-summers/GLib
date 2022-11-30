@@ -11,14 +11,14 @@ AUTO_TEST_SUITE(SplitTests)
 
 AUTO_TEST_CASE(TestString)
 {
-	GLib::Util::Splitter s("a<->bc<->def<->ghijkl", "<->");
+	GLib::Util::Splitter const s("a<->bc<->def<->ghijkl", "<->");
 	std::vector<std::string> expected {"a", "bc", "def", "ghijkl"};
 	CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), s.begin(), s.end());
 }
 
 AUTO_TEST_CASE(TestStringView)
 {
-	GLib::Util::SplitterView s("a<->bc<->def<->ghijkl", "<->");
+	GLib::Util::SplitterView const s("a<->bc<->def<->ghijkl", "<->");
 	std::vector<std::string_view> expected {"a", "bc", "def", "ghijkl"};
 	CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), s.begin(), s.end());
 }
@@ -26,7 +26,7 @@ AUTO_TEST_CASE(TestStringView)
 AUTO_TEST_CASE(TestFor)
 {
 	std::vector<std::string> result;
-	for (const auto & value : GLib::Util::Splitter("a<->bc<->def<->ghijkl", "<->"))
+	for (auto const & value : GLib::Util::Splitter("a<->bc<->def<->ghijkl", "<->"))
 	{
 		result.push_back(value);
 	}
@@ -37,81 +37,81 @@ AUTO_TEST_CASE(TestFor)
 
 AUTO_TEST_CASE(TestEmptyString)
 {
-	GLib::Util::Splitter s("");
+	GLib::Util::Splitter const s("");
 	std::vector<std::string> expected {""};
 	CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), s.begin(), s.end());
 }
 
 AUTO_TEST_CASE(TestEmptyoken)
 {
-	GLib::Util::Splitter s(",");
+	GLib::Util::Splitter const s(",");
 	std::vector<std::string> expected {"", ""};
 	CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), s.begin(), s.end());
 }
 
 AUTO_TEST_CASE(TestEmptyokens)
 {
-	GLib::Util::Splitter s(",,,");
+	GLib::Util::Splitter const s(",,,");
 	std::vector<std::string> expected {"", "", "", ""};
 	CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), s.begin(), s.end());
 }
 
 AUTO_TEST_CASE(TestWhitespace1)
 {
-	GLib::Util::Splitter s("      ");
+	GLib::Util::Splitter const s("      ");
 	std::vector<std::string> expected {"      "};
 	CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), s.begin(), s.end());
 }
 
 AUTO_TEST_CASE(TestWhitespace2)
 {
-	GLib::Util::Splitter s(" ,  ,  , ");
-	std::vector<std::string> expected {" ", "  ", "  ", " "};
+	GLib::Util::Splitter const s(" ,  ,  , ");
+	std::vector<std::string> const expected {" ", "  ", "  ", " "};
 	CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), s.begin(), s.end());
 }
 
 AUTO_TEST_CASE(TestNoMatch)
 {
-	GLib::Util::Splitter s("Splitter");
-	std::vector<std::string> expected {"Splitter"};
+	GLib::Util::Splitter const s("Splitter");
+	std::vector<std::string> const expected {"Splitter"};
 	CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), s.begin(), s.end());
 }
 
 AUTO_TEST_CASE(TestFunc)
 {
-	std::vector<std::string> expected {"a", "b", "c", "d"};
+	std::vector<std::string> const expected {"a", "b", "c", "d"};
 	std::vector<std::string> actual;
-	std::string value = "a,b,c,d";
+	std::string const value = "a,b,c,d";
 	GLib::Util::Split(value, std::back_inserter(actual));
 	CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), actual.begin(), actual.end());
 }
 
 AUTO_TEST_CASE(TestViewFunc)
 {
-	std::vector<std::string_view> expected {"a", "b", "c", "d"};
+	std::vector<std::string_view> const expected {"a", "b", "c", "d"};
 	std::vector<std::string_view> actual;
-	std::string_view value = "a,b,c,d";
+	std::string_view constexpr value = "a,b,c,d";
 	GLib::Util::Split(value, std::back_inserter(actual));
 	CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), actual.begin(), actual.end());
 }
 
 AUTO_TEST_CASE(TestWFunc)
 {
-	std::vector<std::string> expected {"a", "b", "c", "d"};
+	std::vector<std::string> const expected {"a", "b", "c", "d"};
 	std::vector<std::wstring> actual;
-	std::wstring value = L"a,b,c,d";
+	std::wstring const value = L"a,b,c,d";
 	GLib::Util::Split(value, std::back_inserter(actual));
 
 	// workaround wstring generates boost compile errors
 	std::vector<std::string> u8Actual;
-	std::transform(actual.begin(), actual.end(), std::back_inserter(u8Actual), [](const std::wstring & w) -> std::string { return GLib::Cvt::W2A(w); });
+	std::transform(actual.begin(), actual.end(), std::back_inserter(u8Actual), [](std::wstring const & w) -> std::string { return GLib::Cvt::W2A(w); });
 
 	CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), u8Actual.begin(), u8Actual.end());
 }
 
 AUTO_TEST_CASE(EmptyDeliminatorIsError)
 {
-	std::string value = "a,b,c,d";
+	std::string const value = "a,b,c,d";
 	std::vector<std::string> actual;
 
 	GLIB_CHECK_LOGIC_EXCEPTION({ GLib::Util::Split(value, std::back_inserter(actual), {}); }, "Delimiter is empty");
@@ -120,8 +120,8 @@ AUTO_TEST_CASE(EmptyDeliminatorIsError)
 AUTO_TEST_CASE(ConsecutiveFindTest)
 {
 	using Pair = std::pair<int, size_t>;
-	const std::vector values {1, 1, 2, 3, 3, 3};
-	const std::vector<Pair> expected = {{1, 2}, {2, 1}, {3, 3}};
+	std::vector const values {1, 1, 2, 3, 3, 3};
+	std::vector<Pair> const expected = {{1, 2}, {2, 1}, {3, 3}};
 
 	std::vector<Pair> result;
 	std::vector<int>::const_iterator next;
@@ -138,10 +138,10 @@ AUTO_TEST_CASE(ConsecutiveFindTest)
 AUTO_TEST_CASE(ConsecutiveFindPred)
 {
 	using Pair = std::pair<int, std::string>;
-	auto pred = [](const Pair & p1, const Pair & p2) { return p1.second != p2.second; };
+	auto pred = [](Pair const & p1, Pair const & p2) { return p1.second != p2.second; };
 
-	const std::vector<Pair> values {{1, "1"}, {2, "1"}, {3, "2"}, {4, "3"}, {5, "3"}, {6, "3"}};
-	const std::vector<std::pair<std::string, size_t>> expected {{"1", 2}, {"2", 1}, {"3", 3}};
+	std::vector<Pair> const values {{1, "1"}, {2, "1"}, {3, "2"}, {4, "3"}, {5, "3"}, {6, "3"}};
+	std::vector<std::pair<std::string, size_t>> const expected {{"1", 2}, {"2", 1}, {"3", 3}};
 
 	std::vector<std::pair<std::string, size_t>> result;
 	std::vector<Pair>::const_iterator next;

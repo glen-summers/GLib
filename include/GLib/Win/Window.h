@@ -33,32 +33,32 @@ namespace GLib::Win
 		constexpr unsigned int VRedraw = CS_VREDRAW;
 		constexpr unsigned int OverlappedWindow = WS_OVERLAPPEDWINDOW; // NOLINT bad macro
 
-		inline auto MakeIntResource(int id)
+		inline auto MakeIntResource(int const id)
 		{
 			return MAKEINTRESOURCEW(id); // NOLINT bad macro
 		}
 
-		inline WORD LoWord(WPARAM param)
+		inline WORD LoWord(WPARAM const param)
 		{
 			return LOWORD(param); // NOLINT bad macro
 		}
 
-		inline WORD HiWord(WPARAM param)
+		inline WORD HiWord(WPARAM const param)
 		{
 			return HIWORD(param); // NOLINT bad macro
 		}
 
-		inline Point PointFromParam(LPARAM param)
+		inline Point PointFromParam(LPARAM const param)
 		{
 			return {GET_X_LPARAM(param), GET_Y_LPARAM(param)}; // NOLINT bad macro
 		}
 
-		inline short WheelData(WPARAM param)
+		inline short WheelData(WPARAM const param)
 		{
 			return GET_WHEEL_DELTA_WPARAM(param); // NOLINT bad macro
 		}
 
-		inline Size SizeFromParam(LPARAM param)
+		inline Size SizeFromParam(LPARAM const param)
 		{
 			return {LoWord(param), HiWord(param)};
 		}
@@ -70,7 +70,7 @@ namespace GLib::Win
 
 		struct WindowDestroyer
 		{
-			void operator()(HWND hWnd) const noexcept
+			void operator()(HWND const hWnd) const noexcept
 			{
 				if (IsWindow(hWnd))
 				{
@@ -84,7 +84,7 @@ namespace GLib::Win
 		class ClassInfoStore
 		{
 		public:
-			static std::string Register(int icon, int menu, WNDPROC proc)
+			static std::string Register(int const icon, int const menu, WNDPROC const proc)
 			{
 				static_cast<void>(icon);
 				static_cast<void>(menu);
@@ -93,18 +93,18 @@ namespace GLib::Win
 			}
 		};
 
-		inline std::string Register(int icon, int menu, WNDPROC proc)
+		inline std::string Register(int const icon, int const menu, WNDPROC const proc)
 		{
-			std::wstring className = Cvt::A2W(ClassInfoStore::Register(icon, menu, proc));
+			std::wstring const className = Cvt::A2W(ClassInfoStore::Register(icon, menu, proc));
 			auto * instance = Instance();
 
 			WNDCLASSEXW wc {};
-			BOOL exists = GetClassInfoExW(instance, className.c_str(), &wc);
+			BOOL const exists = GetClassInfoExW(instance, className.c_str(), &wc);
 			if (exists == 0)
 			{
 				Util::AssertTrue(GetLastError() == ERROR_CLASS_DOES_NOT_EXIST, "GetClassInfoExW");
 
-				HICON i = icon == 0 ? nullptr : LoadIconW(instance, MakeIntResource(icon));
+				HICON const i = icon == 0 ? nullptr : LoadIconW(instance, MakeIntResource(icon));
 
 				wc = {sizeof(WNDCLASSEXW),
 							HRedraw | VRedraw,
@@ -124,21 +124,21 @@ namespace GLib::Win
 			return Cvt::W2A(className);
 		}
 
-		inline void AssociateHandle(Window * value, HWND handle)
+		inline void AssociateHandle(Window * value, HWND const handle)
 		{
 			SetLastError(ERROR_SUCCESS); // SetWindowLongPtr does not set last error on success
-			auto ret = SetWindowLongPtrW(handle, GWLP_USERDATA, Util::Detail::WindowsCast<LONG_PTR>(value));
+			auto const ret = SetWindowLongPtrW(handle, GWLP_USERDATA, Util::Detail::WindowsCast<LONG_PTR>(value));
 			Util::AssertTrue(ret != 0 || GetLastError() == ERROR_SUCCESS, "SetWindowLongPtr");
 		}
 
-		inline Window * FromHandle(HWND hWnd)
+		inline Window * FromHandle(HWND const hWnd)
 		{
 			return Util::Detail::WindowsCast<Window *>(GetWindowLongPtrW(hWnd, GWLP_USERDATA));
 		}
 
-		inline WindowHandle Create(ULONG style, int icon, int menu, const std::string & title, WNDPROC proc, Window * param)
+		inline WindowHandle Create(ULONG const style, int const icon, int const menu, std::string const & title, WNDPROC const proc, Window * const param)
 		{
-			std::string className = Register(icon, menu, proc);
+			std::string const className = Register(icon, menu, proc);
 			WindowHandle handle(CreateWindowExW(0, Cvt::A2W(className).c_str(), Cvt::A2W(title).c_str(), style, CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, nullptr,
 																					nullptr, Instance(), param));
 			Util::AssertTrue(!!handle, "CreateWindowExW");
@@ -151,9 +151,9 @@ namespace GLib::Win
 			return handle;
 		}
 
-		inline HACCEL LoadAccel(int id)
+		inline HACCEL LoadAccel(int const id)
 		{
-			HACCEL accel = LoadAcceleratorsW(Instance(), MakeIntResource(id));
+			HACCEL const accel = LoadAcceleratorsW(Instance(), MakeIntResource(id));
 			Util::AssertTrue(accel != nullptr, "LoadAcceleratorsW");
 			return accel;
 		}
@@ -171,14 +171,14 @@ namespace GLib::Win
 		HACCEL accel {};
 
 	public:
-		Window(int icon, int menu, int accel, const std::string & title)
+		Window(int const icon, int const menu, int const accel, std::string const & title)
 			: handle {Detail::Create(Detail::OverlappedWindow, icon, menu, title, WindowProc, this)}
 			, accel {accel != 0 ? Detail::LoadAccel(accel) : nullptr}
 		{}
 
-		Window(const Window &) = delete;
+		Window(Window const &) = delete;
 		Window(Window &&) = delete;
-		Window & operator=(const Window &) = delete;
+		Window & operator=(Window const &) = delete;
 		Window & operator=(Window &&) = delete;
 
 	protected:
@@ -194,7 +194,7 @@ namespace GLib::Win
 			return Detail::Instance();
 		}
 
-		[[nodiscard]] LRESULT Send(UINT msg, WPARAM wParam = {}, LPARAM lParam = {}) const
+		[[nodiscard]] LRESULT Send(UINT const msg, WPARAM const wParam = {}, LPARAM const lParam = {}) const
 		{
 			return SendMessageW(Handle(), msg, wParam, lParam);
 		}
@@ -205,7 +205,7 @@ namespace GLib::Win
 			MSG msg = {};
 			while (GetMessageW(&msg, nullptr, 0, 0) != FALSE) // returns -1 on error?
 			{
-				auto ret = TranslateAcceleratorW(handle.get(), accel, &msg); // no error if hAccel is null
+				auto const ret = TranslateAcceleratorW(handle.get(), accel, &msg); // no error if hAccel is null
 				if (ret == 0)
 				{
 					TranslateMessage(&msg);
@@ -222,7 +222,7 @@ namespace GLib::Win
 			return {rc.right - rc.left, rc.bottom - rc.top};
 		}
 
-		[[nodiscard]] bool Show(int cmd) const
+		[[nodiscard]] bool Show(int const cmd) const
 		{
 			return ShowWindow(handle.get(), cmd) != FALSE;
 		}
@@ -246,34 +246,34 @@ namespace GLib::Win
 
 #pragma push_macro("MessageBox")
 #undef MessageBox
-		[[nodiscard]] int MessageBox(const std::string & message, const std::string & caption, UINT type = MB_OK) const
+		[[nodiscard]] int MessageBox(std::string const & message, std::string const & caption, UINT const type = MB_OK) const
 		{
-			int result = MessageBoxW(handle.get(), Cvt::A2W(message).c_str(), Cvt::A2W(caption).c_str(), type);
+			int const result = MessageBoxW(handle.get(), Cvt::A2W(message).c_str(), Cvt::A2W(caption).c_str(), type);
 			Util::AssertTrue(result != 0, "MessageBoxW");
 			return result;
 		}
 #pragma pop_macro("MessageBox")
 
 		template <typename R, typename P>
-		void SetTimer(const std::chrono::duration<R, P> & interval, UINT_PTR id = 1) const
+		void SetTimer(std::chrono::duration<R, P> const & interval, UINT_PTR id = 1) const
 		{
-			auto count = std::chrono::duration_cast<std::chrono::milliseconds>(interval).count();
-			auto milliseconds = GLib::Util::CheckedCast<ULONG>(count);
-			UINT_PTR timerResult = ::SetTimer(handle.get(), id, milliseconds, nullptr);
+			auto const count = std::chrono::duration_cast<std::chrono::milliseconds>(interval).count();
+			auto const milliseconds = GLib::Util::CheckedCast<ULONG>(count);
+			UINT_PTR const timerResult = ::SetTimer(handle.get(), id, milliseconds, nullptr);
 			Util::AssertTrue(timerResult != 0, "SetTimer");
 		}
 
-		void KillTimer(UINT_PTR id = 1) const
+		void KillTimer(UINT_PTR const id = 1) const
 		{
 			Util::AssertTrue(::KillTimer(handle.get(), id), "KillTimer");
 		}
 
-		void Invalidate(bool erase) const
+		void Invalidate(bool const erase) const
 		{
 			Util::AssertTrue(InvalidateRect(Handle(), nullptr, erase ? TRUE : FALSE), "InvalidateRect");
 		}
 
-		static void SetHandled(bool newValue = true)
+		static void SetHandled(bool const newValue = true)
 		{
 			SetHandled(newValue, true);
 		}
@@ -284,13 +284,13 @@ namespace GLib::Win
 		}
 
 	private:
-		static bool SetHandled(bool newValue, bool exchange)
+		static bool SetHandled(bool const newValue, bool const exchange)
 		{
 			static thread_local bool handled;
 			return exchange ? std::exchange(handled, newValue) : handled;
 		}
 
-		virtual void OnSize(const Size & /**/) noexcept {}
+		virtual void OnSize(Size const & /**/) noexcept {}
 		virtual void OnGetMinMaxInfo(MINMAXINFO & /**/) noexcept {}
 		virtual void OnCommand(int /*command*/) noexcept {}
 		virtual CloseResult OnClose() noexcept
@@ -300,21 +300,21 @@ namespace GLib::Win
 		virtual void OnDestroy() noexcept {}
 		virtual void OnNcDestroy() noexcept {}
 		virtual void OnUser(WPARAM /*w*/, LPARAM /*p*/) noexcept {}
-		virtual void OnNotify(const NMHDR & /*hdr*/) noexcept {}
+		virtual void OnNotify(NMHDR const & /*hdr*/) noexcept {}
 		virtual void OnChar(int /*char*/) noexcept {}
 		virtual void OnKeyDown(int /*key*/) noexcept {}
-		virtual void OnLeftButtonDown(const Point & /**/) noexcept {}
-		virtual void OnLeftButtonUp(const Point & /**/) noexcept {}
-		virtual void OnContextMenu(const Point & /**/) noexcept {}
-		virtual void OnMouseMove(const Point & /**/) noexcept {}
-		virtual void OnMouseWheel(const Point & /**/, int /*delta*/) noexcept {}
+		virtual void OnLeftButtonDown(Point const & /**/) noexcept {}
+		virtual void OnLeftButtonUp(Point const & /**/) noexcept {}
+		virtual void OnContextMenu(Point const & /**/) noexcept {}
+		virtual void OnMouseMove(Point const & /**/) noexcept {}
+		virtual void OnMouseWheel(Point const & /**/, int /*delta*/) noexcept {}
 		virtual void OnCaptureChanged() noexcept {}
-		virtual void OnGetDlgCode(int /*key*/, const MSG & /**/, LRESULT & /**/) {}
+		virtual void OnGetDlgCode(int /*key*/, MSG const & /**/, LRESULT & /**/) {}
 		virtual void OnPaint() noexcept {}
 		virtual void OnTimer() noexcept {}
 		virtual void OnEraseBackground() noexcept {}
 
-		void OnMessage(UINT message, WPARAM wParam, LPARAM lParam, LRESULT & result) noexcept
+		void OnMessage(UINT const message, WPARAM const wParam, LPARAM const lParam, LRESULT & result) noexcept
 		{
 			switch (message)
 			{
@@ -376,7 +376,7 @@ namespace GLib::Win
 
 				case WM_NOTIFY:
 				{
-					return OnNotify(*Util::Detail::WindowsCast<const NMHDR *>(lParam));
+					return OnNotify(*Util::Detail::WindowsCast<NMHDR const *>(lParam));
 				}
 
 				case WM_CHAR:
@@ -437,14 +437,14 @@ namespace GLib::Win
 			}
 		}
 
-		static LRESULT APIENTRY WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) noexcept
+		static LRESULT APIENTRY WindowProc(HWND const hWnd, UINT const message, WPARAM const wParam, LPARAM const lParam) noexcept
 		{
 			LRESULT result = 0;
 			Window * window = Detail::FromHandle(hWnd);
 			bool handled {};
 			if (window != nullptr)
 			{
-				auto oldValue = SetHandled(false, true);
+				auto const oldValue = SetHandled(false, true);
 				window->OnMessage(message, wParam, lParam, result);
 				handled = SetHandled(oldValue, true);
 			}

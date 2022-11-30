@@ -9,7 +9,7 @@ namespace GLib::Win
 	{
 		struct LocalFreer
 		{
-			void operator()(HLOCAL p) const noexcept
+			void operator()(HLOCAL const p) const noexcept
 			{
 				Util::WarnAssertTrue(LocalFree(p) == nullptr, "LocalFree");
 			}
@@ -27,7 +27,7 @@ namespace GLib::Win
 			: p(value)
 		{}
 
-		[[nodiscard]] const T * Get() const
+		[[nodiscard]] T const * Get() const
 		{
 			return p.get();
 		}

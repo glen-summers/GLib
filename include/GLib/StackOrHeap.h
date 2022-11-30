@@ -20,13 +20,13 @@ namespace GLib::Util
 
 	public:
 		StackOrHeap() = default;
-		StackOrHeap(const StackOrHeap &) = delete;
+		StackOrHeap(StackOrHeap const &) = delete;
 		StackOrHeap(StackOrHeap &&) = delete;
-		StackOrHeap & operator=(const StackOrHeap &) = delete;
+		StackOrHeap & operator=(StackOrHeap const &) = delete;
 		StackOrHeap & operator=(StackOrHeap &&) = delete;
 		~StackOrHeap() = default;
 
-		void EnsureSize(size_t newElementCount)
+		void EnsureSize(size_t const newElementCount)
 		{
 			if ((newElementCount > StackElementCount && !HeapInUse()) || (HeapInUse() && newElementCount > heapSize))
 			{
@@ -45,7 +45,7 @@ namespace GLib::Util
 			return HeapInUse() ? &std::get<1>(storage)[0] : std::get<0>(storage).data();
 		}
 
-		[[nodiscard]] const T * Get() const
+		[[nodiscard]] T const * Get() const
 		{
 			return HeapInUse() ? &std::get<1>(storage)[0] : std::get<0>(storage).data();
 		}

@@ -63,7 +63,7 @@ namespace GLib::Cpp
 	public:
 		StateEngine() = default;
 
-		explicit StateEngine(bool emitWhiteSpace)
+		explicit StateEngine(bool const emitWhiteSpace)
 			: emitWhiteSpace {emitWhiteSpace}
 			, state {State::None}
 			, stateFunction {&StateEngine::None}
@@ -71,7 +71,7 @@ namespace GLib::Cpp
 			rawStringPrefix.reserve(maxPrefixSize);
 		}
 
-		State Push(char value)
+		State Push(char const value)
 		{
 			SetState((this->*stateFunction)(value));
 			lastChar = value;
@@ -84,17 +84,17 @@ namespace GLib::Cpp
 		}
 
 	private:
-		static bool IsContinuation(char c)
+		static bool IsContinuation(char const c)
 		{
 			return (static_cast<EnumType>(c) & continuationMask) != 0;
 		}
 
-		bool IsWhiteSpace(char c) const
+		bool IsWhiteSpace(char const c) const
 		{
 			return emitWhiteSpace && !IsContinuation(c) && std::isspace(c) != 0;
 		}
 
-		void SetState(State newState)
+		void SetState(State const newState)
 		{
 			if (newState != state)
 			{
@@ -103,7 +103,7 @@ namespace GLib::Cpp
 			}
 		}
 
-		void SetContinue(State newState) const
+		void SetContinue(State const newState) const
 		{
 			// for this to work need to unset continue states when they are invalidated
 			/*if (continuationState != State::Error)
@@ -118,13 +118,13 @@ namespace GLib::Cpp
 			return std::exchange(continuationState, State::Error);
 		}
 
-		State Error(char c) const
+		State Error(char const c) const
 		{
 			static_cast<void>(c);
 			return state;
 		}
 
-		State None(char c) const
+		State None(char const c) const
 		{
 			if (c == forwardSlash)
 			{
@@ -155,7 +155,7 @@ namespace GLib::Cpp
 			return State::Code;
 		}
 
-		State WhiteSpace(char c) const
+		State WhiteSpace(char const c) const
 		{
 			if (c == forwardSlash)
 			{
@@ -191,7 +191,7 @@ namespace GLib::Cpp
 			return state;
 		}
 
-		State CommentStart(char c) const
+		State CommentStart(char const c) const
 		{
 			if (c == forwardSlash)
 			{
@@ -204,7 +204,7 @@ namespace GLib::Cpp
 			return Continue();
 		}
 
-		State CommentLine(char c) const
+		State CommentLine(char const c) const
 		{
 			if (c == newLine && lastChar != backSlash)
 			{
@@ -219,7 +219,7 @@ namespace GLib::Cpp
 			return Continue();
 		}
 
-		State CommentBlock(char c) const
+		State CommentBlock(char const c) const
 		{
 			if (c == asterisk)
 			{
@@ -228,7 +228,7 @@ namespace GLib::Cpp
 			return state;
 		}
 
-		State CommentAsterisk(char c) const
+		State CommentAsterisk(char const c) const
 		{
 			if (c == forwardSlash)
 			{
@@ -241,7 +241,7 @@ namespace GLib::Cpp
 			return state;
 		}
 
-		State Directive(char c) const
+		State Directive(char const c) const
 		{
 			if (c == newLine && lastChar != backSlash)
 			{
@@ -257,7 +257,7 @@ namespace GLib::Cpp
 			return state;
 		}
 
-		State String(char c) const
+		State String(char const c) const
 		{
 			if (c == backSlash)
 			{
@@ -279,7 +279,7 @@ namespace GLib::Cpp
 			return state;
 		}
 
-		State RawStringPrefix(char c) const
+		State RawStringPrefix(char const c) const
 		{
 			if (c == openParenthesis)
 			{
@@ -301,7 +301,7 @@ namespace GLib::Cpp
 			return state;
 		}
 
-		State RawString(char c) const
+		State RawString(char const c) const
 		{
 			if (c == closeParenthesis)
 			{
@@ -331,7 +331,7 @@ namespace GLib::Cpp
 			return state;
 		}
 
-		State Code(char c) const
+		State Code(char const c) const
 		{
 			if (emitWhiteSpace && IsWhiteSpace(c))
 			{
@@ -368,7 +368,7 @@ namespace GLib::Cpp
 			return state;
 		}
 
-		State CharacterLiteral(char c) const
+		State CharacterLiteral(char const c) const
 		{
 			if (c == backSlash)
 			{

@@ -18,8 +18,8 @@ class Directory
 	unsigned int coverableFunctions;
 
 public:
-	Directory(std::string name, std::string link, unsigned int coveredLines, unsigned int coverableLines, unsigned int minCoveragePercent,
-						unsigned int coveredFunctions, unsigned int coverableFunctions)
+	Directory(std::string name, std::string link, unsigned int const coveredLines, unsigned int const coverableLines,
+						unsigned int const minCoveragePercent, unsigned int const coveredFunctions, unsigned int const coverableFunctions)
 		: name(move(name))
 		, link(move(link))
 		, coveredLines(coveredLines)
@@ -88,7 +88,7 @@ public:
 template <>
 struct GLib::Eval::Visitor<Directory>
 {
-	static void Visit(const Directory & dir, const std::string & propertyName, const ValueVisitor & f)
+	static void Visit(Directory const & dir, std::string const & propertyName, ValueVisitor const & f)
 	{
 		if (propertyName == "name")
 		{

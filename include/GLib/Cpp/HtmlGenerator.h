@@ -19,18 +19,18 @@ enum class Style : char
 };
 
 // dumb version, search for contiguous chunks
-inline void VisibleWhitespace(std::string_view value, std::ostream & s)
+inline void VisibleWhitespace(std::string_view const value, std::ostream & s)
 {
 	for (size_t startPos = 0;;)
 	{
-		const size_t find = value.find_first_of(" 	", startPos);
+		size_t const find = value.find_first_of(" 	", startPos);
 		if (find == std::string::npos)
 		{
 			s << value.substr(startPos);
 			break;
 		}
 
-		std::string_view replacement = value[find] == ' ' ? "\xC2\xB7" : " \xE2\x86\x92 ";
+		std::string_view const replacement = value[find] == ' ' ? "\xC2\xB7" : " \xE2\x86\x92 ";
 		s << value.substr(startPos, find - startPos) << replacement;
 		startPos = find + 1;
 	}
@@ -46,17 +46,17 @@ inline void CloseSpan(std::ostream & s)
 	s << "</span>";
 }
 
-inline void Span(Style cls, std::string_view value, std::ostream & s)
+inline void Span(Style const cls, std::string_view const value, std::ostream & s)
 {
 	OpenSpan(cls, s);
 	s << value;
 	CloseSpan(s);
 }
 
-inline bool IsKeyword(std::string_view value)
+inline bool IsKeyword(std::string_view const value)
 {
 	// clang-format off
-	static const std::unordered_set<std::string_view> keywords
+	static std::unordered_set<std::string_view> const keywords
 	{
 		"alignas","alignof","and","and_eq","asm","atomic_cancel","atomic_commit","atomic_noexcept","auto",
 		"bitand","bitor","bool","break","case","catch","char","char8_t","char16_t","char32_t","class","compl",
@@ -73,10 +73,10 @@ inline bool IsKeyword(std::string_view value)
 	return keywords.find(value) != keywords.end();
 }
 
-inline bool IsCommonType(std::string_view value)
+inline bool IsCommonType(std::string_view const value)
 {
 	// clang-format off
-	static const std::unordered_set<std::string_view> types
+	static std::unordered_set<std::string_view> const types
 	{
 		"array", "bitset", "deque", "initializer_list", "istringstream", "list", "map", "multimap", "multiset",
 		"ostream", "ostringstream", "pair", "queue", "set", "size_t", "string", "string_view", "shared_ptr",
@@ -87,7 +87,7 @@ inline bool IsCommonType(std::string_view value)
 	return types.find(value) != types.end();
 }
 
-inline void Htmlify(std::string_view code, bool emitWhitespace, std::ostream & out)
+inline void Htmlify(std::string_view const code, bool const emitWhitespace, std::ostream & out)
 {
 	// clang-format off
 	static std::unordered_map<GLib::Cpp::State, Style> styles =
@@ -102,18 +102,18 @@ inline void Htmlify(std::string_view code, bool emitWhitespace, std::ostream & o
 	};
 	// clang-format on
 
-	auto alphaNumUnd = [](unsigned char c) { return std::isalnum(c) != 0 || c == '_'; };
-	auto whitespace = [](unsigned char c) { return std::isspace(c) != 0; };
-	auto escape = [&](std::string_view value) { GLib::Xml::Utils::Escape(value, out); };
-	auto vis = [&](std::string_view v) { VisibleWhitespace(v, out); };
+	auto alphaNumUnd = [](unsigned char const c) { return std::isalnum(c) != 0 || c == '_'; };
+	auto whitespace = [](unsigned char const c) { return std::isspace(c) != 0; };
+	auto escape = [&](std::string_view const value) { GLib::Xml::Utils::Escape(value, out); };
+	auto vis = [&](std::string_view const v) { VisibleWhitespace(v, out); };
 
-	for (const auto & f : GLib::Cpp::Holder(code, emitWhitespace))
+	for (auto const & f : GLib::Cpp::Holder(code, emitWhitespace))
 	{
 		if (f.first == GLib::Cpp::State::Code)
 		{
 			GLib::Util::Split(
 				f.second, alphaNumUnd,
-				[&](std::string_view value)
+				[&](std::string_view const value)
 				{
 					if (IsKeyword(value))
 					{
@@ -143,8 +143,8 @@ inline void Htmlify(std::string_view code, bool emitWhitespace, std::ostream & o
 		auto splitter = GLib::Util::SplitterView(f.second, "\n");
 		for (auto sit = splitter.begin(), end = splitter.end(); sit != end;)
 		{
-			GLib::Cpp::State state = it->first;
-			std::string_view value = *sit;
+			GLib::Cpp::State const state = it->first;
+			std::string_view const value = *sit;
 
 			if (!value.empty())
 			{

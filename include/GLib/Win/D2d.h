@@ -12,7 +12,7 @@ namespace GLib::Win::D2d
 		inline ComPtr<ID2D1Factory> CreateFactory()
 		{
 			ComPtr<ID2D1Factory> factory;
-			D2D1_FACTORY_OPTIONS options {D2D1_DEBUG_LEVEL_INFORMATION};
+			D2D1_FACTORY_OPTIONS constexpr options {D2D1_DEBUG_LEVEL_INFORMATION};
 			CheckHr(D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED, GetUuId<ID2D1Factory>(), &options, GetAddress(factory).Void()),
 							"D2D1CreateFactory");
 			return factory;
@@ -24,7 +24,7 @@ namespace GLib::Win::D2d
 		ComPtr<ID2D1Factory> factory {Detail::CreateFactory()};
 
 	public:
-		ComPtr<ID2D1HwndRenderTarget> CreateRenderTarget(HWND handle, const SIZE & size) const
+		ComPtr<ID2D1HwndRenderTarget> CreateRenderTarget(HWND const handle, SIZE const & size) const
 		{
 			ComPtr<ID2D1HwndRenderTarget> renderTarget;
 			WarnHr(factory->CreateHwndRenderTarget(D2D1::RenderTargetProperties(), D2D1::HwndRenderTargetProperties(handle, D2D1::SizeU(size.cx, size.cy)),
@@ -46,14 +46,14 @@ namespace GLib::Win::D2d
 			, recreated()
 		{}
 
-		[[nodiscard]] const Factory & Factory() const
+		[[nodiscard]] Factory const & Factory() const
 		{
 			return factory;
 		}
 
-		void Verify(HWND handle, const SIZE & size)
+		void Verify(HWND const handle, SIZE const & size)
 		{
-			bool recreate = !renderTarget;
+			bool const recreate = !renderTarget;
 			if (!renderTarget)
 			{
 				renderTarget = factory.CreateRenderTarget(handle, size);
@@ -62,7 +62,7 @@ namespace GLib::Win::D2d
 		}
 
 		template <typename Function>
-		void CheckDevice(const Function & function) const
+		void CheckDevice(Function const & function) const
 		{
 			if (recreated)
 			{
@@ -77,7 +77,7 @@ namespace GLib::Win::D2d
 
 		void End()
 		{
-			HRESULT hr = renderTarget->EndDraw();
+			HRESULT const hr = renderTarget->EndDraw();
 			if (hr == D2DERR_RECREATE_TARGET)
 			{
 				renderTarget = nullptr;
@@ -88,9 +88,9 @@ namespace GLib::Win::D2d
 			}
 		}
 
-		[[nodiscard]] bool Resize(const SIZE & size) const
+		[[nodiscard]] bool Resize(SIZE const & size) const
 		{
-			bool resize = renderTarget != nullptr;
+			bool const resize = renderTarget != nullptr;
 			if (resize)
 			{
 				renderTarget->Resize(D2D1::SizeU(size.cx, size.cy));
@@ -98,7 +98,7 @@ namespace GLib::Win::D2d
 			return resize;
 		}
 
-		void Clear(const D2D1::ColorF & colour) const
+		void Clear(D2D1 ::ColorF const & colour) const
 		{
 			renderTarget->Clear(colour);
 		}

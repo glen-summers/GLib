@@ -10,10 +10,10 @@ namespace GLib::Win::Util
 {
 	class Uuid
 	{
-		const UUID id;
+		UUID const id;
 
 	public:
-		explicit Uuid(const UUID & id)
+		explicit Uuid(UUID const & id)
 			: id(id)
 		{}
 
@@ -35,15 +35,15 @@ namespace GLib::Win::Util
 			return s;
 		}
 
-		friend std::ostream & operator<<(std::ostream & s, const Uuid & iid);
+		friend std::ostream & operator<<(std::ostream & s, Uuid const & iid);
 	};
 
-	inline std::ostream & operator<<(std::ostream & s, const Uuid & iid)
+	inline std::ostream & operator<<(std::ostream & s, Uuid const & iid)
 	{
 		return iid.WriteTo(s);
 	}
 
-	inline std::string ToString(const Uuid & id)
+	inline std::string ToString(Uuid const & id)
 	{
 		std::ostringstream s;
 		s << id;

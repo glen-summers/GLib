@@ -15,13 +15,13 @@ namespace GLib
 		using element_type = T;
 		using value_type = std::remove_cv_t<T>;
 		using index_type = std::ptrdiff_t;
-		using pointer = const element_type *;
-		using reference = const element_type &;
+		using pointer = element_type const *;
+		using reference = element_type const &;
 		using size_type = index_type;
 		using iterator = Iterator;
 
 	private:
-		const T * ptr {};
+		T const * ptr {};
 		size_type size {};
 
 	public:
@@ -61,8 +61,8 @@ namespace GLib
 			using iterator_category = std::random_access_iterator_tag;
 			using value_type = typename Span::value_type;
 			using difference_type = typename Span::index_type;
-			using pointer = const value_type *;
-			using reference = const value_type &;
+			using pointer = value_type const *;
+			using reference = value_type const &;
 
 		private:
 			pointer ptr = {};
@@ -76,12 +76,12 @@ namespace GLib
 				, end {ptr + size}
 			{}
 
-			constexpr bool operator==(const Iterator & other) const
+			constexpr bool operator==(Iterator const & other) const
 			{
 				return ptr == other.ptr;
 			}
 
-			constexpr bool operator!=(const Iterator & it) const
+			constexpr bool operator!=(Iterator const & it) const
 			{
 				return !(*this == it);
 			}
@@ -115,7 +115,7 @@ namespace GLib
 	};
 
 	template <typename T>
-	Span<T> MakeSpan(const T * value, size_t size)
+	Span<T> MakeSpan(T const * value, const size_t size)
 	{
 		return Span<T> {value, static_cast<std::ptrdiff_t>(size)};
 	}

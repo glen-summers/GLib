@@ -31,7 +31,7 @@ namespace GLib::Win::Symbols
 			}
 		}
 
-		inline CONTEXT GetContext(const EXCEPTION_POINTERS & exceptionInfo)
+		inline CONTEXT GetContext(EXCEPTION_POINTERS const & exceptionInfo)
 		{
 			return NativeTryCatch([&]() { return *exceptionInfo.ContextRecord; });
 		}
@@ -39,26 +39,26 @@ namespace GLib::Win::Symbols
 		struct VirtualBase
 		{
 			VirtualBase() = delete;
-			VirtualBase(const VirtualBase & other) = delete;
+			VirtualBase(VirtualBase const & other) = delete;
 			VirtualBase(VirtualBase && other) = delete;
-			VirtualBase & operator=(const VirtualBase & other) = delete;
+			VirtualBase & operator=(VirtualBase const & other) = delete;
 			VirtualBase & operator=(VirtualBase && other) = delete;
 			virtual ~VirtualBase() = delete;
 		};
 
-		inline bool GetCPlusPlusExceptionName(const std::span<const ULONG_PTR> & ei, std::string & name)
+		inline bool GetCPlusPlusExceptionName(std::span<ULONG_PTR const> const & ei, std::string & name)
 		{
 			return NativeTryCatch(
 				[&]()
 				{
-					const VirtualBase & q = *WindowsCast<VirtualBase *>(ei[1]);
-					const type_info & t = typeid(q);
+					VirtualBase const & q = *WindowsCast<VirtualBase *>(ei[1]);
+					auto const & t = typeid(q);
 					name = t.name();
 					return true;
 				});
 		}
 
-		inline bool GetCPlusPlusExceptionNameEx(const std::span<const ULONG_PTR> & ei, std::string & name)
+		inline bool GetCPlusPlusExceptionNameEx(std::span<ULONG_PTR const> const & ei, std::string & name)
 		{
 			return NativeTryCatch(
 				[&]()
@@ -78,16 +78,16 @@ namespace GLib::Win::Symbols
 #error unexpected target
 #endif
 
-					const std::span throwInfo {WindowsCast<const ULONG *>(ei[throwInfoIndex]), catchableOffsetIndex + 1};
+					std::span const throwInfo {WindowsCast<ULONG const *>(ei[throwInfoIndex]), catchableOffsetIndex + 1};
 
-					const ULONG catchableOffset {throwInfo[catchableOffsetIndex]};
-					const std::span catchables {WindowsCast<const ULONG *>(instance + catchableOffset), catchablesOffsetIndex + 1};
+					ULONG const catchableOffset {throwInfo[catchableOffsetIndex]};
+					std::span const catchables {WindowsCast<ULONG const *>(instance + catchableOffset), catchablesOffsetIndex + 1};
 
-					const ULONG catchablesOffset {catchables[catchablesOffsetIndex]};
-					const std::span catchablesTypes {WindowsCast<const ULONG *>(instance + catchablesOffset), typeInfoOffsetIndex + 1};
-					const ULONG typeInfoOffset {catchablesTypes[typeInfoOffsetIndex]};
+					ULONG const catchablesOffset {catchables[catchablesOffsetIndex]};
+					std::span const catchablesTypes {WindowsCast<ULONG const *>(instance + catchablesOffset), typeInfoOffsetIndex + 1};
+					ULONG const typeInfoOffset {catchablesTypes[typeInfoOffsetIndex]};
 
-					name = WindowsCast<const type_info *>(instance + typeInfoOffset)->name();
+					name = WindowsCast<type_info const *>(instance + typeInfoOffset)->name();
 
 					return true;
 				});
@@ -97,7 +97,7 @@ namespace GLib::Win::Symbols
 		{
 			constexpr ULONG undecoratedNameSize = 512;
 			std::array<char, undecoratedNameSize> undecoratedName {};
-			ULONG flags = UNDNAME_NAME_ONLY;
+			ULONG constexpr flags = UNDNAME_NAME_ONLY;
 
 			if (!symbolName.empty() && *symbolName.begin() == '?' &&
 					UnDecorateSymbolName(symbolName.c_str(), undecoratedName.data(), undecoratedNameSize, flags) != 0)
@@ -106,12 +106,12 @@ namespace GLib::Win::Symbols
 			}
 		}
 
-		inline void Trace(std::ostream & s, const SymProcess & process, const Symbol & symbol, uint64_t address)
+		inline void Trace(std::ostream & s, SymProcess const & process, Symbol const & symbol, uint64_t const address)
 		{
 			auto name = symbol.Name();
 			UnDecorate(name);
 			Formatter::Format(s, "\t{0} + 0x{1:%X}\n", name, symbol.Displacement());
-			if (auto line = process.TryGetLineFromAddress(address))
+			if (auto const line = process.TryGetLineFromAddress(address))
 			{
 				Formatter::Format(s, "\t{0}({1})", line->FileName(), line->LineNumber());
 				if (line->Displacement() != 0)
@@ -122,7 +122,7 @@ namespace GLib::Win::Symbols
 			}
 		}
 
-		inline void InlineTrace(std::ostream & s, const SymProcess & process, uint64_t address, ULONG inlineTrace)
+		inline void InlineTrace(std::ostream & s, SymProcess const & process, uint64_t const address, ULONG const inlineTrace)
 		{
 			ULONG inlineContext {};
 			ULONG inlineFrameIndex {};
@@ -131,12 +131,12 @@ namespace GLib::Win::Symbols
 			{
 				for (ULONG i = inlineContext; i < inlineContext + inlineTrace; ++i)
 				{
-					if (auto symbol = process.TryGetSymbolFromInlineContext(address, i))
+					if (auto const symbol = process.TryGetSymbolFromInlineContext(address, i))
 					{
 						auto name = symbol->Name();
 						UnDecorate(name);
 						Formatter::Format(s, "\tinline context {0} + 0x{1:%x}\n", name, symbol->Displacement());
-						if (auto line = process.TryGetLineFromInlineContext(address, i))
+						if (auto const line = process.TryGetLineFromInlineContext(address, i))
 						{
 							Formatter::Format(s, "\t{0}({1})", line->FileName(), line->LineNumber());
 							if (line->Displacement() != 0)
@@ -150,8 +150,8 @@ namespace GLib::Win::Symbols
 			}
 		}
 
-		inline void WalkStack(std::ostream & s, const SymProcess & process, ULONG machineType, STACKFRAME64 * frame, CONTEXT * context,
-													unsigned int maxFrames)
+		inline void WalkStack(std::ostream & s, SymProcess const & process, ULONG const machineType, STACKFRAME64 * const frame, CONTEXT * const context,
+													unsigned int const maxFrames)
 		{
 			for (unsigned int frames = 0; frames < maxFrames; ++frames)
 			{
@@ -162,7 +162,7 @@ namespace GLib::Win::Symbols
 					break;
 				}
 
-				uint64_t address = frame->AddrPC.Offset;
+				uint64_t const address = frame->AddrPC.Offset;
 				if (address == frame->AddrReturn.Offset)
 				{
 					break;
@@ -176,7 +176,7 @@ namespace GLib::Win::Symbols
 					Formatter::Format(s, "{0,-30} + 0x{1:%08X}\n", moduleName, address - WindowsCast<DWORD_PTR>(mb.AllocationBase));
 				}
 
-				ULONG inlineTrace = SymAddrIncludeInlineTrace(process.Handle(), address);
+				ULONG const inlineTrace = SymAddrIncludeInlineTrace(process.Handle(), address);
 				if (inlineTrace != 0)
 				{
 					InlineTrace(s, process, address, inlineTrace);
@@ -189,11 +189,11 @@ namespace GLib::Win::Symbols
 		}
 	}
 
-	inline void Print(std::ostream & s, const EXCEPTION_POINTERS * exceptionInfo, unsigned int maxFrames)
+	inline void Print(std::ostream & s, EXCEPTION_POINTERS const * exceptionInfo, unsigned int const maxFrames)
 	{
 		constexpr ULONG cPlusPlusExceptionNumber = 0xe06d7363;
-		const EXCEPTION_RECORD * er = exceptionInfo->ExceptionRecord;
-		const std::span info {er->ExceptionInformation};
+		EXCEPTION_RECORD const * const er = exceptionInfo->ExceptionRecord;
+		std::span const info {er->ExceptionInformation};
 
 		Formatter::Format(s, "Unhandled exception at {0} (code: {1:%08X})", er->ExceptionAddress, er->ExceptionCode);
 
@@ -201,7 +201,7 @@ namespace GLib::Win::Symbols
 		{
 			case STATUS_ACCESS_VIOLATION:
 			{
-				auto msg = info[0] == 0 ? "reading"sv : "writing"sv;
+				auto const msg = info[0] == 0 ? "reading"sv : "writing"sv;
 				Formatter::Format(s, " : Access violation {0} address {1}\n", msg, WindowsCast<PVOID>(info[1]));
 				break;
 			}

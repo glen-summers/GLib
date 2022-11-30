@@ -20,8 +20,8 @@ class FileLogger
 	friend class GLib::Flog::Log;
 	friend class GLib::Flog::LogManager;
 
-	const std::string baseFileName;
-	const std::filesystem::path path;
+	std::string const baseFileName;
+	std::filesystem::path const path;
 	std::mutex streamMonitor;
 	StreamInfo streamInfo;
 	GLib::Flog::Level logLevel = GLib::Flog::Level::Info; // config
@@ -29,9 +29,9 @@ class FileLogger
 
 public:
 	FileLogger();
-	FileLogger(const FileLogger &) = delete;
+	FileLogger(FileLogger const &) = delete;
 	FileLogger(FileLogger &&) = delete;
-	FileLogger & operator=(const FileLogger &) = delete;
+	FileLogger & operator=(FileLogger const &) = delete;
 	FileLogger & operator=(FileLogger &&) = delete;
 
 	static void Write(char c);
@@ -39,8 +39,8 @@ public:
 private:
 	~FileLogger();
 
-	static const LogState & GetLogState() noexcept;
-	static inline const LogState & logState {GetLogState()};
+	static LogState const & GetLogState() noexcept;
+	inline static LogState const & logState {GetLogState()};
 
 	static void Write(GLib::Flog::Level level, std::string_view prefix, std::string_view message);
 
@@ -63,7 +63,7 @@ private:
 	static std::ostream & TranslateLevel(std::ostream & stream, GLib::Flog::Level level);
 	static std::ostream & ThreadName(std::ostream & stream, std::string_view threadName);
 	static unsigned int GetDate();
-	static uintmax_t GetFreeDiskSpace(const std::filesystem::path & path);
+	static uintmax_t GetFreeDiskSpace(std::filesystem::path const & path);
 
 	static void CommitPendingScope();
 	static void ScopeStart(GLib::Flog::Level level, std::string_view prefix, std::string_view scope, std::string_view stem);

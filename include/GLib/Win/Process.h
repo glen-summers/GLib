@@ -12,21 +12,21 @@ namespace GLib::Win
 {
 	namespace Detail
 	{
-		inline const void * ToAddress(uint64_t value)
+		inline void const * ToAddress(uint64_t const value)
 		{
-			return Util::Detail::WindowsCast<const void *>(value);
+			return Util::Detail::WindowsCast<void const *>(value);
 		}
 
-		inline void * ToPseudoWritableAddress(uint64_t value)
+		inline void * ToPseudoWritableAddress(uint64_t const value)
 		{
 			return Util::Detail::WindowsCast<void *>(value);
 		}
 
-		inline bool Terminate(HANDLE process, UINT terminationExitCode) noexcept
+		inline bool Terminate(HANDLE const process, UINT const terminationExitCode) noexcept
 		{
 			ULONG exitCode = 0;
-			BOOL result = GetExitCodeProcess(process, &exitCode);
-			bool stillRunning = result != FALSE && exitCode == STILL_ACTIVE;
+			BOOL const result = GetExitCodeProcess(process, &exitCode);
+			bool const stillRunning = result != FALSE && exitCode == STILL_ACTIVE;
 			if (stillRunning)
 			{
 				Util::WarnAssertTrue(TerminateProcess(process, terminationExitCode), "TerminateProcess");
@@ -37,7 +37,7 @@ namespace GLib::Win
 		template <UINT ExitCode>
 		struct Terminator
 		{
-			void operator()(HANDLE process) const noexcept
+			void operator()(HANDLE const process) const noexcept
 			{
 				Terminate(process, ExitCode);
 			}
@@ -50,7 +50,7 @@ namespace GLib::Win
 	class Process
 	{
 		Handle p;
-		const ULONG threadId;
+		ULONG const threadId;
 
 	public:
 		static std::string CurrentPath()
@@ -74,26 +74,26 @@ namespace GLib::Win
 		{}
 
 		// creation flags  DETACHED_PROCESS?
-		explicit Process(const std::string & app, const std::string & cmd = {}, ULONG creationFlags = {}, WORD show = {},
-										 const std::string & desktop = {})
+		explicit Process(std::string const & app, std::string const & cmd = {}, ULONG const creationFlags = {}, WORD const show = {},
+										 std::string const & desktop = {})
 			: Process(Create(app, cmd, creationFlags, show, desktop))
 		{}
 
 		// returns immediately for successful start but failed later? e.g. on non existent desktop
 		template <typename R, typename P>
-		void WaitForInputIdle(const std::chrono::duration<R, P> & duration) const
+		void WaitForInputIdle(std::chrono::duration<R, P> const & duration) const
 		{
-			auto count = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
-			auto timeoutMilliseconds = GLib::Util::CheckedCast<ULONG>(count);
+			auto const count = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
+			auto const timeoutMilliseconds = GLib::Util::CheckedCast<ULONG>(count);
 			CheckWaitResult(::WaitForInputIdle(p.get(), timeoutMilliseconds));
 		}
 
-		[[nodiscard]] const Handle & Handle() const
+		[[nodiscard]] Handle const & Handle() const
 		{
 			return p;
 		}
 
-		void Terminate(unsigned int exitCode = 1) const noexcept
+		void Terminate(unsigned int const exitCode = 1) const noexcept
 		{
 			Detail::Terminate(p.get(), exitCode);
 		}
@@ -106,7 +106,7 @@ namespace GLib::Win
 
 		[[nodiscard]] ULONG Id() const
 		{
-			ULONG pid = GetProcessId(p.get());
+			ULONG const pid = GetProcessId(p.get());
 			Util::AssertTrue(pid != 0, "GetProcessId");
 			return pid;
 		}
@@ -118,16 +118,16 @@ namespace GLib::Win
 		}
 
 		template <typename R, typename P>
-		void WaitForExit(const std::chrono::duration<R, P> & duration) const
+		void WaitForExit(std::chrono::duration<R, P> const & duration) const
 		{
-			auto ms = GLib::Util::CheckedCast<ULONG>(std::chrono::duration_cast<std::chrono::milliseconds>(duration).count());
+			auto const ms = GLib::Util::CheckedCast<ULONG>(std::chrono::duration_cast<std::chrono::milliseconds>(duration).count());
 			Wait(p.get(), ms);
 		}
 
 		[[nodiscard]] ULONG ExitCode() const
 		{
 			ULONG exitCode = 0;
-			BOOL win32Result = GetExitCodeProcess(p.get(), &exitCode);
+			BOOL const win32Result = GetExitCodeProcess(p.get(), &exitCode);
 			Util::AssertTrue(win32Result, "GetExitCodeProcess");
 			return exitCode;
 		}
@@ -137,38 +137,40 @@ namespace GLib::Win
 			return ExitCode() == STILL_ACTIVE;
 		}
 
-		void ReadMemory(uint64_t address, void * buffer, size_t size) const
+		void ReadMemory(uint64_t const address, void * const buffer, size_t const size) const
 		{
-			BOOL result = ReadProcessMemory(p.get(), Detail::ToAddress(address), buffer, size, nullptr);
+			BOOL const result = ReadProcessMemory(p.get(), Detail::ToAddress(address), buffer, size, nullptr);
 			Util::AssertTrue(result, "ReadProcessMemory");
 		}
 
 		template <typename T>
-		void ReadMemory(uint64_t address, void * buffer, size_t size) const
+		void ReadMemory(uint64_t const address, void * const buffer, size_t const size) const
 		{
-			BOOL result = ReadProcessMemory(p.get(), Detail::ToAddress(address), buffer, size * sizeof(T), nullptr);
+			BOOL const result = ReadProcessMemory(p.get(), Detail::ToAddress(address), buffer, size * sizeof(T), nullptr);
 			Util::AssertTrue(result, "ReadProcessMemory");
 		}
 
-		void WriteMemory(uint64_t address, const void * buffer, size_t size) const
+		void WriteMemory(uint64_t const address, void const * const buffer, size_t const size) const
 		{
-			BOOL result = WriteProcessMemory(p.get(), Detail::ToPseudoWritableAddress(address), buffer, size, nullptr);
+			BOOL const result = WriteProcessMemory(p.get(), Detail::ToPseudoWritableAddress(address), buffer, size, nullptr);
 			Util::AssertTrue(result, "WriteProcessMemory");
 		}
 
 	private:
-		static Win::Handle Create(const std::string & app, const std::string & cmd, ULONG creationFlags, WORD show, const std::string & desktop)
+		static Win::Handle Create(std::string const & app, std::string const & cmd, ULONG const creationFlags, WORD const show,
+															std::string const & desktop)
 		{
 			return Create(Cvt::A2W(app), Cvt::A2W(app + " " + cmd), creationFlags, show, Cvt::A2W(desktop));
 		}
 
-		static Win::Handle Create(const std::wstring & app, const std::wstring & cmd, ULONG creationFlags, WORD show, const std::wstring & desktop)
+		static Win::Handle Create(std::wstring const & app, std::wstring const & cmd, ULONG const creationFlags, WORD const show,
+															std::wstring const & desktop)
 		{
 			STARTUPINFOW sui = {};
 			sui.cb = sizeof(STARTUPINFOW);
 
-			std::unique_ptr<wchar_t, void (*)(void *)> cmdCopy {_wcsdup(cmd.c_str()), std::free};
-			std::unique_ptr<wchar_t, void (*)(void *)> desktopCopy {_wcsdup(desktop.c_str()), std::free};
+			std::unique_ptr<wchar_t, void (*)(void *)> const cmdCopy {_wcsdup(cmd.c_str()), std::free};
+			std::unique_ptr<wchar_t, void (*)(void *)> const desktopCopy {_wcsdup(desktop.c_str()), std::free};
 
 			sui.lpDesktop = desktopCopy.get();
 			sui.dwFlags = STARTF_USESHOWWINDOW;
@@ -182,12 +184,12 @@ namespace GLib::Win
 			return Win::Handle {pi.hProcess};
 		}
 
-		static void Wait(HANDLE h, ULONG timeoutMilliseconds)
+		static void Wait(HANDLE const h, ULONG const timeoutMilliseconds)
 		{
 			CheckWaitResult(WaitForSingleObject(h, timeoutMilliseconds));
 		}
 
-		static void CheckWaitResult(ULONG result)
+		static void CheckWaitResult(ULONG const result)
 		{
 			switch (result)
 			{

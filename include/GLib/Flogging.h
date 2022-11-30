@@ -16,7 +16,7 @@ namespace GLib::Flog
 		class Buffer : public std::basic_streambuf<char>
 		{
 		protected:
-			int_type overflow(int_type c) override
+			int_type overflow(int_type const c) override
 			{
 				if (traits_type::eq_int_type(c, traits_type::eof()))
 				{
@@ -26,6 +26,7 @@ namespace GLib::Flog
 				return c;
 			}
 		};
+
 		using StreamType = Util::GenericOutStream<char, Buffer>;
 
 		inline std::ostream & Stream()
@@ -51,60 +52,60 @@ namespace GLib::Flog
 
 	class Log
 	{
-		const std::string name;
+		std::string const name;
 
 	public:
-		void Spam(std::string_view message) const
+		void Spam(std::string_view const message) const
 		{
 			Write(Level::Spam, message);
 		}
 
 		template <typename... Ts>
-		void Spam(std::string_view format, Ts &&... ts) const
+		void Spam(std::string_view const format, Ts &&... ts) const
 		{
 			Write(Level::Spam, format, std::forward<Ts>(ts)...);
 		}
 
-		void Debug(std::string_view message) const
+		void Debug(std::string_view const message) const
 		{
 			Write(Level::Debug, message);
 		}
 
 		template <typename... Ts>
-		void Debug(std::string_view format, Ts &&... ts) const
+		void Debug(std::string_view const format, Ts &&... ts) const
 		{
 			Write(Level::Debug, format, std::forward<Ts>(ts)...);
 		}
 
-		void Info(std::string_view message) const
+		void Info(std::string_view const message) const
 		{
 			Write(Level::Info, message);
 		}
 
 		template <typename... Ts>
-		void Info(std::string_view format, Ts &&... ts) const
+		void Info(std::string_view const format, Ts &&... ts) const
 		{
 			Write(Level::Info, format, std::forward<Ts>(ts)...);
 		}
 
-		void Warning(std::string_view message) const
+		void Warning(std::string_view const message) const
 		{
 			Write(Level::Warning, message);
 		}
 
 		template <typename... Ts>
-		void Warning(std::string_view format, Ts &&... ts) const
+		void Warning(std::string_view const format, Ts &&... ts) const
 		{
 			Write(Level::Warning, format, std::forward<Ts>(ts)...);
 		}
 
-		void Error(std::string_view message) const
+		void Error(std::string_view const message) const
 		{
 			Write(Level::Error, message);
 		}
 
 		template <typename... Ts>
-		void Error(std::string_view format, Ts &&... ts) const
+		void Error(std::string_view const format, Ts &&... ts) const
 		{
 			Write(Level::Error, format, std::forward<Ts>(ts)...);
 		}
@@ -124,7 +125,7 @@ namespace GLib::Flog
 		void CommitStream(Level level) const;
 
 		template <typename... Ts>
-		void Write(Level level, std::string_view format, Ts... ts) const
+		void Write(Level const level, std::string_view const format, Ts... ts) const
 		{
 			Formatter::Format(Detail::Stream(), format, std::forward<Ts>(ts)...);
 			CommitStream(level);
@@ -133,13 +134,13 @@ namespace GLib::Flog
 
 	class ScopeLog
 	{
-		const Log & log;
+		Log const & log;
 		Level level;
 		std::string_view scope;
 		std::string_view stem;
 
 	public:
-		ScopeLog(const Log & log, Level level, std::string_view scope, std::string_view stem = "==")
+		ScopeLog(Log const & log, Level const level, std::string_view const scope, std::string_view const stem = "==")
 			: log(log)
 			, level(level)
 			, scope(scope)
@@ -148,8 +149,8 @@ namespace GLib::Flog
 			log.ScopeStart(this->level, this->scope, this->stem);
 		}
 
-		ScopeLog(const ScopeLog &) = delete;
-		ScopeLog & operator=(const ScopeLog &) = delete;
+		ScopeLog(ScopeLog const &) = delete;
+		ScopeLog & operator=(ScopeLog const &) = delete;
 		ScopeLog(ScopeLog &&) = default;
 		ScopeLog & operator=(ScopeLog &&) = delete;
 
@@ -161,7 +162,7 @@ namespace GLib::Flog
 
 	class LogManager
 	{
-		static std::string Unmangle(const std::string & name);
+		static std::string Unmangle(std::string const & name);
 
 	public:
 		static Level SetLevel(Level level);
@@ -169,7 +170,7 @@ namespace GLib::Flog
 		static void SetThreadName(std::string_view name);
 		static std::filesystem::path GetLogPath();
 
-		static auto GetLog(const std::string & name) noexcept
+		static auto GetLog(std::string const & name) noexcept
 		{
 			return Log(name);
 		}

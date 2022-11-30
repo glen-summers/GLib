@@ -5,12 +5,12 @@
 
 namespace GLib::Xml
 {
-	inline bool operator==(const Attribute & a1, const Attribute & a2)
+	inline bool operator==(Attribute const & a1, Attribute const & a2)
 	{
 		return a1.Name == a2.Name && a1.Value == a2.Value && a1.NameSpace == a2.NameSpace;
 	}
 
-	inline bool operator!=(const Attribute & a1, const Attribute & a2)
+	inline bool operator!=(Attribute const & a1, Attribute const & a2)
 	{
 		return !(a1 == a2);
 	}
@@ -20,12 +20,12 @@ namespace GLib::Xml
 		return s << static_cast<int>(state);
 	}
 
-	inline std::ostream & operator<<(std::ostream & s, const Attribute & a)
+	inline std::ostream & operator<<(std::ostream & s, Attribute const & a)
 	{
 		return s << "Attr: [" << a.NameSpace << "]:[" << a.Name << "]=[" << a.Value << ']' << std::endl;
 	}
 
-	inline bool operator==(const Element & e1, const Element & e2)
+	inline bool operator==(Element const & e1, Element const & e2)
 	{
 		if (e1.Type() != e2.Type() || e1.QName() != e2.QName() || e1.NameSpace() != e2.NameSpace() || e1.Text() != e2.Text())
 		{
@@ -48,12 +48,12 @@ namespace GLib::Xml
 		return true;
 	}
 
-	inline bool operator!=(const Element & e1, const Element & e2)
+	inline bool operator!=(Element const & e1, Element const & e2)
 	{
 		return !(e1 == e2);
 	}
 
-	inline std::ostream & operator<<(std::ostream & s, const Element & e)
+	inline std::ostream & operator<<(std::ostream & s, Element const & e)
 	{
 		s << "NameSpace: [" << e.NameSpace() << "], Name: [" << e.Name() << "], type : [" << static_cast<unsigned int>(e.Type()) << "], text : ["
 			<< e.Text() << ']';
@@ -61,7 +61,7 @@ namespace GLib::Xml
 		if (!e.GetAttributes().Empty())
 		{
 			s << std::endl;
-			for (const auto & a : e.GetAttributes())
+			for (auto const & a : e.GetAttributes())
 			{
 				s << "Attr: [" << a.NameSpace << "]:[" << a.Name << "]=[" << a.Value << ']' << std::endl;
 			}
@@ -69,11 +69,11 @@ namespace GLib::Xml
 		return s;
 	}
 
-	inline void Parse(std::string_view xml) // +expectexception
+	inline void Parse(std::string_view const xml) // +expectexception
 	{
-		for (const auto & e : Holder {xml})
+		for (auto const & e : Holder {xml})
 		{
-			for (const auto & a : e.GetAttributes())
+			for (auto const & a : e.GetAttributes())
 			{
 				static_cast<void>(a);
 			}

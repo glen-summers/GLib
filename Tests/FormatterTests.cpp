@@ -11,17 +11,17 @@
 
 namespace
 {
-	bool IsInvalidFormat(const std::logic_error & e)
+	bool IsInvalidFormat(std::logic_error const & e)
 	{
 		return e.what() == std::string("Invalid format string");
 	}
 
-	bool IsNoArguments(const std::logic_error & e)
+	bool IsNoArguments(std::logic_error const & e)
 	{
 		return e.what() == std::string("NoArguments");
 	}
 
-	const auto UnitedKingdomLocale =
+	auto const UnitedKingdomLocale =
 #ifdef __linux__
 		"en_GB.UTF8";
 #elif _WIN32
@@ -29,7 +29,8 @@ namespace
 #else
 #endif
 
-	tm MakeTm(int second, int minute, int hour, int day, int month, int year, int weekDay, int yearDay, int isDaylightSaving)
+	tm MakeTm(int const second, int const minute, int const hour, int const day, int const month, int const year, int const weekDay, int const yearDay,
+						int const isDaylightSaving)
 	{
 		return {second,
 						minute,
@@ -73,7 +74,7 @@ AUTO_TEST_CASE(BasicTest)
 
 AUTO_TEST_CASE(TestEmptyFormatOk)
 {
-	std::string s = Formatter::Format("", 1, 2, 3);
+	std::string const s = Formatter::Format("", 1, 2, 3);
 	TEST(s.empty());
 }
 
@@ -154,7 +155,7 @@ AUTO_TEST_CASE(TestSprintfFormatPassThrough)
 AUTO_TEST_CASE(TestSprintfFormatException)
 {
 	CHECK_EXCEPTION(Formatter::Format("{0:x}", I32(1234)), std::logic_error,
-									[](const std::logic_error & e) { return e.what() == std::string("Invalid format : 'x' for Type: int"); });
+									[](std::logic_error const & e) { return e.what() == std::string("Invalid format : 'x' for Type: int"); });
 }
 
 AUTO_TEST_CASE(TestSprintfFormatLengthNoException)
@@ -308,11 +309,11 @@ AUTO_TEST_CASE(TestPointer32)
 
 #ifdef __GNUG__
 #pragma GCC diagnostic push
-//#pragma GCC diagnostic ignored "-Werror=int-to-pointer-cast"
+// #pragma GCC diagnostic ignored "-Werror=int-to-pointer-cast"
 #endif
 
 		// -Werror=int-to-pointer-cast
-		const auto * p = reinterpret_cast<const void *>(H32(1234abcd)); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast, performance-no-int-to-ptr)
+		auto const * p = reinterpret_cast<void const *>(H32(1234abcd)); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast, performance-no-int-to-ptr)
 
 		std::string s = Formatter::Format("{0}", p);
 		TEST("1234ABCD" == s);
@@ -322,7 +323,7 @@ AUTO_TEST_CASE(TestPointer32)
 #pragma warning(pop)
 #endif
 
-#if __GNUG__
+#ifdef __GNUG__
 #pragma GCC diagnostic pop
 #endif
 }
@@ -339,9 +340,9 @@ AUTO_TEST_CASE(TestPointer64)
 
 AUTO_TEST_CASE(TestTimePointDefaultFormat)
 {
-	const int offset = 1900;
-	const int yr = 1601;
-	const tm tm = MakeTm(0, 0, 0, 1, 0, yr - offset, 0, 0, 0);
+	int constexpr offset = 1900;
+	int constexpr yr = 1601;
+	tm const tm = MakeTm(0, 0, 0, 1, 0, yr - offset, 0, 0, 0);
 
 	std::ostringstream s;
 	s.imbue(std::locale(UnitedKingdomLocale));
@@ -351,7 +352,7 @@ AUTO_TEST_CASE(TestTimePointDefaultFormat)
 
 AUTO_TEST_CASE(TestTimePoint)
 {
-	const tm tm = MakeTm(0, 0, 18, 6, 10, 67, 0, 0, 1);
+	tm const tm = MakeTm(0, 0, 18, 6, 10, 67, 0, 0, 1);
 
 	std::ostringstream s;
 	s.imbue(std::locale(UnitedKingdomLocale));
@@ -385,27 +386,27 @@ AUTO_TEST_CASE(CustomTypeFormat)
 AUTO_TEST_CASE(CustomTypeNonEmptyFormatException)
 {
 	CHECK_EXCEPTION(Xyzzy2 plugh; Formatter::Format("{0:lentilCustard}", plugh), std::logic_error,
-																[](const std::logic_error & e) { return e.what() == std::string("Unexpected non-empty format : lentilCustard"); });
+																[](std::logic_error const & e) { return e.what() == std::string("Unexpected non-empty format : lentilCustard"); });
 }
 
 AUTO_TEST_CASE(MoneyTest)
 {
-	GLib::Money m {FL(123456.7)};
+	GLib::Money const m {FL(123456.7)};
 
 	std::ostringstream s;
 	s.imbue(std::locale(UnitedKingdomLocale));
 	Formatter::Format(s, "{0}", m);
-	const auto * expected = "\xc2\xa3"
+	auto const * expected = "\xc2\xa3"
 													"1,234.57";
 	TEST(expected == s.str());
 }
 
 AUTO_TEST_CASE(TestLargeObject)
 {
-	CopyCheck c1;
+	CopyCheck const c1;
 	CHECK(c1.Copies() == 0 && c1.Moves() == 0);
 
-	CopyCheck c2(c1); // NOLINT(performance-unnecessary-copy-initialization) test copy
+	CopyCheck const c2(c1); // NOLINT(performance-unnecessary-copy-initialization) test copy
 	CHECK(c2.Copies() == 1 && c1.Moves() == 0);
 
 	CopyCheck c3;

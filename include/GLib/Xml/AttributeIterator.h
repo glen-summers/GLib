@@ -23,7 +23,7 @@ namespace GLib::Xml
 		using Iterator = std::string_view::const_iterator;
 
 		StateEngine engine;
-		const NameSpaceManager * manager {};
+		NameSpaceManager const * manager {};
 		Iterator ptr;
 		Iterator end;
 		std::optional<Iterator> currentPtr;
@@ -34,7 +34,7 @@ namespace GLib::Xml
 		///////////
 
 	public:
-		AttributeIterator(const NameSpaceManager * manager, Iterator begin, Iterator end)
+		AttributeIterator(NameSpaceManager const * manager, const Iterator begin, const Iterator end)
 			: engine(State::AttributeSpace)
 			, manager(manager)
 			, ptr(begin)
@@ -48,12 +48,12 @@ namespace GLib::Xml
 
 		AttributeIterator() = default;
 
-		bool operator==(const AttributeIterator & other) const
+		bool operator==(AttributeIterator const & other) const
 		{
 			return currentPtr == other.currentPtr;
 		}
 
-		bool operator!=(const AttributeIterator & it) const
+		bool operator!=(AttributeIterator const & it) const
 		{
 			return !(*this == it);
 		}
@@ -66,9 +66,9 @@ namespace GLib::Xml
 
 		Attribute operator*() const
 		{
-			auto qName = Utils::ToStringView(attributeName);
-			auto value = Utils::ToStringView(attributeValue);
-			auto rawValue = Utils::ToStringView({attributeName.first, attributeValue.second + 1});
+			auto const qName = Utils::ToStringView(attributeName);
+			auto const value = Utils::ToStringView(attributeValue);
+			auto const rawValue = Utils::ToStringView({attributeName.first, attributeValue.second + 1});
 
 			if (manager != nullptr)
 			{
@@ -79,7 +79,7 @@ namespace GLib::Xml
 		}
 
 	private:
-		[[noreturn]] void IllegalCharacter(char c) const
+		[[noreturn]] void IllegalCharacter(char const c) const
 		{
 			std::ostringstream s;
 			s << "Illegal character: '" << *ptr << "' (0x" << std::hex << static_cast<unsigned>(c) << ')';
@@ -109,9 +109,9 @@ namespace GLib::Xml
 					return;
 				}
 
-				const auto oldPtr = ptr;
-				const auto oldState = engine.GetState();
-				const auto newState = engine.Push(*ptr);
+				auto const oldPtr = ptr;
+				auto const oldState = engine.GetState();
+				auto const newState = engine.Push(*ptr);
 				if (newState == State::Error)
 				{
 					IllegalCharacter(*ptr);

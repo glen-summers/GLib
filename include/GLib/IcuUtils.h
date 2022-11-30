@@ -19,7 +19,7 @@ namespace GLib::IcuUtils
 {
 	namespace Detail
 	{
-		inline void AssertNoError(UErrorCode error, std::string_view msg)
+		inline void AssertNoError(UErrorCode const error, std::string_view const msg)
 		{
 			if (U_FAILURE(error) != UBool {})
 			{
@@ -27,7 +27,7 @@ namespace GLib::IcuUtils
 			}
 		}
 
-		inline void AssertTrue(bool value, std::string_view msg)
+		inline void AssertTrue(bool const value, std::string_view const msg)
 		{
 			if (!value)
 			{
@@ -37,7 +37,7 @@ namespace GLib::IcuUtils
 
 		struct CollatorCloser
 		{
-			void operator()(UCollator * collator) const noexcept
+			void operator()(UCollator * const collator) const noexcept
 			{
 				ucol_close(collator);
 			}
@@ -45,7 +45,7 @@ namespace GLib::IcuUtils
 
 		using CollatorPtr = std::unique_ptr<UCollator, CollatorCloser>;
 
-		inline CollatorPtr MakeCollator(const char * locale = nullptr)
+		inline CollatorPtr MakeCollator(char const * const locale = nullptr)
 		{
 			UErrorCode error = U_ZERO_ERROR;
 			UCollator * col = ucol_open(locale, &error);
@@ -58,7 +58,7 @@ namespace GLib::IcuUtils
 
 		struct UCaseMapCloser
 		{
-			void operator()(UCaseMap * map) const noexcept
+			void operator()(UCaseMap * const map) const noexcept
 			{
 				ucasemap_close(map);
 			}
@@ -66,7 +66,7 @@ namespace GLib::IcuUtils
 
 		using UCaseMapPtr = std::unique_ptr<UCaseMap, UCaseMapCloser>;
 
-		inline UCaseMapPtr MakeUCaseMap(const char * locale = nullptr)
+		inline UCaseMapPtr MakeUCaseMap(char const * locale = nullptr)
 		{
 			UErrorCode error = U_ZERO_ERROR;
 			UCaseMap * uCaseMap = ucasemap_open(locale, U_FOLD_CASE_DEFAULT, &error);
@@ -82,9 +82,9 @@ namespace GLib::IcuUtils
 		Greater = +1
 	};
 
-	inline CompareResult CompareNoCase(std::string_view s1, std::string_view s2, const char * locale = nullptr)
+	inline CompareResult CompareNoCase(std::string_view const s1, std::string_view const s2, char const * const locale = nullptr)
 	{
-		auto collator = Detail::MakeCollator(locale); // cache? perf test
+		auto const collator = Detail::MakeCollator(locale); // cache? perf test
 		ucol_setStrength(collator.get(), UCOL_SECONDARY);
 
 		UCharIterator i1;
@@ -94,7 +94,7 @@ namespace GLib::IcuUtils
 		uiter_setUTF8(&i2, s2.data(), static_cast<int32_t>(s2.size()));
 
 		UErrorCode error = U_ZERO_ERROR;
-		UCollationResult result = ucol_strcollIter(collator.get(), &i1, &i2, &error);
+		UCollationResult const result = ucol_strcollIter(collator.get(), &i1, &i2, &error);
 		Detail::AssertNoError(error, "ucol_strcollIter");
 		switch (result)
 		{
@@ -108,18 +108,18 @@ namespace GLib::IcuUtils
 		throw std::runtime_error("Unexpected result");
 	}
 
-	inline CompareResult CompareNoCase(std::string_view s1, std::string_view s2, size_t size, const char * locale = nullptr)
+	inline CompareResult CompareNoCase(std::string_view const s1, std::string_view const s2, size_t const size, char const * const locale = nullptr)
 	{
 		return CompareNoCase(s1.substr(0, size), s2.substr(0, size), locale);
 	}
 
-	inline std::string ToLower(const std::string & value, const char * locale = nullptr)
+	inline std::string ToLower(std::string const & value, char const * const locale = nullptr)
 	{
 		UErrorCode error = U_ZERO_ERROR;
-		auto map = Detail::MakeUCaseMap(locale); // cache
+		auto const map = Detail::MakeUCaseMap(locale); // cache
 
-		const auto sourceLength = static_cast<int>(value.size());
-		const auto destLength = ucasemap_utf8ToLower(map.get(), nullptr, 0, value.c_str(), sourceLength, &error);
+		auto const sourceLength = static_cast<int>(value.size());
+		auto const destLength = ucasemap_utf8ToLower(map.get(), nullptr, 0, value.c_str(), sourceLength, &error);
 		Detail::AssertTrue(error == U_BUFFER_OVERFLOW_ERROR, "ucasemap_utf8ToLower");
 
 		error = U_ZERO_ERROR;
@@ -130,13 +130,13 @@ namespace GLib::IcuUtils
 		return {s.Get(), static_cast<size_t>(destLength)};
 	}
 
-	inline std::string ToUpper(const std::string & value, const char * locale = nullptr)
+	inline std::string ToUpper(std::string const & value, char const * locale = nullptr)
 	{
 		UErrorCode error = U_ZERO_ERROR;
-		auto map = Detail::MakeUCaseMap(locale); // cache
+		auto const map = Detail::MakeUCaseMap(locale); // cache
 
-		const auto sourceLength = static_cast<int>(value.size());
-		const int destLength = ucasemap_utf8ToUpper(map.get(), nullptr, 0, value.c_str(), sourceLength, &error);
+		auto const sourceLength = static_cast<int>(value.size());
+		int const destLength = ucasemap_utf8ToUpper(map.get(), nullptr, 0, value.c_str(), sourceLength, &error);
 		Detail::AssertTrue(error == U_BUFFER_OVERFLOW_ERROR, "ucasemap_utf8ToUpper");
 
 		error = U_ZERO_ERROR;

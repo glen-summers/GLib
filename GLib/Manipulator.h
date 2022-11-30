@@ -23,7 +23,7 @@ namespace Detail
 	};
 
 	template <typename Argument>
-	std::ostream & operator<<(std::ostream & stream, const Manipulator<Argument> & manipulator)
+	std::ostream & operator<<(std::ostream & stream, Manipulator<Argument> const & manipulator)
 	{
 		return manipulator.Manipulate(stream);
 	}

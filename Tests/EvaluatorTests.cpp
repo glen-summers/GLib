@@ -20,21 +20,21 @@ AUTO_TEST_CASE(AddEnum)
 AUTO_TEST_CASE(AddStruct)
 {
 	GLib::Eval::Evaluator evaluator;
-	User user {"Zardoz", U16(999), {}};
+	User const user {"Zardoz", U16(999), {}};
 	evaluator.Set("user", user);
 
-	std::string name = evaluator.Evaluate("user.name");
+	std::string const name = evaluator.Evaluate("user.name");
 	TEST(name == "Zardoz");
-	std::string ageValue = evaluator.Evaluate("user.age");
+	std::string const ageValue = evaluator.Evaluate("user.age");
 	TEST(ageValue == "999");
 }
 
 AUTO_TEST_CASE(NestedStruct)
 {
 	GLib::Eval::Evaluator evaluator;
-	Struct Struct {{"NestedValue"}};
+	Struct const Struct {{"NestedValue"}};
 	evaluator.Set("struct", Struct);
-	std::string value = evaluator.Evaluate("struct.Nested");
+	std::string const value = evaluator.Evaluate("struct.Nested");
 	TEST(value == "NestedValue");
 }
 
@@ -42,20 +42,20 @@ AUTO_TEST_CASE(StructForEach)
 {
 	GLib::Eval::Evaluator evaluator;
 
-	const std::vector<User> users {{"Fred", U16(42), {"FC00"}}, {"Jim", U16(43), {"FD00"}}, {"Sheila", U16(44), {"FE00"}}};
+	std::vector<User> const users {{"Fred", U16(42), {"FC00"}}, {"Jim", U16(43), {"FD00"}}, {"Sheila", U16(44), {"FE00"}}};
 	evaluator.SetCollection("users", users);
 
 	std::vector<std::string> result;
 	evaluator.ForEach("users",
-										[&](const GLib::Eval::ValueBase & user)
+										[&](GLib::Eval::ValueBase const & user)
 										{
 											std::ostringstream s;
-											user.VisitProperty("name", [&](const GLib::Eval::ValueBase & value) { s << value.ToString(); });
-											user.VisitProperty("age", [&](const GLib::Eval::ValueBase & value) { s << ':' << value.ToString(); });
+											user.VisitProperty("name", [&](GLib::Eval::ValueBase const & value) { s << value.ToString(); });
+											user.VisitProperty("age", [&](GLib::Eval::ValueBase const & value) { s << ':' << value.ToString(); });
 											result.push_back(s.str());
 										});
 
-	const std::vector<std::string> expected {"Fred:42", "Jim:43", "Sheila:44"};
+	std::vector<std::string> const expected {"Fred:42", "Jim:43", "Sheila:44"};
 	CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), result.begin(), result.end());
 }
 
@@ -63,11 +63,11 @@ AUTO_TEST_CASE(NestedPropertyForEach)
 {
 	GLib::Eval::Evaluator evaluator;
 
-	User user {"Fred", U16(42), {"Computing", "Busses"}};
+	User const user {"Fred", U16(42), {"Computing", "Busses"}};
 	evaluator.Set("user", user);
 
 	std::ostringstream s;
-	evaluator.ForEach("user.hobbies", [&](const GLib::Eval::ValueBase & value) { s << value.ToString() << ','; });
+	evaluator.ForEach("user.hobbies", [&](GLib::Eval::ValueBase const & value) { s << value.ToString() << ','; });
 
 	TEST(s.str() == "Computing,Busses,");
 }
@@ -76,13 +76,13 @@ AUTO_TEST_CASE(NativeTypeForEach)
 {
 	GLib::Eval::Evaluator evaluator;
 
-	const std::vector integers {1, 2, 3};
+	std::vector const integers {1, 2, 3};
 	evaluator.SetCollection("integers", integers);
 
 	std::vector<std::string> result;
-	evaluator.ForEach("integers", [&](const GLib::Eval::ValueBase & value) { result.push_back(value.ToString()); });
+	evaluator.ForEach("integers", [&](GLib::Eval::ValueBase const & value) { result.push_back(value.ToString()); });
 
-	const std::vector<std::string> expected {"1", "2", "3"};
+	std::vector<std::string> const expected {"1", "2", "3"};
 	CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), result.begin(), result.end());
 }
 
@@ -109,8 +109,8 @@ AUTO_TEST_CASE(RemoveNonexistentCollectionThrows)
 
 AUTO_TEST_CASE(ResetValue)
 {
-	User z {"Zardoz", U16(999), {"Domination", "MassiveHead"}};
-	User d {"Diablo", U16(666), {"Fire", "Brimstone"}};
+	User const z {"Zardoz", U16(999), {"Domination", "MassiveHead"}};
+	User const d {"Diablo", U16(666), {"Fire", "Brimstone"}};
 
 	GLib::Eval::Evaluator evaluator;
 	evaluator.Set("user", z);
@@ -133,7 +133,7 @@ AUTO_TEST_CASE(ResetCollection)
 AUTO_TEST_CASE(CollectionUnimplementedMethods)
 {
 	GLib::Eval::Evaluator evaluator;
-	const std::vector values {1, 2, 3};
+	std::vector const values {1, 2, 3};
 	evaluator.SetCollection("value", values);
 
 	GLIB_CHECK_RUNTIME_EXCEPTION({ static_cast<void>(evaluator.Evaluate("value.property")); }, "Not implemented");
@@ -144,17 +144,17 @@ AUTO_TEST_CASE(ValueForEachThrows)
 	GLib::Eval::Evaluator evaluator;
 	evaluator.Set("value", I32(1234));
 
-	GLIB_CHECK_RUNTIME_EXCEPTION({ evaluator.ForEach("value", [&](const GLib::Eval::ValueBase &) {}); }, "ForEach not defined for : int");
+	GLIB_CHECK_RUNTIME_EXCEPTION({ evaluator.ForEach("value", [&](GLib::Eval::ValueBase const &) {}); }, "ForEach not defined for : int");
 }
 
 AUTO_TEST_CASE(CollectionForEach)
 {
 	GLib::Eval::Evaluator evaluator;
-	std::vector ints {1, 2, 3, 4};
+	std::vector const ints {1, 2, 3, 4};
 	evaluator.Set("ints", ints);
 
 	std::vector<std::string> result;
-	evaluator.ForEach("ints", [&](const GLib::Eval::ValueBase & value) { result.push_back(value.ToString()); });
+	evaluator.ForEach("ints", [&](GLib::Eval::ValueBase const & value) { result.push_back(value.ToString()); });
 	std::vector<std::string> expected {"1", "2", "3", "4"};
 	CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), result.begin(), result.end());
 }
@@ -162,7 +162,7 @@ AUTO_TEST_CASE(CollectionForEach)
 AUTO_TEST_CASE(UnknownValueThrows)
 {
 	GLib::Eval::Evaluator evaluator;
-	User user {"Zardoz", U16(999), {"Domination", "MassiveHead"}};
+	User const user {"Zardoz", U16(999), {"Domination", "MassiveHead"}};
 	evaluator.Set("user", user);
 
 	GLIB_CHECK_RUNTIME_EXCEPTION({ static_cast<void>(evaluator.Evaluate("user.HasProperty")); }, "Unknown property : 'HasProperty'");
@@ -174,7 +174,6 @@ AUTO_TEST_CASE(UnknownVisitorThrows)
 	evaluator.Set("HasNoVisitor", HasNoVisitor {});
 	GLIB_CHECK_RUNTIME_EXCEPTION({ static_cast<void>(evaluator.Evaluate("HasNoVisitor.FuBar")); },
 															 "No accessor defined for property: 'FuBar', type:'HasNoVisitor'");
-	;
 }
 
 AUTO_TEST_CASE(NoToStringThrows)

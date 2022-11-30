@@ -30,12 +30,12 @@ namespace GLib::Win::Util
 
 	namespace Detail
 	{
-		inline bool IsError(Exp::ULong auto value)
+		bool IsError(Exp::ULong auto value)
 		{
 			return IS_ERROR(value); // NOLINT bad macro
 		}
 
-		inline std::string FormatErrorMessage(std::string_view message, Exp::ULong auto error, const wchar_t * moduleName = {})
+		std::string FormatErrorMessage(std::string_view const message, Exp::ULong auto const error, wchar_t const * const moduleName = {})
 		{
 			std::ostringstream stm;
 			stm << message << " : ";

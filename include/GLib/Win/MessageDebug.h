@@ -6,12 +6,12 @@ namespace GLib::Win
 {
 	namespace Detail
 	{
-		inline std::string ClassName(HWND hWnd)
+		inline std::string ClassName(HWND const hWnd)
 		{
 			GLib::Util::WideCharBuffer s;
 			for (;;)
 			{
-				unsigned int lengthNoNull = GetClassNameW(hWnd, s.Get(), static_cast<int>(s.Size()));
+				unsigned int const lengthNoNull = GetClassNameW(hWnd, s.Get(), static_cast<int>(s.Size()));
 				Util::AssertTrue(lengthNoNull != 0, "GetClassNameW");
 				if (lengthNoNull < s.Size() - 1)
 				{
@@ -26,7 +26,7 @@ namespace GLib::Win
 	class MessageDebug
 	{
 	public:
-		static void Write(const std::string & context, HWND hWnd, const void * param)
+		static void Write(std::string const & context, HWND const hWnd, void const * param)
 		{
 			std::string className = IsWindow(hWnd) != 0 ? Detail::ClassName(hWnd) : "<unknown>";
 			Debug::Write("{0} ClassName:{1}, Param:{2}, hWnd:{3}", context, className, param, hWnd);
@@ -56,7 +56,7 @@ namespace GLib::Win
 
 			if (message == WM_NOTIFY) // check
 			{
-				const NMHDR & hdr = *Util::Detail::WindowsCast<const NMHDR *>(lParam);
+				NMHDR const & hdr = *Util::Detail::WindowsCast<NMHDR const *>(lParam);
 				Debug::Write("Msg: WM_NOTIFY {0,-20} {1,-20}[hw:{2}] : From Hw:{3} Id:{4}, Code:{5:%8x}", sourceName, className, hWnd, hdr.hwndFrom,
 										 hdr.idFrom, hdr.code);
 				return;
@@ -68,7 +68,7 @@ namespace GLib::Win
 
 	private:
 		// http ://blog.airesoft.co.uk/2009/11/wm_messages/
-		static const auto & MessageStrings()
+		static auto const & MessageStrings()
 		{
 			// clang-format off
 			constexpr unsigned int messageCount = 1024;

@@ -16,7 +16,7 @@ class Scope
 	TimePoint start;
 
 public:
-	Scope(GLib::Flog::Level level, std::string_view prefix, std::string_view scope, std::string_view stem)
+	Scope(GLib::Flog::Level const level, std::string_view const prefix, std::string_view const scope, std::string_view const stem)
 		: level(level)
 		, prefix(prefix)
 		, scopeText(scope)

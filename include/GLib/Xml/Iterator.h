@@ -30,7 +30,7 @@ namespace GLib::Xml
 		StateEngine engine;
 
 		std::string_view::const_iterator ptr {};
-		const std::string_view::const_iterator end {};
+		std::string_view::const_iterator const end {};
 		std::optional<std::string_view::const_iterator> lastPtr;
 		NameSpaceManager * manager = {};
 
@@ -59,7 +59,7 @@ namespace GLib::Xml
 		using reference = void;
 		// ReSharper restore All
 
-		Iterator(std::string_view::const_iterator begin, std::string_view::const_iterator end, NameSpaceManager * manager)
+		Iterator(std::string_view::const_iterator begin, std::string_view::const_iterator const end, NameSpaceManager * manager)
 			: ptr(begin)
 			, end(end)
 			, lastPtr(begin)
@@ -70,12 +70,12 @@ namespace GLib::Xml
 
 		Iterator() = default;
 
-		bool operator==(const Iterator & other) const
+		bool operator==(Iterator const & other) const
 		{
 			return lastPtr == other.lastPtr;
 		}
 
-		bool operator!=(const Iterator & it) const
+		bool operator!=(Iterator const & it) const
 		{
 			return !(*this == it);
 		}
@@ -86,18 +86,18 @@ namespace GLib::Xml
 			return *this;
 		}
 
-		const Element & operator*() const
+		Element const & operator*() const
 		{
 			return element;
 		}
 
-		const Element * operator->() const
+		Element const * operator->() const
 		{
 			return &element;
 		}
 
 	private:
-		[[noreturn]] static void IllegalCharacter(char c, unsigned int lineNumber, unsigned int characterOffset)
+		[[noreturn]] static void IllegalCharacter(char const c, unsigned int const lineNumber, unsigned int const characterOffset)
 		{
 			std::ostringstream s;
 			s << "Illegal character: ";
@@ -112,7 +112,7 @@ namespace GLib::Xml
 			throw std::runtime_error(s.str());
 		}
 
-		bool ProcessOldState(const std::string_view::const_iterator oldPtr, const State oldState, const State newState)
+		bool ProcessOldState(std::string_view::const_iterator const oldPtr, State const oldState, State const newState)
 		{
 			if (oldState == State::Text && newState == State::TextEntity)
 			{
@@ -160,7 +160,7 @@ namespace GLib::Xml
 			return false;
 		}
 
-		bool ProcessNewState(const std::string_view::const_iterator oldPtr, const State newState)
+		bool ProcessNewState(std::string_view::const_iterator const oldPtr, State const newState)
 		{
 			if (newState == State::AttributeEnd)
 			{
@@ -239,10 +239,10 @@ namespace GLib::Xml
 					return;
 				}
 
-				const auto oldPtr = ptr;
-				const auto oldState = engine.GetState();
-				const char character = *ptr;
-				const auto newState = engine.Push(character);
+				auto const oldPtr = ptr;
+				auto const oldState = engine.GetState();
+				char const character = *ptr;
+				auto const newState = engine.Push(character);
 
 				if (newState == State::Error)
 				{
@@ -319,7 +319,7 @@ namespace GLib::Xml
 				case ElementType::Close:
 				{
 					element.depth = elementStack.size();
-					const auto & top = elementStack.top();
+					auto const & top = elementStack.top();
 					if (element.qName != top)
 					{
 						std::ostringstream s;
@@ -345,11 +345,11 @@ namespace GLib::Xml
 
 	class Holder
 	{
-		const std::string_view value;
+		std::string_view const value;
 		NameSpaceManager manager;
 
 	public:
-		explicit Holder(std::string_view value)
+		explicit Holder(std::string_view const value)
 			: value(value)
 		{}
 
@@ -364,7 +364,7 @@ namespace GLib::Xml
 			return Iterator {};
 		}
 
-		const NameSpaceManager & Manager()
+		NameSpaceManager const & Manager()
 		{
 			return manager;
 		}

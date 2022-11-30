@@ -127,6 +127,7 @@ PenaltyReturnTypeOnItsOwnLine: 60
 PenaltyIndentedWhitespace: 0
 PointerAlignment: Middle
 PPIndentWidth:   -1
+QualifierAlignment: Right
 ReferenceAlignment: Pointer
 ReflowComments:  true
 ShortNamespaceLines: 1

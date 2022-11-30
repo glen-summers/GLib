@@ -15,9 +15,9 @@ namespace TestUtils
 	constexpr auto DefaultCompareSize = 32;
 
 	template <typename T>
-	bool ExpectException(const T & e, const std::string & what)
+	bool ExpectException(T const & e, std::string const & what)
 	{
-		bool compare = e.what() == what;
+		bool const compare = e.what() == what;
 		if (!compare)
 		{
 			std::wcerr << "Expected exception message: \"" << GLib::Cvt::A2W(what) << "\" got: \"" << GLib::Cvt::A2W(e.what()) << "\"" << std::endl;
@@ -57,14 +57,14 @@ namespace TestUtils
 		s << ']';
 	}
 
-	inline bool CompareStrings(const std::string & expected, const std::string & actual, size_t maxCount, std::ostringstream & msg)
+	inline bool CompareStrings(std::string const & expected, std::string const & actual, const size_t maxCount, std::ostringstream & msg)
 	{
-		auto ret = std::mismatch(expected.begin(), expected.end(), actual.begin(), actual.end());
+		auto const ret = std::mismatch(expected.begin(), expected.end(), actual.begin(), actual.end());
 
 		bool result {};
 		if (ret.second != actual.end())
 		{
-			auto pos = std::distance(actual.begin(), ret.second);
+			auto const pos = std::distance(actual.begin(), ret.second);
 			msg << "Difference at position: " << pos << "\n";
 			msg << "Expected: ";
 			Dump(msg, ret.first, expected.end(), maxCount);
@@ -84,7 +84,7 @@ namespace TestUtils
 		return result;
 	}
 
-	inline void Compare(const std::string & expected, const std::string & actual, size_t maxCount = DefaultCompareSize)
+	inline void Compare(std::string const & expected, std::string const & actual, const size_t maxCount = DefaultCompareSize)
 	{
 		std::ostringstream stm;
 		if (CompareStrings(expected, actual, maxCount, stm))
@@ -94,12 +94,12 @@ namespace TestUtils
 	}
 
 	template <typename T>
-	constexpr auto ToInt(std::string_view value)
+	constexpr auto ToInt(std::string_view const value)
 	{
 		constexpr auto Ten = 10;
 		T accumulator {};
 
-		for (char c : value)
+		for (char const c : value)
 		{
 			if (c < '0' || c > '9')
 			{
@@ -115,7 +115,7 @@ namespace TestUtils
 	}
 
 	template <typename T>
-	constexpr T ToFloat(std::string_view value)
+	constexpr T ToFloat(std::string_view const value)
 	{
 		constexpr T Ten = 10;
 		T accumulator1 {};
@@ -123,7 +123,7 @@ namespace TestUtils
 		size_t decimals {};
 		std::optional<size_t> point;
 
-		for (char c : value)
+		for (char const c : value)
 		{
 			if (c == '.')
 			{
@@ -157,7 +157,7 @@ namespace TestUtils
 	}
 
 	template <typename T>
-	constexpr auto ToHex(std::string_view value)
+	constexpr auto ToHex(std::string_view const value)
 	{
 		constexpr auto Ten = 10;
 		constexpr auto HexTen = 0x10;
@@ -165,7 +165,7 @@ namespace TestUtils
 		T accumulator {};
 		T val {};
 
-		for (char c : value)
+		for (char const c : value)
 		{
 			if (c >= '0' && c <= '9')
 			{
@@ -219,7 +219,7 @@ namespace boost::test_tools::tt_detail
 	template <typename K, typename V>
 	struct print_log_value<std::pair<K, V>>
 	{
-		void operator()(std::ostream & str, const std::pair<K, V> & item)
+		void operator()(std::ostream & str, std::pair<K, V> const & item)
 		{
 			str << '{' << item.first << ',' << item.second << '}';
 		}
@@ -228,7 +228,7 @@ namespace boost::test_tools::tt_detail
 	template <>
 	struct print_log_value<std::wstring>
 	{
-		void operator()(std::ostream & str, const std::wstring & item)
+		void operator()(std::ostream & str, std::wstring const & item)
 		{
 			str << GLib::Cvt::W2A(item);
 		}

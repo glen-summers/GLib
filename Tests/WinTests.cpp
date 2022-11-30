@@ -35,7 +35,7 @@ namespace boost::test_tools::tt_detail
 	template <>
 	struct print_log_value<Variant>
 	{
-		void operator()(std::ostream & str, const Variant & item)
+		void operator()(std::ostream & str, Variant const & item) const
 		{
 			str << item.Type();
 		}
@@ -44,14 +44,14 @@ namespace boost::test_tools::tt_detail
 
 namespace
 {
-	LONG WINAPI Filter(std::ostream & s, EXCEPTION_POINTERS * exceptionInfo)
+	LONG WINAPI Filter(std::ostream & s, EXCEPTION_POINTERS const * exceptionInfo)
 	{
 		Symbols::Print(s, exceptionInfo, I32(100));
 		return EXCEPTION_EXECUTE_HANDLER;
 	}
 
 	template <typename Function>
-	void GetStackTrace(std::ostream & s, const Function & function)
+	void GetStackTrace(std::ostream & s, Function const & function)
 	{
 		__try // NOLINT(clang-diagnostic-language-extension-token)
 		{
@@ -62,18 +62,17 @@ namespace
 	}
 
 	template <typename Function>
-	std::string GetStackTrace(const Function & function)
+	std::string GetStackTrace(Function const & function)
 	{
 		std::ostringstream s;
 		GetStackTrace(s, function);
-		// std::cout << s.str();
 		return s.str();
 	}
 
 	std::filesystem::path GetTestApp()
 	{
-		std::string appName = "TestApp.exe";
-		std::string cmakeName = "TestApp/" + appName;
+		std::string const appName = "TestApp.exe";
+		std::string const cmakeName = "TestApp/" + appName;
 		auto p = std::filesystem::path(Process::CurrentPath()).parent_path();
 		if (exists(p / appName))
 		{
@@ -90,7 +89,7 @@ namespace
 		return p;
 	}
 
-	const auto DefaultTimeout = 10s;
+	auto constexpr DefaultTimeout = 10s;
 }
 
 // split up
@@ -98,31 +97,31 @@ AUTO_TEST_SUITE(WinTests)
 
 AUTO_TEST_CASE(TestDriveInfo)
 {
-	auto ld = FileSystem::LogicalDrives();
+	auto const ld = FileSystem::LogicalDrives();
 	static_cast<void>(ld);
-	auto dm = FileSystem::DriveMap();
+	auto const dm = FileSystem::DriveMap();
 
-	std::filesystem::path tempFilePath = std::filesystem::temp_directory_path() / A2W(ToString(Util::Uuid::CreateRandom()) + ".tmp");
-	Handle h(FileSystem::CreateAutoDeleteFile(P2A(tempFilePath)));
-	std::string pathOfHandle = FileSystem::PathOfFileHandle(h.get(), VOLUME_NAME_NT);
+	std::filesystem::path const tempFilePath = std::filesystem::temp_directory_path() / A2W(ToString(Util::Uuid::CreateRandom()) + ".tmp");
+	Handle const h(FileSystem::CreateAutoDeleteFile(P2A(tempFilePath)));
+	std::string const pathOfHandle = FileSystem::PathOfFileHandle(h.get(), VOLUME_NAME_NT);
 
 	TEST(!exists(std::filesystem::path(pathOfHandle)));
-	auto normalisedPath = FileSystem::NormalisePath(pathOfHandle, dm);
+	auto const normalisedPath = FileSystem::NormalisePath(pathOfHandle, dm);
 	TEST(exists(std::filesystem::path(normalisedPath)));
 }
 
 AUTO_TEST_CASE(TestPathOfModule)
 {
-	std::string path = FileSystem::PathOfModule(Process::CurrentModule());
+	std::string const path = FileSystem::PathOfModule(Process::CurrentModule());
 	TEST("Tests.exe" == P2A(std::filesystem::path(path).filename()));
 }
 
 AUTO_TEST_CASE(TestPathOfhandle)
 {
-	std::filesystem::path tempFilePath = std::filesystem::temp_directory_path() / A2W(ToString(Util::Uuid::CreateRandom()) + "\xE2\x82\xAC.tmp");
+	std::filesystem::path const tempFilePath = std::filesystem::temp_directory_path() / A2W(ToString(Util::Uuid::CreateRandom()) + "\xE2\x82\xAC.tmp");
 
 	Handle h(FileSystem::CreateAutoDeleteFile(P2A(tempFilePath)));
-	std::wstring pathOfHandle = A2W(FileSystem::PathOfFileHandle(h.get(), 0));
+	std::wstring const pathOfHandle = A2W(FileSystem::PathOfFileHandle(h.get(), 0));
 	TEST(true == exists(std::filesystem::path(pathOfHandle)));
 	h.reset();
 	TEST(false == exists(std::filesystem::path(pathOfHandle)));
@@ -141,9 +140,9 @@ AUTO_TEST_CASE(TestDebugStream)
 AUTO_TEST_CASE(TestProcess)
 {
 	// capture output
-	Process p(R"(c:\windows\system32\cmd.exe)"); //  /c echo hello
+	Process const p(R"(c:\windows\system32\cmd.exe)"); //  /c echo hello
 	{
-		auto scopedTerminator = p.ScopedTerminator();
+		auto const scopedTerminator = p.ScopedTerminator();
 		TEST(p.IsRunning());
 		static_cast<void>(scopedTerminator);
 	}
@@ -166,7 +165,7 @@ AUTO_TEST_CASE(RegistryKeyExists)
 
 AUTO_TEST_CASE(RegistryGetString)
 {
-	auto key = RegistryKeys::CurrentUser / "Environment";
+	auto const key = RegistryKeys::CurrentUser / "Environment";
 	std::string regValue = key.GetString("TEMP");
 
 	std::string envValue = *GLib::Compat::GetEnv("TEMP");
@@ -193,19 +192,19 @@ AUTO_TEST_CASE(RegistryGet)
 
 AUTO_TEST_CASE(RegistryTestComItf)
 {
-	std::string keyPath = GLib::Formatter::Format("Interface\\{0}", Util::Uuid {IID_IUnknown});
+	std::string const keyPath = GLib::Formatter::Format("Interface\\{0}", Util::Uuid {IID_IUnknown});
 	TEST(RegistryKeys::ClassesRoot.KeyExists(keyPath));
 	TEST(RegistryKeys::ClassesRoot.OpenSubKey(keyPath).GetString("") == "IUnknown");
 }
 
 AUTO_TEST_CASE(RegistryCreateKey)
 {
-	const auto & rootKey = RegistryKeys::CurrentUser;
+	auto const & rootKey = RegistryKeys::CurrentUser;
 	constexpr std::string_view testKey {"Software\\CrapolaCppUnitTests"};
 
 	auto key = rootKey.CreateSubKey(testKey);
 
-	auto scopedDelete = GLib::Detail::Scope([&]() { static_cast<void>(rootKey.DeleteSubKey(testKey)); });
+	auto const scopedDelete = GLib::Detail::Scope([&]() { static_cast<void>(rootKey.DeleteSubKey(testKey)); });
 
 	TEST(rootKey.KeyExists(testKey));
 	key.SetInt32("Int32Value", I32(1234567890));
@@ -259,7 +258,7 @@ AUTO_TEST_CASE(PrintNativeException2)
 
 AUTO_TEST_CASE(PrintNativeException3)
 {
-	const int * p = nullptr;
+	int const * p = nullptr;
 	int result {};
 	auto s = GetStackTrace([&]() { result = *p++; }); // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
 
@@ -300,7 +299,7 @@ AUTO_TEST_CASE(TestVariant)
 
 AUTO_TEST_CASE(TestApp0)
 {
-	Process p(P2A(GetTestApp()), "-exitTime 1", 0, SW_HIDE);
+	Process const p(P2A(GetTestApp()), "-exitTime 1", 0, SW_HIDE);
 	auto scopedTerminator(p.ScopedTerminator());
 	p.WaitForExit(DefaultTimeout);
 	static_cast<void>(scopedTerminator.release());
@@ -309,10 +308,10 @@ AUTO_TEST_CASE(TestApp0)
 
 AUTO_TEST_CASE(TestApp1)
 {
-	Mta mta;
+	Mta const mta;
 
-	Automation aut; // causes leaks
-	Process p(P2A(GetTestApp()), "-exitTime 500", 0, SW_SHOWNORMAL);
+	Automation const aut; // causes leaks
+	Process const p(P2A(GetTestApp()), "-exitTime 500", 0, SW_SHOWNORMAL);
 	auto scopedTerminator(p.ScopedTerminator());
 	p.WaitForInputIdle(DefaultTimeout);
 
@@ -323,7 +322,7 @@ AUTO_TEST_CASE(TestApp1)
 	TEST("TestApp" == mainWindow.CurrentName());
 	CHECK(mainWindow.CurrentClassName().find("GTL:") == 0);
 
-	auto wp(mainWindow.GetCurrentPattern<IUIAutomationWindowPattern>(UIA_WindowPatternId));
+	auto const wp(mainWindow.GetCurrentPattern<IUIAutomationWindowPattern>(UIA_WindowPatternId));
 
 	BOOL value {};
 	CheckHr(wp->get_CurrentCanMaximize(&value), "get_CurrentCanMaximize");

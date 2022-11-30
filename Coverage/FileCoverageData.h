@@ -12,7 +12,7 @@ using Functions = std::multiset<Function>;
 
 class FileCoverageData
 {
-	const std::filesystem::path path;
+	std::filesystem::path const path;
 	unsigned int coveredLines {};
 	LineCoverage lineCoverage;
 
@@ -23,7 +23,7 @@ public:
 		: path(std::move(path))
 	{}
 
-	void AddLine(unsigned int line, bool covered)
+	void AddLine(unsigned int const line, bool const covered)
 	{
 		unsigned int & hitCount = lineCoverage[line];
 		if (covered && ++hitCount == 1)
@@ -32,13 +32,13 @@ public:
 		}
 	}
 
-	void AddFunction(const Function & addedFunction)
+	void AddFunction(Function const & addedFunction)
 	{
 		bool accumulated {};
-		auto lowerIt = functions.lower_bound(addedFunction);
+		auto const lowerIt = functions.lower_bound(addedFunction);
 		if (lowerIt != functions.end())
 		{
-			auto upperIt = functions.upper_bound(addedFunction);
+			auto const upperIt = functions.upper_bound(addedFunction);
 			for (auto it = lowerIt; it != upperIt; ++it)
 			{
 				if (it->Merge(addedFunction, path))
@@ -55,12 +55,12 @@ public:
 		}
 	}
 
-	[[nodiscard]] const Functions & Functions() const
+	[[nodiscard]] Functions const & Functions() const
 	{
 		return functions;
 	}
 
-	[[nodiscard]] const std::filesystem::path & Path() const
+	[[nodiscard]] std::filesystem::path const & Path() const
 	{
 		return path;
 	}
@@ -78,7 +78,7 @@ public:
 	[[nodiscard]] unsigned int CoveredFunctions() const
 	{
 		unsigned int value {};
-		for (const auto & f : functions) // improve
+		for (auto const & f : functions) // improve
 		{
 			if (f.CoveredLines() != 0)
 			{
@@ -93,7 +93,7 @@ public:
 		return static_cast<unsigned int>(functions.size());
 	}
 
-	[[nodiscard]] const LineCoverage & LineCoverage() const
+	[[nodiscard]] LineCoverage const & LineCoverage() const
 	{
 		return lineCoverage;
 	}

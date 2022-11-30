@@ -16,11 +16,11 @@ AUTO_TEST_SUITE(CompatTests)
 
 AUTO_TEST_CASE(LocalTimeZero)
 {
-	auto tz = GLib::Compat::GetEnv("TZ");
+	auto const tz = GLib::Compat::GetEnv("TZ");
 	GLib::Compat::SetEnv("TZ", "GMST0GMDT-1,M3.3.0,M10.1.0");
 	GLib::Compat::TzSet();
 
-	auto scope = GLib::Detail::Scope(
+	auto const scope = GLib::Detail::Scope(
 		[&]()
 		{
 			if (tz)
@@ -51,11 +51,11 @@ AUTO_TEST_CASE(LocalTimeZero)
 
 AUTO_TEST_CASE(LocalTimeSpecific)
 {
-	auto tz = GLib::Compat::GetEnv("TZ");
+	auto const tz = GLib::Compat::GetEnv("TZ");
 	GLib::Compat::SetEnv("TZ", "CST");
 	GLib::Compat::TzSet();
 
-	auto scope = GLib::Detail::Scope(
+	auto const scope = GLib::Detail::Scope(
 		[&]()
 		{
 			if (tz)
@@ -70,7 +70,7 @@ AUTO_TEST_CASE(LocalTimeSpecific)
 		});
 
 	tm tm {};
-	const auto testTime = 1569056285;
+	auto constexpr testTime = 1569056285;
 	GLib::Compat::LocalTime(tm, testTime);
 	static_cast<void>(scope);
 
@@ -119,7 +119,7 @@ AUTO_TEST_CASE(Unmangle)
 AUTO_TEST_CASE(ProcessName)
 {
 	auto name = GLib::Compat::ProcessName();
-	auto exe = name.rfind(".exe");
+	auto const exe = name.rfind(".exe");
 	if (exe == name.size() - 4)
 	{
 		name.erase(exe);
@@ -137,7 +137,7 @@ AUTO_TEST_CASE(CommandLine)
 
 AUTO_TEST_CASE(Env)
 {
-	const auto * testVar = "TestVar";
+	auto const * testVar = "TestVar";
 	CHECK(false == GLib::Compat::GetEnv(testVar).has_value());
 
 	GLib::Compat::SetEnv(testVar, "Value");
@@ -149,7 +149,7 @@ AUTO_TEST_CASE(Env)
 	GLib::Compat::SetEnv(testVar, "Euro \xE2\x82\xAC");
 	TEST("Euro \xE2\x82\xAC" == *GLib::Compat::GetEnv(testVar));
 
-	const auto size = 300;
+	auto constexpr size = 300;
 	auto valueLongerThanDefaultBuffer = std::string(size, '-');
 	GLib::Compat::SetEnv(testVar, valueLongerThanDefaultBuffer.c_str());
 	TEST(valueLongerThanDefaultBuffer == *GLib::Compat::GetEnv(testVar));

@@ -16,8 +16,8 @@ namespace GLib::Detail
 			: function(std::move(function))
 		{}
 
-		ScopedFunction(const ScopedFunction &) = delete;
-		ScopedFunction & operator=(const ScopedFunction &) = delete;
+		ScopedFunction(ScopedFunction const &) = delete;
+		ScopedFunction & operator=(ScopedFunction const &) = delete;
 		ScopedFunction(ScopedFunction &&) noexcept = default;
 		ScopedFunction & operator=(ScopedFunction &&) noexcept = default;
 
@@ -27,7 +27,7 @@ namespace GLib::Detail
 			{
 				function();
 			}
-			catch (const std::exception &)
+			catch (std::exception const &)
 			{
 				std::abort();
 			}

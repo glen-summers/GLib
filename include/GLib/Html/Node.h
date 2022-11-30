@@ -13,17 +13,17 @@ namespace GLib::Html
 		std::string enumeration;
 		std::string_view condition;
 		std::list<Node> children; // use ostream for xml fragments, single optional child for the rest, polymorphic?
-		const size_t depth {};
+		size_t const depth {};
 
 	public:
 		Node() = default;
 
-		Node(Node * parent, std::string_view value)
+		Node(Node * parent, std::string_view const value)
 			: parent(parent)
 			, value(value)
 		{}
 
-		Node(Node * parent, std::string variable, std::string enumeration, std::string_view condition, size_t depth)
+		Node(Node * parent, std::string variable, std::string enumeration, std::string_view const condition, size_t const depth)
 			: parent(parent)
 			, variable(move(variable))
 			, enumeration(move(enumeration))
@@ -31,7 +31,7 @@ namespace GLib::Html
 			, depth(depth)
 		{}
 
-		Node(Node * parent, std::string_view condition, bool unused)
+		Node(Node * parent, std::string_view const condition, bool const unused)
 			: parent(parent)
 			, condition(condition)
 		{
@@ -48,12 +48,12 @@ namespace GLib::Html
 			return value;
 		}
 
-		[[nodiscard]] const std::string & Variable() const
+		[[nodiscard]] std::string const & Variable() const
 		{
 			return variable;
 		}
 
-		[[nodiscard]] const std::string & Enumeration() const
+		[[nodiscard]] std::string const & Enumeration() const
 		{
 			return enumeration;
 		}
@@ -63,7 +63,7 @@ namespace GLib::Html
 			return condition;
 		}
 
-		[[nodiscard]] const std::list<Node> & Children() const
+		[[nodiscard]] std::list<Node> const & Children() const
 		{
 			return children;
 		}
@@ -78,12 +78,12 @@ namespace GLib::Html
 			children.emplace_back(this, fragment);
 		}
 
-		void AddFragment(const char * start, const char * end)
+		void AddFragment(char const * start, char const * end)
 		{
 			AddFragment({start, static_cast<size_t>(end - start)});
 		}
 
-		void AddEnumeration(const std::string & var, const std::string & e, std::string_view c, size_t enumerationDepth)
+		void AddEnumeration(std::string const & var, std::string const & e, std::string_view c, size_t enumerationDepth)
 		{
 			children.emplace_back(this, var, e, c, enumerationDepth);
 		}

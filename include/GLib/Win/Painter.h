@@ -10,7 +10,7 @@ namespace GLib::Win
 	{
 		struct PaintEnder
 		{
-			void operator()(const PaintInfo * info) const;
+			void operator()(PaintInfo const * info) const;
 		};
 
 		using PaintHolder = std::unique_ptr<PaintInfo, PaintEnder>;
@@ -23,7 +23,7 @@ namespace GLib::Win
 		HDC DeviceContext;
 	};
 
-	inline void Detail::PaintEnder::operator()(const PaintInfo * info) const
+	inline void Detail::PaintEnder::operator()(PaintInfo const * info) const
 	{
 		Util::WarnAssertTrue(EndPaint(info->Window, &info->PaintStruct), "EndPaint");
 	}
@@ -34,7 +34,7 @@ namespace GLib::Win
 		Detail::PaintHolder p;
 
 	public:
-		explicit Painter(const PaintInfo & info)
+		explicit Painter(PaintInfo const & info)
 			: info {info}
 			, p {&this->info, Detail::PaintEnder {}}
 		{}

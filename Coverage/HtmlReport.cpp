@@ -24,12 +24,12 @@
 
 using GLib::Cvt::P2A;
 
-std::string LoadHtml(unsigned int id)
+std::string LoadHtml(unsigned int const id)
 {
 	return GLib::Win::LoadResourceString(nullptr, id, RT_HTML); // NOLINT bad macro
 }
 
-std::string GetDateTime(time_t t)
+std::string GetDateTime(time_t const t)
 {
 	std::tm tm {};
 	GLib::Compat::LocalTime(tm, t);
@@ -38,7 +38,7 @@ std::string GetDateTime(time_t t)
 	return os.str();
 }
 
-HtmlReport::HtmlReport(std::string testName, const std::filesystem::path & htmlPath, const CoverageData & coverageData, bool showWhiteSpace)
+HtmlReport::HtmlReport(std::string testName, std::filesystem::path const & htmlPath, CoverageData const & coverageData, bool const showWhiteSpace)
 	: testName(move(testName))
 	, time(GetDateTime(std::time(nullptr)))
 	, htmlPath(htmlPath)
@@ -50,10 +50,10 @@ HtmlReport::HtmlReport(std::string testName, const std::filesystem::path & htmlP
 	, functionsTemplate(LoadHtml(IDR_FUNCTIONS))
 	, showWhiteSpace(showWhiteSpace)
 {
-	GLib::Flog::ScopeLog scopeLog(log, GLib::Flog::Level::Info, "HtmlReport");
+	GLib::Flog::ScopeLog const scopeLog(log, GLib::Flog::Level::Info, "HtmlReport");
 
 	Strings drives;
-	for (const auto & rootPath : rootPaths)
+	for (auto const & rootPath : rootPaths)
 	{
 		if (!rootPath.is_absolute() && !rootPath.has_root_name())
 		{
@@ -61,9 +61,9 @@ HtmlReport::HtmlReport(std::string testName, const std::filesystem::path & htmlP
 		}
 		drives.insert(P2A(rootPath.root_name()));
 	}
-	bool multipleDrives = drives.size() > 1;
+	bool const multipleDrives = drives.size() > 1;
 
-	for (const auto & data : coverageData | std::views::values)
+	for (auto const & data : coverageData | std::views::values)
 	{
 		auto [rootPath, subPath] = Reduce(data.Path(), rootPaths);
 
@@ -81,9 +81,9 @@ HtmlReport::HtmlReport(std::string testName, const std::filesystem::path & htmlP
 	static_cast<void>(scopeLog);
 }
 
-std::filesystem::path HtmlReport::Initialise(const std::filesystem::path & path)
+std::filesystem::path HtmlReport::Initialise(std::filesystem::path const & path)
 {
-	std::string s = LoadHtml(IDR_STYLESHEET);
+	std::string const s = LoadHtml(IDR_STYLESHEET);
 
 	remove_all(path);
 	create_directories(path);
@@ -97,10 +97,10 @@ std::filesystem::path HtmlReport::Initialise(const std::filesystem::path & path)
 	return cssPath;
 }
 
-std::set<std::filesystem::path> HtmlReport::RootPaths(const CoverageData & data)
+std::set<std::filesystem::path> HtmlReport::RootPaths(CoverageData const & data)
 {
 	std::set<std::filesystem::path> rootPaths;
-	for (const auto & path : data | std::views::keys)
+	for (auto const & path : data | std::views::keys)
 	{
 		rootPaths.insert(path.parent_path());
 	}
@@ -117,9 +117,9 @@ void HtmlReport::GenerateRootIndex() const
 
 	std::vector<Directory> directories;
 
-	for (const auto & [name, children] : index)
+	for (auto const & [name, children] : index)
 	{
-		const auto & link = name / "index.html";
+		auto const & link = name / "index.html";
 
 		unsigned int coveredLines {};
 		unsigned int coverableLines {};
@@ -129,7 +129,7 @@ void HtmlReport::GenerateRootIndex() const
 		unsigned int coverableFunctions {};
 		// minChildFunctionCover?
 
-		for (const FileCoverageData & data : children)
+		for (FileCoverageData const & data : children)
 		{
 			coveredLines += data.CoveredLines();
 			coverableLines += data.CoverableLines();
@@ -185,7 +185,7 @@ void HtmlReport::GenerateRootIndex() const
 // consolidate with GenerateRootIndex
 void HtmlReport::GenerateIndices() const
 {
-	for (const auto & [subPath, children] : index)
+	for (auto const & [subPath, children] : index)
 	{
 		std::vector<Directory> directories;
 
@@ -194,7 +194,7 @@ void HtmlReport::GenerateIndices() const
 		unsigned int totalCoveredLines {};
 		unsigned int totalCoverableLines {};
 
-		for (const FileCoverageData & data : children)
+		for (FileCoverageData const & data : children)
 		{
 			totalCoveredLines += data.CoveredLines();
 			totalCoverableLines += data.CoverableLines();
@@ -210,7 +210,7 @@ void HtmlReport::GenerateIndices() const
 		auto coveragePercent = Percentage(totalCoveredLines, totalCoverableLines);
 		auto coverageFunctionPercent = Percentage(totalCoveredFunctions, totalCoverableFunctions);
 
-		for (const FileCoverageData & data : children)
+		for (FileCoverageData const & data : children)
 		{
 			std::string text = P2A(data.Path().filename());
 			directories.emplace_back(text, text + ".html", data.CoveredLines(), data.CoverableLines(), 0, data.CoveredFunctions(),
@@ -252,12 +252,12 @@ void HtmlReport::GenerateIndices() const
 	}
 }
 
-void HtmlReport::GenerateSourceFile(const std::filesystem::path & subPath, const FileCoverageData & data) const
+void HtmlReport::GenerateSourceFile(std::filesystem::path const & subPath, FileCoverageData const & data) const
 {
-	const auto & targetPath = htmlPath / subPath;
+	auto const & targetPath = htmlPath / subPath;
 	auto relativePath = relative(htmlPath, targetPath.parent_path());
 
-	const std::filesystem::path & sourceFile = data.Path();
+	std::filesystem::path const & sourceFile = data.Path();
 	std::ifstream in(sourceFile);
 	if (!in)
 	{
@@ -266,7 +266,7 @@ void HtmlReport::GenerateSourceFile(const std::filesystem::path & subPath, const
 		return;
 	}
 
-	const auto & lc = data.LineCoverage();
+	auto const & lc = data.LineCoverage();
 
 	std::string source;
 	{
@@ -279,7 +279,7 @@ void HtmlReport::GenerateSourceFile(const std::filesystem::path & subPath, const
 			Htmlify(buffer.str(), showWhiteSpace, tmp);
 			source = tmp.str();
 		}
-		catch (const std::exception & e)
+		catch (std::exception const & e)
 		{
 			log.Warning("Failed to parse source file '{0}' : {1}", P2A(sourceFile), e.what());
 			source = buffer.str();
@@ -288,7 +288,7 @@ void HtmlReport::GenerateSourceFile(const std::filesystem::path & subPath, const
 
 	std::vector<Line> lines;
 
-	for (const auto & sourceLine : GLib::Util::Splitter {source, "\n"})
+	for (auto const & sourceLine : GLib::Util::Splitter {source, "\n"})
 	{
 		auto lineNumber = static_cast<unsigned int>(lines.size() + 1);
 		LineCover cover {};
@@ -314,7 +314,7 @@ void HtmlReport::GenerateSourceFile(const std::filesystem::path & subPath, const
 	auto effectiveLines = lines.size() + effectiveHeaderLines + effectiveFooterLines;
 	auto ratio = HundredPercent / static_cast<float>(effectiveLines);
 
-	auto pred = [](const Line & l1, const Line & l2) { return l1.Cover != l2.Cover; };
+	auto pred = [](Line const & l1, Line const & l2) { return l1.Cover != l2.Cover; };
 
 	std::vector<Chunk> chunks;
 	chunks.push_back({LineCover::None, effectiveHeaderLines * ratio});
@@ -356,16 +356,16 @@ void HtmlReport::GenerateSourceFile(const std::filesystem::path & subPath, const
 	e.SetCollection("chunks", chunks);
 
 	std::multiset<FunctionCoverage> coverage;
-	for (const auto & f : data.Functions())
+	for (auto const & f : data.Functions())
 	{
-		for (const auto & [file, l] : f.FileLines())
+		for (auto const & [file, l] : f.FileLines())
 		{
 			if (file == sourceFile)
 			{
 				unsigned int oneBasedLine = l.begin()->first;
 
 				// 0 can causes out of range for debug global delete, todo remove this and replace with jscript offset on navigate
-				const unsigned int functionOffset = 1;
+				unsigned int constexpr functionOffset = 1;
 
 				unsigned int zeroBasedLine {};
 				if (oneBasedLine >= functionOffset)

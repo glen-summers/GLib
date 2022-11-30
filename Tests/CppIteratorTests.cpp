@@ -11,7 +11,7 @@
 
 namespace GLib::Cpp
 {
-	std::ostream & operator<<(std::ostream & s, const Fragment & f)
+	std::ostream & operator<<(std::ostream & s, Fragment const & f)
 	{
 		return s << "State: " << f.first << ", Value: \'" << f.second << '\'';
 	}
@@ -21,9 +21,9 @@ using GLib::Cpp::Fragment;
 using GLib::Cpp::Holder;
 using GLib::Cpp::State;
 
-void Parse(std::string_view code, bool showWhiteSpace = {})
+void Parse(std::string_view const code, bool const showWhiteSpace = {})
 {
-	for (const auto & x : Holder {code, showWhiteSpace})
+	for (auto const & x : Holder {code, showWhiteSpace})
 	{
 #ifdef CPP_DIAGS
 		std::cout << x.first << " : " << x.second << std::endl;
@@ -37,7 +37,7 @@ AUTO_TEST_SUITE(CppIteratorTests)
 
 AUTO_TEST_CASE(Empty)
 {
-	Holder code {R"()", false};
+	Holder const code {R"()", false};
 
 	std::vector<Fragment> expected {};
 
@@ -46,7 +46,7 @@ AUTO_TEST_CASE(Empty)
 
 AUTO_TEST_CASE(Code0)
 {
-	Holder code {"void", false};
+	Holder const code {"void", false};
 
 	std::vector<Fragment> expected {{State::Code, "void"}};
 
@@ -55,7 +55,7 @@ AUTO_TEST_CASE(Code0)
 
 AUTO_TEST_CASE(Code1)
 {
-	Holder code {R"(void foo)", true};
+	Holder const code {R"(void foo)", true};
 
 	std::vector<Fragment> expected {{State::Code, "void"}, {State::WhiteSpace, " "}, {State::Code, "foo"}};
 
@@ -64,42 +64,40 @@ AUTO_TEST_CASE(Code1)
 
 AUTO_TEST_CASE(CodeNoWs)
 {
-	Holder code {R"(void foo)", false};
+	Holder const code {R"(void foo)", false};
 
-	std::vector<Fragment> expected {{State::Code, "void foo"}};
+	std::vector<Fragment> const expected {{State::Code, "void foo"}};
 
 	CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), code.begin(), code.end());
 }
 
 AUTO_TEST_CASE(CommentBlock)
 {
-	Holder code {R"(/***/)", false};
+	Holder const code {R"(/***/)", false};
 
-	std::vector<Fragment> expected {{State::CommentBlock, {"/***/"}}};
+	std::vector<Fragment> const expected {{State::CommentBlock, {"/***/"}}};
 
 	CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), code.begin(), code.end());
 }
 
 AUTO_TEST_CASE(CommentWhiteSpace)
 {
-	Holder code {R"(/**/ 
-;)",
-							 true};
+	Holder const code {"/**/ \n;", true};
 
-	std::vector<Fragment> expected {{State::CommentBlock, {"/**/"}}, {State::WhiteSpace, {" "}}, {State::Code, {"\n;"}}};
+	std::vector<Fragment> const expected {{State::CommentBlock, {"/**/"}}, {State::WhiteSpace, {" "}}, {State::Code, {"\n;"}}};
 
 	CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), code.begin(), code.end());
 }
 
 AUTO_TEST_CASE(CommentLineContinue)
 {
-	Holder code {R"(// hello\
+	Holder const code {R"(// hello\
 continue
 /* block */ /* another block */
 )",
-							 true};
+										 true};
 
-	std::vector<Fragment> expected {
+	std::vector<Fragment> const expected {
 		{State::CommentLine, {"// hello\\\ncontinue\n"}},
 		{State::CommentBlock, {"/* block */"}},
 		{State::WhiteSpace, {" "}},
@@ -112,54 +110,54 @@ continue
 
 AUTO_TEST_CASE(CommentLineNotContinue)
 {
-	Holder code {"// hello \\ not continuation", false};
+	Holder const code {"// hello \\ not continuation", false};
 
-	std::vector<Fragment> expected {{State::CommentLine, {"// hello \\ not continuation"}}};
+	std::vector<Fragment> const expected {{State::CommentLine, {"// hello \\ not continuation"}}};
 
 	CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), code.begin(), code.end());
 }
 
 AUTO_TEST_CASE(CommentLineNotContinueEnd)
 {
-	Holder code {"// hello not continuation \\/", false};
+	Holder const code {"// hello not continuation \\/", false};
 
-	std::vector<Fragment> expected {{State::CommentLine, {"// hello not continuation \\/"}}};
+	std::vector<Fragment> const expected {{State::CommentLine, {"// hello not continuation \\/"}}};
 
 	CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), code.begin(), code.end());
 }
 
 AUTO_TEST_CASE(CommentStar)
 {
-	Holder code {"/* * */", false};
+	Holder const code {"/* * */", false};
 
-	std::vector<Fragment> expected {{State::CommentBlock, {"/* * */"}}};
+	std::vector<Fragment> const expected {{State::CommentBlock, {"/* * */"}}};
 
 	CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), code.begin(), code.end());
 }
 
 AUTO_TEST_CASE(NotCommentStart)
 {
-	Holder code {"int foo=bar/baz;", true};
+	Holder const code {"int foo=bar/baz;", true};
 
-	std::vector<Fragment> expected {{State::Code, {"int"}}, {State::WhiteSpace, {" "}}, {State::Code, {"foo=bar"}}, {State::Code, {"/baz;"}}};
+	std::vector<Fragment> const expected {{State::Code, {"int"}}, {State::WhiteSpace, {" "}}, {State::Code, {"foo=bar"}}, {State::Code, {"/baz;"}}};
 
 	CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), code.begin(), code.end());
 }
 
 AUTO_TEST_CASE(CommentFromStateCode)
 {
-	Holder code {"bar//comment\n;", false};
+	Holder const code {"bar//comment\n;", false};
 
-	std::vector<Fragment> expected {{State::Code, {"bar"}}, {State::CommentLine, {"//comment\n"}}, {State::Code, {";"}}};
+	std::vector<Fragment> const expected {{State::Code, {"bar"}}, {State::CommentLine, {"//comment\n"}}, {State::Code, {";"}}};
 
 	CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), code.begin(), code.end());
 }
 
 AUTO_TEST_CASE(String)
 {
-	Holder code {R"(auto fred = "this is a string";)", true};
+	Holder const code {R"(auto fred = "this is a string";)", true};
 
-	std::vector<Fragment> expected {
+	std::vector<Fragment> const expected {
 		{State::Code, {"auto"}},
 		{State::WhiteSpace, {" "}},
 		{State::Code, {"fred"}},
@@ -175,20 +173,20 @@ AUTO_TEST_CASE(String)
 
 AUTO_TEST_CASE(StringFromStateCode)
 {
-	Holder code {R"(;"hello";)", false};
+	Holder const code {R"(;"hello";)", false};
 
-	std::vector<Fragment> expected {{State::Code, {";"}}, {State::String, {R"("hello")"}}, {State::Code, {";"}}};
+	std::vector<Fragment> const expected {{State::Code, {";"}}, {State::String, {R"("hello")"}}, {State::Code, {";"}}};
 
 	CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), code.begin(), code.end());
 }
 
 AUTO_TEST_CASE(StringContinue)
 {
-	Holder code {R"--("abc\
+	Holder const code {R"--("abc\
 def")--",
-							 false};
+										 false};
 
-	std::vector<Fragment> expected {{State::String, {R"--("abc\
+	std::vector<Fragment> const expected {{State::String, {R"--("abc\
 def")--"}}};
 
 	CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), code.begin(), code.end());
@@ -196,27 +194,27 @@ def")--"}}};
 
 AUTO_TEST_CASE(StringNotContinue)
 {
-	Holder code {R"--("\\abc\\")--", false};
+	Holder const code {R"--("\\abc\\")--", false};
 
-	std::vector<Fragment> expected {{State::String, {R"--("\\abc\\")--"}}};
+	std::vector<Fragment> const expected {{State::String, {R"--("\\abc\\")--"}}};
 
 	CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), code.begin(), code.end());
 }
 
 AUTO_TEST_CASE(StringWithQuotes)
 {
-	Holder code {R"--("\"abc\"")--", false};
+	Holder const code {R"--("\"abc\"")--", false};
 
-	std::vector<Fragment> expected {{State::String, {R"--("\"abc\"")--"}}};
+	std::vector<Fragment> const expected {{State::String, {R"--("\"abc\"")--"}}};
 
 	CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), code.begin(), code.end());
 }
 
 AUTO_TEST_CASE(RawString)
 {
-	Holder code {R"--(auto fred = R"(this is a raw string)";)--", true};
+	Holder const code {R"--(auto fred = R"(this is a raw string)";)--", true};
 
-	std::vector<Fragment> expected {
+	std::vector<Fragment> const expected {
 		{State::Code, {"auto"}}, {State::WhiteSpace, {" "}}, {State::Code, {"fred"}}, {State::WhiteSpace, {" "}},
 		{State::Code, {"="}},		 {State::WhiteSpace, {" "}}, {State::Code, {"R"}},		{State::RawString, {"\"(this is a raw string)\""}},
 		{State::Code, {";"}},
@@ -227,9 +225,9 @@ AUTO_TEST_CASE(RawString)
 
 AUTO_TEST_CASE(RawStringPrefix)
 {
-	Holder code {R"--(auto fred = R"==(this is a raw string)==";)--", true};
+	Holder const code {R"--(auto fred = R"==(this is a raw string)==";)--", true};
 
-	std::vector<Fragment> expected {
+	std::vector<Fragment> const expected {
 		{State::Code, {"auto"}}, {State::WhiteSpace, {" "}}, {State::Code, {"fred"}}, {State::WhiteSpace, {" "}},
 		{State::Code, {"="}},		 {State::WhiteSpace, {" "}}, {State::Code, {"R"}},		{State::RawString, {R"--("==(this is a raw string)==")--"}},
 		{State::Code, {";"}},
@@ -240,50 +238,50 @@ AUTO_TEST_CASE(RawStringPrefix)
 
 AUTO_TEST_CASE(RawStringIgnored)
 {
-	Holder code {R"(R"--(hello)--)--")", false};
+	Holder const code {R"(R"--(hello)--)--")", false};
 
-	std::vector<Fragment> expected {{State::Code, "R"}, {State::RawString, "\"--(hello)--)--\""}};
+	std::vector<Fragment> const expected {{State::Code, "R"}, {State::RawString, "\"--(hello)--)--\""}};
 
 	CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), code.begin(), code.end());
 }
 
 AUTO_TEST_CASE(RawStringPrefixTooLong)
 {
-	std::string_view code = R"(R"12345678901234567(content)12345678901234567")";
+	std::string_view constexpr code = R"(R"12345678901234567(content)12345678901234567")";
 
 	GLIB_CHECK_RUNTIME_EXCEPTION(Parse(code), "Illegal character: '7' (0x37) at line: 1, state: RawStringPrefix");
 }
 
 AUTO_TEST_CASE(RawStringPrefixErrorSpace)
 {
-	std::string_view code = R"(R" (content) ")";
+	std::string_view constexpr code = R"(R" (content) ")";
 
 	GLIB_CHECK_RUNTIME_EXCEPTION(Parse(code, true), "Illegal character: ' ' (0x20) at line: 1, state: RawStringPrefix");
 }
 
 AUTO_TEST_CASE(RawStringPrefixErrorCloseParenthesis)
 {
-	std::string_view code = R"--(R")(content)(")--";
+	std::string_view constexpr code = R"--(R")(content)(")--";
 
 	GLIB_CHECK_RUNTIME_EXCEPTION(Parse(code), "Illegal character: ')' (0x29) at line: 1, state: RawStringPrefix");
 }
 
 AUTO_TEST_CASE(RawStringPrefixBackslash)
 {
-	std::string_view code = R"--(R"\(content)\")--";
+	std::string_view constexpr code = R"--(R"\(content)\")--";
 
 	GLIB_CHECK_RUNTIME_EXCEPTION(Parse(code), "Illegal character: '\\' (0x5c) at line: 1, state: RawStringPrefix");
 }
 
 AUTO_TEST_CASE(RawStringNewLine)
 {
-	Holder code {
+	Holder const code {
 		R"--(R"(1
 2
 3)")--",
 		false};
 
-	std::vector<Fragment> expected {
+	std::vector<Fragment> const expected {
 		{State::Code, {"R"}},
 		{State::RawString, {R"--("(1
 2
@@ -295,7 +293,7 @@ AUTO_TEST_CASE(RawStringNewLine)
 
 AUTO_TEST_CASE(Main)
 {
-	Holder code {
+	Holder const code {
 		R"--(#include <iostream>
 
 int main() // main
@@ -307,7 +305,7 @@ int main() // main
 )--",
 		true};
 
-	std::vector<Fragment> expected {
+	std::vector<Fragment> const expected {
 		{State::Directive, {"#include <iostream>"}},
 		{State::WhiteSpace, {"\n\n"}},
 		{State::Code, {"int"}},
@@ -354,22 +352,22 @@ int main() // main
 
 AUTO_TEST_CASE(SystemInclude)
 {
-	Holder code {R"--(#include <experimental/filesystem>)--", false};
+	Holder const code {R"--(#include <experimental/filesystem>)--", false};
 
-	std::vector<Fragment> expected {{State::Directive, {"#include <experimental"}}, {State::Directive, {"/filesystem>"}}};
+	std::vector<Fragment> const expected {{State::Directive, {"#include <experimental"}}, {State::Directive, {"/filesystem>"}}};
 
 	CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), code.begin(), code.end());
 }
 
 AUTO_TEST_CASE(CharacterLiteral)
 {
-	Holder code {R"(auto char1='"';
+	Holder const code {R"(auto char1='"';
 auto char2='\"';
 auto char3='\\';
 )",
-							 true};
+										 true};
 
-	std::vector<Fragment> expected {
+	std::vector<Fragment> const expected {
 		{State::Code, {"auto"}}, {State::WhiteSpace, {" "}},	{State::Code, {"char1="}}, {State::CharacterLiteral, {R"('"')"}},
 		{State::Code, {";"}},		 {State::WhiteSpace, {"\n"}},
 
@@ -385,42 +383,42 @@ auto char3='\\';
 
 AUTO_TEST_CASE(CharacterLiteralFromStateNone)
 {
-	Holder code {R"('\x00';)", false};
+	Holder const code {R"('\x00';)", false};
 
-	std::vector<Fragment> expected {{State::CharacterLiteral, {R"('\x00')"}}, {State::Code, {";"}}};
+	std::vector<Fragment> const expected {{State::CharacterLiteral, {R"('\x00')"}}, {State::Code, {";"}}};
 
 	CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), code.begin(), code.end());
 }
 
 AUTO_TEST_CASE(CharacterLiteralFromStateWhitespace)
 {
-	Holder code {R"( '\x00';)", true};
+	Holder const code {R"( '\x00';)", true};
 
-	std::vector<Fragment> expected {{State::WhiteSpace, {" "}}, {State::CharacterLiteral, {R"('\x00')"}}, {State::Code, {";"}}};
+	std::vector<Fragment> const expected {{State::WhiteSpace, {" "}}, {State::CharacterLiteral, {R"('\x00')"}}, {State::Code, {";"}}};
 
 	CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), code.begin(), code.end());
 }
 
 AUTO_TEST_CASE(NotCharacterLiteral)
 {
-	Holder code {R"(0xFFFF'FFFFU;)", false};
+	Holder const code {R"(0xFFFF'FFFFU;)", false};
 
-	std::vector<Fragment> expected {{State::Code, {"0xFFFF'FFFFU;"}}};
+	std::vector<Fragment> const expected {{State::Code, {"0xFFFF'FFFFU;"}}};
 
 	CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), code.begin(), code.end());
 }
 
 AUTO_TEST_CASE(Guard)
 {
-	Holder code {R"(/* comment */
+	Holder const code {R"(/* comment */
 #ifndef file_included // another comment
 #define file_included
 
 #endif /* not file_included */
 )",
-							 true};
+										 true};
 
-	std::vector<Fragment> expected {
+	std::vector<Fragment> const expected {
 		{State::CommentBlock, "/* comment */"},
 		{State::WhiteSpace, "\n"},
 		{State::Directive, "#ifndef file_included "},
@@ -437,57 +435,57 @@ AUTO_TEST_CASE(Guard)
 
 AUTO_TEST_CASE(DirectiveContinue)
 {
-	Holder code {R"(#include \
+	Holder const code {R"(#include \
 "foo")",
-							 false};
+										 false};
 
-	std::vector<Fragment> expected {{State::Directive, "#include \\\n\"foo\""}};
+	std::vector<Fragment> const expected {{State::Directive, "#include \\\n\"foo\""}};
 
 	CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), code.begin(), code.end());
 }
 
 AUTO_TEST_CASE(TerminationError)
 {
-	std::string_view code = R"("stringNotClosed)";
+	std::string_view constexpr code = R"("stringNotClosed)";
 
 	GLIB_CHECK_RUNTIME_EXCEPTION(Parse(code), "Termination error, State: String, StartLine: 1");
 }
 
 AUTO_TEST_CASE(DirectiveNotContinue)
 {
-	auto code = Holder {R"(# define foo \ //)", false};
+	auto const code = Holder {R"(# define foo \ //)", false};
 
-	std::vector<Fragment> expected {{State::Directive, "# define foo \\ "}, {State::CommentLine, "//"}};
+	std::vector<Fragment> const expected {{State::Directive, "# define foo \\ "}, {State::CommentLine, "//"}};
 
 	CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), code.begin(), code.end());
 }
 
 AUTO_TEST_CASE(Html)
 {
-	std::string_view code = ";";
+	std::string_view constexpr code = ";";
 
 	std::ostringstream stm;
 	Htmlify(code, true, stm);
 
-	const auto * expected = ";";
+	auto const * const expected = ";";
 	TEST(expected == stm.str());
 }
 
 AUTO_TEST_CASE(Html2)
 {
-	std::string_view code = "#include \"foo.h\"";
+	std::string_view constexpr code = "#include \"foo.h\"";
 
 	std::ostringstream stm;
 	Htmlify(code, true, stm);
 
-	const auto * expected = "<span class=\"d\">#include\xC2\xB7&quot;foo.h&quot;</span>";
+	auto const * const expected = "<span class=\"d\">#include\xC2\xB7&quot;foo.h&quot;</span>";
 
 	TEST(expected == stm.str());
 }
 
 AUTO_TEST_CASE(Html3)
 {
-	std::string_view code = R"(/*
+	std::string_view constexpr code = R"(/*
 1
 2
 3
@@ -496,7 +494,7 @@ AUTO_TEST_CASE(Html3)
 	std::ostringstream stm;
 	Htmlify(code, true, stm);
 
-	const auto * expected = R"(<span class="c">/*</span>
+	auto const * expected = R"(<span class="c">/*</span>
 <span class="c">1</span>
 <span class="c">2</span>
 <span class="c">3</span>
@@ -507,12 +505,12 @@ AUTO_TEST_CASE(Html3)
 
 AUTO_TEST_CASE(KeywordAndCommonType)
 {
-	std::string_view code = "auto v=std::vector{};";
+	std::string_view constexpr code = "auto v=std::vector{};";
 
 	std::ostringstream stm;
 	Htmlify(code, true, stm);
 
-	const auto * expected = "<span class=\"k\">auto</span>"
+	auto const * expected = "<span class=\"k\">auto</span>"
 													"<span class=\"w\">\xC2\xB7</span>"
 													"v="
 													"std::<span class=\"t\">vector</span>"
@@ -590,14 +588,14 @@ AUTO_TEST_CASE(SymbolNameError)
 
 AUTO_TEST_CASE(UnterminatedBug)
 {
-	std::string_view code = R"(//\)"; // test compilers have no error
+	std::string_view constexpr code = R"(//\)"; // test compilers have no error
 	std::ostringstream stm;
 	GLIB_CHECK_RUNTIME_EXCEPTION({ Htmlify(code, false, stm); }, "Termination error, State: CommentLine, StartLine: 1");
 }
 
 // #define BULK_TEST
 #ifdef BULK_TEST
-void ScanFile(const std::filesystem::path & p, std::ostream & s)
+void ScanFile(std::filesystem::path const & p, std::ostream & s)
 {
 	std::ifstream t(p);
 	if (!t)
@@ -612,7 +610,7 @@ void ScanFile(const std::filesystem::path & p, std::ostream & s)
 		ss << t.rdbuf();
 		Parse(ss.str(), true);
 	}
-	catch (const std::runtime_error & e)
+	catch (std::runtime_error const & e)
 	{
 		s << p << " : " << e.what() << '\n';
 	}
@@ -642,10 +640,10 @@ AUTO_TEST_CASE(BulkTest)
 	};
 
 	std::ostringstream s;
-	for (const auto & p : paths)
+	for (auto const & p : paths)
 	{
 		size_t count {};
-		for (const auto & de : std::filesystem::recursive_directory_iterator(p))
+		for (auto const & de : std::filesystem::recursive_directory_iterator(p))
 		{
 			if (is_regular_file(de.path()) && extensions.contains(de.path().extension().string()))
 			{

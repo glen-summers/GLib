@@ -16,7 +16,7 @@ struct Line
 template <>
 struct GLib::Eval::Visitor<Line>
 {
-	static void Visit(const Line & line, const std::string & propertyName, const ValueVisitor & f)
+	static void Visit(Line const & line, std::string const & propertyName, ValueVisitor const & f)
 	{
 		if (propertyName == "cover")
 		{

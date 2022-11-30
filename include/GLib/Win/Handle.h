@@ -11,7 +11,7 @@ namespace GLib::Win
 	{
 		struct HandleCloser
 		{
-			void operator()(void * h) const noexcept
+			void operator()(void * const h) const noexcept
 			{
 				// h!= INVALID_HANDLE_VALUE, or null - via policy?
 				// should not be needed, null should never get here as its a unique_ptr

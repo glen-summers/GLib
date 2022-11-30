@@ -23,22 +23,22 @@ public:
 		, functionName(std::move(functionName))
 	{}
 
-	const std::string & NameSpace() const
+	std::string const & NameSpace() const
 	{
 		return nameSpace;
 	}
 
-	const std::string & ClassName() const
+	std::string const & ClassName() const
 	{
 		return className;
 	}
 
-	const std::string & FunctionName() const
+	std::string const & FunctionName() const
 	{
 		return functionName;
 	}
 
-	const FileLines & FileLines() const
+	FileLines const & FileLines() const
 	{
 		return fileLines;
 	}
@@ -46,21 +46,21 @@ public:
 	// called when another address seen for the same function symbolId
 	// 1. lines in same function
 	// 2. lines merged into constructor from in class assignments, can cause multiple file names per accumulated address
-	void Accumulate(const Address & address) const
+	void Accumulate(Address const & address) const
 	{
-		for (const auto & [file, addressLines] : address.FileLines())
+		for (auto const & [file, addressLines] : address.FileLines())
 		{
-			for (const auto & line : addressLines | std::views::keys) // map merge method?
+			for (auto const & line : addressLines | std::views::keys) // map merge method?
 			{
 				fileLines[file][line] |= address.Visited();
 			}
 		}
 	}
 
-	bool Merge(const Function & added, const std::filesystem::path & path) const
+	bool Merge(Function const & added, std::filesystem::path const & path) const
 	{
-		auto addedIt = added.fileLines.find(path);
-		auto existingIt = fileLines.find(path);
+		auto const addedIt = added.fileLines.find(path);
+		auto const existingIt = fileLines.find(path);
 
 		if (existingIt == fileLines.end() || addedIt == added.fileLines.end())
 		{
@@ -80,7 +80,7 @@ public:
 		return merged;
 	}
 
-	static bool Overlap(const Lines & lines1, const Lines & lines2)
+	static bool Overlap(Lines const & lines1, Lines const & lines2)
 	{
 		if (lines1.empty() || lines2.empty())
 		{
@@ -103,9 +103,9 @@ public:
 	size_t CoveredLines() const
 	{
 		size_t total {};
-		for (const auto & lines : fileLines | std::views::values)
+		for (auto const & lines : fileLines | std::views::values)
 		{
-			for (const auto & isCovered : lines | std::views::values)
+			for (auto const & isCovered : lines | std::views::values)
 			{
 				// improve? keep tally?
 				if (isCovered)
@@ -120,7 +120,7 @@ public:
 	size_t AllLines() const
 	{
 		size_t total {};
-		for (const auto & lines : fileLines | std::views::values)
+		for (auto const & lines : fileLines | std::views::values)
 		{
 			total += lines.size();
 		}
@@ -128,7 +128,7 @@ public:
 	}
 };
 
-inline bool operator<(const Function & f1, const Function & f2)
+inline bool operator<(Function const & f1, Function const & f2)
 {
 	return std::tie(f1.NameSpace(), f1.ClassName(), f1.FunctionName()) < std::tie(f2.NameSpace(), f2.ClassName(), f2.FunctionName());
 }
