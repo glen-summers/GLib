@@ -39,8 +39,8 @@ namespace GLib::Util
 		};
 
 		using TupleType =
-			typename std::conditional<Predicate<First>::value, typename Accumulator<First, typename TypeFilter<Predicate, Rest...>::TupleType>::Types,
-																typename TypeFilter<Predicate, Rest...>::TupleType>::type;
+			std::conditional_t<Predicate<First>::value, typename Accumulator<First, typename TypeFilter<Predicate, Rest...>::TupleType>::Types,
+												 typename TypeFilter<Predicate, Rest...>::TupleType>;
 	};
 
 	template <template <typename, typename...> typename Predicate, typename... Types>

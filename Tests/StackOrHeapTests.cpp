@@ -36,7 +36,7 @@ AUTO_TEST_CASE(Realloc)
 
 	{
 		auto const * ss = new (s.Get()) std::string(sz99, '-'); // NOLINT(cppcoreguidelines-owning-memory)
-		auto const scope = GLib::Detail::Scope([&]() { ss->std::string::~string(); });
+		auto const scope = GLib::Detail::Scope([&] { ss->std::string::~string(); });
 		TEST(*ss == std::string(sz99, '-'));
 		static_cast<void>(scope);
 	}
@@ -46,7 +46,7 @@ AUTO_TEST_CASE(Realloc)
 
 	{
 		auto const * sss = new (s.Get()) std::string(sz199, '-'); // NOLINT(cppcoreguidelines-owning-memory)
-		auto const scope = GLib::Detail::Scope([&]() { sss->std::string::~string(); });
+		auto const scope = GLib::Detail::Scope([&] { sss->std::string::~string(); });
 		TEST(*sss == std::string(sz199, '-'));
 		static_cast<void>(scope);
 	}

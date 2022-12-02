@@ -39,7 +39,7 @@ std::string GetDateTime(time_t const t)
 }
 
 HtmlReport::HtmlReport(std::string testName, std::filesystem::path const & htmlPath, CoverageData const & coverageData, bool const showWhiteSpace)
-	: testName(move(testName))
+	: testName(std::move(testName))
 	, time(GetDateTime(std::time(nullptr)))
 	, htmlPath(htmlPath)
 	, rootPaths(RootPaths(coverageData))
@@ -63,18 +63,19 @@ HtmlReport::HtmlReport(std::string testName, std::filesystem::path const & htmlP
 	}
 	bool const multipleDrives = drives.size() > 1;
 
-	for (auto const & data : coverageData | std::views::values)
+	for (FileCoverageData const & data : coverageData | std::views::values)
 	{
 		auto [rootPath, subPath] = Reduce(data.Path(), rootPaths);
 
 		if (multipleDrives)
 		{
-			auto drive = P2A(rootPath.root_name()).substr(0, 1);
+			auto const drive = P2A(rootPath.root_name()).substr(0, 1);
 			subPath = std::filesystem::path {drive} / subPath;
 		}
 		GenerateSourceFile(subPath, data);
 		index[subPath.parent_path()].push_back(data);
 	}
+
 	GenerateRootIndex();
 	GenerateIndices();
 
@@ -134,7 +135,7 @@ void HtmlReport::GenerateRootIndex() const
 			coveredLines += data.CoveredLines();
 			coverableLines += data.CoverableLines();
 
-			auto childPercent = Percentage(data.CoveredLines(), data.CoverableLines());
+			auto const childPercent = Percentage(data.CoveredLines(), data.CoverableLines());
 			minChildPercent = std::min(minChildPercent, childPercent);
 
 			coveredFunctions += data.CoveredFunctions();
@@ -154,8 +155,8 @@ void HtmlReport::GenerateRootIndex() const
 		throw std::runtime_error("Zero coverable lines");
 	}
 
-	auto coveragePercent = Percentage(totalCoveredLines, totalCoverableLines);
-	auto coverageFunctionPercent = Percentage(totalCoveredFunctions, totalCoverableFunctions);
+	auto const coveragePercent = Percentage(totalCoveredLines, totalCoverableLines);
+	auto const coverageFunctionPercent = Percentage(totalCoveredFunctions, totalCoverableFunctions);
 
 	GLib::Eval::Evaluator e;
 	e.Set("title", testName);
@@ -172,7 +173,7 @@ void HtmlReport::GenerateRootIndex() const
 	e.Set("coverageFunctionsPercent", coverageFunctionPercent);
 	e.Set("coverageFunctionsStyle", GetCoverageLevel(coverageFunctionPercent));
 
-	auto rootIndex = htmlPath / "index.html";
+	auto const rootIndex = htmlPath / "index.html";
 	std::ofstream out(rootIndex);
 	if (!out)
 	{
@@ -207,18 +208,18 @@ void HtmlReport::GenerateIndices() const
 			throw std::runtime_error("Zero coverable lines");
 		}
 
-		auto coveragePercent = Percentage(totalCoveredLines, totalCoverableLines);
-		auto coverageFunctionPercent = Percentage(totalCoveredFunctions, totalCoverableFunctions);
+		auto const coveragePercent = Percentage(totalCoveredLines, totalCoverableLines);
+		auto const coverageFunctionPercent = Percentage(totalCoveredFunctions, totalCoverableFunctions);
 
 		for (FileCoverageData const & data : children)
 		{
-			std::string text = P2A(data.Path().filename());
+			std::string const text = P2A(data.Path().filename());
 			directories.emplace_back(text, text + ".html", data.CoveredLines(), data.CoverableLines(), 0, data.CoveredFunctions(),
 															 data.CoverableFunctions());
 		}
 
-		auto path = htmlPath / subPath;
-		auto relativePath = relative(htmlPath, path);
+		auto const path = htmlPath / subPath;
+		auto const relativePath = relative(htmlPath, path);
 		auto css = P2A(relativePath / "coverage.css");
 
 		// in case no files generated, also todo, create error stub files
@@ -241,7 +242,7 @@ void HtmlReport::GenerateIndices() const
 		e.Set("coverageFunctionsPercent", coverageFunctionPercent);
 		e.Set("coverageFunctionsStyle", GetCoverageLevel(coverageFunctionPercent));
 
-		auto pathIndex = path / "index.html";
+		auto const & pathIndex = path / "index.html";
 		std::ofstream out(pathIndex);
 		if (!out)
 		{
@@ -255,10 +256,10 @@ void HtmlReport::GenerateIndices() const
 void HtmlReport::GenerateSourceFile(std::filesystem::path const & subPath, FileCoverageData const & data) const
 {
 	auto const & targetPath = htmlPath / subPath;
-	auto relativePath = relative(htmlPath, targetPath.parent_path());
+	auto const & relativePath = relative(htmlPath, targetPath.parent_path());
 
 	std::filesystem::path const & sourceFile = data.Path();
-	std::ifstream in(sourceFile);
+	std::ifstream const in(sourceFile);
 	if (!in)
 	{
 		log.Warning("Unable to open input file : {0}", P2A(sourceFile));
@@ -290,9 +291,9 @@ void HtmlReport::GenerateSourceFile(std::filesystem::path const & subPath, FileC
 
 	for (auto const & sourceLine : GLib::Util::Splitter {source, "\n"})
 	{
-		auto lineNumber = static_cast<unsigned int>(lines.size() + 1);
+		auto const lineNumber = static_cast<unsigned int>(lines.size() + 1);
 		LineCover cover {};
-		auto it = lc.find(lineNumber);
+		auto const it = lc.find(lineNumber);
 		if (it != lc.end())
 		{
 			cover = it->second == 0 ? LineCover::NotCovered : LineCover::Covered;
@@ -300,7 +301,7 @@ void HtmlReport::GenerateSourceFile(std::filesystem::path const & subPath, FileC
 		lines.push_back({sourceLine, {}, {}, cover, {}});
 	}
 
-	auto maxLineNumberWidth = static_cast<unsigned int>(floor(log10(lines.size()))) + 1;
+	auto const maxLineNumberWidth = static_cast<unsigned int>(floor(log10(lines.size()))) + 1;
 	for (size_t i = 0; i < lines.size(); ++i)
 	{
 		std::ostringstream paddedLineNumber;
@@ -311,27 +312,27 @@ void HtmlReport::GenerateSourceFile(std::filesystem::path const & subPath, FileC
 
 	constexpr int effectiveHeaderLines = 10;
 	constexpr int effectiveFooterLines = 3;
-	auto effectiveLines = lines.size() + effectiveHeaderLines + effectiveFooterLines;
-	auto ratio = HundredPercent / static_cast<float>(effectiveLines);
+	auto const effectiveLines = lines.size() + effectiveHeaderLines + effectiveFooterLines;
+	auto const ratio = HundredPercent / static_cast<float>(effectiveLines);
 
-	auto pred = [](Line const & l1, Line const & l2) { return l1.Cover != l2.Cover; };
+	auto const pred = [](Line const & l1, Line const & l2) { return l1.Cover != l2.Cover; };
 
 	std::vector<Chunk> chunks;
 	chunks.push_back({LineCover::None, effectiveHeaderLines * ratio});
 	for (auto it = lines.begin(), end = lines.end(), next = end; it != end; it = next)
 	{
 		next = GLib::Util::ConsecutiveFind(it, end, pred);
-		auto size = static_cast<float>(std::distance(it, next));
+		auto const size = static_cast<float>(std::distance(it, next));
 		chunks.push_back({it->Cover, size * ratio});
 	}
 	chunks.push_back({LineCover::None, effectiveFooterLines * ratio});
 
 	GLib::Eval::Evaluator e;
 
-	auto parent = subPath.parent_path();
-	auto css = P2A(relativePath / "coverage.css");
-	auto coveragePercent = Percentage(data.CoveredLines(), lc.size());
-	auto coverageFunctionPercent = Percentage(data.CoveredFunctions(), data.CoverableFunctions());
+	auto const parent = subPath.parent_path();
+	auto const css = P2A(relativePath / "coverage.css");
+	auto const coveragePercent = Percentage(data.CoveredLines(), lc.size());
+	auto const coverageFunctionPercent = Percentage(data.CoveredFunctions(), data.CoverableFunctions());
 
 	e.Set("title", P2A(subPath));
 	e.Set("testName", testName);
@@ -362,10 +363,10 @@ void HtmlReport::GenerateSourceFile(std::filesystem::path const & subPath, FileC
 		{
 			if (file == sourceFile)
 			{
-				unsigned int oneBasedLine = l.begin()->first;
+				unsigned int const oneBasedLine = l.begin()->first;
 
 				// 0 can causes out of range for debug global delete, todo remove this and replace with jscript offset on navigate
-				unsigned int constexpr functionOffset = 1;
+				constexpr unsigned int functionOffset = 1;
 
 				unsigned int zeroBasedLine {};
 				if (oneBasedLine >= functionOffset)

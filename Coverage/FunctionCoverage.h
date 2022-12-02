@@ -14,7 +14,7 @@ class FunctionCoverage
 
 public:
 	FunctionCoverage(std::string nameSpace, std::string className, std::string functionName, unsigned int const line, unsigned int const coveredLines,
-									 unsigned int coverableLines)
+									 unsigned int const coverableLines)
 		: nameSpace {std::move(nameSpace)}
 		, className {std::move(className)}
 		, functionName {std::move(functionName)}

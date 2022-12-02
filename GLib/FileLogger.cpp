@@ -24,7 +24,7 @@ FileLogger::~FileLogger()
 
 LogState const & FileLogger::GetLogState() noexcept
 {
-	thread_local LogState state;
+	thread_local LogState const state;
 	return state;
 }
 
@@ -103,7 +103,7 @@ StreamInfo FileLogger::GetStream() const
 			//::GetSystemTimeAsFileTime(&ft);
 			//::SetFileTime(GetImpl(m_stream), &ft, NULL, NULL); // filesystem ver? nope
 
-			return {move(newStreamWriter), std::move(logFileName), date};
+			return {std::move(newStreamWriter), std::move(logFileName), date};
 		}
 		catch (...) // specific
 		{}
@@ -125,7 +125,7 @@ void FileLogger::InternalWrite(GLib::Flog::Level const level, std::string_view c
 
 void FileLogger::WriteToStream(GLib::Flog::Level const level, std::string_view const prefix, std::string_view const message)
 {
-	std::lock_guard guard(streamMonitor);
+	std::lock_guard const guard(streamMonitor);
 	{
 		try
 		{

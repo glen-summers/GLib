@@ -12,17 +12,17 @@ class HtmlReport
 {
 	inline static auto const log = GLib::Flog::LogManager::GetLog<HtmlReport>();
 
-	std::string testName;
-	std::string time;
+	std::string const testName;
+	std::string const time;
 	std::filesystem::path const & htmlPath;
-	std::set<std::filesystem::path> rootPaths;
-	std::filesystem::path cssPath;
-	std::string rootTemplate;
-	std::string dirTemplate;
-	std::string fileTemplate;
-	std::string functionsTemplate;
+	std::set<std::filesystem::path> const rootPaths;
+	std::filesystem::path const cssPath;
+	std::string const rootTemplate;
+	std::string const dirTemplate;
+	std::string const fileTemplate;
+	std::string const functionsTemplate;
 	std::map<std::filesystem::path, std::list<FileCoverageData>> index;
-	bool showWhiteSpace;
+	bool const showWhiteSpace;
 
 public:
 	HtmlReport(std::string testName, std::filesystem::path const & htmlPath, CoverageData const & coverageData, bool showWhiteSpace);

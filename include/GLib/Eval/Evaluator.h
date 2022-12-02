@@ -9,7 +9,7 @@
 namespace GLib::Eval
 {
 	// move?
-	template <typename T, std::enable_if_t<std::is_class<T>::value> * = nullptr>
+	template <typename T, std::enable_if_t<std::is_class_v<T>> * = nullptr>
 	void VisitProperty(T const & value, std::string const & propertyName)
 	{
 		Visitor<T>::Visit(propertyName, value);
@@ -29,11 +29,11 @@ namespace GLib::Eval
 
 			if (it == values.end())
 			{
-				values.emplace(name, move(v));
+				values.emplace(name, std::move(v));
 			}
 			else
 			{
-				it->second = move(v);
+				it->second = std::move(v);
 			}
 		}
 
@@ -46,11 +46,11 @@ namespace GLib::Eval
 
 			if (it == values.end())
 			{
-				values.emplace(name, move(v));
+				values.emplace(name, std::move(v));
 			}
 			else
 			{
-				it->second = move(v);
+				it->second = std::move(v);
 			}
 		}
 

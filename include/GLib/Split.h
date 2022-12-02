@@ -33,7 +33,7 @@ namespace GLib::Util
 
 		public:
 			explicit Splitter(StringType value, StringType const & delimiter = DefaultDelimiter<typename StringType::value_type>())
-				: value(move(value))
+				: value(std::move(value))
 				, delimiter(delimiter)
 			{
 				if (delimiter.empty())

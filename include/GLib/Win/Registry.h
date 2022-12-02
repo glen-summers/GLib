@@ -40,7 +40,7 @@ namespace GLib::Win
 																							: throw std::runtime_error {"!"};
 		}
 
-		inline constexpr uint32_t ToInt32(std::string_view const s)
+		constexpr uint32_t ToInt32(std::string_view const s)
 		{
 			uint32_t result {};
 			for (auto const c : s)

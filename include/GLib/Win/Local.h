@@ -23,7 +23,7 @@ namespace GLib::Win
 		Ptr p;
 
 	public:
-		explicit Local(T * value = nullptr)
+		explicit Local(T * const value = nullptr)
 			: p(value)
 		{}
 

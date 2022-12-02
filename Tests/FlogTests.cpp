@@ -53,7 +53,7 @@ AUTO_TEST_CASE(LogLevel)
 
 	auto const currentLevel = GLib::Flog::LogManager::SetLevel(GLib::Flog::Level::Error);
 
-	auto const scope = GLib::Detail::Scope([=]() { GLib::Flog::LogManager::SetLevel(currentLevel); });
+	auto const scope = GLib::Detail::Scope([=] { GLib::Flog::LogManager::SetLevel(currentLevel); });
 
 	log.Info("info");
 	log.Error("error");
@@ -75,7 +75,7 @@ AUTO_TEST_CASE(LogFileSize)
 
 	auto const currentSize = GLib::Flog::LogManager::SetMaxFileSize(SZ(1024));
 
-	auto const scope = GLib::Detail::Scope([=]() { GLib::Flog::LogManager::SetMaxFileSize(currentSize); });
+	auto const scope = GLib::Detail::Scope([=] { GLib::Flog::LogManager::SetMaxFileSize(currentSize); });
 
 	log.Info(std::string(SZ(100), 'x'));
 	TEST(path1 == GLib::Flog::LogManager::GetLogPath());

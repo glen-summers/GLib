@@ -35,7 +35,7 @@ namespace GLib::Win::FileSystem
 		auto const size = GetLogicalDriveStringsW(static_cast<ULONG>(s.Size()), s.Get());
 		Util::AssertTrue(size != 0 && size < sizeWithFinalTerminator, "GetLogicalDriveStringsW");
 
-		std::wstring_view pp {s.Get(), size};
+		std::wstring_view const pp {s.Get(), size};
 		constexpr wchar_t nul = u'\0';
 		for (size_t pos = 0, next = pp.find(nul, pos); next != std::wstring_view::npos; pos = next + 1, next = pp.find(nul, pos))
 		{
@@ -57,8 +57,8 @@ namespace GLib::Win::FileSystem
 			Util::AssertTrue(length != 0, "QueryDosDeviceW");
 
 			s.EnsureSize(length);
-			size_t sizeWithoutTwoTrailingNulls = length - 2;
-			std::string dosDeviceName = Cvt::W2A({s.Get(), sizeWithoutTwoTrailingNulls});
+			std::size_t const sizeWithoutTwoTrailingNulls = length - 2;
+			std::string const dosDeviceName = Cvt::W2A({s.Get(), sizeWithoutTwoTrailingNulls});
 			result.emplace(logicalDrive, dosDeviceName);
 		}
 		return result;

@@ -258,7 +258,7 @@ namespace GLib
 			return Policy::Format(os, obj, format);
 		}
 
-		template <typename T, typename std::enable_if<FormatterDetail::IsFormattable<T>::value>::type * = nullptr>
+		template <typename T, std::enable_if_t<FormatterDetail::IsFormattable<T>::value> * = nullptr>
 		static void FormatImpl(std::ostream & stm, T const & value, std::string const & format, long const unused)
 		{
 			static_cast<void>(unused);
@@ -272,7 +272,7 @@ namespace GLib
 			}
 		}
 
-		template <typename T, typename std::enable_if<!FormatterDetail::IsFormattable<T>::value>::type * = nullptr>
+		template <typename T, std::enable_if_t<!FormatterDetail::IsFormattable<T>::value> * = nullptr>
 		static void FormatImpl(std::ostream & stm, T const & value, std::string const & format, long const unused)
 		{
 			// handle T==wide string?

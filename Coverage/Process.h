@@ -13,7 +13,7 @@ using Processes = std::unordered_map<ULONG, Process>;
 
 class Process // ren ProcessInfo
 {
-	ULONG id;
+	ULONG const id;
 	Addresses addresses;
 	Threads threads;
 	IndexToFunction indexToFunction;

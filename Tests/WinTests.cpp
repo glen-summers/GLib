@@ -30,17 +30,14 @@ using GLib::Cvt::P2A;
 
 using namespace GLib::Win; // NOLINT(google-build-using-namespace)
 
-namespace boost::test_tools::tt_detail
+template <>
+struct boost::test_tools::tt_detail::print_log_value<Variant>
 {
-	template <>
-	struct print_log_value<Variant>
+	void operator()(std::ostream & str, Variant const & item) const
 	{
-		void operator()(std::ostream & str, Variant const & item) const
-		{
-			str << item.Type();
-		}
-	};
-}
+		str << item.Type();
+	}
+};
 
 namespace
 {
@@ -204,7 +201,7 @@ AUTO_TEST_CASE(RegistryCreateKey)
 
 	auto key = rootKey.CreateSubKey(testKey);
 
-	auto const scopedDelete = GLib::Detail::Scope([&]() { static_cast<void>(rootKey.DeleteSubKey(testKey)); });
+	auto const scopedDelete = GLib::Detail::Scope([&] { static_cast<void>(rootKey.DeleteSubKey(testKey)); });
 
 	TEST(rootKey.KeyExists(testKey));
 	key.SetInt32("Int32Value", I32(1234567890));
@@ -234,7 +231,7 @@ AUTO_TEST_CASE(RegistryCreateKey)
 
 AUTO_TEST_CASE(PrintNativeException1)
 {
-	auto s = GetStackTrace([]() { throw std::runtime_error("!"); });
+	auto s = GetStackTrace([] { throw std::runtime_error("!"); });
 
 	TEST(s.find("Unhandled exception at") != std::string::npos);
 	TEST(s.find("(code: E06D7363) : C++ exception of type: 'class std::runtime_error'") != std::string::npos);
@@ -246,7 +243,7 @@ AUTO_TEST_CASE(PrintNativeException1)
 
 AUTO_TEST_CASE(PrintNativeException2)
 {
-	auto s = GetStackTrace([]() { throw I32(12345678); }); // NOLINT(hicpp-exception-baseclass)
+	auto s = GetStackTrace([] { throw I32(12345678); }); // NOLINT(hicpp-exception-baseclass)
 
 	TEST(s.find("Unhandled exception at") != std::string::npos);
 	TEST(s.find("(code: E06D7363) : C++ exception of type: 'int'") != std::string::npos);
@@ -260,8 +257,8 @@ AUTO_TEST_CASE(PrintNativeException3)
 {
 	int const * p = nullptr;
 	int result {};
-	auto s = GetStackTrace([&]() { result = *p++; }); // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-
+	auto s = GetStackTrace([&] { result = *p++; }); // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+	TEST(result == 0);
 	TEST(s.find("Unhandled exception at") != std::string::npos);
 	TEST(s.find("(code: C0000005) : Access violation reading address 00000000") != std::string::npos);
 	TEST(s.find("GetStackTrace") != std::string::npos);

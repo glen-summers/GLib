@@ -21,7 +21,7 @@ AUTO_TEST_CASE(LocalTimeZero)
 	GLib::Compat::TzSet();
 
 	auto const scope = GLib::Detail::Scope(
-		[&]()
+		[&]
 		{
 			if (tz)
 			{
@@ -56,7 +56,7 @@ AUTO_TEST_CASE(LocalTimeSpecific)
 	GLib::Compat::TzSet();
 
 	auto const scope = GLib::Detail::Scope(
-		[&]()
+		[&]
 		{
 			if (tz)
 			{

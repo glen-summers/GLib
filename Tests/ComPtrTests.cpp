@@ -26,17 +26,14 @@ namespace
 	}
 }
 
-namespace boost::test_tools::tt_detail
+template <typename T>
+struct boost::test_tools::tt_detail::print_log_value<GLib::Win::ComPtr<T>>
 {
-	template <typename T>
-	struct print_log_value<GLib::Win::ComPtr<T>>
+	void operator()(std::ostream & str, GLib::Win::ComPtr<T> const & item)
 	{
-		void operator()(std::ostream & str, GLib::Win::ComPtr<T> const & item)
-		{
-			str << "ptr: " << Get(item) << ", Ref: " << UseCount(item);
-		}
-	};
-}
+		str << "ptr: " << Get(item) << ", Ref: " << UseCount(item);
+	}
+};
 
 AUTO_TEST_SUITE(ComPtrTests)
 
@@ -190,7 +187,7 @@ AUTO_TEST_CASE(SelfAssign)
 
 AUTO_TEST_CASE(SelfAssignBug)
 {
-	GLib::Win::ComPtr<ITest1> p1(GLib::Win::Make<ImplementsITest1>());
+	GLib::Win::ComPtr p1(GLib::Win::Make<ImplementsITest1>());
 	auto const * raw = Get(p1);
 	p1 = p1; // NOLINT(clang-diagnostic-self-assign-overloaded) test
 

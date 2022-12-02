@@ -61,7 +61,7 @@ namespace GLib::Win::Symbols
 			: index(index)
 			, typeIndex(typeIndex)
 			, tag(tag)
-			, name(move(name))
+			, name(std::move(name))
 			, displacement(displacement)
 		{}
 
@@ -108,7 +108,7 @@ namespace GLib::Win::Symbols
 
 		void Name(std::string value)
 		{
-			name = move(value);
+			name = std::move(value);
 		}
 
 		[[nodiscard]] uint64_t Displacement() const
@@ -127,7 +127,7 @@ namespace GLib::Win::Symbols
 	public:
 		Line(unsigned int const lineNumber, std::string fileName, uint64_t const address, unsigned int const displacement)
 			: lineNumber(lineNumber)
-			, fileName(move(fileName))
+			, fileName(std::move(fileName))
 			, address(address)
 			, displacement(displacement)
 		{}

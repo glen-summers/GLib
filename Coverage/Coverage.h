@@ -50,11 +50,11 @@ private:
 	void AddLine(std::wstring const & fileName, unsigned int lineNumber, GLib::Win::Symbols::SymProcess const & symProcess, uint64_t address,
 							 Process & process);
 
-	void OnCreateProcess(ULONG processId, ULONG threadId, const CREATE_PROCESS_DEBUG_INFO & info) override;
-	void OnExitProcess(ULONG processId, ULONG threadId, const EXIT_PROCESS_DEBUG_INFO & info) override;
-	void OnCreateThread(ULONG processId, ULONG threadId, const CREATE_THREAD_DEBUG_INFO & info) override;
-	void OnExitThread(ULONG processId, ULONG threadId, const EXIT_THREAD_DEBUG_INFO & info) override;
-	ULONG OnException(ULONG processId, ULONG threadId, const EXCEPTION_DEBUG_INFO & info) override;
+	void OnCreateProcess(ULONG processId, ULONG threadId, CREATE_PROCESS_DEBUG_INFO const & info) override;
+	void OnExitProcess(ULONG processId, ULONG threadId, EXIT_PROCESS_DEBUG_INFO const & info) override;
+	void OnCreateThread(ULONG processId, ULONG threadId, CREATE_THREAD_DEBUG_INFO const & info) override;
+	void OnExitThread(ULONG processId, ULONG threadId, EXIT_THREAD_DEBUG_INFO const & info) override;
+	ULONG OnException(ULONG processId, ULONG threadId, EXCEPTION_DEBUG_INFO const & info) override;
 
 	[[nodiscard]] std::tuple<std::string, std::string, std::string> CleanupFunctionNames(std::string const & name, std::string const & typeName) const;
 	void CaptureData(ULONG processId);

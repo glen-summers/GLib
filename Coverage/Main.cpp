@@ -11,7 +11,7 @@
 
 using namespace std::string_literals;
 
-int main(int const argc, char * argv[]) // NOLINT(bugprone-exception-escape) potential exception from catch block
+int main(int const argc, char const * argv[]) // NOLINT(bugprone-exception-escape) potential exception from catch block
 {
 	auto const log = GLib::Flog::LogManager::GetLog("Main");
 	int errorCode = 0;

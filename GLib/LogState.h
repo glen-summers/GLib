@@ -33,7 +33,7 @@ public:
 
 	auto TopAndPop() const
 	{
-		Scope top = scopes.top();
+		Scope const top = scopes.top();
 		scopes.pop();
 		if (!pending)
 		{

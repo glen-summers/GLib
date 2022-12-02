@@ -20,8 +20,8 @@ class Directory
 public:
 	Directory(std::string name, std::string link, unsigned int const coveredLines, unsigned int const coverableLines,
 						unsigned int const minCoveragePercent, unsigned int const coveredFunctions, unsigned int const coverableFunctions)
-		: name(move(name))
-		, link(move(link))
+		: name(std::move(name))
+		, link(std::move(link))
 		, coveredLines(coveredLines)
 		, coverableLines(coverableLines)
 		, minCoveragePercent(minCoveragePercent)

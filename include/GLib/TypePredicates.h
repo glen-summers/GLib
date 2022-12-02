@@ -5,7 +5,7 @@
 namespace GLib::TypePredicates
 {
 	template <typename T1, typename T2>
-	struct IsBaseOf : std::bool_constant<std::is_base_of<T1, T2>::value && !std::is_same<T1, T2>::value>
+	struct IsBaseOf : std::bool_constant<std::is_base_of_v<T1, T2> && !std::is_same_v<T1, T2>>
 	{};
 
 	template <typename T1, typename T2>

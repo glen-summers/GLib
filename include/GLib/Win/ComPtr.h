@@ -154,7 +154,7 @@ namespace GLib::Win
 		{
 			if (*this)
 			{
-				return static_cast<typename ComPtrDetail::Restricted<T> *>(p);
+				return static_cast<ComPtrDetail::Restricted<T> *>(p);
 			}
 			throw std::runtime_error("nullptr");
 		}

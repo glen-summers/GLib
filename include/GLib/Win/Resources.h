@@ -20,4 +20,4 @@ namespace GLib::Win
 	{
 		return std::make_from_tuple<std::string>(LoadResource<char>(instance, id, resourceType));
 	}
-};
+}

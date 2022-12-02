@@ -6,7 +6,7 @@
 
 struct Chunk
 {
-	LineCover Cover;
+	LineCover const Cover;
 	float Size;
 };
 

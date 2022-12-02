@@ -25,8 +25,8 @@ namespace GLib::Html
 
 		Node(Node * parent, std::string variable, std::string enumeration, std::string_view const condition, size_t const depth)
 			: parent(parent)
-			, variable(move(variable))
-			, enumeration(move(enumeration))
+			, variable(std::move(variable))
+			, enumeration(std::move(enumeration))
 			, condition(condition)
 			, depth(depth)
 		{}

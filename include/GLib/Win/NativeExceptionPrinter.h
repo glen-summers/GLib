@@ -33,7 +33,7 @@ namespace GLib::Win::Symbols
 
 		inline CONTEXT GetContext(EXCEPTION_POINTERS const & exceptionInfo)
 		{
-			return NativeTryCatch([&]() { return *exceptionInfo.ContextRecord; });
+			return NativeTryCatch([&] { return *exceptionInfo.ContextRecord; });
 		}
 
 		struct VirtualBase
@@ -49,7 +49,7 @@ namespace GLib::Win::Symbols
 		inline bool GetCPlusPlusExceptionName(std::span<ULONG_PTR const> const & ei, std::string & name)
 		{
 			return NativeTryCatch(
-				[&]()
+				[&]
 				{
 					VirtualBase const & q = *WindowsCast<VirtualBase *>(ei[1]);
 					auto const & t = typeid(q);
@@ -61,7 +61,7 @@ namespace GLib::Win::Symbols
 		inline bool GetCPlusPlusExceptionNameEx(std::span<ULONG_PTR const> const & ei, std::string & name)
 		{
 			return NativeTryCatch(
-				[&]()
+				[&]
 				{
 					constexpr auto instanceOffset64 = 3;
 					constexpr auto throwInfoIndex = 2;
