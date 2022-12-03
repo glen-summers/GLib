@@ -13,12 +13,14 @@ namespace GLib::Win
 	{
 		BSTR value {}; // use unique_ptr?
 
-		explicit Bstr(BSTR const value)
+	public:
+		using Base = std::remove_pointer_t<BSTR>;
+
+		Bstr() = default;
+
+		explicit Bstr(Base * const value)
 			: value(value)
 		{}
-
-	public:
-		Bstr() = default;
 
 		Bstr(Bstr const &) = delete;
 
@@ -49,13 +51,13 @@ namespace GLib::Win
 			return value != nullptr ? Cvt::W2A(value) : std::string {};
 		}
 
-		static auto Attach(BSTR const value)
+		static auto Attach(Base * const value)
 		{
 			return Bstr(value);
 		}
 
 	private:
-		Bstr(BSTR const other, bool const ignored) noexcept
+		Bstr(Base * const other, bool const ignored) noexcept
 			: value(other)
 		{
 			static_cast<void>(ignored);

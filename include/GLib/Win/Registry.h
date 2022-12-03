@@ -2,6 +2,7 @@
 
 #include <GLib/StackOrHeap.h>
 #include <GLib/Win/ErrorCheck.h>
+#include <GLib/Win/Handle.h>
 
 #define TO_STRING(X) #X
 #define TO_STRING_2(X) TO_STRING(X)
@@ -57,7 +58,7 @@ namespace GLib::Win
 
 		struct KeyCloser
 		{
-			void operator()(HKEY const key) const noexcept
+			void operator()(KeyBase * const key) const noexcept
 			{
 				Util::WarnAssertSuccess(RegCloseKey(key), "RegCloseKey");
 			}
@@ -68,7 +69,7 @@ namespace GLib::Win
 			std::unique_ptr<HKEY__, KeyCloser> p;
 
 		public:
-			explicit KeyHolder(HKEY const key)
+			explicit KeyHolder(KeyBase * const key)
 				: p(key)
 			{}
 
@@ -114,7 +115,7 @@ namespace GLib::Win
 			return Util::AssertSuccess(result, message);
 		}
 
-		inline void SetString(HKEY const key, std::string_view const name, std::string_view const value, ULONG const type)
+		inline void SetString(KeyBase * const key, std::string_view const name, std::string_view const value, ULONG const type)
 		{
 			auto const wideName = Cvt::A2W(name);
 			auto const wideValue = Cvt::A2W(value);
@@ -123,7 +124,7 @@ namespace GLib::Win
 			Util::AssertSuccess(RegSetValueExW(key, wideName.c_str(), 0, type, valueBytes, valueSize), "RegSetValueEx");
 		}
 
-		inline std::string GetString(HKEY const key, std::wstring const & valueName)
+		inline std::string GetString(KeyBase * const key, std::wstring const & valueName)
 		{
 			ULONG size {};
 			ULONG constexpr flags = static_cast<ULONG>(RRF_RT_REG_SZ) | static_cast<ULONG>(RRF_RT_REG_EXPAND_SZ);
@@ -138,7 +139,7 @@ namespace GLib::Win
 		}
 
 		template <typename T>
-		T GetScalar(HKEY const key, std::wstring const & valueName)
+		T GetScalar(KeyBase * const key, std::wstring const & valueName)
 		{
 			ULONG actualTypeCode {};
 			T value {};

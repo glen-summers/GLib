@@ -22,7 +22,7 @@ namespace GLib::Win
 			return Util::Detail::WindowsCast<void *>(value);
 		}
 
-		inline bool Terminate(HANDLE const process, UINT const terminationExitCode) noexcept
+		inline bool Terminate(HandleBase * const process, UINT const terminationExitCode) noexcept
 		{
 			ULONG exitCode = 0;
 			BOOL const result = GetExitCodeProcess(process, &exitCode);
@@ -37,7 +37,7 @@ namespace GLib::Win
 		template <UINT ExitCode>
 		struct Terminator
 		{
-			void operator()(HANDLE const process) const noexcept
+			void operator()(HandleBase * const process) const noexcept
 			{
 				Terminate(process, ExitCode);
 			}
@@ -184,7 +184,7 @@ namespace GLib::Win
 			return Win::Handle {pi.hProcess};
 		}
 
-		static void Wait(HANDLE const h, ULONG const timeoutMilliseconds)
+		static void Wait(HandleBase * const h, ULONG const timeoutMilliseconds)
 		{
 			CheckWaitResult(WaitForSingleObject(h, timeoutMilliseconds));
 		}

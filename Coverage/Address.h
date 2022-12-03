@@ -8,13 +8,12 @@ class Address
 	ULONG const symbolId;
 
 	mutable FileLines fileLines; // use sparse container?
-	mutable bool visited;
+	mutable bool visited {};
 
 public:
 	explicit Address(unsigned char const oldData, ULONG const symbolId)
 		: oldData(oldData)
 		, symbolId(symbolId)
-		, visited()
 	{}
 
 	unsigned char OldData() const

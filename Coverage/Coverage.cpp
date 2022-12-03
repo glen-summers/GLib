@@ -169,7 +169,7 @@ ULONG Coverage::OnException(ULONG const processId, ULONG const threadId, EXCEPTI
 			p.Write(address, a.OldData());
 			a.Visit();
 
-			HANDLE const threadHandle = process.FindThread(threadId);
+			GLib::Win::HandleBase * const threadHandle = process.FindThread(threadId);
 
 			CONTEXT ctx {};
 			ctx.ContextFlags = CONTEXT_ALL; // NOLINT bad macro

@@ -194,7 +194,7 @@ namespace GLib::Html
 		{
 			for (auto const && [name2, value2, nameSpace2, rawValue2] : attributes)
 			{
-				if (std::string_view prefix = Xml::NameSpaceManager::CheckForDeclaration(name2); !prefix.empty())
+				if (std::string_view const prefix = Xml::NameSpaceManager::CheckForDeclaration(name2); !prefix.empty())
 				{
 					if (std::string_view const ns = manager.Get(prefix); ns == mainNameSpace)
 					{
@@ -231,7 +231,7 @@ namespace GLib::Html
 			char const * p = e.OuterXml().data();
 			for (auto const && [name, value, nameSpace, rawValue] : attributes)
 			{
-				if (std::string_view prefix = Xml::NameSpaceManager::CheckForDeclaration(name); !prefix.empty() && manager.Get(prefix) == mainNameSpace)
+				if (std::string_view const prefix = Xml::NameSpaceManager::CheckForDeclaration(name); !prefix.empty() && manager.Get(prefix) == mainNameSpace)
 				{
 					node->AddFragment(p, name.data() - 1); // -1 minus space prefix
 					p = EndOf(rawValue);
@@ -249,8 +249,8 @@ namespace GLib::Html
 			std::string_view ifValue;
 			std::string_view eachValue;
 
-			std::string_view attributesValue = e.GetAttributes().Value();
-			Xml::Attributes attributes {attributesValue, nullptr};
+			std::string_view const attributesValue = e.GetAttributes().Value();
+			Xml::Attributes const attributes {attributesValue, nullptr};
 			bool pop {};
 
 			// handle duplicate attr names?
@@ -348,7 +348,7 @@ namespace GLib::Html
 		void Generate(Node const & node, std::ostream & out)
 		{
 			// todo eval during parse, store bool or property to evaluate
-			std::string_view condition = node.Condition();
+			std::string_view const condition = node.Condition();
 			if (condition == "false")
 			{
 				return;
@@ -363,7 +363,7 @@ namespace GLib::Html
 					throw std::runtime_error("Error in if value : " + std::string(condition));
 				}
 
-				std::string result = evaluator.Evaluate(m[1]);
+				std::string const result = evaluator.Evaluate(m[1]);
 				if (result == "false")
 				{
 					return;
@@ -395,7 +395,7 @@ namespace GLib::Html
 
 			if (!node.Value().empty())
 			{
-				std::regex r(propRegex);
+				std::regex const r(propRegex);
 				std::cregex_iterator it(node.Value().data(), EndOf(node.Value()), r);
 				auto end = std::cregex_iterator {};
 				if (it == end)

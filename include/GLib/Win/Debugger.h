@@ -64,7 +64,7 @@ namespace GLib::Win
 
 		[[nodiscard]] ULONG ExitCode() const
 		{
-			return exitCode.value();
+			return exitCode.has_value() ? *exitCode : throw std::runtime_error{"Unexpected empty value"};
 		}
 
 		bool ProcessEvents(ULONG const timeout)
@@ -291,7 +291,7 @@ namespace GLib::Win
 			GLib::Util::Splitter const splitter(message, "\n");
 			for (auto it = splitter.begin(), end = splitter.end(); it != end;)
 			{
-				std::string s = *it;
+				std::string const s = *it;
 				if (++it != end)
 				{
 					Debug::Stream() << "GDB: " << pendingDebugOut << s << std::endl;

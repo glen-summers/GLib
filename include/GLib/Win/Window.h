@@ -4,6 +4,7 @@
 
 #include <GLib/CheckedCast.h>
 #include <GLib/Win/ErrorCheck.h>
+#include <GLib/Win/Handle.h>
 #include <GLib/Win/Painter.h>
 
 #ifdef GLIB_DEBUG_MESSAGES
@@ -70,7 +71,7 @@ namespace GLib::Win
 
 		struct WindowDestroyer
 		{
-			void operator()(HWND const hWnd) const noexcept
+			void operator()(WindowHandleBase * const hWnd) const noexcept
 			{
 				if (IsWindow(hWnd))
 				{
@@ -79,12 +80,10 @@ namespace GLib::Win
 			}
 		};
 
-		using WindowHandle = std::unique_ptr<HWND__, WindowDestroyer>;
-
 		class ClassInfoStore
 		{
 		public:
-			static std::string Register(int const icon, int const menu, WNDPROC const proc)
+			static std::string Register(int const icon, int const menu, WndProcBase * const proc)
 			{
 				static_cast<void>(icon);
 				static_cast<void>(menu);
@@ -93,7 +92,7 @@ namespace GLib::Win
 			}
 		};
 
-		inline std::string Register(int const icon, int const menu, WNDPROC const proc)
+		inline std::string Register(int const icon, int const menu, WndProcBase * const proc)
 		{
 			std::wstring const className = Cvt::A2W(ClassInfoStore::Register(icon, menu, proc));
 			auto * instance = Instance();
@@ -104,7 +103,7 @@ namespace GLib::Win
 			{
 				Util::AssertTrue(GetLastError() == ERROR_CLASS_DOES_NOT_EXIST, "GetClassInfoExW");
 
-				HICON const i = icon == 0 ? nullptr : LoadIconW(instance, MakeIntResource(icon));
+				IconBase * const i = icon == 0 ? nullptr : LoadIconW(instance, MakeIntResource(icon));
 
 				wc = {sizeof(WNDCLASSEXW),
 							HRedraw | VRedraw,
@@ -124,19 +123,20 @@ namespace GLib::Win
 			return Cvt::W2A(className);
 		}
 
-		inline void AssociateHandle(Window * value, HWND const handle)
+		inline void AssociateHandle(Window * value, WindowHandleBase * const handle)
 		{
 			SetLastError(ERROR_SUCCESS); // SetWindowLongPtr does not set last error on success
 			auto const ret = SetWindowLongPtrW(handle, GWLP_USERDATA, Util::Detail::WindowsCast<LONG_PTR>(value));
 			Util::AssertTrue(ret != 0 || GetLastError() == ERROR_SUCCESS, "SetWindowLongPtr");
 		}
 
-		inline Window * FromHandle(HWND const hWnd)
+		inline Window * FromHandle(WindowHandleBase * const hWnd)
 		{
 			return Util::Detail::WindowsCast<Window *>(GetWindowLongPtrW(hWnd, GWLP_USERDATA));
 		}
 
-		inline WindowHandle Create(ULONG const style, int const icon, int const menu, std::string const & title, WNDPROC const proc, Window * const param)
+		inline WindowHandle Create(ULONG const style, int const icon, int const menu, std::string const & title, WndProcBase * const proc,
+															 Window * const param)
 		{
 			std::string const className = Register(icon, menu, proc);
 			WindowHandle handle(CreateWindowExW(0, Cvt::A2W(className).c_str(), Cvt::A2W(title).c_str(), style, CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, nullptr,
@@ -153,7 +153,7 @@ namespace GLib::Win
 
 		inline HACCEL LoadAccel(int const id)
 		{
-			HACCEL const accel = LoadAcceleratorsW(Instance(), MakeIntResource(id));
+			AccelBase * const accel = LoadAcceleratorsW(Instance(), MakeIntResource(id));
 			Util::AssertTrue(accel != nullptr, "LoadAcceleratorsW");
 			return accel;
 		}
@@ -167,7 +167,7 @@ namespace GLib::Win
 
 	class Window
 	{
-		Detail::WindowHandle handle;
+		WindowHandle handle;
 		HACCEL accel {};
 
 	public:
@@ -180,10 +180,9 @@ namespace GLib::Win
 		Window(Window &&) = delete;
 		Window & operator=(Window const &) = delete;
 		Window & operator=(Window &&) = delete;
-
-	protected:
 		virtual ~Window() = default;
 
+	protected:
 		[[nodiscard]] HWND Handle() const
 		{
 			return handle.get();
@@ -437,7 +436,7 @@ namespace GLib::Win
 			}
 		}
 
-		static LRESULT APIENTRY WindowProc(HWND const hWnd, UINT const message, WPARAM const wParam, LPARAM const lParam) noexcept
+		static LRESULT APIENTRY WindowProc(WindowHandleBase * const hWnd, UINT const message, WPARAM const wParam, LPARAM const lParam) noexcept
 		{
 			LRESULT result = 0;
 			Window * window = Detail::FromHandle(hWnd);

@@ -73,7 +73,7 @@ namespace GLib::Win::Symbols
 					ULONG_PTR instance = 0;
 					static_cast<void>(instanceOffset64);
 #elif defined(_M_X64)
-					ULONG_PTR instance = ei[instanceOffset64];
+					ULONG_PTR const instance = ei[instanceOffset64];
 #elif
 #error unexpected target
 #endif
@@ -172,7 +172,7 @@ namespace GLib::Win::Symbols
 				if (VirtualQueryEx(process.Handle(), WindowsCast<PVOID>(address), &mb, sizeof mb) != 0)
 				{
 					auto * module = static_cast<HMODULE>(mb.AllocationBase);
-					std::string moduleName = FileSystem::PathOfModule(module);
+					std::string const moduleName = FileSystem::PathOfModule(module);
 					Formatter::Format(s, "{0,-30} + 0x{1:%08X}\n", moduleName, address - WindowsCast<DWORD_PTR>(mb.AllocationBase));
 				}
 

@@ -1,11 +1,12 @@
 #pragma once
 
 #include <GLib/Win/ErrorCheck.h>
+#include <GLib/Win/Handle.h>
 
 namespace GLib::Win
 {
 	template <typename T>
-	std::tuple<T const *, size_t> LoadResource(HINSTANCE const instance, unsigned int const id, wchar_t const * const resourceType)
+	std::tuple<T const *, size_t> LoadResource(InstanceBase * const instance, unsigned int const id, wchar_t const * const resourceType)
 	{
 		HRSRC const resource = FindResourceW(instance, MAKEINTRESOURCEW(id), resourceType); // NOLINT bad macro
 		Util::AssertTrue(resource != nullptr, "FindResourceW");
@@ -16,7 +17,7 @@ namespace GLib::Win
 		return {static_cast<T const *>(LockResource(resourceData)), SizeofResource(instance, resource)};
 	}
 
-	inline std::string LoadResourceString(HINSTANCE const instance, unsigned int const id, wchar_t const * const resourceType)
+	inline std::string LoadResourceString(InstanceBase * const instance, unsigned int const id, wchar_t const * const resourceType)
 	{
 		return std::make_from_tuple<std::string>(LoadResource<char>(instance, id, resourceType));
 	}

@@ -2,6 +2,7 @@
 
 #include <GLib/Win/SimpleCom.h>
 
+// NOLINTBEGIN
 MIDL_INTERFACE("26FA5481-DA4F-45A8-8F83-F099E951C6E2")
 ITest1 : IUnknown
 {
@@ -31,6 +32,7 @@ ITest1ExtendedAlt : ITest1
 {
 	virtual HRESULT STDMETHODCALLTYPE ITest1ExtendedMethodAlt() = 0;
 };
+// NOLINTEND
 
 template <typename T>
 struct DeleteCounter

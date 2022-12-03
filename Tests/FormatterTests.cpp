@@ -172,7 +172,7 @@ AUTO_TEST_CASE(TestCharLiteral)
 
 AUTO_TEST_CASE(TestString)
 {
-	std::string value = "abcd";
+	std::string const value = "abcd";
 	std::string s = Formatter::Format("{0}", value);
 	TEST("abcd" == s);
 }
@@ -371,14 +371,14 @@ AUTO_TEST_CASE(TestPad)
 
 AUTO_TEST_CASE(CustomTypeNoFormat)
 {
-	Xyzzy plugh;
+	Xyzzy const plugh;
 	std::string s = Formatter::Format("{0}", plugh);
 	TEST("plover" == s);
 }
 
 AUTO_TEST_CASE(CustomTypeFormat)
 {
-	Xyzzy plugh;
+	Xyzzy const plugh;
 	std::string s = Formatter::Format("{0:fmt}", plugh);
 	TEST("fmt:plover" == s);
 }
@@ -409,7 +409,7 @@ AUTO_TEST_CASE(TestLargeObject)
 	CopyCheck const c2(c1); // NOLINT(performance-unnecessary-copy-initialization) test copy
 	CHECK(c2.Copies() == 1 && c1.Moves() == 0);
 
-	CopyCheck c3;
+	CopyCheck const c3;
 	std::string s = Formatter::Format("{0}", c3);
 	TEST("0:0" == s);
 

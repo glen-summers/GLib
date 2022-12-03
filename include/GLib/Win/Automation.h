@@ -2,6 +2,7 @@
 
 #include <GLib/Win/Bstr.h>
 #include <GLib/Win/ComPtr.h>
+#include <GLib/Win/Handle.h>
 
 #include <UIAutomation.h>
 
@@ -54,7 +55,7 @@ namespace GLib::Win
 							"CoCreateInstance");
 		}
 
-		Element ElementFromHandle(HWND const hWnd) const
+		Element ElementFromHandle(WindowHandleBase * const hWnd) const
 		{
 			ComPtr<IUIAutomationElement> element;
 			CheckHr(automation->ElementFromHandle(hWnd, GetAddress(element).Raw()), "ElementFromHandle");

@@ -267,7 +267,7 @@ AUTO_TEST_CASE(PrintNativeException3)
 
 AUTO_TEST_CASE(TestVariant)
 {
-	Variant v0;
+	Variant const v0;
 	Variant v1 {"v"};
 	Variant v2 {"v"};
 	Variant v3 {"v3"};

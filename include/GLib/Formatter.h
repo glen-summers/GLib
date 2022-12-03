@@ -84,8 +84,8 @@ namespace GLib
 				{
 					break;
 				}
-				++it;
-				if (it == end || (ch = *it) < '0' || ch > '9')
+
+				if (ch = *++it; it == end || (ch < '0' || ch > '9'))
 				{
 					FormatError();
 				}
@@ -94,8 +94,7 @@ namespace GLib
 				do
 				{
 					index = index * DecimalShift + ch - '0';
-					++it;
-					if (it == end)
+					if (++it == end)
 					{
 						FormatError();
 					}
@@ -221,14 +220,14 @@ namespace GLib
 	{
 	public:
 		template <typename... Ts>
-		static std::ostream & Format(std::ostream & str, std::string_view format, Ts const &... ts)
+		static std::ostream & Format(std::ostream & str, std::string_view const format, Ts const &... ts)
 		{
 			std::array<FormatterDetail::StreamFunction, sizeof...(Ts)> ar {ToStreamFunctions(ts)...};
 			return FormatterDetail::AppendFormatHelper(str, format, {ar.data(), ar.size()});
 		}
 
 		template <typename... Ts>
-		static std::string Format(std::string_view format, Ts &&... ts)
+		static std::string Format(std::string_view const format, Ts &&... ts)
 		{
 			std::ostringstream str;
 			Format(str, format, std::forward<Ts>(ts)...);

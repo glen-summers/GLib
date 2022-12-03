@@ -38,7 +38,7 @@ public:
 		return threads;
 	}
 
-	void AddThread(ULONG const threadId, HANDLE const handle)
+	void AddThread(ULONG const threadId, GLib::Win::HandleBase * const handle)
 	{
 		threads.emplace(threadId, handle);
 	}

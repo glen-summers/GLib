@@ -462,7 +462,7 @@ AUTO_TEST_CASE(AttributeIteratorAll)
 
 AUTO_TEST_CASE(AttributeIteratorEnum)
 {
-	GLib::Xml::NameSpaceManager man;
+	GLib::Xml::NameSpaceManager const man;
 	Attributes const attr {"a='1' b='2' xmlns:foo='bar'", &man};
 
 	std::vector<Attribute> expected {{"a", "1", {}, "a='1'"}, {"b", "2", {}, "b='2'"}};

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <GLib/Win/ComPtr.h>
+#include <GLib/Win/Handle.h>
 
 #include <d2d1.h>
 #pragma comment(lib, "D2d1.lib")
@@ -24,7 +25,7 @@ namespace GLib::Win::D2d
 		ComPtr<ID2D1Factory> factory {Detail::CreateFactory()};
 
 	public:
-		ComPtr<ID2D1HwndRenderTarget> CreateRenderTarget(HWND const handle, SIZE const & size) const
+		ComPtr<ID2D1HwndRenderTarget> CreateRenderTarget(WindowHandleBase * const handle, SIZE const & size) const
 		{
 			ComPtr<ID2D1HwndRenderTarget> renderTarget;
 			WarnHr(factory->CreateHwndRenderTarget(D2D1::RenderTargetProperties(), D2D1::HwndRenderTargetProperties(handle, D2D1::SizeU(size.cx, size.cy)),
@@ -38,12 +39,11 @@ namespace GLib::Win::D2d
 	{
 		Factory factory;
 		ComPtr<ID2D1HwndRenderTarget> renderTarget;
-		bool recreated;
+		bool recreated {};
 
 	public:
 		explicit Renderer(Factory factory)
 			: factory(std::move(factory))
-			, recreated()
 		{}
 
 		[[nodiscard]] Factory const & Factory() const
@@ -51,7 +51,7 @@ namespace GLib::Win::D2d
 			return factory;
 		}
 
-		void Verify(HWND const handle, SIZE const & size)
+		void Verify(WindowHandleBase * const handle, SIZE const & size)
 		{
 			bool const recreate = !renderTarget;
 			if (!renderTarget)

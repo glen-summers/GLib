@@ -8,7 +8,8 @@ name='Microsoft.Windows.Common-Controls' version='6.0.0.0' \
 processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 
 // NOLINTNEXTLINE(readability-non-const-parameter) 'wWinMain': function cannot be overloaded
-int APIENTRY wWinMain(_In_ HINSTANCE const hInstance, _In_opt_ HINSTANCE const hPrevInstance, _In_ LPWSTR const lpCmdLine, _In_ int const nShowCmd)
+int APIENTRY wWinMain(_In_ GLib::Win::InstanceBase * const hInstance, _In_opt_ GLib::Win::InstanceBase * const hPrevInstance,
+											_In_ wchar_t * const lpCmdLine, _In_ int const nShowCmd)
 {
 	static_cast<void>(hPrevInstance);
 

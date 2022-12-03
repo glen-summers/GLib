@@ -236,20 +236,22 @@ namespace boost::test_tools::tt_detail
 }
 
 // clang-format off
-#define /*NOLINT*/ BOOST_CHECK_EXCEPTION_EX(Src, Ex, Pred, C)\
-	BOOST_CHECK_THROW_IMPL(Src, Ex, Pred<Ex>(ex, C), ": validation on the raised exception through predicate \"" BOOST_STRINGIZE(Pred<Ex>) "\"", CHECK) // NOLINT
+// NOLINTBEGIN
+#define BOOST_CHECK_EXCEPTION_EX(Src, Ex, Pred, C)\
+	BOOST_CHECK_THROW_IMPL(Src, Ex, Pred<Ex>(ex, C), ": validation on the raised exception through predicate \"" BOOST_STRINGIZE(Pred<Ex>) "\"", CHECK)
 
 #define GLIB_CHECK_EXCEPTION(Src, E, C) BOOST_CHECK_EXCEPTION_EX(Src, E, TestUtils::ExpectException, C)
 #define GLIB_CHECK_RUNTIME_EXCEPTION(Src, C) GLIB_CHECK_EXCEPTION(Src, std::runtime_error, C)
 #define GLIB_CHECK_LOGIC_EXCEPTION(Src, C) GLIB_CHECK_EXCEPTION(Src, std::logic_error, C)
 
-#define AUTO_TEST_SUITE(x) BOOST_AUTO_TEST_SUITE(x)																						// NOLINT
-#define AUTO_TEST_SUITE_END BOOST_AUTO_TEST_SUITE_END																					// NOLINT
-#define AUTO_TEST_CASE(x) BOOST_AUTO_TEST_CASE(x)																							// NOLINT
-#define TEST(x) BOOST_TEST(x)																																	// NOLINT
-#define CHECK_EXCEPTION(Src, Ex, Pred) BOOST_CHECK_EXCEPTION(Src, Ex, Pred)										// NOLINT
-#define CHECK(Pred) BOOST_CHECK(Pred)																													// NOLINT
-#define FAIL(Msg) BOOST_FAIL(Msg)																															// NOLINT
-#define CHECK_EQUAL_COLLECTIONS(Lb, Le, Rb, Re) BOOST_CHECK_EQUAL_COLLECTIONS(Lb, Le, Rb, Re)	// NOLINT
+#define AUTO_TEST_SUITE(x) BOOST_AUTO_TEST_SUITE(x)
+#define AUTO_TEST_SUITE_END BOOST_AUTO_TEST_SUITE_END
+#define AUTO_TEST_CASE(x) BOOST_AUTO_TEST_CASE(x)
+#define TEST(x) BOOST_TEST(x)
+#define CHECK_EXCEPTION(Src, Ex, Pred) BOOST_CHECK_EXCEPTION(Src, Ex, Pred)
+#define CHECK(Pred) BOOST_CHECK(Pred)
+#define FAIL(Msg) BOOST_FAIL(Msg)
+#define CHECK_EQUAL_COLLECTIONS(Lb, Le, Rb, Re) BOOST_CHECK_EQUAL_COLLECTIONS(Lb, Le, Rb, Re)
+// NOLINTEND
 // clang-format on
 // ReSharper restore All

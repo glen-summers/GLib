@@ -118,7 +118,7 @@ namespace GLib::Util
 	template <typename StringType, typename OutputIterator>
 	void Split(StringType const & value, OutputIterator it, StringType const & delimiter = Detail::DefaultDelimiter<typename StringType::value_type>())
 	{
-		Detail::Splitter<StringType> splitter {value, delimiter};
+		Detail::Splitter<StringType> const splitter {value, delimiter};
 		std::copy(splitter.begin(), splitter.end(), it);
 	}
 

@@ -2,6 +2,7 @@
 
 #include <GLib/Compat.h>
 #include <GLib/Scope.h>
+#include <GLib/Win/Handle.h>
 #include <GLib/Win/Local.h>
 #include <GLib/Win/Process.h>
 
@@ -24,14 +25,15 @@ namespace GLib::Win::Symbols
 	{
 		struct Cleanup
 		{
-			void operator()(HANDLE const handle) const noexcept
+			void operator()(HandleBase * const handle) const noexcept
 			{
 				Util::WarnAssertTrue(SymCleanup(handle), "SymCleanup");
 			}
 		};
-		using SymbolHandle = std::unique_ptr<void, Cleanup>;
 
-		inline Handle Duplicate(HANDLE const handle)
+		using SymbolHandle = std::unique_ptr<HandleBase, Cleanup>;
+
+		inline Handle Duplicate(HandleBase * const handle)
 		{
 			HANDLE duplicatedHandle = nullptr;
 			Util::AssertTrue(DuplicateHandle(GetCurrentProcess(), handle, GetCurrentProcess(), &duplicatedHandle, 0, FALSE, DUPLICATE_SAME_ACCESS),
@@ -39,7 +41,7 @@ namespace GLib::Win::Symbols
 			return Handle {duplicatedHandle};
 		}
 
-		inline auto ConvertBase(void * baseValue)
+		inline auto ConvertBase(HandleBase * const baseValue)
 		{
 			return Util::Detail::WindowsCast<uint64_t>(baseValue);
 		}
@@ -177,7 +179,7 @@ namespace GLib::Win::Symbols
 			return GetProcess(GetCurrentProcess(), 0, true);
 		}
 
-		static SymProcess GetProcess(HANDLE const handle, uint64_t const baseOfImage, bool const invasive)
+		static SymProcess GetProcess(HandleBase * const handle, uint64_t const baseOfImage, bool const invasive)
 		{
 			auto duplicate = Detail::Duplicate(handle);
 
@@ -364,7 +366,7 @@ namespace GLib::Win::Symbols
 			SymSetOptions(SymGetOptions() | flags);
 		}
 
-		SymProcess & AddProcess(ULONG const processId, HANDLE const processHandle, const uint64_t baseOfImage, HANDLE const imageFile,
+		SymProcess & AddProcess(ULONG const processId, HandleBase * const processHandle, const uint64_t baseOfImage, HandleBase * const imageFile,
 														std::string const & imageName)
 		{
 			SymProcess sp = SymProcess::GetProcess(processHandle, baseOfImage, false);
@@ -393,13 +395,13 @@ namespace GLib::Win::Symbols
 			}
 		}
 
-		void SourceFiles(std::function<void(PSOURCEFILEW)> f, HANDLE const process, void * base) const
+		void SourceFiles(std::function<void(PSOURCEFILEW)> f, HandleBase * const process, void * base) const
 		{
 			static_cast<void>(this);
 			Util::AssertTrue(SymEnumSourceFilesW(process, Detail::ConvertBase(base), nullptr, EnumSourceFiles, &f), "SymEnumSourceFilesW");
 		}
 
-		void Lines(std::function<void(PSRCCODEINFOW)> f, HANDLE const process, void * base) const
+		void Lines(std::function<void(PSRCCODEINFOW)> f, HandleBase * const process, void * base) const
 		{
 			static_cast<void>(this);
 			auto const result = SymEnumLinesW(process, Detail::ConvertBase(base), nullptr, nullptr, EnumLines, &f);
@@ -410,7 +412,7 @@ namespace GLib::Win::Symbols
 		void Processes(Inserter && inserter) const
 		{
 			static_cast<void>(this);
-			std::function<void(HANDLE)> f = [&](HANDLE h) { *inserter++ = h; };
+			std::function<void(HANDLE)> f = [&](HandleBase * const h) { *inserter++ = h; };
 			Util::AssertTrue(SymEnumProcesses(EnumProcesses, &f), "SymEnumProcesses");
 		}
 
@@ -427,7 +429,7 @@ namespace GLib::Win::Symbols
 			return TRUE;
 		}
 
-		static BOOL CALLBACK EnumProcesses(HANDLE const hProcess, void * const context)
+		static BOOL CALLBACK EnumProcesses(HandleBase * const hProcess, void * const context)
 		{
 			(*static_cast<std::function<void(HANDLE)> *>(context))(hProcess);
 			return TRUE;

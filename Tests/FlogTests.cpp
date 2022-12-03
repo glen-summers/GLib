@@ -42,7 +42,7 @@ AUTO_TEST_CASE(BasicTest)
 	log.Info("Format: {0} , {1}", 1, 2);
 
 	std::ifstream in(GLib::Flog::LogManager::GetLogPath());
-	std::string contents((std::istreambuf_iterator(in)), std::istreambuf_iterator<char>());
+	std::string const contents((std::istreambuf_iterator(in)), std::istreambuf_iterator<char>());
 	TEST(contents.find(" : INFO     : FlogTests::Fred  : Hello") != std::string::npos);
 	TEST(contents.find(" : INFO     : FlogTests::Fred  : Format: 1 , 2") != std::string::npos);
 }
@@ -59,7 +59,7 @@ AUTO_TEST_CASE(LogLevel)
 	log.Error("error");
 
 	std::ifstream in(GLib::Flog::LogManager::GetLogPath());
-	std::string contents((std::istreambuf_iterator(in)), std::istreambuf_iterator<char>());
+	std::string const contents((std::istreambuf_iterator(in)), std::istreambuf_iterator<char>());
 	TEST(contents.find(" : INFO     : FlogTests::Fred  : info") == std::string::npos);
 	TEST(contents.find(" : ERROR    : FlogTests::Fred  : error") != std::string::npos);
 
@@ -94,7 +94,7 @@ AUTO_TEST_CASE(ProcessName)
 	}
 
 	std::ifstream in(GLib::Flog::LogManager::GetLogPath());
-	std::string contents((std::istreambuf_iterator(in)), std::istreambuf_iterator<char>());
+	std::string const contents((std::istreambuf_iterator(in)), std::istreambuf_iterator<char>());
 
 	auto const processName = GLib::Compat::ProcessName();
 	auto const processPath = GLib::Compat::ProcessPath();

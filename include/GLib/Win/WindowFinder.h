@@ -2,6 +2,7 @@
 
 #include <GLib/StackOrHeap.h>
 #include <GLib/Win/ErrorCheck.h>
+#include <GLib/Win/Handle.h>
 
 #include <functional>
 
@@ -9,7 +10,7 @@ namespace GLib::Win
 {
 	namespace Detail
 	{
-		inline std::wstring GetWindowText(HWND const hWnd)
+		inline std::wstring GetWindowText(WindowHandleBase * const hWnd)
 		{
 			GLib::Util::WideCharBuffer s;
 			SetLastError(ERROR_SUCCESS); // GetWindowTextLength does not set last error on success
@@ -29,7 +30,7 @@ namespace GLib::Win
 	{
 		using WindowEnumerator = std::function<BOOL(HWND)>;
 
-		static BOOL CALLBACK EnumWindowsCallback(HWND const handle, LPARAM const param) noexcept
+		static BOOL CALLBACK EnumWindowsCallback(WindowHandleBase * const handle, LPARAM const param) noexcept
 		{
 			// todo setLastError when return false
 			return (*Util::Detail::WindowsCast<WindowEnumerator const *>(param))(handle);
@@ -38,12 +39,12 @@ namespace GLib::Win
 	public:
 		static HWND Find(ULONG const pid, std::string const & windowText)
 		{
-			HDESK const desktop = GetThreadDesktop(GetCurrentThreadId());
+			DeskBase * const desktop = GetThreadDesktop(GetCurrentThreadId());
 			Util::AssertTrue(desktop != nullptr, "GetThreadDesktop");
 			auto const wideWindowText = Cvt::A2W(windowText);
 
 			HWND ret {};
-			WindowEnumerator func = [&](HWND const wnd) noexcept -> BOOL
+			WindowEnumerator func = [&](WindowHandleBase * const wnd) noexcept -> BOOL
 			{
 				ULONG windowPid = 0;
 				GetWindowThreadProcessId(wnd, &windowPid);

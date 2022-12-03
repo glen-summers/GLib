@@ -64,7 +64,7 @@ namespace GLib::Win::FileSystem
 		return result;
 	}
 
-	inline std::string PathOfFileHandle(HANDLE const fileHandle, ULONG const flags)
+	inline std::string PathOfFileHandle(HandleBase * const fileHandle, ULONG const flags)
 	{
 		GLib::Util::WideCharBuffer s;
 		ULONG length = GetFinalPathNameByHandleW(fileHandle, nullptr, 0, flags);
@@ -118,7 +118,7 @@ namespace GLib::Win::FileSystem
 		return Cvt::W2A(std::wstring_view {s.Get(), length});
 	}
 
-	inline std::string PathOfProcessHandle(HANDLE const process)
+	inline std::string PathOfProcessHandle(HandleBase * const process)
 	{
 		GLib::Util::WideCharBuffer s;
 
@@ -147,7 +147,7 @@ namespace GLib::Win::FileSystem
 
 	inline Handle CreateAutoDeleteFile(std::string const & name)
 	{
-		HANDLE const h = CreateFileW(Cvt::A2W(name).c_str(), Detail::Access, 0, nullptr, Detail::Create, Detail::Flags, nullptr);
+		HandleBase * const h = CreateFileW(Cvt::A2W(name).c_str(), Detail::Access, 0, nullptr, Detail::Create, Detail::Flags, nullptr);
 		Util::AssertTrue(h != nullptr, "CreateFileW");
 		return Handle(h);
 	}
