@@ -1,20 +1,19 @@
 #pragma once
 
 #include <ranges>
+#include <string>
+#include <tuple>
+
+#include <GLib/Cvt.h>
 
 #include "Address.h"
 #include "Types.h"
-
-#include <string>
-#include <tuple>
 
 class Function
 {
 	std::string nameSpace;
 	std::string className;
 	std::string functionName;
-
-	FileLines mutable fileLines;
 
 public:
 	Function(std::string nameSpace, std::string className, std::string functionName)
@@ -23,24 +22,32 @@ public:
 		, functionName(std::move(functionName))
 	{}
 
-	std::string const & NameSpace() const
+	static FileLines & GetFileLines() noexcept
+	{
+		try
+		{
+			static FileLines fileLines;
+			return fileLines;
+		}
+		catch (std::exception &)
+		{
+			std::terminate();
+		}
+	}
+
+	[[nodiscard]] std::string const & NameSpace() const
 	{
 		return nameSpace;
 	}
 
-	std::string const & ClassName() const
+	[[nodiscard]] std::string const & ClassName() const
 	{
 		return className;
 	}
 
-	std::string const & FunctionName() const
+	[[nodiscard]] std::string const & FunctionName() const
 	{
 		return functionName;
-	}
-
-	FileLines const & FileLines() const
-	{
-		return fileLines;
 	}
 
 	// called when another address seen for the same function symbolId
@@ -48,21 +55,21 @@ public:
 	// 2. lines merged into constructor from in class assignments, can cause multiple file names per accumulated address
 	void Accumulate(Address const & address) const
 	{
-		for (auto const & [file, addressLines] : address.FileLines())
+		for (auto & [file, addressLines] : address.GetFileLines())
 		{
-			for (auto const & line : addressLines | std::views::keys) // map merge method?
+			for (auto & line : addressLines | std::views::keys) // map merge method?
 			{
-				fileLines[file][line] |= address.Visited();
+				GetFileLines()[file][line] |= address.Visited();
 			}
 		}
 	}
 
-	bool Merge(Function const & added, std::filesystem::path const & path) const
+	[[nodiscard]] bool Merge(Function const & added, std::filesystem::path const & path) const
 	{
-		auto const addedIt = added.fileLines.find(path);
-		auto const existingIt = fileLines.find(path);
+		auto const addedIt = added.GetFileLines().find(path);
+		auto const existingIt = GetFileLines().find(path);
 
-		if (existingIt == fileLines.end() || addedIt == added.fileLines.end())
+		if (existingIt == GetFileLines().end() || addedIt == added.GetFileLines().end())
 		{
 			return false;
 		}
@@ -100,10 +107,10 @@ public:
 		return true;
 	}
 
-	size_t CoveredLines() const
+	[[nodiscard]] size_t CoveredLines() const
 	{
 		size_t total {};
-		for (auto const & lines : fileLines | std::views::values)
+		for (auto const & lines : GetFileLines() | std::views::values)
 		{
 			for (auto const & isCovered : lines | std::views::values)
 			{
@@ -117,10 +124,10 @@ public:
 		return total;
 	}
 
-	size_t AllLines() const
+	[[nodiscard]] size_t AllLines() const
 	{
 		size_t total {};
-		for (auto const & lines : fileLines | std::views::values)
+		for (auto const & lines : GetFileLines() | std::views::values)
 		{
 			total += lines.size();
 		}

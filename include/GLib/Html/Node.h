@@ -5,6 +5,9 @@
 
 namespace GLib::Html
 {
+	class Node;
+	using NodeList = std::pmr::list<Node>; // pmr avoids potential exception leak, try use forward list
+
 	class Node
 	{
 		Node * const parent {};
@@ -12,7 +15,7 @@ namespace GLib::Html
 		std::string variable;
 		std::string enumeration;
 		std::string_view condition;
-		std::list<Node> children; // use ostream for xml fragments, single optional child for the rest, polymorphic?
+		NodeList children; // use ostream for xml fragments, single optional child for the rest, polymorphic?
 		size_t const depth {};
 
 	public:
@@ -63,7 +66,7 @@ namespace GLib::Html
 			return condition;
 		}
 
-		[[nodiscard]] std::list<Node> const & Children() const
+		[[nodiscard]] NodeList const & Children() const
 		{
 			return children;
 		}

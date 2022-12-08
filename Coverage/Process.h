@@ -65,7 +65,7 @@ public:
 
 	Addresses::const_iterator AddAddress(uint64_t const address, Address address1)
 	{
-		return addresses.emplace(address, std::move(address1)).first;
+		return addresses.emplace(address, address1).first;
 	}
 
 	IndexToFunction::const_iterator AddFunction(ULONG const index, std::string const & nameSpace, std::string const & typeName,

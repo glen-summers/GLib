@@ -57,7 +57,7 @@ namespace GLib::Win
 						ret = wnd;
 					}
 				}
-				catch (std::exception const &)
+				catch (std::exception &)
 				{}
 				return TRUE;
 			};

@@ -24,8 +24,15 @@ FileLogger::~FileLogger()
 
 LogState const & FileLogger::GetLogState() noexcept
 {
-	thread_local LogState const state;
-	return state;
+	try
+	{
+		thread_local LogState const state;
+		return state;
+	}
+	catch (std::exception &)
+	{
+		std::terminate();
+	}
 }
 
 void FileLogger::Write(GLib::Flog::Level const level, std::string_view const prefix, std::string_view const message)

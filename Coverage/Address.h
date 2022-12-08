@@ -6,8 +6,6 @@ class Address
 {
 	unsigned char const oldData;
 	ULONG const symbolId;
-
-	mutable FileLines fileLines; // use sparse container?
 	mutable bool visited {};
 
 public:
@@ -16,14 +14,22 @@ public:
 		, symbolId(symbolId)
 	{}
 
+	static FileLines & GetFileLines() noexcept
+	{
+		try
+		{
+			static FileLines fileLines;
+			return fileLines;
+		}
+		catch (std::exception &)
+		{
+			std::terminate();
+		}
+	}
+
 	unsigned char OldData() const
 	{
 		return oldData;
-	}
-
-	FileLines const & FileLines() const
-	{
-		return fileLines;
 	}
 
 	bool Visited() const
@@ -46,6 +52,6 @@ public:
 	// 1. release build of {return atomicType++;} returns 3 lines for same address
 	void AddFileLine(std::wstring const & fileName, unsigned int const lineNumber) const
 	{
-		fileLines[fileName].emplace(lineNumber, false);
+		GetFileLines()[fileName].emplace(lineNumber, false);
 	}
 };

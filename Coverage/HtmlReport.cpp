@@ -359,7 +359,7 @@ void HtmlReport::GenerateSourceFile(std::filesystem::path const & subPath, FileC
 	std::multiset<FunctionCoverage> coverage;
 	for (auto const & f : data.Functions())
 	{
-		for (auto const & [file, l] : f.FileLines())
+		for (auto const & [file, l] : f.GetFileLines())
 		{
 			if (file == sourceFile)
 			{

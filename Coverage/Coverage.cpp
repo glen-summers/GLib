@@ -197,7 +197,7 @@ CoverageData Coverage::GetCoverageData() const
 	{
 		for (auto const & function : process.IndexToFunction() | std::views::values)
 		{
-			for (auto const & fileName : function.FileLines() | std::views::keys)
+			for (auto const & fileName : function.GetFileLines() | std::views::keys)
 			{
 				fileNameToFunctionMap[fileName].emplace(function);
 			}
@@ -218,7 +218,7 @@ CoverageData Coverage::GetCoverageData() const
 
 		for (auto const & function : functions)
 		{
-			FileLines const & fileLines = function.FileLines();
+			FileLines const & fileLines = function.GetFileLines();
 
 			auto justFileNameIt = fileLines.find(filePath);
 			if (justFileNameIt == fileLines.end())

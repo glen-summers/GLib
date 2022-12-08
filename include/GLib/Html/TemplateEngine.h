@@ -45,7 +45,7 @@ namespace GLib::Html
 
 		[[nodiscard]] Node Parse(std::string_view const xml)
 		{
-			Node root;
+			Node root; // hack?
 			Node * current = &root;
 
 			Xml::Holder holder {xml};

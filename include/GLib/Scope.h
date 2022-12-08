@@ -27,9 +27,9 @@ namespace GLib::Detail
 			{
 				function();
 			}
-			catch (std::exception const &)
+			catch (std::exception &)
 			{
-				std::abort();
+				std::terminate();
 			}
 		}
 	};

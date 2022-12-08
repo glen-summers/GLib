@@ -29,7 +29,7 @@ namespace GLib
 		// todo: use string_view for formats
 		using StreamFunction = std::function<void(std::ostream &, std::string const &)>;
 
-		inline void FormatError()
+		inline void FormatError [[noreturn]] ()
 		{
 			throw std::logic_error("Invalid format string");
 		}
@@ -85,7 +85,12 @@ namespace GLib
 					break;
 				}
 
-				if (ch = *++it; it == end || (ch < '0' || ch > '9'))
+				if (++it == end)
+				{
+					FormatError();
+				}
+
+				if (ch = *it; it == end || ch < '0' || ch > '9')
 				{
 					FormatError();
 				}

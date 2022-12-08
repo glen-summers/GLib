@@ -2,6 +2,7 @@
 
 #include <GLib/Compat.h>
 
+#include <exception>
 #include <fstream>
 
 class StreamInfo
@@ -11,17 +12,37 @@ class StreamInfo
 	unsigned int date {};
 
 public:
-	StreamInfo(std::ofstream stream, std::filesystem::path path, unsigned int date) noexcept
+	StreamInfo(std::ofstream stream, std::filesystem::path path, unsigned int date)
+	try
 		: stream(std::move(stream))
 		, path(std::move(path))
 		, date(date)
 	{}
+	catch (std::exception &)
+	{
+		std::terminate();
+	}
 
 	StreamInfo() = default;
 	StreamInfo(StreamInfo const &) = delete;
 	StreamInfo(StreamInfo &&) = delete;
 	StreamInfo & operator=(StreamInfo const &) = delete;
-	StreamInfo & operator=(StreamInfo &&) noexcept = default; // NOLINT(bugprone-exception-escape) ofstream move can throw
+
+	StreamInfo & operator=(StreamInfo && s) noexcept
+	{
+		try
+		{
+			stream = std::move(s.stream);
+			path = std::move(s.path);
+			date = s.date;
+			return *this;
+		}
+		catch (std::exception &)
+		{
+			std::terminate();
+		}
+	}
+
 	~StreamInfo() = default;
 
 	std::ofstream & Stream() const
