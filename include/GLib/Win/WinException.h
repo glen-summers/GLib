@@ -29,10 +29,10 @@ namespace GLib::Win
 		{}
 
 	protected:
-		WinException(std::string const & message, HRESULT const hr)
+		WinException(std::string const & message, HRESULT const result)
 			: runtime_error(message)
-			, errorCode(static_cast<unsigned int>(hr))
-			, hResult(hr)
+			, errorCode(static_cast<unsigned int>(result))
+			, hResult(result)
 		{}
 	};
 }

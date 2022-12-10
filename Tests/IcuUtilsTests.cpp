@@ -34,13 +34,13 @@ AUTO_TEST_CASE(DiaeresisCompare)
 
 AUTO_TEST_CASE(StartWithNoCasePartialDecode)
 {
-	auto const * s = "abcd"
-									 "\xc3\xbc"
-									 "defg";
+	auto const * str = "abcd"
+										 "\xc3\xbc"
+										 "defg";
 
-	TEST(0 == static_cast<int>(GLib::IcuUtils::CompareNoCase(s, s, 4)));
-	TEST(0 == static_cast<int>(GLib::IcuUtils::CompareNoCase(s, s, 5)));
-	TEST(0 == static_cast<int>(GLib::IcuUtils::CompareNoCase(s, s, 6)));
+	TEST(0 == static_cast<int>(GLib::IcuUtils::CompareNoCase(str, str, 4)));
+	TEST(0 == static_cast<int>(GLib::IcuUtils::CompareNoCase(str, str, 5)));
+	TEST(0 == static_cast<int>(GLib::IcuUtils::CompareNoCase(str, str, 6)));
 }
 
 AUTO_TEST_CASE(LowerUpper)

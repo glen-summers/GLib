@@ -13,19 +13,19 @@ using Processes = std::unordered_map<ULONG, Process>;
 
 class Process // ren ProcessInfo
 {
-	ULONG const id;
+	ULONG const processId;
 	Addresses addresses;
 	Threads threads;
 	IndexToFunction indexToFunction;
 
 public:
-	explicit Process(ULONG const id)
-		: id {id}
+	explicit Process(ULONG const processId)
+		: processId {processId}
 	{}
 
 	[[nodiscard]] ULONG Id() const
 	{
-		return id;
+		return processId;
 	}
 
 	[[nodiscard]] Addresses const & Addresses() const
@@ -50,12 +50,12 @@ public:
 
 	[[nodiscard]] HANDLE FindThread(ULONG const threadId) const
 	{
-		auto const it = threads.find(threadId);
-		if (it == threads.end())
+		auto const iter = threads.find(threadId);
+		if (iter == threads.end())
 		{
 			throw std::runtime_error("Thread not found");
 		}
-		return it->second;
+		return iter->second;
 	}
 
 	[[nodiscard]] IndexToFunction const & IndexToFunction() const

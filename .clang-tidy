@@ -25,9 +25,7 @@ Checks: '*,
 -misc-no-recursion,
 -modernize-use-trailing-return-type,
 
-# tmp
-#-readability-function-cognitive-complexity
--readability*
+-readability-function-cognitive-complexity
 '
 
 HeaderFilterRegex: '^.*\\GLib\\.*$'

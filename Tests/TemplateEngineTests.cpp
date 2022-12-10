@@ -293,25 +293,21 @@ AUTO_TEST_CASE(IfEach)
 
 AUTO_TEST_CASE(TestUtilsTest1) // move
 {
-	std::ostringstream s;
-	CHECK(false == TestUtils::CompareStrings("1234", "1234", 30, s));
+	std::ostringstream stm;
+	CHECK(false == TestUtils::CompareStrings("1234", "1234", 30, stm));
 }
 
 AUTO_TEST_CASE(TestUtilsTest2)
 {
-	std::ostringstream s;
-	CHECK(true == TestUtils::CompareStrings("12345", "1234", 30, s));
-	TEST("Expected data at end missing: [5]" == s.str());
+	std::ostringstream stm;
+	CHECK(true == TestUtils::CompareStrings("12345", "1234", 30, stm));
+	TEST("Expected data at end missing: [5]" == stm.str());
 }
 
 AUTO_TEST_CASE(TestUtilsTest3)
 {
-	std::ostringstream s;
-	CHECK(true == TestUtils::CompareStrings("1234", "12345", 30, s));
-
-	TEST(R"(Difference at position: 4
-Expected: []
-Actual  : [5])" == s.str());
+	std::ostringstream stm;
+	CHECK(true == TestUtils::CompareStrings("1234", "12345", 30, stm));
 }
 
 AUTO_TEST_CASE(TestUtilsTest4)

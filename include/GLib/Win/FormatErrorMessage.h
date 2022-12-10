@@ -11,15 +11,15 @@ namespace GLib::Win::Util
 	namespace Detail
 	{
 		template <typename T1, typename T2>
-		T1 WindowsCast(T2 t2)
+		T1 WindowsCast(T2 value)
 		{
-			return reinterpret_cast<T1>(t2); // NOLINT required by legacy windows runtime
+			return reinterpret_cast<T1>(value); // NOLINT required by legacy windows runtime
 		}
 
 		enum class Lang : WORD
 		{
 			Neutral = LANG_NEUTRAL,				// NOLINT bad macros
-			SubDefault = SUBLANG_DEFAULT, // NOLINT
+			SubDefault = SUBLANG_DEFAULT, // NO-LINT
 		};
 
 		enum class Flags : ULONG
@@ -30,19 +30,19 @@ namespace GLib::Win::Util
 			FromHandle = FORMAT_MESSAGE_FROM_HMODULE,				 // NOLINT
 		};
 
-		inline ULONG Make(Lang l1, Lang l2)
+		inline ULONG Make(Lang lang1, Lang lang2)
 		{
-			return MAKELANGID(static_cast<WORD>(l1), static_cast<WORD>(l2)); // NOLINT(hicpp-signed-bitwise) bad macro
+			return MAKELANGID(static_cast<WORD>(lang1), static_cast<WORD>(lang2)); // NOLINT(hicpp-signed-bitwise) bad macro
 		}
 
-		inline Flags operator|(Flags a, Flags b)
+		inline Flags operator|(Flags flag1, Flags flag2)
 		{
-			return static_cast<Flags>(static_cast<unsigned int>(a) | static_cast<unsigned int>(b));
+			return static_cast<Flags>(static_cast<unsigned int>(flag1) | static_cast<unsigned int>(flag2));
 		}
 
-		inline Flags operator|=(Flags a, Flags b)
+		inline Flags operator|=(Flags flag1, Flags flag2)
 		{
-			return static_cast<Flags>(static_cast<unsigned int>(a) | static_cast<unsigned int>(b));
+			return static_cast<Flags>(static_cast<unsigned int>(flag1) | static_cast<unsigned int>(flag2));
 		}
 	}
 

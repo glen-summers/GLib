@@ -62,9 +62,9 @@ namespace GLib::Eval::Utils
 	template <typename T, std::enable_if_t<!Detail::HasToString<T>::value && Detail::CanStream<T>::value> * = nullptr>
 	std::string ToString(T const & value)
 	{
-		std::ostringstream s;
-		s << value;
-		return s.str();
+		std::ostringstream stm;
+		stm << value;
+		return stm.str();
 	}
 
 	template <typename T, std::enable_if_t<!Detail::HasToString<T>::value && !Detail::CanStream<T>::value> * = nullptr>

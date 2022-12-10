@@ -19,38 +19,38 @@ enum class Style : char
 };
 
 // dumb version, search for contiguous chunks
-inline void VisibleWhitespace(std::string_view const value, std::ostream & s)
+inline void VisibleWhitespace(std::string_view const value, std::ostream & stm)
 {
 	for (size_t startPos = 0;;)
 	{
 		size_t const find = value.find_first_of(" 	", startPos);
 		if (find == std::string::npos)
 		{
-			s << value.substr(startPos);
+			stm << value.substr(startPos);
 			break;
 		}
 
 		std::string_view const replacement = value[find] == ' ' ? "\xC2\xB7" : " \xE2\x86\x92 ";
-		s << value.substr(startPos, find - startPos) << replacement;
+		stm << value.substr(startPos, find - startPos) << replacement;
 		startPos = find + 1;
 	}
 }
 
-inline void OpenSpan(Style cls, std::ostream & s)
+inline void OpenSpan(Style cls, std::ostream & stm)
 {
-	s << "<span class=\"" << static_cast<char>(cls) << "\">";
+	stm << "<span class=\"" << static_cast<char>(cls) << "\">";
 }
 
-inline void CloseSpan(std::ostream & s)
+inline void CloseSpan(std::ostream & stm)
 {
-	s << "</span>";
+	stm << "</span>";
 }
 
-inline void Span(Style const cls, std::string_view const value, std::ostream & s)
+inline void Span(Style const cls, std::string_view const value, std::ostream & stm)
 {
-	OpenSpan(cls, s);
-	s << value;
-	CloseSpan(s);
+	OpenSpan(cls, stm);
+	stm << value;
+	CloseSpan(stm);
 }
 
 inline bool IsKeyword(std::string_view const value)
@@ -102,17 +102,17 @@ inline void Htmlify(std::string_view const code, bool const emitWhitespace, std:
 	};
 	// clang-format on
 
-	auto alphaNumUnd = [](unsigned char const c) { return std::isalnum(c) != 0 || c == '_'; };
-	auto whitespace = [](unsigned char const c) { return std::isspace(c) != 0; };
+	auto alphaNumUnd = [](unsigned char const chr) { return std::isalnum(chr) != 0 || chr == '_'; };
+	auto whitespace = [](unsigned char const chr) { return std::isspace(chr) != 0; };
 	auto escape = [&](std::string_view const value) { GLib::Xml::Utils::Escape(value, out); };
-	auto vis = [&](std::string_view const v) { VisibleWhitespace(v, out); };
+	auto vis = [&](std::string_view const value) { VisibleWhitespace(value, out); };
 
-	for (auto const & f : GLib::Cpp::Holder(code, emitWhitespace))
+	for (auto const & frag : GLib::Cpp::Holder(code, emitWhitespace))
 	{
-		if (f.first == GLib::Cpp::State::Code)
+		if (frag.first == GLib::Cpp::State::Code)
 		{
 			GLib::Util::Split(
-				f.second, alphaNumUnd,
+				frag.second, alphaNumUnd,
 				[&](std::string_view const value)
 				{
 					if (IsKeyword(value))
@@ -133,22 +133,22 @@ inline void Htmlify(std::string_view const code, bool const emitWhitespace, std:
 			continue;
 		}
 
-		auto it = styles.find(f.first);
-		if (it == styles.end())
+		auto iter = styles.find(frag.first);
+		if (iter == styles.end())
 		{
-			escape(f.second);
+			escape(frag.second);
 			continue;
 		}
 
-		auto splitter = GLib::Util::SplitterView(f.second, "\n");
+		auto splitter = GLib::Util::SplitterView(frag.second, "\n");
 		for (auto sit = splitter.begin(), end = splitter.end(); sit != end;)
 		{
-			GLib::Cpp::State const state = it->first;
+			GLib::Cpp::State const state = iter->first;
 			std::string_view const value = *sit;
 
 			if (!value.empty())
 			{
-				OpenSpan(it->second, out);
+				OpenSpan(iter->second, out);
 				if (state == GLib::Cpp::State::WhiteSpace)
 				{
 					vis(value);

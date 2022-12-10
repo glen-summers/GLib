@@ -40,14 +40,14 @@ void FileLogger::Write(GLib::Flog::Level const level, std::string_view const pre
 	Instance().InternalWrite(level, prefix, message);
 }
 
-void FileLogger::Write(char const c)
+void FileLogger::Write(char const chr)
 {
-	logState.Put(c);
+	logState.Put(chr);
 }
 
-extern "C" void GLib::Flog::Detail::Write(char const c)
+extern "C" void GLib::Flog::Detail::Write(char const chr)
 {
-	FileLogger::Write(c);
+	FileLogger::Write(chr);
 }
 
 StreamInfo FileLogger::GetStream() const
@@ -148,18 +148,18 @@ void FileLogger::WriteToStream(GLib::Flog::Level const level, std::string_view c
 			// move some formatting out of lock
 
 			auto const now = std::chrono::system_clock::now();
-			std::time_t const t = std::chrono::system_clock::to_time_t(now);
-			std::tm tm {};
-			GLib::Compat::LocalTime(tm, t);
+			std::time_t const time = std::chrono::system_clock::to_time_t(now);
+			std::tm tmValue {};
+			GLib::Compat::LocalTime(tmValue, time);
 
-			auto const ms = static_cast<int>(std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count() % 1000);
+			auto const millisecs = static_cast<int>(std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count() % 1000);
 
-			auto & s = streamInfo.Stream();
-			s << std::left << std::put_time(&tm, "%d %b %Y, %H:%M:%S") << "." << std::setw(3) << std::setfill('0') << ms;
-			s << std::setfill(' ') << " : [ " << std::setw(threadIdWidth) << Manipulate(ThreadName, logState.ThreadName()) << " ] : ";
-			s << std::setw(levelWidth) << Manipulate(TranslateLevel, level) << " : ";
-			s << std::setw(prefixWidth) << prefix << " : " << message;
-			s << std::endl << std::flush;
+			auto & stm = streamInfo.Stream();
+			stm << std::left << std::put_time(&tmValue, "%d %b %Y, %H:%M:%S") << "." << std::setw(3) << std::setfill('0') << millisecs;
+			stm << std::setfill(' ') << " : [ " << std::setw(threadIdWidth) << Manipulate(ThreadName, logState.ThreadName()) << " ] : ";
+			stm << std::setw(levelWidth) << Manipulate(TranslateLevel, level) << " : ";
+			stm << std::setw(prefixWidth) << prefix << " : " << message;
+			stm << std::endl << std::flush;
 		}
 		catch (...)
 		{
@@ -222,11 +222,11 @@ void FileLogger::WriteHeader(std::ostream & writer)
 {
 	writer << headerFooterSeparator << std::endl;
 
-	std::time_t const t = std::time(nullptr);
-	std::tm tm {};
-	GLib::Compat::LocalTime(tm, t);
+	std::time_t const time = std::time(nullptr);
+	std::tm tmValue {};
+	GLib::Compat::LocalTime(tmValue, time);
 	std::tm gtm {};
-	GLib::Compat::GmTime(gtm, t);
+	GLib::Compat::GmTime(gtm, time);
 
 	std::string const name = GLib::Compat::ProcessName();
 	std::string const path = GLib::Compat::ProcessPath();
@@ -241,7 +241,7 @@ void FileLogger::WriteHeader(std::ostream & writer)
 	static constexpr bool is64BitProcess = sizeof(void *) == 8;
 	static constexpr int bits = is64BitProcess ? 64 : 32; // more?
 
-	writer << "Opened      : " << std::put_time(&tm, "%d %b %Y, %H:%M:%S (%z)") << std::endl
+	writer << "Opened      : " << std::put_time(&tmValue, "%d %b %Y, %H:%M:%S (%z)") << std::endl
 				 << "OpenedUtc   : " << std::put_time(&gtm, "%F %TZ") << std::endl
 				 << "ProcessName : (" << bits << " bit) " << name << std::endl
 				 << "FullPath    : " << path << std::endl
@@ -256,12 +256,12 @@ void FileLogger::WriteHeader(std::ostream & writer)
 
 void FileLogger::WriteFooter(std::ostream & writer)
 {
-	std::time_t const t = std::time(nullptr);
-	std::tm tm {};
-	GLib::Compat::LocalTime(tm, t);
+	std::time_t const time = std::time(nullptr);
+	std::tm tmValue {};
+	GLib::Compat::LocalTime(tmValue, time);
 
 	writer << headerFooterSeparator << std::endl
-				 << "Closed       " << std::put_time(&tm, "%d %b %Y, %H:%M:%S (%z)") << std::endl
+				 << "Closed       " << std::put_time(&tmValue, "%d %b %Y, %H:%M:%S (%z)") << std::endl
 				 << headerFooterSeparator << std::endl;
 	writer.flush();
 }
@@ -279,11 +279,11 @@ void FileLogger::CommitPendingScope()
 	}
 
 	Scope const & scope = logState.Top();
-	std::ostringstream s; // use thread stream
-	s << std::setw(logState.Depth()) << "" << scope.Stem() << "> " << scope.ScopeText();
+	std::ostringstream stm; // use thread stream
+	stm << std::setw(logState.Depth()) << "" << scope.Stem() << "> " << scope.ScopeText();
 
 	// need to go via Instance() again as method is static due to use of logState
-	Instance().WriteToStream(scope.Level(), scope.Prefix(), s.str().c_str());
+	Instance().WriteToStream(scope.Level(), scope.Prefix(), stm.str().c_str());
 
 	logState.Commit();
 }
@@ -305,16 +305,16 @@ void FileLogger::ScopeEnd(std::string_view const prefix)
 {
 	auto [scope, pending] = logState.TopAndPop();
 
-	std::ostringstream s; // use thread stream
-	s << std::setw(logState.Depth()) << "";
-	s << "<" << scope.Stem();
+	std::ostringstream stm; // use thread stream
+	stm << std::setw(logState.Depth()) << "";
+	stm << "<" << scope.Stem();
 
 	if (pending)
 	{
-		s << ">";
+		stm << ">";
 	}
-	s << " " << scope.ScopeText() << " " << scope.Duration<std::chrono::nanoseconds>();
-	Write(scope.Level(), prefix, s.str().c_str());
+	stm << " " << scope.ScopeText() << " " << scope.Duration<std::chrono::nanoseconds>();
+	Write(scope.Level(), prefix, stm.str().c_str());
 }
 
 FileLogger & FileLogger::Instance()
@@ -375,12 +375,12 @@ std::ostream & FileLogger::ThreadName(std::ostream & stream, std::string_view co
 
 unsigned FileLogger::GetDate()
 {
-	std::time_t const t = std::time(nullptr);
-	std::tm tm {};
-	GLib::Compat::LocalTime(tm, t);
+	std::time_t const time = std::time(nullptr);
+	std::tm tmValue {};
+	GLib::Compat::LocalTime(tmValue, time);
 	constexpr auto tmEpochYear = 1900;
 	constexpr auto shiftTwoDecimals = 100;
-	return ((tmEpochYear + tm.tm_year) * shiftTwoDecimals + tm.tm_mon + 1) * shiftTwoDecimals + tm.tm_mday;
+	return ((tmEpochYear + tmValue.tm_year) * shiftTwoDecimals + tmValue.tm_mon + 1) * shiftTwoDecimals + tmValue.tm_mday;
 }
 
 uintmax_t FileLogger::GetFreeDiskSpace(std::filesystem::path const & path)

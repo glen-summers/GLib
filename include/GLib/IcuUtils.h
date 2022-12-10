@@ -82,19 +82,19 @@ namespace GLib::IcuUtils
 		Greater = +1
 	};
 
-	inline CompareResult CompareNoCase(std::string_view const s1, std::string_view const s2, char const * const locale = nullptr)
+	inline CompareResult CompareNoCase(std::string_view const value1, std::string_view const value2, char const * const locale = nullptr)
 	{
 		auto const collator = Detail::MakeCollator(locale); // cache? perf test
 		ucol_setStrength(collator.get(), UCOL_SECONDARY);
 
-		UCharIterator i1;
-		UCharIterator i2;
+		UCharIterator iter1;
+		UCharIterator iter2;
 
-		uiter_setUTF8(&i1, s1.data(), static_cast<int32_t>(s1.size()));
-		uiter_setUTF8(&i2, s2.data(), static_cast<int32_t>(s2.size()));
+		uiter_setUTF8(&iter1, value1.data(), static_cast<int32_t>(value1.size()));
+		uiter_setUTF8(&iter2, value2.data(), static_cast<int32_t>(value2.size()));
 
 		UErrorCode error = U_ZERO_ERROR;
-		UCollationResult const result = ucol_strcollIter(collator.get(), &i1, &i2, &error);
+		UCollationResult const result = ucol_strcollIter(collator.get(), &iter1, &iter2, &error);
 		Detail::AssertNoError(error, "ucol_strcollIter");
 		switch (result)
 		{
@@ -108,9 +108,10 @@ namespace GLib::IcuUtils
 		throw std::runtime_error("Unexpected result");
 	}
 
-	inline CompareResult CompareNoCase(std::string_view const s1, std::string_view const s2, size_t const size, char const * const locale = nullptr)
+	inline CompareResult CompareNoCase(std::string_view const value1, std::string_view const value2, size_t const size,
+																		 char const * const locale = nullptr)
 	{
-		return CompareNoCase(s1.substr(0, size), s2.substr(0, size), locale);
+		return CompareNoCase(value1.substr(0, size), value2.substr(0, size), locale);
 	}
 
 	inline std::string ToLower(std::string const & value, char const * const locale = nullptr)
@@ -123,11 +124,11 @@ namespace GLib::IcuUtils
 		Detail::AssertTrue(error == U_BUFFER_OVERFLOW_ERROR, "ucasemap_utf8ToLower");
 
 		error = U_ZERO_ERROR;
-		Util::CharBuffer s;
-		s.EnsureSize(destLength);
-		ucasemap_utf8ToLower(map.get(), s.Get(), destLength, value.c_str(), sourceLength, &error);
+		Util::CharBuffer buffer;
+		buffer.EnsureSize(destLength);
+		ucasemap_utf8ToLower(map.get(), buffer.Get(), destLength, value.c_str(), sourceLength, &error);
 		Detail::AssertNoError(error, "ucasemap_utf8ToLower");
-		return {s.Get(), static_cast<size_t>(destLength)};
+		return {buffer.Get(), static_cast<size_t>(destLength)};
 	}
 
 	inline std::string ToUpper(std::string const & value, char const * locale = nullptr)
@@ -140,10 +141,10 @@ namespace GLib::IcuUtils
 		Detail::AssertTrue(error == U_BUFFER_OVERFLOW_ERROR, "ucasemap_utf8ToUpper");
 
 		error = U_ZERO_ERROR;
-		Util::CharBuffer s;
-		s.EnsureSize(destLength);
-		ucasemap_utf8ToUpper(map.get(), s.Get(), destLength, value.c_str(), sourceLength, &error);
+		Util::CharBuffer buffer;
+		buffer.EnsureSize(destLength);
+		ucasemap_utf8ToUpper(map.get(), buffer.Get(), destLength, value.c_str(), sourceLength, &error);
 		Detail::AssertNoError(error, "ucasemap_utf8ToUpper");
-		return {s.Get(), static_cast<size_t>(destLength)};
+		return {buffer.Get(), static_cast<size_t>(destLength)};
 	}
 }

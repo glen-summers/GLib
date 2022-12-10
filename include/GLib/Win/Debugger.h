@@ -85,9 +85,9 @@ namespace GLib::Win
 			{
 				case CREATE_PROCESS_DEBUG_EVENT:
 				{
-					auto const pi = Detail::CreateProcessInfo(debugEvent);
-					Handle const handle {pi.hFile};
-					OnCreateProcess(processId, threadId, pi);
+					auto const processInfo = Detail::CreateProcessInfo(debugEvent);
+					Handle const handle {processInfo.hFile};
+					OnCreateProcess(processId, threadId, processInfo);
 					static_cast<void>(handle);
 					break;
 				}
@@ -291,15 +291,15 @@ namespace GLib::Win
 			GLib::Util::Splitter const splitter(message, "\n");
 			for (auto it = splitter.begin(), end = splitter.end(); it != end;)
 			{
-				std::string const s = *it;
+				std::string const value = *it;
 				if (++it != end)
 				{
-					Debug::Stream() << "GDB: " << pendingDebugOut << s << std::endl;
+					Debug::Stream() << "GDB: " << pendingDebugOut << value << std::endl;
 					pendingDebugOut.clear();
 				}
 				else
 				{
-					pendingDebugOut += s;
+					pendingDebugOut += value;
 				}
 			}
 		}

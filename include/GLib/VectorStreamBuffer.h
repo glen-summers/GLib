@@ -35,14 +35,14 @@ namespace GLib::Util
 		}
 
 	protected:
-		int_type overflow(int_type c) override
+		int_type overflow(int_type value) override
 		{
-			if (Base::traits_type::eq_int_type(c, Base::traits_type::eof()))
+			if (Base::traits_type::eq_int_type(value, Base::traits_type::eof()))
 			{
-				return Base::traits_type::not_eof(c);
+				return Base::traits_type::not_eof(value);
 			}
-			buffer.push_back(Base::traits_type::to_char_type(c));
-			return c;
+			buffer.push_back(Base::traits_type::to_char_type(value));
+			return value;
 		}
 	};
 }

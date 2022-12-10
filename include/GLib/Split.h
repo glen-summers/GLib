@@ -68,14 +68,14 @@ namespace GLib::Util
 					, nextDelimiter(StringType::npos)
 				{}
 
-				bool operator==(Iterator const & it) const
+				bool operator==(Iterator const & iter) const
 				{
-					return current == it.current;
+					return current == iter.current;
 				}
 
-				bool operator!=(Iterator const & it) const
+				bool operator!=(Iterator const & iter) const
 				{
-					return !(*this == it);
+					return !(*this == iter);
 				}
 
 				Iterator operator++()
@@ -116,10 +116,11 @@ namespace GLib::Util
 	using SplitterView = Detail::Splitter<std::string_view>;
 
 	template <typename StringType, typename OutputIterator>
-	void Split(StringType const & value, OutputIterator it, StringType const & delimiter = Detail::DefaultDelimiter<typename StringType::value_type>())
+	void Split(StringType const & value, OutputIterator iter,
+						 StringType const & delimiter = Detail::DefaultDelimiter<typename StringType::value_type>())
 	{
 		Detail::Splitter<StringType> const splitter {value, delimiter};
-		std::copy(splitter.begin(), splitter.end(), it);
+		std::copy(splitter.begin(), splitter.end(), iter);
 	}
 
 	template <typename Predicate, typename OutYes, typename OutNo>

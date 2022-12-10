@@ -77,14 +77,14 @@ namespace GLib::Win::D2d
 
 		void End()
 		{
-			HRESULT const hr = renderTarget->EndDraw();
-			if (hr == D2DERR_RECREATE_TARGET)
+			HRESULT const result = renderTarget->EndDraw();
+			if (result == D2DERR_RECREATE_TARGET)
 			{
 				renderTarget = nullptr;
 			}
 			else
 			{
-				WarnHr(hr, "EndDraw");
+				WarnHr(result, "EndDraw");
 			}
 		}
 

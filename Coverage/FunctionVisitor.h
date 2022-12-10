@@ -9,38 +9,38 @@
 template <>
 struct GLib::Eval::Visitor<FunctionCoverage>
 {
-	static void Visit(FunctionCoverage const & fc, std::string const & propertyName, ValueVisitor const & f)
+	static void Visit(FunctionCoverage const & coverage, std::string const & propertyName, ValueVisitor const & visitor)
 	{
 		if (propertyName == "name")
 		{
-			std::ostringstream s;
-			if (!fc.NameSpace().empty())
+			std::ostringstream stm;
+			if (!coverage.NameSpace().empty())
 			{
-				Xml::Utils::Escape(fc.NameSpace(), s) << "::";
+				Xml::Utils::Escape(coverage.NameSpace(), stm) << "::";
 			}
-			if (!fc.ClassName().empty())
+			if (!coverage.ClassName().empty())
 			{
-				Xml::Utils::Escape(fc.ClassName(), s) << "::";
+				Xml::Utils::Escape(coverage.ClassName(), stm) << "::";
 			}
-			Xml::Utils::Escape(fc.FunctionName(), s);
-			return f(Value(s.str()));
+			Xml::Utils::Escape(coverage.FunctionName(), stm);
+			return visitor(Value(stm.str()));
 		}
 		if (propertyName == "line")
 		{
-			return f(Value(fc.Line()));
+			return visitor(Value(coverage.Line()));
 		}
 		if (propertyName == "coveredLines")
 		{
-			return f(Value(fc.CoveredLines()));
+			return visitor(Value(coverage.CoveredLines()));
 		}
 		if (propertyName == "coverableLines")
 		{
-			return f(Value(fc.CoverableLines()));
+			return visitor(Value(coverage.CoverableLines()));
 		}
 
 		if (propertyName == "cover")
 		{
-			return f(Value(fc.CoveredLines() != 0 ? LineCover::Covered : LineCover::NotCovered));
+			return visitor(Value(coverage.CoveredLines() != 0 ? LineCover::Covered : LineCover::NotCovered));
 		}
 
 		throw std::runtime_error("Unknown property : '" + propertyName + '\'');

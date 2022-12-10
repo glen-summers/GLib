@@ -16,36 +16,36 @@ struct Line
 template <>
 struct GLib::Eval::Visitor<Line>
 {
-	static void Visit(Line const & line, std::string const & propertyName, ValueVisitor const & f)
+	static void Visit(Line const & line, std::string const & propertyName, ValueVisitor const & visitor)
 	{
 		if (propertyName == "cover")
 		{
-			return f(Value(line.Cover));
+			return visitor(Value(line.Cover));
 		}
 
 		if (propertyName == "number")
 		{
-			return f(Value(line.Number));
+			return visitor(Value(line.Number));
 		}
 
 		if (propertyName == "paddedNumber")
 		{
-			return f(Value(line.PaddedNumber));
+			return visitor(Value(line.PaddedNumber));
 		}
 
 		if (propertyName == "text")
 		{
-			return f(Value(line.Text));
+			return visitor(Value(line.Text));
 		}
 
 		if (propertyName == "hasLink")
 		{
-			return f(Value(line.HasLink));
+			return visitor(Value(line.HasLink));
 		}
 
 		if (propertyName == "hasNoLink") // todo !${value}
 		{
-			return f(Value(!line.HasLink));
+			return visitor(Value(!line.HasLink));
 		}
 
 		throw std::runtime_error("Unknown property : '" + propertyName + '\'');

@@ -13,16 +13,16 @@ struct Chunk
 template <>
 struct GLib::Eval::Visitor<Chunk>
 {
-	static void Visit(Chunk const & chunk, std::string const & propertyName, ValueVisitor const & f)
+	static void Visit(Chunk const & chunk, std::string const & propertyName, ValueVisitor const & visitor)
 	{
 		if (propertyName == "cover")
 		{
-			return f(Value(chunk.Cover));
+			return visitor(Value(chunk.Cover));
 		}
 
 		if (propertyName == "size")
 		{
-			return f(Value(chunk.Size));
+			return visitor(Value(chunk.Size));
 		}
 
 		throw std::runtime_error("Unknown property : '" + propertyName + '\'');

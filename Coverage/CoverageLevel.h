@@ -16,23 +16,23 @@ inline unsigned int Percentage(size_t const value, size_t const amount)
 	return static_cast<unsigned int>(HundredPercent * value / amount);
 }
 
-inline std::ostream & operator<<(std::ostream & s, CoverageLevel const coverageLevel)
+inline std::ostream & operator<<(std::ostream & stm, CoverageLevel const coverageLevel)
 {
 	switch (coverageLevel)
 	{
 		case CoverageLevel::Red:
-			s << "red";
+			stm << "red";
 			break;
 
 		case CoverageLevel::Amber:
-			s << "amber";
+			stm << "amber";
 			break;
 
 		case CoverageLevel::Green:
-			s << "green";
+			stm << "green";
 			break;
 	}
-	return s;
+	return stm;
 }
 
 inline CoverageLevel GetCoverageLevel(unsigned int const coveragePercent)

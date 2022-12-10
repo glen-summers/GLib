@@ -12,9 +12,9 @@ namespace GLib
 	template <>
 	struct NoCaseLess<char>
 	{
-		bool operator()(std::string_view const s1, std::string_view const s2) const
+		bool operator()(std::string_view const value1, std::string_view const value2) const
 		{
-			return IcuUtils::CompareNoCase(s1, s2) == IcuUtils::CompareResult::Less;
+			return IcuUtils::CompareNoCase(value1, value2) == IcuUtils::CompareResult::Less;
 		}
 	};
 
@@ -30,9 +30,9 @@ namespace GLib
 		size_t operator()(std::string const & key) const
 		{
 			size_t val {};
-			for (char const c : IcuUtils::ToLower(key))
+			for (char const chr : IcuUtils::ToLower(key))
 			{
-				val ^= static_cast<size_t>(c);
+				val ^= static_cast<size_t>(chr);
 				val *= fnvPrime;
 			}
 			return val;

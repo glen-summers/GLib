@@ -54,9 +54,9 @@ public:
 	}
 };
 
-inline bool operator<(FunctionCoverage const & f1, FunctionCoverage const & f2)
+inline bool operator<(FunctionCoverage const & function1, FunctionCoverage const & function2)
 {
 	// default sort by line, html has to resort itself
-	return std::tie(f1.Line(), f1.NameSpace(), f1.ClassName(), f1.FunctionName()) <
-				 std::tie(f2.Line(), f2.NameSpace(), f2.ClassName(), f2.FunctionName());
+	return std::tie(function1.Line(), function1.NameSpace(), function1.ClassName(), function1.FunctionName()) <
+				 std::tie(function2.Line(), function2.NameSpace(), function2.ClassName(), function2.FunctionName());
 }

@@ -8,18 +8,18 @@ namespace GLib::Win
 	{
 		inline std::string ClassName(HWND const hWnd)
 		{
-			GLib::Util::WideCharBuffer s;
+			GLib::Util::WideCharBuffer stm;
 			for (;;)
 			{
-				unsigned int const lengthNoNull = GetClassNameW(hWnd, s.Get(), static_cast<int>(s.Size()));
+				unsigned int const lengthNoNull = GetClassNameW(hWnd, stm.Get(), static_cast<int>(stm.Size()));
 				Util::AssertTrue(lengthNoNull != 0, "GetClassNameW");
-				if (lengthNoNull < s.Size() - 1)
+				if (lengthNoNull < stm.Size() - 1)
 				{
 					break;
 				}
-				s.EnsureSize(s.Size() * 2);
+				stm.EnsureSize(stm.Size() * 2);
 			}
-			return Cvt::W2A(s.Get());
+			return Cvt::W2A(stm.Get());
 		}
 	}
 

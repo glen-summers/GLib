@@ -84,14 +84,14 @@ namespace GLib::Cpp
 		}
 
 	private:
-		static bool IsContinuation(char const c)
+		static bool IsContinuation(char const chr)
 		{
-			return (static_cast<EnumType>(c) & continuationMask) != 0;
+			return (static_cast<EnumType>(chr) & continuationMask) != 0;
 		}
 
-		bool IsWhiteSpace(char const c) const
+		bool IsWhiteSpace(char const chr) const
 		{
-			return emitWhiteSpace && !IsContinuation(c) && std::isspace(c) != 0;
+			return emitWhiteSpace && !IsContinuation(chr) && std::isspace(chr) != 0;
 		}
 
 		void SetState(State const newState)
@@ -118,36 +118,36 @@ namespace GLib::Cpp
 			return std::exchange(continuationState, State::Error);
 		}
 
-		State Error(char const c) const
+		State Error(char const chr) const
 		{
-			static_cast<void>(c);
+			static_cast<void>(chr);
 			return state;
 		}
 
-		State None(char const c) const
+		State None(char const chr) const
 		{
-			if (c == forwardSlash)
+			if (chr == forwardSlash)
 			{
 				SetContinue(state);
 				return State::CommentStart;
 			}
 
-			if (c == hash)
+			if (chr == hash)
 			{
 				return State::Directive;
 			}
 
-			if (c == doubleQuote)
+			if (chr == doubleQuote)
 			{
 				return State::String;
 			}
 
-			if (c == singleQuote)
+			if (chr == singleQuote)
 			{
 				return State::CharacterLiteral;
 			}
 
-			if (IsWhiteSpace(c))
+			if (IsWhiteSpace(chr))
 			{
 				return emitWhiteSpace ? State::WhiteSpace : state;
 			}
@@ -155,35 +155,35 @@ namespace GLib::Cpp
 			return State::Code;
 		}
 
-		State WhiteSpace(char const c) const
+		State WhiteSpace(char const chr) const
 		{
-			if (c == forwardSlash)
+			if (chr == forwardSlash)
 			{
 				SetContinue(state);
 				return State::CommentStart;
 			}
 
-			if (c == hash)
+			if (chr == hash)
 			{
 				return State::Directive;
 			}
 
-			if (c == doubleQuote)
+			if (chr == doubleQuote)
 			{
 				return State::String;
 			}
 
-			if (c == singleQuote)
+			if (chr == singleQuote)
 			{
 				return State::CharacterLiteral;
 			}
 
-			if (c == newLine)
+			if (chr == newLine)
 			{
 				return State::None;
 			}
 
-			if (!IsWhiteSpace(c))
+			if (!IsWhiteSpace(chr))
 			{
 				return State::Code;
 			}
@@ -191,22 +191,22 @@ namespace GLib::Cpp
 			return state;
 		}
 
-		State CommentStart(char const c) const
+		State CommentStart(char const chr) const
 		{
-			if (c == forwardSlash)
+			if (chr == forwardSlash)
 			{
 				return State::CommentLine;
 			}
-			if (c == asterisk)
+			if (chr == asterisk)
 			{
 				return State::CommentBlock;
 			}
 			return Continue();
 		}
 
-		State CommentLine(char const c) const
+		State CommentLine(char const chr) const
 		{
-			if (c == newLine && lastChar != backSlash)
+			if (chr == newLine && lastChar != backSlash)
 			{
 				return State::None;
 			}
@@ -214,41 +214,41 @@ namespace GLib::Cpp
 			return state;
 		}
 
-		State Continuation(char /*c*/) const
+		State Continuation(char /*chr*/) const
 		{
 			return Continue();
 		}
 
-		State CommentBlock(char const c) const
+		State CommentBlock(char const chr) const
 		{
-			if (c == asterisk)
+			if (chr == asterisk)
 			{
 				return State::CommentAsterisk;
 			}
 			return state;
 		}
 
-		State CommentAsterisk(char const c) const
+		State CommentAsterisk(char const chr) const
 		{
-			if (c == forwardSlash)
+			if (chr == forwardSlash)
 			{
 				return State::None;
 			}
-			if (c != asterisk)
+			if (chr != asterisk)
 			{
 				return State::CommentBlock;
 			}
 			return state;
 		}
 
-		State Directive(char const c) const
+		State Directive(char const chr) const
 		{
-			if (c == newLine && lastChar != backSlash)
+			if (chr == newLine && lastChar != backSlash)
 			{
 				return State::None;
 			}
 
-			if (c == forwardSlash)
+			if (chr == forwardSlash)
 			{
 				SetContinue(state);
 				return State::CommentStart;
@@ -257,9 +257,9 @@ namespace GLib::Cpp
 			return state;
 		}
 
-		State String(char const c) const
+		State String(char const chr) const
 		{
-			if (c == backSlash)
+			if (chr == backSlash)
 			{
 				stringEscape = !stringEscape;
 				return state;
@@ -271,7 +271,7 @@ namespace GLib::Cpp
 				return state;
 			}
 
-			if (c == doubleQuote)
+			if (chr == doubleQuote)
 			{
 				return State::None;
 			}
@@ -279,15 +279,15 @@ namespace GLib::Cpp
 			return state;
 		}
 
-		State RawStringPrefix(char const c) const
+		State RawStringPrefix(char const chr) const
 		{
-			if (c == openParenthesis)
+			if (chr == openParenthesis)
 			{
 				matchCount = 0;
 				return State::RawString;
 			}
 
-			if (IsWhiteSpace(c) || c == closeParenthesis || c == backSlash)
+			if (IsWhiteSpace(chr) || chr == closeParenthesis || chr == backSlash)
 			{
 				return State::Error;
 			}
@@ -297,13 +297,13 @@ namespace GLib::Cpp
 				return State::Error;
 			}
 
-			rawStringPrefix += c;
+			rawStringPrefix += chr;
 			return state;
 		}
 
-		State RawString(char const c) const
+		State RawString(char const chr) const
 		{
-			if (c == closeParenthesis)
+			if (chr == closeParenthesis)
 			{
 				if (matchCount != 0)
 				{
@@ -314,12 +314,12 @@ namespace GLib::Cpp
 				return state;
 			}
 
-			if (matchCount != 0 && matchCount - 1 == rawStringPrefix.size() && c == doubleQuote)
+			if (matchCount != 0 && matchCount - 1 == rawStringPrefix.size() && chr == doubleQuote)
 			{
 				return State::None;
 			}
 
-			if (matchCount != 0 && matchCount - 1 < rawStringPrefix.size() && c == rawStringPrefix[matchCount - 1])
+			if (matchCount != 0 && matchCount - 1 < rawStringPrefix.size() && chr == rawStringPrefix[matchCount - 1])
 			{
 				++matchCount;
 			}
@@ -331,20 +331,20 @@ namespace GLib::Cpp
 			return state;
 		}
 
-		State Code(char const c) const
+		State Code(char const chr) const
 		{
-			if (emitWhiteSpace && IsWhiteSpace(c))
+			if (emitWhiteSpace && IsWhiteSpace(chr))
 			{
 				return State::WhiteSpace;
 			}
 
-			if (c == forwardSlash)
+			if (chr == forwardSlash)
 			{
 				SetContinue(state);
 				return State::CommentStart;
 			}
 
-			if (c == doubleQuote)
+			if (chr == doubleQuote)
 			{
 				if (lastChar == 'R')
 				{
@@ -355,12 +355,12 @@ namespace GLib::Cpp
 				return State::String;
 			}
 
-			if (c == singleQuote && std::isxdigit(lastChar) == 0)
+			if (chr == singleQuote && std::isxdigit(lastChar) == 0)
 			{
 				return State::CharacterLiteral;
 			}
 
-			if (c == '\n')
+			if (chr == '\n')
 			{
 				return State::None;
 			}
@@ -368,15 +368,15 @@ namespace GLib::Cpp
 			return state;
 		}
 
-		State CharacterLiteral(char const c) const
+		State CharacterLiteral(char const chr) const
 		{
-			if (c == backSlash)
+			if (chr == backSlash)
 			{
 				stringEscape = !stringEscape;
 				return state;
 			}
 
-			if (c == newLine)
+			if (chr == newLine)
 			{
 				return State::Error;
 			}
@@ -387,7 +387,7 @@ namespace GLib::Cpp
 				return state;
 			}
 
-			if (c == singleQuote)
+			if (chr == singleQuote)
 			{
 				return State::None;
 			}

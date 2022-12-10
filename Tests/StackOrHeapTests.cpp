@@ -16,11 +16,11 @@ AUTO_TEST_SUITE(StackOrHeapTests)
 
 AUTO_TEST_CASE(Alloc)
 {
-	GLib::Util::StackOrHeap<char, sz100> s;
-	CHECK(sz100 == s.Size());
-	TEST(nullptr != s.Get());
+	GLib::Util::StackOrHeap<char, sz100> soh;
+	CHECK(sz100 == soh.Size());
+	TEST(nullptr != soh.Get());
 
-	auto * ss = new (s.Get()) std::string(sz99, '-'); // NOLINT(cppcoreguidelines-owning-memory)
+	auto * ss = new (soh.Get()) std::string(sz99, '-'); // NOLINT(cppcoreguidelines-owning-memory)
 	TEST(*ss == std::string(sz99, '-'));
 	ss->std::string::~string();
 }
@@ -54,9 +54,9 @@ AUTO_TEST_CASE(Realloc)
 
 AUTO_TEST_CASE(Const)
 {
-	GLib::Util::StackOrHeap<char, sz100> const s;
-	CHECK(sz100 == s.Size());
-	TEST(nullptr != s.Get());
+	GLib::Util::StackOrHeap<char, sz100> const soh;
+	CHECK(sz100 == soh.Size());
+	TEST(nullptr != soh.Get());
 }
 
 AUTO_TEST_SUITE_END()

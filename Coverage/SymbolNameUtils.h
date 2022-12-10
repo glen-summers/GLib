@@ -6,29 +6,29 @@
 
 inline bool Parse(std::string & name, unsigned int imbalance, char const open, char const close)
 {
-	std::ostringstream s;
+	std::ostringstream stm;
 	unsigned int depth {};
 
-	for (auto const c : name)
+	for (auto const chr : name)
 	{
-		if (c == open)
+		if (chr == open)
 		{
 			if (++depth == 1)
 			{
-				s.put(c);
-				s.put('T');
+				stm.put(chr);
+				stm.put('T');
 			}
 		}
-		else if (c == close)
+		else if (chr == close)
 		{
 			if (depth != 0 && --depth == 0)
 			{
-				s.put(c);
+				stm.put(chr);
 			}
 			else if (depth == 0 && imbalance != 0)
 			{
 				--imbalance;
-				s.put(c);
+				stm.put(chr);
 			}
 			else if (depth == 0)
 			{
@@ -39,11 +39,11 @@ inline bool Parse(std::string & name, unsigned int imbalance, char const open, c
 		{
 			if (depth == 0)
 			{
-				s.put(c);
+				stm.put(chr);
 			}
 		}
 	}
-	name = s.str();
+	name = stm.str();
 	return true;
 }
 
@@ -52,9 +52,9 @@ inline void RemoveTemplateDefinitions(std::string & name)
 	int left {};
 	int right {};
 
-	for (auto const c : name)
+	for (auto const chr : name)
 	{
-		switch (c)
+		switch (chr)
 		{
 			case '<':
 			{
@@ -77,19 +77,19 @@ inline void RemoveTemplateDefinitions(std::string & name)
 		return;
 	}
 
-	bool ok {};
+	bool okay {};
 	if (left < right)
 	{
-		ok = Parse(name, right - left, '<', '>');
+		okay = Parse(name, right - left, '<', '>');
 	}
 	else
 	{
 		std::ranges::reverse(name);
-		ok = Parse(name, right - left, '>', '<');
+		okay = Parse(name, right - left, '>', '<');
 		std::ranges::reverse(name);
 	}
 
-	if (!ok)
+	if (!okay)
 	{
 		throw std::runtime_error("Unable to parse symbol: " + name);
 	}

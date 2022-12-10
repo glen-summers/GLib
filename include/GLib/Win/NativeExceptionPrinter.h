@@ -106,23 +106,23 @@ namespace GLib::Win::Symbols
 			}
 		}
 
-		inline void Trace(std::ostream & s, SymProcess const & process, Symbol const & symbol, uint64_t const address)
+		inline void Trace(std::ostream & stm, SymProcess const & process, Symbol const & symbol, uint64_t const address)
 		{
 			auto name = symbol.Name();
 			UnDecorate(name);
-			Formatter::Format(s, "\t{0} + 0x{1:%X}\n", name, symbol.Displacement());
+			Formatter::Format(stm, "\t{0} + 0x{1:%X}\n", name, symbol.Displacement());
 			if (auto const line = process.TryGetLineFromAddress(address))
 			{
-				Formatter::Format(s, "\t{0}({1})", line->FileName(), line->LineNumber());
+				Formatter::Format(stm, "\t{0}({1})", line->FileName(), line->LineNumber());
 				if (line->Displacement() != 0)
 				{
-					s << " + " << line->Displacement() << " byte(s)";
+					stm << " + " << line->Displacement() << " byte(stm)";
 				}
-				s << '\n';
+				stm << '\n';
 			}
 		}
 
-		inline void InlineTrace(std::ostream & s, SymProcess const & process, uint64_t const address, ULONG const inlineTrace)
+		inline void InlineTrace(std::ostream & stm, SymProcess const & process, uint64_t const address, ULONG const inlineTrace)
 		{
 			ULONG inlineContext {};
 			ULONG inlineFrameIndex {};
@@ -135,30 +135,30 @@ namespace GLib::Win::Symbols
 					{
 						auto name = symbol->Name();
 						UnDecorate(name);
-						Formatter::Format(s, "\tinline context {0} + 0x{1:%x}\n", name, symbol->Displacement());
+						Formatter::Format(stm, "\tinline context {0} + 0x{1:%x}\n", name, symbol->Displacement());
 						if (auto const line = process.TryGetLineFromInlineContext(address, i))
 						{
-							Formatter::Format(s, "\t{0}({1})", line->FileName(), line->LineNumber());
+							Formatter::Format(stm, "\t{0}({1})", line->FileName(), line->LineNumber());
 							if (line->Displacement() != 0)
 							{
-								s << " + " << line->Displacement() << " byte(s)";
+								stm << " + " << line->Displacement() << " byte(stm)";
 							}
-							s << '\n';
+							stm << '\n';
 						}
 					}
 				}
 			}
 		}
 
-		inline void WalkStack(std::ostream & s, SymProcess const & process, ULONG const machineType, STACKFRAME64 * const frame, CONTEXT * const context,
-													unsigned int const maxFrames)
+		inline void WalkStack(std::ostream & stm, SymProcess const & process, ULONG const machineType, STACKFRAME64 * const frame,
+													CONTEXT * const context, unsigned int const maxFrames)
 		{
 			for (unsigned int frames = 0; frames < maxFrames; ++frames)
 			{
 				if (StackWalk64(machineType, process.Handle(), GetCurrentThread(), frame, context, nullptr, SymFunctionTableAccess64, SymGetModuleBase64,
 												nullptr) == FALSE)
 				{
-					s << "StackWalk64: " << GetLastError() << '\n';
+					stm << "StackWalk64: " << GetLastError() << '\n';
 					break;
 				}
 
@@ -173,36 +173,36 @@ namespace GLib::Win::Symbols
 				{
 					auto * module = static_cast<HMODULE>(mb.AllocationBase);
 					std::string const moduleName = FileSystem::PathOfModule(module);
-					Formatter::Format(s, "{0,-30} + 0x{1:%08X}\n", moduleName, address - WindowsCast<DWORD_PTR>(mb.AllocationBase));
+					Formatter::Format(stm, "{0,-30} + 0x{1:%08X}\n", moduleName, address - WindowsCast<DWORD_PTR>(mb.AllocationBase));
 				}
 
 				ULONG const inlineTrace = SymAddrIncludeInlineTrace(process.Handle(), address);
 				if (inlineTrace != 0)
 				{
-					InlineTrace(s, process, address, inlineTrace);
+					InlineTrace(stm, process, address, inlineTrace);
 				}
 				else if (auto symbol = process.TryGetSymbolFromAddress(address))
 				{
-					Trace(s, process, *symbol, address);
+					Trace(stm, process, *symbol, address);
 				}
 			}
 		}
 	}
 
-	inline void Print(std::ostream & s, EXCEPTION_POINTERS const * exceptionInfo, unsigned int const maxFrames)
+	inline void Print(std::ostream & stm, EXCEPTION_POINTERS const * exceptionInfo, unsigned int const maxFrames)
 	{
 		constexpr ULONG cPlusPlusExceptionNumber = 0xe06d7363;
 		EXCEPTION_RECORD const * const er = exceptionInfo->ExceptionRecord;
 		std::span const info {er->ExceptionInformation};
 
-		Formatter::Format(s, "Unhandled exception at {0} (code: {1:%08X})", er->ExceptionAddress, er->ExceptionCode);
+		Formatter::Format(stm, "Unhandled exception at {0} (code: {1:%08X})", er->ExceptionAddress, er->ExceptionCode);
 
 		switch (er->ExceptionCode)
 		{
 			case STATUS_ACCESS_VIOLATION:
 			{
 				auto const msg = info[0] == 0 ? "reading"sv : "writing"sv;
-				Formatter::Format(s, " : Access violation {0} address {1}\n", msg, WindowsCast<PVOID>(info[1]));
+				Formatter::Format(stm, " : Access violation {0} address {1}\n", msg, WindowsCast<PVOID>(info[1]));
 				break;
 			}
 
@@ -213,7 +213,7 @@ namespace GLib::Win::Symbols
 				{
 					Detail::GetCPlusPlusExceptionNameEx(info, name);
 				}
-				Formatter::Format(s, " : C++ exception of type: '{0}'\n", name);
+				Formatter::Format(stm, " : C++ exception of type: '{0}'\n", name);
 
 				[[fallthrough]];
 			}
@@ -222,16 +222,16 @@ namespace GLib::Win::Symbols
 			{
 				if (er->NumberParameters != 0)
 				{
-					s << "\tException parameters: ";
+					stm << "\tException parameters: ";
 					for (ULONG i = 0; i < er->NumberParameters; ++i)
 					{
 						if (i != 0)
 						{
-							s << ", ";
+							stm << ", ";
 						}
-						s << WindowsCast<PVOID>(info[i]);
+						stm << WindowsCast<PVOID>(info[i]);
 					}
-					s << std::endl;
+					stm << std::endl;
 				}
 				break;
 			}
@@ -261,6 +261,6 @@ namespace GLib::Win::Symbols
 #error "Unsupported platform"
 #endif
 
-		Detail::WalkStack(s, SymProcess::CurrentProcess(), machineType, &frame, &context, maxFrames);
+		Detail::WalkStack(stm, SymProcess::CurrentProcess(), machineType, &frame, &context, maxFrames);
 	}
 }

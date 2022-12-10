@@ -56,15 +56,15 @@ AUTO_TEST_SUITE(FormatterTests)
 
 AUTO_TEST_CASE(BasicTest)
 {
-	std::string s = Formatter::Format("{0} {1} {2} {3}", 1, "2", std::string("3"),
-																		reinterpret_cast<void *>(4)); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
+	std::string str = Formatter::Format("{0} {1} {2} {3}", 1, "2", std::string("3"),
+																			reinterpret_cast<void *>(4)); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
 	if constexpr (sizeof(void *) == SZ(8))
 	{
-		TEST(s == "1 2 3 0000000000000004");
+		TEST(str == "1 2 3 0000000000000004");
 	}
 	else if constexpr (sizeof(void *) == SZ(4))
 	{
-		TEST(s == "1 2 3 00000004");
+		TEST(str == "1 2 3 00000004");
 	}
 	else
 	{
@@ -74,16 +74,16 @@ AUTO_TEST_CASE(BasicTest)
 
 AUTO_TEST_CASE(TestEmptyFormatOk)
 {
-	std::string const s = Formatter::Format("", 1, 2, 3);
-	TEST(s.empty());
+	std::string const str = Formatter::Format("", 1, 2, 3);
+	TEST(str.empty());
 }
 
 AUTO_TEST_CASE(TestEscapes)
 {
 	TEST(GLib::FormatterDetail::IsFormattable<Xyzzy>::value);
 
-	std::string s = Formatter::Format("{0} {{1}} {2} {3:{{4}}}", "a", "b", "c", Xyzzy());
-	TEST("a {1} c {4}:plover" == s);
+	std::string str = Formatter::Format("{0} {{1}} {2} {3:{{4}}}", "a", "b", "c", Xyzzy());
+	TEST("a {1} c {4}:plover" == str);
 }
 
 AUTO_TEST_CASE(NoArgumentsThrows)
@@ -133,23 +133,23 @@ AUTO_TEST_CASE(TestInvalidCharacterAfterIndex)
 
 AUTO_TEST_CASE(TestSpacesOk)
 {
-	std::string s = Formatter::Format("{0    }", I32(1234));
-	TEST("1234" == s);
+	std::string str = Formatter::Format("{0    }", I32(1234));
+	TEST("1234" == str);
 
-	s = Formatter::Format("{0    ,   -10   }", I32(1234));
-	TEST("1234      " == s);
+	str = Formatter::Format("{0    ,   -10   }", I32(1234));
+	TEST("1234      " == str);
 }
 
 AUTO_TEST_CASE(TestRepeatedInsert)
 {
-	std::string s = Formatter::Format("{0} {0:%x}", I32(1234));
-	TEST("1234 4d2" == s);
+	std::string str = Formatter::Format("{0} {0:%x}", I32(1234));
+	TEST("1234 4d2" == str);
 }
 
 AUTO_TEST_CASE(TestSprintfFormatPassThrough)
 {
-	std::string s = Formatter::Format("{0:%#.8X}", I32(1234));
-	TEST("0X000004D2" == s);
+	std::string str = Formatter::Format("{0:%#.8X}", I32(1234));
+	TEST("0X000004D2" == str);
 }
 
 AUTO_TEST_CASE(TestSprintfFormatException)
@@ -160,27 +160,27 @@ AUTO_TEST_CASE(TestSprintfFormatException)
 
 AUTO_TEST_CASE(TestSprintfFormatLengthNoException)
 {
-	std::string s = Formatter::Format("{0:%#40.8x}", I32(1234));
-	TEST("                              0x000004d2" == s);
+	std::string str = Formatter::Format("{0:%#40.8x}", I32(1234));
+	TEST("                              0x000004d2" == str);
 }
 
 AUTO_TEST_CASE(TestCharLiteral)
 {
-	std::string s = Formatter::Format("{0}", "abcd");
-	TEST("abcd" == s);
+	std::string str = Formatter::Format("{0}", "abcd");
+	TEST("abcd" == str);
 }
 
 AUTO_TEST_CASE(TestString)
 {
 	std::string const value = "abcd";
-	std::string s = Formatter::Format("{0}", value);
-	TEST("abcd" == s);
+	std::string str = Formatter::Format("{0}", value);
+	TEST("abcd" == str);
 }
 
 AUTO_TEST_CASE(TestBool)
 {
-	std::string s = Formatter::Format("{0}:{1}", true, false);
-	TEST("1:0" == s);
+	std::string str = Formatter::Format("{0}:{1}", true, false);
+	TEST("1:0" == str);
 
 	std::ostringstream stm;
 	stm << std::boolalpha;
@@ -190,112 +190,112 @@ AUTO_TEST_CASE(TestBool)
 
 AUTO_TEST_CASE(TestInt)
 {
-	std::string s = Formatter::Format("{0}", -I32(2000000000));
-	TEST("-2000000000" == s);
+	std::string str = Formatter::Format("{0}", -I32(2000000000));
+	TEST("-2000000000" == str);
 }
 
 AUTO_TEST_CASE(TestIntFormat)
 {
-	std::string s = Formatter::Format("{0:%x}", -I32(2000000000));
-	TEST("88ca6c00" == s);
+	std::string str = Formatter::Format("{0:%x}", -I32(2000000000));
+	TEST("88ca6c00" == str);
 }
 
 AUTO_TEST_CASE(TestUnisgnedInt)
 {
-	std::string s = Formatter::Format("{0}", U32(4000000000));
-	TEST("4000000000" == s);
+	std::string str = Formatter::Format("{0}", U32(4000000000));
+	TEST("4000000000" == str);
 }
 
 AUTO_TEST_CASE(TestUnisgnedIntFormat)
 {
-	std::string s = Formatter::Format("{0:%x}", H32(12345678));
-	TEST("12345678" == s);
+	std::string str = Formatter::Format("{0:%x}", H32(12345678));
+	TEST("12345678" == str);
 }
 
 AUTO_TEST_CASE(TestLong)
 {
-	std::string s = Formatter::Format("{0}", I64(1234567890123456789));
-	TEST("1234567890123456789" == s);
+	std::string str = Formatter::Format("{0}", I64(1234567890123456789));
+	TEST("1234567890123456789" == str);
 }
 
 AUTO_TEST_CASE(TestLongFormat)
 {
-	std::string s = Formatter::Format("{0:%lx}", H32(12345678));
-	TEST("12345678" == s);
+	std::string str = Formatter::Format("{0:%lx}", H32(12345678));
+	TEST("12345678" == str);
 }
 
 AUTO_TEST_CASE(TestUnsignedLong)
 {
-	std::string s = Formatter::Format("{0}", U64(1234567890123456789));
-	TEST("1234567890123456789" == s);
+	std::string str = Formatter::Format("{0}", U64(1234567890123456789));
+	TEST("1234567890123456789" == str);
 }
 
 AUTO_TEST_CASE(TestUnsignedLongFormat)
 {
-	std::string s = Formatter::Format("{0:%lx}", H32(12345678));
-	TEST("12345678" == s);
+	std::string str = Formatter::Format("{0:%lx}", H32(12345678));
+	TEST("12345678" == str);
 }
 
 AUTO_TEST_CASE(TestLongLong)
 {
-	std::string s = Formatter::Format("{0}", I64(1234567890123456789));
-	TEST("1234567890123456789" == s);
+	std::string str = Formatter::Format("{0}", I64(1234567890123456789));
+	TEST("1234567890123456789" == str);
 }
 
 AUTO_TEST_CASE(TestLongLongFormat)
 {
-	std::string s = Formatter::Format("{0:%llx}", H64(123456789abcdef0));
-	TEST("123456789abcdef0" == s);
+	std::string str = Formatter::Format("{0:%llx}", H64(123456789abcdef0));
+	TEST("123456789abcdef0" == str);
 }
 
 AUTO_TEST_CASE(TestULongLong)
 {
-	std::string s = Formatter::Format("{0}", U64(12345678901234567890));
-	TEST("12345678901234567890" == s);
+	std::string str = Formatter::Format("{0}", U64(12345678901234567890));
+	TEST("12345678901234567890" == str);
 }
 
 AUTO_TEST_CASE(TestULongLongFormat)
 {
-	std::string s = Formatter::Format("{0:%llx}", H64(123456789abcdef0));
-	TEST("123456789abcdef0" == s);
+	std::string str = Formatter::Format("{0:%llx}", H64(123456789abcdef0));
+	TEST("123456789abcdef0" == str);
 }
 
 AUTO_TEST_CASE(TestFloat)
 {
 	auto foo = FL(1.234);
 
-	std::string s = Formatter::Format("{0}", foo);
-	TEST("1.234" == s);
+	std::string str = Formatter::Format("{0}", foo);
+	TEST("1.234" == str);
 }
 
 AUTO_TEST_CASE(TestFloatFormat)
 {
-	std::string s = Formatter::Format("{0:%.2f}", FL(1.2345678));
-	TEST("1.23" == s);
+	std::string str = Formatter::Format("{0:%.2f}", FL(1.2345678));
+	TEST("1.23" == str);
 }
 
 AUTO_TEST_CASE(TestDouble)
 {
-	std::string s = Formatter::Format("{0}", DB(1.234));
-	TEST("1.234" == s);
+	std::string str = Formatter::Format("{0}", DB(1.234));
+	TEST("1.234" == str);
 }
 
 AUTO_TEST_CASE(TestDoubleFormat)
 {
-	std::string s = Formatter::Format("{0:%.2f}", DB(1.23456789012345));
-	TEST("1.23" == s);
+	std::string str = Formatter::Format("{0:%.2f}", DB(1.23456789012345));
+	TEST("1.23" == str);
 }
 
 AUTO_TEST_CASE(TestLongDouble)
 {
-	std::string s = Formatter::Format("{0}", LD(1.234));
-	TEST("1.234" == s);
+	std::string str = Formatter::Format("{0}", LD(1.234));
+	TEST("1.234" == str);
 }
 
 AUTO_TEST_CASE(TestLongDoubleFormat)
 {
-	std::string s = Formatter::Format("{0:%.2Lf}", LD(1.23456789012345));
-	TEST("1.23" == s);
+	std::string str = Formatter::Format("{0:%.2Lf}", LD(1.23456789012345));
+	TEST("1.23" == str);
 }
 
 AUTO_TEST_CASE(TestPointer32)
@@ -315,8 +315,8 @@ AUTO_TEST_CASE(TestPointer32)
 		// -Werror=int-to-pointer-cast
 		auto const * p = reinterpret_cast<void const *>(H32(1234abcd)); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast, performance-no-int-to-ptr)
 
-		std::string s = Formatter::Format("{0}", p);
-		TEST("1234ABCD" == s);
+		std::string str = Formatter::Format("{0}", p);
+		TEST("1234ABCD" == str);
 	}
 
 #ifdef _MSC_VER
@@ -333,8 +333,8 @@ AUTO_TEST_CASE(TestPointer64)
 	if constexpr (sizeof(void *) == sizeof(uint64_t))
 	{
 		auto * p = reinterpret_cast<void *>(H64(123456789abcdef0)); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast, performance-no-int-to-ptr)
-		std::string s = Formatter::Format("{0}", p);
-		TEST("123456789ABCDEF0" == s);
+		std::string str = Formatter::Format("{0}", p);
+		TEST("123456789ABCDEF0" == str);
 	}
 }
 
@@ -344,43 +344,43 @@ AUTO_TEST_CASE(TestTimePointDefaultFormat)
 	int constexpr yr = 1601;
 	tm const tm = MakeTm(0, 0, 0, 1, 0, yr - offset, 0, 0, 0);
 
-	std::ostringstream s;
-	s.imbue(std::locale(UnitedKingdomLocale));
-	Formatter::Format(s, "{0}", tm);
-	TEST("01 Jan 1601, 00:00:00" == s.str());
+	std::ostringstream str;
+	str.imbue(std::locale(UnitedKingdomLocale));
+	Formatter::Format(str, "{0}", tm);
+	TEST("01 Jan 1601, 00:00:00" == str.str());
 }
 
 AUTO_TEST_CASE(TestTimePoint)
 {
 	tm const tm = MakeTm(0, 0, 18, 6, 10, 67, 0, 0, 1);
 
-	std::ostringstream s;
-	s.imbue(std::locale(UnitedKingdomLocale));
-	Formatter::Format(s, "{0:%d %b %Y, %H:%M:%S}", tm);
-	TEST("06 Nov 1967, 18:00:00" == s.str());
+	std::ostringstream str;
+	str.imbue(std::locale(UnitedKingdomLocale));
+	Formatter::Format(str, "{0:%d %b %Y, %H:%M:%S}", tm);
+	TEST("06 Nov 1967, 18:00:00" == str.str());
 }
 
 AUTO_TEST_CASE(TestPad)
 {
-	std::string s = Formatter::Format("{0},{1,4},{2}", 0, 1, 2);
-	TEST("0,   1,2" == s);
+	std::string str = Formatter::Format("{0},{1,4},{2}", 0, 1, 2);
+	TEST("0,   1,2" == str);
 
-	s = Formatter::Format("{0},{1,-4},{2}", 0, 1, 2);
-	TEST("0,1   ,2" == s);
+	str = Formatter::Format("{0},{1,-4},{2}", 0, 1, 2);
+	TEST("0,1   ,2" == str);
 }
 
 AUTO_TEST_CASE(CustomTypeNoFormat)
 {
 	Xyzzy const plugh;
-	std::string s = Formatter::Format("{0}", plugh);
-	TEST("plover" == s);
+	std::string str = Formatter::Format("{0}", plugh);
+	TEST("plover" == str);
 }
 
 AUTO_TEST_CASE(CustomTypeFormat)
 {
 	Xyzzy const plugh;
-	std::string s = Formatter::Format("{0:fmt}", plugh);
-	TEST("fmt:plover" == s);
+	std::string str = Formatter::Format("{0:fmt}", plugh);
+	TEST("fmt:plover" == str);
 }
 
 AUTO_TEST_CASE(CustomTypeNonEmptyFormatException)
@@ -393,12 +393,12 @@ AUTO_TEST_CASE(MoneyTest)
 {
 	GLib::Money const m {FL(123456.7)};
 
-	std::ostringstream s;
-	s.imbue(std::locale(UnitedKingdomLocale));
-	Formatter::Format(s, "{0}", m);
+	std::ostringstream str;
+	str.imbue(std::locale(UnitedKingdomLocale));
+	Formatter::Format(str, "{0}", m);
 	auto const * expected = "\xc2\xa3"
 													"1,234.57";
-	TEST(expected == s.str());
+	TEST(expected == str.str());
 }
 
 AUTO_TEST_CASE(TestLargeObject)
@@ -410,11 +410,11 @@ AUTO_TEST_CASE(TestLargeObject)
 	CHECK(c2.Copies() == 1 && c1.Moves() == 0);
 
 	CopyCheck const c3;
-	std::string s = Formatter::Format("{0}", c3);
-	TEST("0:0" == s);
+	std::string str = Formatter::Format("{0}", c3);
+	TEST("0:0" == str);
 
-	s = Formatter::Format("{0}", CopyCheck());
-	TEST("0:0" == s);
+	str = Formatter::Format("{0}", CopyCheck());
+	TEST("0:0" == str);
 }
 
 AUTO_TEST_SUITE_END()

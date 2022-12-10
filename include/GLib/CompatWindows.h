@@ -32,14 +32,14 @@ namespace GLib::Compat
 		}
 	}
 
-	inline void LocalTime(tm & tm, time_t const & t)
+	inline void LocalTime(tm & tmValue, time_t const & time)
 	{
-		ThrowErrorNumber(static_cast<char const *>(__func__), localtime_s(&tm, &t));
+		ThrowErrorNumber(static_cast<char const *>(__func__), localtime_s(&tmValue, &time));
 	}
 
-	inline void GmTime(tm & tm, time_t const & t)
+	inline void GmTime(tm & tmValue, time_t const & time)
 	{
-		ThrowErrorNumber(static_cast<char const *>(__func__), gmtime_s(&tm, &t));
+		ThrowErrorNumber(static_cast<char const *>(__func__), gmtime_s(&tmValue, &time));
 	}
 
 	inline void AssertTrue(bool const value, std::string_view const prefix, errno_t const error)

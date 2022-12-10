@@ -45,14 +45,14 @@ namespace GLib
 		inline std::ostream & AppendFormatHelper(std::ostream & str, std::string_view view, std::span<StreamFunction> const & args)
 		{
 			constexpr auto DecimalShift = 10;
-			char ch = {};
+			char chr = {};
 			for (auto it = view.begin(), end = view.end();;)
 			{
 				while (it != end)
 				{
-					ch = *it++;
+					chr = *it++;
 
-					if (ch == '}')
+					if (chr == '}')
 					{
 						if (it != end && *it == '}') // Treat as escape character for }}
 						{
@@ -64,7 +64,7 @@ namespace GLib
 						}
 					}
 
-					if (ch == '{')
+					if (chr == '{')
 					{
 						if (it != end && *it == '{') // Treat as escape character for {{
 						{
@@ -77,7 +77,7 @@ namespace GLib
 						}
 					}
 
-					str << ch;
+					str << chr;
 				}
 
 				if (it == end)
@@ -90,7 +90,7 @@ namespace GLib
 					FormatError();
 				}
 
-				if (ch = *it; it == end || ch < '0' || ch > '9')
+				if (chr = *it; it == end || chr < '0' || chr > '9')
 				{
 					FormatError();
 				}
@@ -98,22 +98,22 @@ namespace GLib
 				size_t index {};
 				do
 				{
-					index = index * DecimalShift + ch - '0';
+					index = index * DecimalShift + chr - '0';
 					if (++it == end)
 					{
 						FormatError();
 					}
-					ch = *it;
-				} while (ch >= '0' && ch <= '9');
+					chr = *it;
+				} while (chr >= '0' && chr <= '9');
 
-				while (it != end && (ch = *it) == ' ')
+				while (it != end && (chr = *it) == ' ')
 				{
 					++it;
 				}
 
 				bool leftJustify = {};
 				std::streamsize width {};
-				if (ch == ',')
+				if (chr == ',')
 				{
 					++it;
 					while (it != end && *it == ' ')
@@ -126,8 +126,8 @@ namespace GLib
 						FormatError();
 					}
 
-					ch = *it;
-					if (ch == '-')
+					chr = *it;
+					if (chr == '-')
 					{
 						leftJustify = true;
 						++it;
@@ -135,34 +135,34 @@ namespace GLib
 						{
 							FormatError();
 						}
-						ch = *it;
+						chr = *it;
 					}
 
-					if (ch < '0' || ch > '9')
+					if (chr < '0' || chr > '9')
 					{
 						FormatError();
 					}
 
 					do
 					{
-						width = width * DecimalShift + ch - '0';
+						width = width * DecimalShift + chr - '0';
 						++it;
 						if (it == end)
 						{
 							FormatError();
 						}
-						ch = *it;
-					} while (ch >= '0' && ch <= '9');
+						chr = *it;
+					} while (chr >= '0' && chr <= '9');
 				}
 
-				while (it != end && (ch = *it) == ' ')
+				while (it != end && (chr = *it) == ' ')
 				{
 					++it;
 				}
 
 				std::string format; // use string_view?
 
-				if (ch == ':')
+				if (chr == ':')
 				{
 					std::ostringstream tmp; // capture a string_view
 					++it;
@@ -172,9 +172,9 @@ namespace GLib
 						{
 							FormatError();
 						}
-						ch = *it;
+						chr = *it;
 						++it;
-						if (ch == '{')
+						if (chr == '{')
 						{
 							if (it != end && *it == '{') // Treat as escape character for {{
 							{
@@ -185,7 +185,7 @@ namespace GLib
 								FormatError();
 							}
 						}
-						else if (ch == '}')
+						else if (chr == '}')
 						{
 							if (it != end && *it == '}') // Treat as escape character for }}
 							{
@@ -198,12 +198,12 @@ namespace GLib
 							}
 						}
 
-						tmp << ch;
+						tmp << chr;
 					}
 
 					format = tmp.str();
 				}
-				if (ch != '}')
+				if (chr != '}')
 				{
 					FormatError();
 				}
@@ -225,17 +225,17 @@ namespace GLib
 	{
 	public:
 		template <typename... Ts>
-		static std::ostream & Format(std::ostream & str, std::string_view const format, Ts const &... ts)
+		static std::ostream & Format(std::ostream & str, std::string_view const format, Ts const &... values)
 		{
-			std::array<FormatterDetail::StreamFunction, sizeof...(Ts)> ar {ToStreamFunctions(ts)...};
-			return FormatterDetail::AppendFormatHelper(str, format, {ar.data(), ar.size()});
+			std::array<FormatterDetail::StreamFunction, sizeof...(Ts)> array {ToStreamFunctions(values)...};
+			return FormatterDetail::AppendFormatHelper(str, format, {array.data(), array.size()});
 		}
 
 		template <typename... Ts>
-		static std::string Format(std::string_view const format, Ts &&... ts)
+		static std::string Format(std::string_view const format, Ts &&... values)
 		{
 			std::ostringstream str;
-			Format(str, format, std::forward<Ts>(ts)...);
+			Format(str, format, std::forward<Ts>(values)...);
 			return str.str();
 		}
 
@@ -249,17 +249,17 @@ namespace GLib
 	private:
 		// ? http://www.drdobbs.com/cpp/efficient-use-of-lambda-expressions-and/232500059
 		template <typename T>
-		static FormatterDetail::StreamFunction ToStreamFunctions(T const & t)
+		static FormatterDetail::StreamFunction ToStreamFunctions(T const & value)
 		{
-			return FormatterDetail::StreamFunction([&](std::ostream & stm, std::string const & format) { FormatImpl(stm, t, format, 0); });
+			return FormatterDetail::StreamFunction([&](std::ostream & stm, std::string const & format) { FormatImpl(stm, value, format, 0); });
 		}
 
 		template <typename T>
-		static auto FormatImpl(std::ostream & os, T const & obj, std::string const & format, int const unused)
-			-> decltype(Policy::Format(os, obj, format), void())
+		static auto FormatImpl(std::ostream & stm, T const & value, std::string const & format, int const unused)
+			-> decltype(Policy::Format(stm, value, format), void())
 		{
 			static_cast<void>(unused);
-			return Policy::Format(os, obj, format);
+			return Policy::Format(stm, value, format);
 		}
 
 		template <typename T, std::enable_if_t<FormatterDetail::IsFormattable<T>::value> * = nullptr>

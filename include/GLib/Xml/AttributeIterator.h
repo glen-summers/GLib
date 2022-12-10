@@ -53,9 +53,9 @@ namespace GLib::Xml
 			return currentPtr == other.currentPtr;
 		}
 
-		bool operator!=(AttributeIterator const & it) const
+		bool operator!=(AttributeIterator const & iter) const
 		{
-			return !(*this == it);
+			return !(*this == iter);
 		}
 
 		AttributeIterator & operator++()
@@ -79,11 +79,11 @@ namespace GLib::Xml
 		}
 
 	private:
-		[[noreturn]] void IllegalCharacter(char const c) const
+		[[noreturn]] void IllegalCharacter(char const chr) const
 		{
-			std::ostringstream s;
-			s << "Illegal character: '" << *ptr << "' (0x" << std::hex << static_cast<unsigned>(c) << ')';
-			throw std::runtime_error(s.str());
+			std::ostringstream stm;
+			stm << "Illegal character: '" << *ptr << "' (0x" << std::hex << static_cast<unsigned>(chr) << ')';
+			throw std::runtime_error(stm.str());
 		}
 
 		void Advance()

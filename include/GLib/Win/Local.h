@@ -9,9 +9,9 @@ namespace GLib::Win
 	{
 		struct LocalFreer
 		{
-			void operator()(HLOCAL const p) const noexcept
+			void operator()(HLOCAL const handle) const noexcept
 			{
-				Util::WarnAssertTrue(LocalFree(p) == nullptr, "LocalFree");
+				Util::WarnAssertTrue(LocalFree(handle) == nullptr, "LocalFree");
 			}
 		};
 	}

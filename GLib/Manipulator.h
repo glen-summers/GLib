@@ -16,9 +16,9 @@ namespace Detail
 			, argument {argument}
 		{}
 
-		std::ostream & Manipulate(std::ostream & s) const
+		std::ostream & Manipulate(std::ostream & stm) const
 		{
-			return function(s, argument);
+			return function(stm, argument);
 		}
 	};
 

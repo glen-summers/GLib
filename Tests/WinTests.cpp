@@ -33,37 +33,37 @@ using namespace GLib::Win; // NOLINT(google-build-using-namespace)
 template <>
 struct boost::test_tools::tt_detail::print_log_value<Variant>
 {
-	void operator()(std::ostream & str, Variant const & item) const
+	void operator()(std::ostream & stm, Variant const & item) const
 	{
-		str << item.Type();
+		stm << item.Type();
 	}
 };
 
 namespace
 {
-	LONG WINAPI Filter(std::ostream & s, EXCEPTION_POINTERS const * exceptionInfo)
+	LONG WINAPI Filter(std::ostream & stm, EXCEPTION_POINTERS const * exceptionInfo)
 	{
-		Symbols::Print(s, exceptionInfo, I32(100));
+		Symbols::Print(stm, exceptionInfo, I32(100));
 		return EXCEPTION_EXECUTE_HANDLER;
 	}
 
 	template <typename Function>
-	void GetStackTrace(std::ostream & s, Function const & function)
+	void GetStackTrace(std::ostream & stm, Function const & function)
 	{
 		__try // NOLINT(clang-diagnostic-language-extension-token)
 		{
 			function();
 		}
-		__except (Filter(s, GetExceptionInformation())) // NOLINT(cppcoreguidelines-pro-type-cstyle-cast)
+		__except (Filter(stm, GetExceptionInformation())) // NOLINT(cppcoreguidelines-pro-type-cstyle-cast)
 		{}
 	}
 
 	template <typename Function>
 	std::string GetStackTrace(Function const & function)
 	{
-		std::ostringstream s;
-		GetStackTrace(s, function);
-		return s.str();
+		std::ostringstream stm;
+		GetStackTrace(stm, function);
+		return stm.str();
 	}
 
 	std::filesystem::path GetTestApp()
@@ -231,38 +231,38 @@ AUTO_TEST_CASE(RegistryCreateKey)
 
 AUTO_TEST_CASE(PrintNativeException1)
 {
-	auto s = GetStackTrace([] { throw std::runtime_error("!"); });
+	auto stm = GetStackTrace([] { throw std::runtime_error("!"); });
 
-	TEST(s.find("Unhandled exception at") != std::string::npos);
-	TEST(s.find("(code: E06D7363) : C++ exception of type: 'class std::runtime_error'") != std::string::npos);
-	TEST(s.find("RaiseException") != std::string::npos);
-	TEST(s.find("CxxThrowException") != std::string::npos);
-	TEST(s.find("GetStackTrace") != std::string::npos);
-	TEST(s.find("WinTests::PrintNativeException1") != std::string::npos);
+	TEST(stm.find("Unhandled exception at") != std::string::npos);
+	TEST(stm.find("(code: E06D7363) : C++ exception of type: 'class std::runtime_error'") != std::string::npos);
+	TEST(stm.find("RaiseException") != std::string::npos);
+	TEST(stm.find("CxxThrowException") != std::string::npos);
+	TEST(stm.find("GetStackTrace") != std::string::npos);
+	TEST(stm.find("WinTests::PrintNativeException1") != std::string::npos);
 }
 
 AUTO_TEST_CASE(PrintNativeException2)
 {
-	auto s = GetStackTrace([] { throw I32(12345678); }); // NOLINT(hicpp-exception-baseclass)
+	auto stm = GetStackTrace([] { throw I32(12345678); }); // NOLINT(hicpp-exception-baseclass)
 
-	TEST(s.find("Unhandled exception at") != std::string::npos);
-	TEST(s.find("(code: E06D7363) : C++ exception of type: 'int'") != std::string::npos);
-	TEST(s.find("RaiseException") != std::string::npos);
-	TEST(s.find("CxxThrowException") != std::string::npos);
-	TEST(s.find("GetStackTrace") != std::string::npos);
-	TEST(s.find("WinTests::PrintNativeException2") != std::string::npos);
+	TEST(stm.find("Unhandled exception at") != std::string::npos);
+	TEST(stm.find("(code: E06D7363) : C++ exception of type: 'int'") != std::string::npos);
+	TEST(stm.find("RaiseException") != std::string::npos);
+	TEST(stm.find("CxxThrowException") != std::string::npos);
+	TEST(stm.find("GetStackTrace") != std::string::npos);
+	TEST(stm.find("WinTests::PrintNativeException2") != std::string::npos);
 }
 
 AUTO_TEST_CASE(PrintNativeException3)
 {
 	int const * p = nullptr;
 	int result {};
-	auto s = GetStackTrace([&] { result = *p++; }); // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+	auto stm = GetStackTrace([&] { result = *p++; }); // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
 	TEST(result == 0);
-	TEST(s.find("Unhandled exception at") != std::string::npos);
-	TEST(s.find("(code: C0000005) : Access violation reading address 00000000") != std::string::npos);
-	TEST(s.find("GetStackTrace") != std::string::npos);
-	TEST(s.find("WinTests::PrintNativeException3") != std::string::npos);
+	TEST(stm.find("Unhandled exception at") != std::string::npos);
+	TEST(stm.find("(code: C0000005) : Access violation reading address 00000000") != std::string::npos);
+	TEST(stm.find("GetStackTrace") != std::string::npos);
+	TEST(stm.find("WinTests::PrintNativeException3") != std::string::npos);
 }
 
 AUTO_TEST_CASE(TestVariant)

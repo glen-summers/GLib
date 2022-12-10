@@ -21,12 +21,12 @@ namespace GLib
 		{
 			inline std::string CheckFormat(char const * defaultFormat, std::string const & format, std::string const & type)
 			{
-				std::string f = format.empty() ? defaultFormat : format;
-				if (*f.begin() != '%')
+				std::string value = format.empty() ? defaultFormat : format;
+				if (*value.begin() != '%')
 				{
-					throw std::logic_error("Invalid format : '" + f + "' for Type: " + type);
+					throw std::logic_error("Invalid format : '" + value + "' for Type: " + type);
 				}
-				return f;
+				return value;
 			}
 
 			inline void CheckFormatEmpty(std::string const & format)
@@ -40,25 +40,25 @@ namespace GLib
 			template <typename T>
 			void ToStringImpl(char const * defaultFormat, std::ostream & stm, T const & value, std::string const & format)
 			{
-				std::string const f = CheckFormat(defaultFormat, format, Compat::Unmangle(typeid(T).name()));
+				std::string const checkedFormat = CheckFormat(defaultFormat, format, Compat::Unmangle(typeid(T).name()));
 				constexpr auto initialBufferSize = 21;
-				Util::StackOrHeap<char, initialBufferSize> s;
-				int const len = snprintf(nullptr, 0, f.c_str(), value); // NOLINT until c++/20 Format impl
+				Util::StackOrHeap<char, initialBufferSize> buffer;
+				int const len = snprintf(nullptr, 0, checkedFormat.c_str(), value); // NOLINT until c++/20 Format impl
 				Compat::AssertTrue(len >= 0, "ToString", errno);
-				s.EnsureSize(static_cast<size_t>(len) + 1);
-				snprintf(s.Get(), s.Size(), f.c_str(), value); // NOLINT until c++/20 Format impl
+				buffer.EnsureSize(static_cast<size_t>(len) + 1);
+				snprintf(buffer.Get(), buffer.Size(), checkedFormat.c_str(), value); // NOLINT until c++/20 Format impl
 
-				stm << s.Get();
+				stm << buffer.Get();
 			}
 
 			template <>
 			inline void ToStringImpl(char const * defaultFormat, std::ostream & stm, std::tm const & value, std::string const & format)
 			{
-				std::string const f = CheckFormat(defaultFormat, format, "tm");
+				std::string const checkedFormat = CheckFormat(defaultFormat, format, "tm");
 				// stream to wide to correctly convert locale symbols, is there a better better way? maybe when code convert gets fixed
 				std::wstringstream wideStream;
 				static_cast<void>(wideStream.imbue(stm.getloc()));
-				wideStream << std::put_time(&value, Cvt::A2W(f).c_str());
+				wideStream << std::put_time(&value, Cvt::A2W(checkedFormat).c_str());
 				stm << Cvt::W2A(wideStream.str());
 			}
 

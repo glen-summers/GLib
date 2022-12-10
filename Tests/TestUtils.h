@@ -26,9 +26,9 @@ namespace TestUtils
 	}
 
 	template <typename Iterator>
-	void Dump(std::ostream & s, Iterator begin, Iterator end, size_t maxCount)
+	void Dump(std::ostream & stm, Iterator begin, Iterator end, size_t maxCount)
 	{
-		s << '[';
+		stm << '[';
 		if (begin != end)
 		{
 			for (auto it = begin; it != end && maxCount != 0; ++it, --maxCount)
@@ -37,24 +37,24 @@ namespace TestUtils
 				{
 					// hex?
 					case Tab:
-						s << "\\t";
+						stm << "\\t";
 						break;
 
 					case NewLine:
-						s << "\\n";
+						stm << "\\n";
 						break;
 
 					case Space:
-						s << "\\s";
+						stm << "\\s";
 						break;
 
 					default:
-						s << *it;
+						stm << *it;
 						break;
 				}
 			}
 		}
-		s << ']';
+		stm << ']';
 	}
 
 	inline bool CompareStrings(std::string const & expected, std::string const & actual, const size_t maxCount, std::ostringstream & msg)
@@ -219,18 +219,18 @@ namespace boost::test_tools::tt_detail
 	template <typename K, typename V>
 	struct print_log_value<std::pair<K, V>>
 	{
-		void operator()(std::ostream & str, std::pair<K, V> const & item)
+		void operator()(std::ostream & stm, std::pair<K, V> const & item)
 		{
-			str << '{' << item.first << ',' << item.second << '}';
+			stm << '{' << item.first << ',' << item.second << '}';
 		}
 	};
 
 	template <>
 	struct print_log_value<std::wstring>
 	{
-		void operator()(std::ostream & str, std::wstring const & item)
+		void operator()(std::ostream & stm, std::wstring const & item)
 		{
-			str << GLib::Cvt::W2A(item);
+			stm << GLib::Cvt::W2A(item);
 		}
 	};
 }

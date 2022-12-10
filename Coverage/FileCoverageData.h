@@ -78,9 +78,9 @@ public:
 	[[nodiscard]] unsigned int CoveredFunctions() const
 	{
 		unsigned int value {};
-		for (auto const & f : functions) // improve
+		for (auto const & function : functions) // improve
 		{
-			if (f.CoveredLines() != 0)
+			if (function.CoveredLines() != 0)
 			{
 				++value;
 			}

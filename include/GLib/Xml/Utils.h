@@ -19,11 +19,11 @@ namespace GLib::Xml::Utils
 	static constexpr Entity Quot {"&quot;", '\"'};
 	static constexpr Entity Amp {"&amp;", '&'};
 	static constexpr Entity Apos {"&apos;", '\''};
-	static constexpr Entity Lt {"&lt;", '<'};
-	static constexpr Entity Gt {"&gt;", '>'};
+	static constexpr Entity Open {"&lt;", '<'};
+	static constexpr Entity Close {"&gt;", '>'};
 
 	static constexpr auto EntitySize = 5;
-	static constexpr std::array Entities {Quot, Amp, Apos, Lt, Gt};
+	static constexpr std::array Entities {Quot, Amp, Apos, Open, Close};
 
 	inline std::ostream & Escape(std::string_view value, std::ostream & out)
 	{

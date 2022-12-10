@@ -86,14 +86,14 @@ namespace GLib::Html
 			AddFragment({start, static_cast<size_t>(end - start)});
 		}
 
-		void AddEnumeration(std::string const & var, std::string const & e, std::string_view c, size_t enumerationDepth)
+		void AddEnumeration(std::string const & var, std::string const & childEnumeration, std::string_view childCondition, size_t enumerationDepth)
 		{
-			children.emplace_back(this, var, e, c, enumerationDepth);
+			children.emplace_back(this, var, childEnumeration, childCondition, enumerationDepth);
 		}
 
-		void AddConditional(std::string_view c)
+		void AddConditional(std::string_view childCondition)
 		{
-			children.emplace_back(this, c, true);
+			children.emplace_back(this, childCondition, true);
 		}
 
 		[[nodiscard]] Node * Back()

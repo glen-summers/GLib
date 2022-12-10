@@ -26,19 +26,19 @@ namespace GLib::Eval
 	}
 
 	template <typename T, std::enable_if_t<!Utils::Detail::IsContainer<T>::value> * = nullptr>
-	void ForEach(T value, ValueVisitor const & f)
+	void ForEach(T value, ValueVisitor const & visitor)
 	{
 		static_cast<void>(value);
-		static_cast<void>(f);
+		static_cast<void>(visitor);
 		throw std::runtime_error(std::string("ForEach not defined for : ") + Compat::Unmangle(typeid(T).name()));
 	}
 
 	template <typename T, std::enable_if_t<Utils::Detail::IsContainer<T>::value> * = nullptr>
-	void ForEach(T collection, ValueVisitor const & f)
+	void ForEach(T collection, ValueVisitor const & visitor)
 	{
 		for (auto const & value : collection)
 		{
-			f(Value(value));
+			visitor(Value(value));
 		}
 	}
 
@@ -53,8 +53,8 @@ namespace GLib::Eval
 
 		[[nodiscard]] virtual std::string ToString() const = 0; // +format/stream?
 
-		virtual void VisitProperty(std::string const & propertyName, ValueVisitor const & f) const = 0;
-		virtual void ForEach(ValueVisitor const & f) const = 0;
+		virtual void VisitProperty(std::string const & propertyName, ValueVisitor const & visitor) const = 0;
+		virtual void ForEach(ValueVisitor const & visitor) const = 0;
 	};
 
 	template <typename ValueType>
@@ -77,9 +77,9 @@ namespace GLib::Eval
 			Visitor<ValueType>::Visit(value, propertyName, visitor);
 		}
 
-		void ForEach(ValueVisitor const & f) const override
+		void ForEach(ValueVisitor const & visitor) const override
 		{
-			return Eval::ForEach(value, f);
+			return Eval::ForEach(value, visitor);
 		}
 	};
 

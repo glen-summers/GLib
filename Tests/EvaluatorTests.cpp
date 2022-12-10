@@ -49,10 +49,10 @@ AUTO_TEST_CASE(StructForEach)
 	evaluator.ForEach("users",
 										[&](GLib::Eval::ValueBase const & user)
 										{
-											std::ostringstream s;
-											user.VisitProperty("name", [&](GLib::Eval::ValueBase const & value) { s << value.ToString(); });
-											user.VisitProperty("age", [&](GLib::Eval::ValueBase const & value) { s << ':' << value.ToString(); });
-											result.push_back(s.str());
+											std::ostringstream stm;
+											user.VisitProperty("name", [&](GLib::Eval::ValueBase const & value) { stm << value.ToString(); });
+											user.VisitProperty("age", [&](GLib::Eval::ValueBase const & value) { stm << ':' << value.ToString(); });
+											result.push_back(stm.str());
 										});
 
 	std::vector<std::string> const expected {"Fred:42", "Jim:43", "Sheila:44"};
@@ -66,10 +66,10 @@ AUTO_TEST_CASE(NestedPropertyForEach)
 	User const user {"Fred", U16(42), {"Computing", "Busses"}};
 	evaluator.Set("user", user);
 
-	std::ostringstream s;
-	evaluator.ForEach("user.hobbies", [&](GLib::Eval::ValueBase const & value) { s << value.ToString() << ','; });
+	std::ostringstream stm;
+	evaluator.ForEach("user.hobbies", [&](GLib::Eval::ValueBase const & value) { stm << value.ToString() << ','; });
 
-	TEST(s.str() == "Computing,Busses,");
+	TEST(stm.str() == "Computing,Busses,");
 }
 
 AUTO_TEST_CASE(NativeTypeForEach)

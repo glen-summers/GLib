@@ -6,9 +6,9 @@
 namespace GLib::Win::Debug
 {
 	template <typename... Ts>
-	void Write(std::string_view format, Ts &&... ts)
+	void Write(std::string_view format, Ts &&... values)
 	{
-		Formatter::Format(Stream(), format, std::forward<Ts>(ts)...) << std::endl;
+		Formatter::Format(Stream(), format, std::forward<Ts>(values)...) << std::endl;
 	}
 
 	template <typename T>

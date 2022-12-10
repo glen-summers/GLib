@@ -176,17 +176,17 @@ namespace GLib::Win
 			sui.dwFlags = STARTF_USESHOWWINDOW;
 			sui.wShowWindow = show;
 
-			PROCESS_INFORMATION pi = {};
+			PROCESS_INFORMATION info = {};
 
-			Util::AssertTrue(CreateProcessW(app.c_str(), cmdCopy.get(), nullptr, nullptr, FALSE, creationFlags, nullptr, nullptr, &sui, &pi),
+			Util::AssertTrue(CreateProcessW(app.c_str(), cmdCopy.get(), nullptr, nullptr, FALSE, creationFlags, nullptr, nullptr, &sui, &info),
 											 "CreateProcessW");
-			Win::Handle(pi.hThread).reset();
-			return Win::Handle {pi.hProcess};
+			Win::Handle(info.hThread).reset();
+			return Win::Handle {info.hProcess};
 		}
 
-		static void Wait(HandleBase * const h, ULONG const timeoutMilliseconds)
+		static void Wait(HandleBase * const handle, ULONG const timeoutMilliseconds)
 		{
-			CheckWaitResult(WaitForSingleObject(h, timeoutMilliseconds));
+			CheckWaitResult(WaitForSingleObject(handle, timeoutMilliseconds));
 		}
 
 		static void CheckWaitResult(ULONG const result)

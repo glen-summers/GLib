@@ -17,7 +17,7 @@ namespace GLib::Xml
 		bool isFirstElement {true};
 		int depth {};
 		int textDepth;
-		std::ostringstream s;
+		std::ostringstream stm;
 		std::stack<std::string> stack;
 
 	public:
@@ -28,7 +28,7 @@ namespace GLib::Xml
 
 		void PushDeclaration()
 		{
-			s << R"(<?xml version="1.0" encoding="UTF-8" ?>)" << std::endl;
+			stm << R"(<?xml version="1.0" encoding="UTF-8" ?>)" << std::endl;
 		}
 
 		void OpenElement(std::string const & name)
@@ -42,13 +42,13 @@ namespace GLib::Xml
 			stack.push(name);
 			if (textDepth == textDepthNotSet && !isFirstElement && elementFormat)
 			{
-				s << std::endl;
+				stm << std::endl;
 			}
 			if (elementFormat)
 			{
-				s << std::string(depth, ' ');
+				stm << std::string(depth, ' ');
 			}
-			s << '<' << name;
+			stm << '<' << name;
 			elementOpen = true;
 			isFirstElement = false;
 			++depth;
@@ -57,9 +57,9 @@ namespace GLib::Xml
 		void PushAttribute(std::string_view const name, std::string_view const value)
 		{
 			AssertTrue(elementOpen, "Element not open");
-			s << ' ' << name << R"(=")";
+			stm << ' ' << name << R"(=")";
 			Text(value);
-			s << '"';
+			stm << '"';
 		}
 
 		void PushAttribute(std::string_view const name, const int64_t value)
@@ -76,7 +76,7 @@ namespace GLib::Xml
 
 		void PushDocType(std::string_view const docType)
 		{
-			s << "<!DOCTYPE " << docType << '>' << std::endl;
+			stm << "<!DOCTYPE " << docType << '>' << std::endl;
 		}
 
 		void CloseElement()
@@ -91,15 +91,15 @@ namespace GLib::Xml
 			stack.pop();
 			if (elementOpen)
 			{
-				s << "/>";
+				stm << "/>";
 			}
 			else
 			{
 				if (textDepth == textDepthNotSet && elementFormat)
 				{
-					s << std::endl << std::setw(depth) << "";
+					stm << std::endl << std::setw(depth) << "";
 				}
-				s << "</" << name << '>';
+				stm << "</" << name << '>';
 			}
 
 			if (textDepth == depth)
@@ -109,7 +109,7 @@ namespace GLib::Xml
 
 			if (depth == 0 && elementFormat)
 			{
-				s << std::endl;
+				stm << std::endl;
 			}
 
 			elementOpen = false;
@@ -129,7 +129,7 @@ namespace GLib::Xml
 			{
 				throw std::runtime_error("Element is not closed: " + stack.top());
 			}
-			return s.str();
+			return stm.str();
 		}
 
 	private:
@@ -137,14 +137,14 @@ namespace GLib::Xml
 		{
 			if (elementOpen)
 			{
-				s << '>';
+				stm << '>';
 				elementOpen = false;
 			}
 		}
 
 		void Text(std::string_view const value)
 		{
-			Utils::Escape(value, s);
+			Utils::Escape(value, stm);
 		}
 
 		static void AssertTrue(bool const value, char const * message)

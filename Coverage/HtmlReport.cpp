@@ -24,18 +24,18 @@
 
 using GLib::Cvt::P2A;
 
-std::string LoadHtml(unsigned int const id)
+std::string LoadHtml(unsigned int const idValue)
 {
-	return GLib::Win::LoadResourceString(nullptr, id, RT_HTML); // NOLINT bad macro
+	return GLib::Win::LoadResourceString(nullptr, idValue, RT_HTML); // NOLINT bad macro
 }
 
-std::string GetDateTime(time_t const t)
+std::string GetDateTime(time_t const time)
 {
-	std::tm tm {};
-	GLib::Compat::LocalTime(tm, t);
-	std::ostringstream os;
-	os << std::put_time(&tm, "%d %b %Y, %H:%M:%S (%z)");
-	return os.str();
+	std::tm tmValue {};
+	GLib::Compat::LocalTime(tmValue, time);
+	std::ostringstream stm;
+	stm << std::put_time(&tmValue, "%d %b %Y, %H:%M:%S (%z)");
+	return stm.str();
 }
 
 HtmlReport::HtmlReport(std::string testName, std::filesystem::path const & htmlPath, CoverageData const & coverageData, bool const showWhiteSpace)
@@ -84,7 +84,7 @@ HtmlReport::HtmlReport(std::string testName, std::filesystem::path const & htmlP
 
 std::filesystem::path HtmlReport::Initialise(std::filesystem::path const & path)
 {
-	std::string const s = LoadHtml(IDR_STYLESHEET);
+	std::string const styleSheet = LoadHtml(IDR_STYLESHEET);
 
 	remove_all(path);
 	create_directories(path);
@@ -94,7 +94,7 @@ std::filesystem::path HtmlReport::Initialise(std::filesystem::path const & path)
 	{
 		throw std::runtime_error("Unable to create file");
 	}
-	css << s;
+	css << styleSheet;
 	return cssPath;
 }
 
@@ -158,20 +158,20 @@ void HtmlReport::GenerateRootIndex() const
 	auto const coveragePercent = Percentage(totalCoveredLines, totalCoverableLines);
 	auto const coverageFunctionPercent = Percentage(totalCoveredFunctions, totalCoverableFunctions);
 
-	GLib::Eval::Evaluator e;
-	e.Set("title", testName);
-	e.Set("time", time);
-	e.Set("styleSheet", "./coverage.css");
-	e.Set("directories", directories);
-	e.Set("coveredLines", totalCoveredLines);
-	e.Set("coverableLines", totalCoverableLines);
-	e.Set("coveragePercent", coveragePercent);
-	e.Set("coverageStyle", GetCoverageLevel(coveragePercent));
+	GLib::Eval::Evaluator eval;
+	eval.Set("title", testName);
+	eval.Set("time", time);
+	eval.Set("styleSheet", "./coverage.css");
+	eval.Set("directories", directories);
+	eval.Set("coveredLines", totalCoveredLines);
+	eval.Set("coverableLines", totalCoverableLines);
+	eval.Set("coveragePercent", coveragePercent);
+	eval.Set("coverageStyle", GetCoverageLevel(coveragePercent));
 
-	e.Set("coveredFunctions", totalCoveredFunctions);
-	e.Set("coverableFunctions", totalCoverableFunctions);
-	e.Set("coverageFunctionsPercent", coverageFunctionPercent);
-	e.Set("coverageFunctionsStyle", GetCoverageLevel(coverageFunctionPercent));
+	eval.Set("coveredFunctions", totalCoveredFunctions);
+	eval.Set("coverableFunctions", totalCoverableFunctions);
+	eval.Set("coverageFunctionsPercent", coverageFunctionPercent);
+	eval.Set("coverageFunctionsStyle", GetCoverageLevel(coverageFunctionPercent));
 
 	auto const rootIndex = htmlPath / "index.html";
 	std::ofstream out(rootIndex);
@@ -180,7 +180,7 @@ void HtmlReport::GenerateRootIndex() const
 		throw std::runtime_error("Unable to create output file : " + P2A(rootIndex));
 	}
 
-	GLib::Html::Generate(e, rootTemplate, out);
+	GLib::Html::Generate(eval, rootTemplate, out);
 }
 
 // consolidate with GenerateRootIndex
@@ -225,22 +225,22 @@ void HtmlReport::GenerateIndices() const
 		// in case no files generated, also todo, create error stub files
 		create_directories(path);
 
-		GLib::Eval::Evaluator e;
-		e.Set("title", testName);
-		e.Set("time", time);
-		e.Set("index", P2A(relativePath / "index.html"));
-		e.Set("subPath", P2A(subPath));
-		e.Set("styleSheet", css);
-		e.Set("directories", directories);
-		e.Set("coveredLines", totalCoveredLines);
-		e.Set("coverableLines", totalCoverableLines);
-		e.Set("coveragePercent", coveragePercent);
-		e.Set("coverageStyle", GetCoverageLevel(coveragePercent));
+		GLib::Eval::Evaluator eval;
+		eval.Set("title", testName);
+		eval.Set("time", time);
+		eval.Set("index", P2A(relativePath / "index.html"));
+		eval.Set("subPath", P2A(subPath));
+		eval.Set("styleSheet", css);
+		eval.Set("directories", directories);
+		eval.Set("coveredLines", totalCoveredLines);
+		eval.Set("coverableLines", totalCoverableLines);
+		eval.Set("coveragePercent", coveragePercent);
+		eval.Set("coverageStyle", GetCoverageLevel(coveragePercent));
 
-		e.Set("coveredFunctions", totalCoveredFunctions);
-		e.Set("coverableFunctions", totalCoverableFunctions);
-		e.Set("coverageFunctionsPercent", coverageFunctionPercent);
-		e.Set("coverageFunctionsStyle", GetCoverageLevel(coverageFunctionPercent));
+		eval.Set("coveredFunctions", totalCoveredFunctions);
+		eval.Set("coverableFunctions", totalCoverableFunctions);
+		eval.Set("coverageFunctionsPercent", coverageFunctionPercent);
+		eval.Set("coverageFunctionsStyle", GetCoverageLevel(coverageFunctionPercent));
 
 		auto const & pathIndex = path / "index.html";
 		std::ofstream out(pathIndex);
@@ -249,7 +249,7 @@ void HtmlReport::GenerateIndices() const
 			throw std::runtime_error("Unable to create output file : " + P2A(pathIndex));
 		}
 
-		GLib::Html::Generate(e, dirTemplate, out);
+		GLib::Html::Generate(eval, dirTemplate, out);
 	}
 }
 
@@ -259,20 +259,20 @@ void HtmlReport::GenerateSourceFile(std::filesystem::path const & subPath, FileC
 	auto const & relativePath = relative(htmlPath, targetPath.parent_path());
 
 	std::filesystem::path const & sourceFile = data.Path();
-	std::ifstream const in(sourceFile);
-	if (!in)
+	std::ifstream const stm(sourceFile);
+	if (!stm)
 	{
 		log.Warning("Unable to open input file : {0}", P2A(sourceFile));
 		// generate error file
 		return;
 	}
 
-	auto const & lc = data.LineCoverage();
+	auto const & lineCoverage = data.LineCoverage();
 
 	std::string source;
 	{
 		std::stringstream buffer;
-		buffer << in.rdbuf();
+		buffer << stm.rdbuf();
 
 		try
 		{
@@ -293,10 +293,10 @@ void HtmlReport::GenerateSourceFile(std::filesystem::path const & subPath, FileC
 	{
 		auto const lineNumber = static_cast<unsigned int>(lines.size() + 1);
 		LineCover cover {};
-		auto const it = lc.find(lineNumber);
-		if (it != lc.end())
+		auto const iter = lineCoverage.find(lineNumber);
+		if (iter != lineCoverage.end())
 		{
-			cover = it->second == 0 ? LineCover::NotCovered : LineCover::Covered;
+			cover = iter->second == 0 ? LineCover::NotCovered : LineCover::Covered;
 		}
 		lines.push_back({sourceLine, {}, {}, cover, {}});
 	}
@@ -315,7 +315,7 @@ void HtmlReport::GenerateSourceFile(std::filesystem::path const & subPath, FileC
 	auto const effectiveLines = lines.size() + effectiveHeaderLines + effectiveFooterLines;
 	auto const ratio = HundredPercent / static_cast<float>(effectiveLines);
 
-	auto const pred = [](Line const & l1, Line const & l2) { return l1.Cover != l2.Cover; };
+	auto const pred = [](Line const & line1, Line const & line2) { return line1.Cover != line2.Cover; };
 
 	std::vector<Chunk> chunks;
 	chunks.push_back({LineCover::None, effectiveHeaderLines * ratio});
@@ -327,39 +327,39 @@ void HtmlReport::GenerateSourceFile(std::filesystem::path const & subPath, FileC
 	}
 	chunks.push_back({LineCover::None, effectiveFooterLines * ratio});
 
-	GLib::Eval::Evaluator e;
+	GLib::Eval::Evaluator eval;
 
 	auto const parent = subPath.parent_path();
 	auto const css = P2A(relativePath / "coverage.css");
-	auto const coveragePercent = Percentage(data.CoveredLines(), lc.size());
+	auto const coveragePercent = Percentage(data.CoveredLines(), lineCoverage.size());
 	auto const coverageFunctionPercent = Percentage(data.CoveredFunctions(), data.CoverableFunctions());
 
-	e.Set("title", P2A(subPath));
-	e.Set("testName", testName);
-	e.Set("time", time);
-	e.Set("parent", P2A(parent));
-	e.Set("fileName", P2A(targetPath.filename()));
-	e.Set("styleSheet", css);
-	e.Set("coverageStyle", GetCoverageLevel(coveragePercent));
+	eval.Set("title", P2A(subPath));
+	eval.Set("testName", testName);
+	eval.Set("time", time);
+	eval.Set("parent", P2A(parent));
+	eval.Set("fileName", P2A(targetPath.filename()));
+	eval.Set("styleSheet", css);
+	eval.Set("coverageStyle", GetCoverageLevel(coveragePercent));
 
-	e.Set("coveredLines", data.CoveredLines());
-	e.Set("coverableLines", lc.size());
-	e.Set("coveragePercent", coveragePercent);
+	eval.Set("coveredLines", data.CoveredLines());
+	eval.Set("coverableLines", lineCoverage.size());
+	eval.Set("coveragePercent", coveragePercent);
 
-	e.Set("coveredFunctions", data.CoveredFunctions());
-	e.Set("coverableFunctions", data.CoverableFunctions());
-	e.Set("coverageFunctionsPercent", coverageFunctionPercent);
-	e.Set("coverageFunctionsStyle", GetCoverageLevel(coverageFunctionPercent));
+	eval.Set("coveredFunctions", data.CoveredFunctions());
+	eval.Set("coverableFunctions", data.CoverableFunctions());
+	eval.Set("coverageFunctionsPercent", coverageFunctionPercent);
+	eval.Set("coverageFunctionsStyle", GetCoverageLevel(coverageFunctionPercent));
 
-	e.Set("index", P2A(relativePath / "index.html"));
+	eval.Set("index", P2A(relativePath / "index.html"));
 
-	e.SetCollection("lines", lines);
-	e.SetCollection("chunks", chunks);
+	eval.SetCollection("lines", lines);
+	eval.SetCollection("chunks", chunks);
 
 	std::multiset<FunctionCoverage> coverage;
-	for (auto const & f : data.Functions())
+	for (auto const & func : data.Functions())
 	{
-		for (auto const & [file, l] : f.GetFileLines())
+		for (auto const & [file, l] : func.GetFileLines())
 		{
 			if (file == sourceFile)
 			{
@@ -375,13 +375,13 @@ void HtmlReport::GenerateSourceFile(std::filesystem::path const & subPath, FileC
 				}
 
 				lines[zeroBasedLine].HasLink = true;
-				coverage.emplace(f.NameSpace(), f.ClassName(), f.FunctionName(), zeroBasedLine + 1, static_cast<unsigned int>(f.CoveredLines()),
-												 static_cast<unsigned int>(f.AllLines()));
+				coverage.emplace(func.NameSpace(), func.ClassName(), func.FunctionName(), zeroBasedLine + 1, static_cast<unsigned int>(func.CoveredLines()),
+												 static_cast<unsigned int>(func.AllLines()));
 			}
 		}
 	}
 
-	e.SetCollection("functions", coverage);
+	eval.SetCollection("functions", coverage);
 
 	create_directories(targetPath.parent_path());
 	{
@@ -392,7 +392,7 @@ void HtmlReport::GenerateSourceFile(std::filesystem::path const & subPath, FileC
 		{
 			throw std::runtime_error("Unable to create file");
 		}
-		GLib::Html::Generate(e, fileTemplate, out);
+		GLib::Html::Generate(eval, fileTemplate, out);
 	}
 
 	{
@@ -403,6 +403,6 @@ void HtmlReport::GenerateSourceFile(std::filesystem::path const & subPath, FileC
 		{
 			throw std::runtime_error("Unable to create file");
 		}
-		GLib::Html::Generate(e, functionsTemplate, out);
+		GLib::Html::Generate(eval, functionsTemplate, out);
 	}
 }

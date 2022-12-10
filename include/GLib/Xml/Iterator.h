@@ -75,9 +75,9 @@ namespace GLib::Xml
 			return lastPtr == other.lastPtr;
 		}
 
-		bool operator!=(Iterator const & it) const
+		bool operator!=(Iterator const & iter) const
 		{
-			return !(*this == it);
+			return !(*this == iter);
 		}
 
 		Iterator & operator++()
@@ -97,19 +97,19 @@ namespace GLib::Xml
 		}
 
 	private:
-		[[noreturn]] static void IllegalCharacter(char const c, unsigned int const lineNumber, unsigned int const characterOffset)
+		[[noreturn]] static void IllegalCharacter(char const chr, unsigned int const lineNumber, unsigned int const characterOffset)
 		{
-			std::ostringstream s;
-			s << "Illegal character: ";
-			if (c >= minPrintable)
+			std::ostringstream stm;
+			stm << "Illegal character: ";
+			if (chr >= minPrintable)
 			{
-				s << '\'' << c << "' ";
+				stm << '\'' << chr << "' ";
 			}
 
-			s << "(0x" << std::hex << static_cast<unsigned>(c) << std::dec << ")"
-				<< " at line: " << lineNumber << ", offset: " << characterOffset;
+			stm << "(0x" << std::hex << static_cast<unsigned>(chr) << std::dec << ")"
+					<< " at line: " << lineNumber << ", offset: " << characterOffset;
 
-			throw std::runtime_error(s.str());
+			throw std::runtime_error(stm.str());
 		}
 
 		bool ProcessOldState(std::string_view::const_iterator const oldPtr, State const oldState, State const newState)
@@ -322,9 +322,9 @@ namespace GLib::Xml
 					auto const & top = elementStack.top();
 					if (element.qName != top)
 					{
-						std::ostringstream s;
-						s << "Element mismatch: " << element.qName << " != " << top << ", at line: " << line << ", offset: " << pos;
-						throw std::runtime_error(s.str());
+						std::ostringstream stm;
+						stm << "Element mismatch: " << element.qName << " != " << top << ", at line: " << line << ", offset: " << pos;
+						throw std::runtime_error(stm.str());
 					}
 					if (element.depth == 1)
 					{

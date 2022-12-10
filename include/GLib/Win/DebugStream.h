@@ -15,19 +15,18 @@ namespace GLib::Win::Debug
 
 		class DebugBuffer : public Buffer
 		{
-			int_type overflow(int_type c) override
+			int_type overflow(int_type const chr) override
 			{
-				c = Buffer::overflow(c);
-				if (c == traits_type::to_char_type('\n'))
+				if (Buffer::overflow(chr) == traits_type::to_char_type('\n'))
 				{
 					Write(Get());
 				}
-				return c;
+				return chr;
 			}
 
-			void Write(std::string_view const s)
+			void Write(std::string_view const value)
 			{
-				OutputDebugStringW(Cvt::A2W(s).c_str());
+				OutputDebugStringW(Cvt::A2W(value).c_str());
 				Reset();
 			}
 		};

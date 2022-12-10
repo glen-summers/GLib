@@ -68,9 +68,9 @@ public:
 		threadName = name;
 	}
 
-	void Put(char const c) const
+	void Put(char const chr) const
 	{
-		stream.Stream().put(c);
+		stream.Stream().put(chr);
 	}
 
 	std::string_view Get() const

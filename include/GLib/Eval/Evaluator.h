@@ -24,16 +24,16 @@ namespace GLib::Eval
 		template <typename ValueType>
 		void Set(std::string const & name, ValueType value)
 		{
-			ValuePtr v = MakeValue(value);
-			auto const it = values.find(name);
+			ValuePtr valuePtr = MakeValue(value);
+			auto const iter = values.find(name);
 
-			if (it == values.end())
+			if (iter == values.end())
 			{
-				values.emplace(name, std::move(v));
+				values.emplace(name, std::move(valuePtr));
 			}
 			else
 			{
-				it->second = std::move(v);
+				iter->second = std::move(valuePtr);
 			}
 		}
 
@@ -41,27 +41,27 @@ namespace GLib::Eval
 		template <typename Container>
 		void SetCollection(std::string const & name, Container const & container)
 		{
-			auto v = std::make_unique<Collection<Container>>(container);
-			auto const it = values.find(name);
+			auto value = std::make_unique<Collection<Container>>(container);
+			auto const iter = values.find(name);
 
-			if (it == values.end())
+			if (iter == values.end())
 			{
-				values.emplace(name, std::move(v));
+				values.emplace(name, std::move(value));
 			}
 			else
 			{
-				it->second = std::move(v);
+				iter->second = std::move(value);
 			}
 		}
 
 		void Remove(std::string const & name)
 		{
-			auto const it = values.find(name);
-			if (it == values.end())
+			auto const iter = values.find(name);
+			if (iter == values.end())
 			{
 				throw std::runtime_error("Value not found : " + name);
 			}
-			values.erase(it);
+			values.erase(iter);
 		}
 
 		void Push(std::string const & name, ValueBase const & value)
@@ -95,35 +95,35 @@ namespace GLib::Eval
 	private:
 		void Evaluate(std::string const & value, ValueVisitor const & visitor) const
 		{
-			auto const & s = Util::Splitter {value, "."};
-			auto it = s.begin();
+			auto const & splitValue = Util::Splitter {value, "."};
+			auto iter = splitValue.begin();
 
-			auto const lit = localValues.find(*it);
-			if (lit != localValues.end())
+			auto const localIt = localValues.find(*iter);
+			if (localIt != localValues.end())
 			{
-				++it;
-				return SubEvaluate(lit->second, it, s.end(), visitor);
+				++iter;
+				return SubEvaluate(localIt->second, iter, splitValue.end(), visitor);
 			}
 
-			auto const vit = values.find(*it);
-			if (vit == values.end())
+			auto const valueIt = values.find(*iter);
+			if (valueIt == values.end())
 			{
-				throw std::runtime_error("Value not found : " + *it);
+				throw std::runtime_error("Value not found : " + *iter);
 			}
-			++it;
-			SubEvaluate(*vit->second, it, s.end(), visitor);
+			++iter;
+			SubEvaluate(*valueIt->second, iter, splitValue.end(), visitor);
 		}
 
-		static void SubEvaluate(ValueBase const & value, Util::Splitter::Iterator & it, Util::Splitter::Iterator const & end,
+		static void SubEvaluate(ValueBase const & value, Util::Splitter::Iterator & iter, Util::Splitter::Iterator const & end,
 														ValueVisitor const & visitor)
 		{
-			if (it != end)
+			if (iter != end)
 			{
-				value.VisitProperty(*it,
+				value.VisitProperty(*iter,
 														[&](ValueBase const & subValue)
 														{
-															++it;
-															SubEvaluate(subValue, it, end, visitor);
+															++iter;
+															SubEvaluate(subValue, iter, end, visitor);
 														});
 			}
 			else

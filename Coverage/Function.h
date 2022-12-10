@@ -135,7 +135,8 @@ public:
 	}
 };
 
-inline bool operator<(Function const & f1, Function const & f2)
+inline bool operator<(Function const & function1, Function const & function2)
 {
-	return std::tie(f1.NameSpace(), f1.ClassName(), f1.FunctionName()) < std::tie(f2.NameSpace(), f2.ClassName(), f2.FunctionName());
+	return std::tie(function1.NameSpace(), function1.ClassName(), function1.FunctionName()) <
+				 std::tie(function2.NameSpace(), function2.ClassName(), function2.FunctionName());
 }

@@ -34,7 +34,7 @@ public:
 	FileLogger & operator=(FileLogger const &) = delete;
 	FileLogger & operator=(FileLogger &&) = delete;
 
-	static void Write(char c);
+	static void Write(char chr);
 
 private:
 	~FileLogger();

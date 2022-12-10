@@ -18,7 +18,7 @@ namespace GLib::Win
 
 		inline VARTYPE & Vt(VARIANT & v)
 		{
-			return v.vt; // NOLINT(cppcoreguidelines-pro-type-union-access)
+			return V_VT(&v);
 		}
 
 		inline BSTR & Bstr(VARIANT & v)
@@ -34,7 +34,7 @@ namespace GLib::Win
 				throw std::runtime_error("SysAllocString");
 			}
 
-			VARIANT v;
+			VARIANT v {};
 			VariantInit(&v);
 			Vt(v) = VT_BSTR;
 			Bstr(v) = bstr;

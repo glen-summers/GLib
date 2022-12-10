@@ -8,14 +8,14 @@
 
 namespace GLib::Cpp
 {
-	inline std::ostream & operator<<(std::ostream & str, State s)
+	inline std::ostream & operator<<(std::ostream & str, State state)
 	{
 		static constexpr std::array<std::string_view, static_cast<unsigned int>(State::Count)> stateNames {
 			"Error",					 "None",			"WhiteSpace", "CommentStart",		 "CommentLine", "Continuation", "CommentBlock",
 			"CommentAsterisk", "Directive", "String",			"RawStringPrefix", "RawString",		"Code",					"CharacterLiteral",
 		};
 
-		return str << stateNames.at(static_cast<unsigned int>(s));
+		return str << stateNames.at(static_cast<unsigned int>(state));
 	}
 
 	using Fragment = std::pair<State, std::string_view>;
@@ -59,9 +59,9 @@ namespace GLib::Cpp
 			return lastPtr == other.lastPtr;
 		}
 
-		bool operator!=(Iterator const & it) const
+		bool operator!=(Iterator const & iter) const
 		{
-			return !(*this == it);
+			return !(*this == iter);
 		}
 
 		Iterator & operator++()
@@ -81,23 +81,23 @@ namespace GLib::Cpp
 		}
 
 	private:
-		[[noreturn]] static void IllegalCharacter(char const c, unsigned int const lineNumber, State const state, unsigned int const startLine)
+		[[noreturn]] static void IllegalCharacter(char const chr, unsigned int const lineNumber, State const state, unsigned int const startLine)
 		{
-			std::ostringstream s;
-			s << "Illegal character: ";
-			if (c >= minPrintable)
+			std::ostringstream stm;
+			stm << "Illegal character: ";
+			if (chr >= minPrintable)
 			{
-				s << '\'' << c << "' ";
+				stm << '\'' << chr << "' ";
 			}
 
-			s << "(0x" << std::hex << static_cast<unsigned>(c) << std::dec << ") at line: " << lineNumber << ", state: " << state;
+			stm << "(0x" << std::hex << static_cast<unsigned>(chr) << std::dec << ") at line: " << lineNumber << ", state: " << state;
 
 			if (startLine != lineNumber)
 			{
-				s << ", StartLine: " << startLine;
+				stm << ", StartLine: " << startLine;
 			}
 
-			throw std::runtime_error(s.str());
+			throw std::runtime_error(stm.str());
 		}
 
 		bool Set(State state, std::string_view::const_iterator yieldValue)
@@ -119,9 +119,9 @@ namespace GLib::Cpp
 				auto const endState = engine.Push('\n');
 				if (endState != State::None && endState != State::WhiteSpace)
 				{
-					std::ostringstream s;
-					s << "Termination error, State: " << endState << ", StartLine: " << startLineNumber;
-					throw std::runtime_error(s.str());
+					std::ostringstream stm;
+					stm << "Termination error, State: " << endState << ", StartLine: " << startLineNumber;
+					throw std::runtime_error(stm.str());
 				}
 			}
 
@@ -146,13 +146,13 @@ namespace GLib::Cpp
 
 				if (ptr != end)
 				{
-					char const c = *ptr++;
-					newState = engine.Push(c);
+					char const chr = *ptr++;
+					newState = engine.Push(chr);
 					if (newState == State::Error)
 					{
-						IllegalCharacter(c, lineNumber, oldState, startLineNumber);
+						IllegalCharacter(chr, lineNumber, oldState, startLineNumber);
 					}
-					if (c == '\n')
+					if (chr == '\n')
 					{
 						++lineNumber;
 					}

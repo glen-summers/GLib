@@ -10,20 +10,20 @@ namespace GLib::Flog
 {
 	namespace Detail
 	{
-		extern "C" void Write(char c);
+		extern "C" void Write(char chr);
 
 		// perf test
 		class Buffer : public std::basic_streambuf<char>
 		{
 		protected:
-			int_type overflow(int_type const c) override
+			int_type overflow(int_type const chr) override
 			{
-				if (traits_type::eq_int_type(c, traits_type::eof()))
+				if (traits_type::eq_int_type(chr, traits_type::eof()))
 				{
-					return traits_type::not_eof(c);
+					return traits_type::not_eof(chr);
 				}
-				Write(traits_type::to_char_type(c));
-				return c;
+				Write(traits_type::to_char_type(chr));
+				return chr;
 			}
 		};
 
@@ -61,9 +61,9 @@ namespace GLib::Flog
 		}
 
 		template <typename... Ts>
-		void Spam(std::string_view const format, Ts &&... ts) const
+		void Spam(std::string_view const format, Ts &&... values) const
 		{
-			Write(Level::Spam, format, std::forward<Ts>(ts)...);
+			Write(Level::Spam, format, std::forward<Ts>(values)...);
 		}
 
 		void Debug(std::string_view const message) const
@@ -72,9 +72,9 @@ namespace GLib::Flog
 		}
 
 		template <typename... Ts>
-		void Debug(std::string_view const format, Ts &&... ts) const
+		void Debug(std::string_view const format, Ts &&... values) const
 		{
-			Write(Level::Debug, format, std::forward<Ts>(ts)...);
+			Write(Level::Debug, format, std::forward<Ts>(values)...);
 		}
 
 		void Info(std::string_view const message) const
@@ -83,9 +83,9 @@ namespace GLib::Flog
 		}
 
 		template <typename... Ts>
-		void Info(std::string_view const format, Ts &&... ts) const
+		void Info(std::string_view const format, Ts &&... values) const
 		{
-			Write(Level::Info, format, std::forward<Ts>(ts)...);
+			Write(Level::Info, format, std::forward<Ts>(values)...);
 		}
 
 		void Warning(std::string_view const message) const
@@ -94,9 +94,9 @@ namespace GLib::Flog
 		}
 
 		template <typename... Ts>
-		void Warning(std::string_view const format, Ts &&... ts) const
+		void Warning(std::string_view const format, Ts &&... values) const
 		{
-			Write(Level::Warning, format, std::forward<Ts>(ts)...);
+			Write(Level::Warning, format, std::forward<Ts>(values)...);
 		}
 
 		void Error(std::string_view const message) const
@@ -105,9 +105,9 @@ namespace GLib::Flog
 		}
 
 		template <typename... Ts>
-		void Error(std::string_view const format, Ts &&... ts) const
+		void Error(std::string_view const format, Ts &&... values) const
 		{
-			Write(Level::Error, format, std::forward<Ts>(ts)...);
+			Write(Level::Error, format, std::forward<Ts>(values)...);
 		}
 
 		friend class LogManager;
@@ -125,9 +125,9 @@ namespace GLib::Flog
 		void CommitStream(Level level) const;
 
 		template <typename... Ts>
-		void Write(Level const level, std::string_view const format, Ts... ts) const
+		void Write(Level const level, std::string_view const format, Ts... values) const
 		{
-			Formatter::Format(Detail::Stream(), format, std::forward<Ts>(ts)...);
+			Formatter::Format(Detail::Stream(), format, std::forward<Ts>(values)...);
 			CommitStream(level);
 		}
 	};

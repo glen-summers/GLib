@@ -59,14 +59,14 @@ void Coverage::AddLine(std::wstring const & fileName, unsigned int const lineNum
 		wideFiles.insert(fileName);
 	}
 
-	auto it = process.Addresses().find(address);
-	if (it == process.Addresses().end())
+	auto iter = process.Addresses().find(address);
+	if (iter == process.Addresses().end())
 	{
-		ULONG const id = symProcess.GetSymbolIdFromAddress(address);
+		ULONG const symbolId = symProcess.GetSymbolIdFromAddress(address);
 		auto const oldByte = symProcess.Read<unsigned char>(address);
-		it = process.AddAddress(address, Address {oldByte, id});
+		iter = process.AddAddress(address, Address {oldByte, symbolId});
 	}
-	it->second.AddFileLine(fileName, lineNumber);
+	iter->second.AddFileLine(fileName, lineNumber);
 
 	symProcess.Write(address, debugBreakByte);
 }
@@ -78,10 +78,10 @@ void Coverage::OnCreateProcess(ULONG const processId, ULONG const threadId, CREA
 
 	log.Info("+Process Pid:{0}, Path:{1}", processId, GLib::Win::FileSystem::PathOfProcessHandle(process.Process().Handle().get()));
 
-	auto it = processes.find(processId);
-	if (it == processes.end())
+	auto iter = processes.find(processId);
+	if (iter == processes.end())
 	{
-		it = processes.emplace(processId, processId).first;
+		iter = processes.emplace(processId, processId).first;
 	}
 
 	CREATE_THREAD_DEBUG_INFO threadInfo {};
@@ -91,7 +91,7 @@ void Coverage::OnCreateProcess(ULONG const processId, ULONG const threadId, CREA
 	GLib::Flog::ScopeLog const scopeLog(log, GLib::Flog::Level::Info, "EnumLines");
 
 	Symbols().Lines([&](SRCCODEINFOW const * const lineInfo)
-									{ AddLine(&lineInfo->FileName[0], lineInfo->LineNumber, process, lineInfo->Address, it->second); },
+									{ AddLine(&lineInfo->FileName[0], lineInfo->LineNumber, process, lineInfo->Address, iter->second); },
 									process.Handle(), info.lpBaseOfImage);
 
 	static_cast<void>(scopeLog);
@@ -114,8 +114,8 @@ void Coverage::CaptureData(ULONG const processId)
 		auto symbolId = address.SymbolId();
 		auto symbol = symProcess.GetSymbolFromIndex(symbolId);
 
-		auto it = process.IndexToFunction().find(symbolId);
-		if (it == process.IndexToFunction().end())
+		auto iter = process.IndexToFunction().find(symbolId);
+		if (iter == process.IndexToFunction().end())
 		{
 			std::string parentName;
 			std::optional<GLib::Win::Symbols::Symbol> const parent = symProcess.TryGetClassParent(symbolId);
@@ -125,9 +125,9 @@ void Coverage::CaptureData(ULONG const processId)
 			}
 
 			auto const & [nameSpace, typeName, functionName] = CleanupFunctionNames(symbol.Name(), parentName);
-			it = process.AddFunction(symbol.Index(), nameSpace, typeName, functionName);
+			iter = process.AddFunction(symbol.Index(), nameSpace, typeName, functionName);
 		}
-		it->second.Accumulate(address);
+		iter->second.Accumulate(address);
 	}
 
 	static_cast<void>(scopeLog);
@@ -157,17 +157,17 @@ ULONG Coverage::OnException(ULONG const processId, ULONG const threadId, EXCEPTI
 
 	if (info.dwFirstChance != 0 && isBreakpoint)
 	{
-		uint64_t const address = GLib::Win::Detail::ConvertAddress(info.ExceptionRecord.ExceptionAddress);
+		uint64_t const addressValue = GLib::Win::Detail::ConvertAddress(info.ExceptionRecord.ExceptionAddress);
 		auto const & process = processes.at(processId);
 
-		auto const it = process.Addresses().find(address);
-		if (it != process.Addresses().end())
+		auto const iter = process.Addresses().find(addressValue);
+		if (iter != process.Addresses().end())
 		{
-			GLib::Win::Symbols::SymProcess const & p = Symbols().GetProcess(processId);
+			GLib::Win::Symbols::SymProcess const & symProcess = Symbols().GetProcess(processId);
 
-			Address const & a = it->second;
-			p.Write(address, a.OldData());
-			a.Visit();
+			Address const & address = iter->second;
+			symProcess.Write(addressValue, address.OldData());
+			address.Visit();
 
 			GLib::Win::HandleBase * const threadHandle = process.FindThread(threadId);
 
@@ -248,13 +248,13 @@ std::tuple<std::string, std::string, std::string> Coverage::CleanupFunctionNames
 	RemoveTemplateDefinitions(className);
 	RemoveTemplateDefinitions(functionName);
 
-	std::smatch m;
+	std::smatch match;
 	if (!className.empty())
 	{
-		std::regex_search(className, m, nameSpaceRegex);
-		if (!m.empty())
+		std::regex_search(className, match, nameSpaceRegex);
+		if (!match.empty())
 		{
-			size_t const len = m[0].str().size();
+			size_t const len = match[0].str().size();
 			if (len >= 2)
 			{
 				nameSpace = className.substr(0, len - 2);
@@ -276,10 +276,10 @@ std::tuple<std::string, std::string, std::string> Coverage::CleanupFunctionNames
 	}
 	else
 	{
-		std::regex_search(functionName, m, nameSpaceRegex);
-		if (!m.empty())
+		std::regex_search(functionName, match, nameSpaceRegex);
+		if (!match.empty())
 		{
-			size_t const len = m[0].str().size();
+			size_t const len = match[0].str().size();
 			if (len >= 2)
 			{
 				nameSpace = functionName.substr(0, len - 2);

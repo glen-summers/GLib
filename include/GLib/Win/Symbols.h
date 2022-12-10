@@ -369,22 +369,22 @@ namespace GLib::Win::Symbols
 		SymProcess & AddProcess(ULONG const processId, HandleBase * const processHandle, const uint64_t baseOfImage, HandleBase * const imageFile,
 														std::string const & imageName)
 		{
-			SymProcess sp = SymProcess::GetProcess(processHandle, baseOfImage, false);
+			SymProcess symProcess = SymProcess::GetProcess(processHandle, baseOfImage, false);
 
-			uint64_t const loadBase = SymLoadModuleExW(sp.Handle(), imageFile, Cvt::A2W(imageName).c_str(), nullptr, baseOfImage, 0, nullptr, 0);
+			uint64_t const loadBase = SymLoadModuleExW(symProcess.Handle(), imageFile, Cvt::A2W(imageName).c_str(), nullptr, baseOfImage, 0, nullptr, 0);
 			Util::AssertTrue(0 != loadBase, "SymLoadModuleExW");
 
-			return handles.emplace(processId, std::move(sp)).first->second;
+			return handles.emplace(processId, std::move(symProcess)).first->second;
 		}
 
 		[[nodiscard]] SymProcess const & GetProcess(ULONG const processId) const
 		{
-			auto const it = handles.find(processId);
-			if (it == handles.end())
+			auto const iter = handles.find(processId);
+			if (iter == handles.end())
 			{
 				throw std::runtime_error("Process not found");
 			}
-			return it->second;
+			return iter->second;
 		}
 
 		void RemoveProcess(ULONG const processId)
@@ -395,16 +395,16 @@ namespace GLib::Win::Symbols
 			}
 		}
 
-		void SourceFiles(std::function<void(PSOURCEFILEW)> f, HandleBase * const process, void * base) const
+		void SourceFiles(std::function<void(PSOURCEFILEW)> func, HandleBase * const process, void * base) const
 		{
 			static_cast<void>(this);
-			Util::AssertTrue(SymEnumSourceFilesW(process, Detail::ConvertBase(base), nullptr, EnumSourceFiles, &f), "SymEnumSourceFilesW");
+			Util::AssertTrue(SymEnumSourceFilesW(process, Detail::ConvertBase(base), nullptr, EnumSourceFiles, &func), "SymEnumSourceFilesW");
 		}
 
-		void Lines(std::function<void(PSRCCODEINFOW)> f, HandleBase * const process, void * base) const
+		void Lines(std::function<void(PSRCCODEINFOW)> func, HandleBase * const process, void * base) const
 		{
 			static_cast<void>(this);
-			auto const result = SymEnumLinesW(process, Detail::ConvertBase(base), nullptr, nullptr, EnumLines, &f);
+			auto const result = SymEnumLinesW(process, Detail::ConvertBase(base), nullptr, nullptr, EnumLines, &func);
 			Util::AssertTrue(result == TRUE || GetLastError() == ERROR_NOT_SUPPORTED, "SymEnumLinesW");
 		}
 

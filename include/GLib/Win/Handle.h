@@ -18,13 +18,13 @@ namespace GLib::Win
 
 	struct HandleCloser
 	{
-		void operator()(HandleBase * const h) const noexcept
+		void operator()(HandleBase * const handle) const noexcept
 		{
 			// h!= INVALID_HANDLE_VALUE, or null - via policy?
 			// should not be needed, null should never get here as its a unique_ptr
 			// and INVALID_HANDLE_VALUE appears to return success from CloseHandle
-			assert(h != nullptr && h != INVALID_HANDLE_VALUE); // NOLINT bad macro
-			Util::WarnAssertTrue(CloseHandle(h), "CloseHandle");
+			assert(handle != nullptr && handle != INVALID_HANDLE_VALUE); // NOLINT bad macro
+			Util::WarnAssertTrue(CloseHandle(handle), "CloseHandle");
 		}
 	};
 

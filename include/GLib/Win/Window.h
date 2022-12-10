@@ -34,9 +34,9 @@ namespace GLib::Win
 		constexpr unsigned int VRedraw = CS_VREDRAW;
 		constexpr unsigned int OverlappedWindow = WS_OVERLAPPEDWINDOW; // NOLINT bad macro
 
-		inline auto MakeIntResource(int const id)
+		inline auto MakeIntResource(int const identifier)
 		{
-			return MAKEINTRESOURCEW(id); // NOLINT bad macro
+			return MAKEINTRESOURCEW(identifier); // NOLINT bad macro
 		}
 
 		inline WORD LoWord(WPARAM const param)
@@ -97,28 +97,28 @@ namespace GLib::Win
 			std::wstring const className = Cvt::A2W(ClassInfoStore::Register(icon, menu, proc));
 			auto * instance = Instance();
 
-			WNDCLASSEXW wc {};
-			BOOL const exists = GetClassInfoExW(instance, className.c_str(), &wc);
+			WNDCLASSEXW wndClass {};
+			BOOL const exists = GetClassInfoExW(instance, className.c_str(), &wndClass);
 			if (exists == 0)
 			{
 				Util::AssertTrue(GetLastError() == ERROR_CLASS_DOES_NOT_EXIST, "GetClassInfoExW");
 
-				IconBase * const i = icon == 0 ? nullptr : LoadIconW(instance, MakeIntResource(icon));
+				IconBase * const iconPtr = icon == 0 ? nullptr : LoadIconW(instance, MakeIntResource(icon));
 
-				wc = {sizeof(WNDCLASSEXW),
-							HRedraw | VRedraw,
-							proc,
-							0,
-							0,
-							instance,
-							i,
-							LoadCursorW(nullptr, IDC_ARROW), // NOLINT bad macro
-							Util::Detail::WindowsCast<HBRUSH>(size_t {COLOR_WINDOW} + 1),
-							MakeIntResource(menu),
-							className.c_str(),
-							{}};
+				wndClass = {sizeof(WNDCLASSEXW),
+										HRedraw | VRedraw,
+										proc,
+										0,
+										0,
+										instance,
+										iconPtr,
+										LoadCursorW(nullptr, IDC_ARROW), // NOLINT bad macro
+										Util::Detail::WindowsCast<HBRUSH>(size_t {COLOR_WINDOW} + 1),
+										MakeIntResource(menu),
+										className.c_str(),
+										{}};
 
-				Util::AssertTrue(RegisterClassExW(&wc) != 0, "RegisterClassExW");
+				Util::AssertTrue(RegisterClassExW(&wndClass) != 0, "RegisterClassExW");
 			}
 			return Cvt::W2A(className);
 		}
@@ -151,9 +151,9 @@ namespace GLib::Win
 			return handle;
 		}
 
-		inline HACCEL LoadAccel(int const id)
+		inline HACCEL LoadAccel(int const identifier)
 		{
-			AccelBase * const accel = LoadAcceleratorsW(Instance(), MakeIntResource(id));
+			AccelBase * const accel = LoadAcceleratorsW(Instance(), MakeIntResource(identifier));
 			Util::AssertTrue(accel != nullptr, "LoadAcceleratorsW");
 			return accel;
 		}
@@ -216,9 +216,9 @@ namespace GLib::Win
 
 		[[nodiscard]] Size ClientSize() const
 		{
-			RECT rc;
-			Util::AssertTrue(GetClientRect(handle.get(), &rc), "GetClientRect");
-			return {rc.right - rc.left, rc.bottom - rc.top};
+			RECT rect;
+			Util::AssertTrue(GetClientRect(handle.get(), &rect), "GetClientRect");
+			return {rect.right - rect.left, rect.bottom - rect.top};
 		}
 
 		[[nodiscard]] bool Show(int const cmd) const
@@ -228,9 +228,9 @@ namespace GLib::Win
 
 		[[nodiscard]] Painter GetPainter() const
 		{
-			PAINTSTRUCT ps {};
-			auto * dc = BeginPaint(handle.get(), &ps);
-			return Painter {PaintInfo {ps, handle.get(), dc}};
+			PAINTSTRUCT paintStruct {};
+			auto * context = BeginPaint(handle.get(), &paintStruct);
+			return Painter {PaintInfo {paintStruct, handle.get(), context}};
 		}
 
 		void Close() const
@@ -254,17 +254,17 @@ namespace GLib::Win
 #pragma pop_macro("MessageBox")
 
 		template <typename R, typename P>
-		void SetTimer(std::chrono::duration<R, P> const & interval, UINT_PTR id = 1) const
+		void SetTimer(std::chrono::duration<R, P> const & interval, UINT_PTR identifier = 1) const
 		{
 			auto const count = std::chrono::duration_cast<std::chrono::milliseconds>(interval).count();
 			auto const milliseconds = GLib::Util::CheckedCast<ULONG>(count);
-			UINT_PTR const timerResult = ::SetTimer(handle.get(), id, milliseconds, nullptr);
+			UINT_PTR const timerResult = ::SetTimer(handle.get(), identifier, milliseconds, nullptr);
 			Util::AssertTrue(timerResult != 0, "SetTimer");
 		}
 
-		void KillTimer(UINT_PTR const id = 1) const
+		void KillTimer(UINT_PTR const identifier = 1) const
 		{
-			Util::AssertTrue(::KillTimer(handle.get(), id), "KillTimer");
+			Util::AssertTrue(::KillTimer(handle.get(), identifier), "KillTimer");
 		}
 
 		void Invalidate(bool const erase) const

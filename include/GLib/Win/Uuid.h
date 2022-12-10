@@ -45,8 +45,8 @@ namespace GLib::Win::Util
 
 	inline std::string ToString(Uuid const & id)
 	{
-		std::ostringstream s;
-		s << id;
-		return s.str();
+		std::ostringstream stm;
+		stm << id;
+		return stm.str();
 	}
 }

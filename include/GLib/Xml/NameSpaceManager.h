@@ -84,12 +84,12 @@ namespace GLib::Xml
 			{
 				ValidateName(colon, name);
 				auto const prefix = name.substr(0, colon);
-				auto const it = nameSpaces.find(prefix);
-				if (it == nameSpaces.end())
+				auto const iter = nameSpaces.find(prefix);
+				if (iter == nameSpaces.end())
 				{
 					throw std::runtime_error(std::string("NameSpace ") + std::string(prefix) + " not found");
 				}
-				return {name.substr(colon + 1), it->second};
+				return {name.substr(colon + 1), iter->second};
 			}
 			return {name, {}};
 		}

@@ -13,11 +13,13 @@ class StreamInfo
 
 public:
 	StreamInfo(std::ofstream stream, std::filesystem::path path, unsigned int date)
+	// clang-format off
 	try
 		: stream(std::move(stream))
 		, path(std::move(path))
 		, date(date)
 	{}
+	// clang-format on
 	catch (std::exception &)
 	{
 		std::terminate();
@@ -28,13 +30,13 @@ public:
 	StreamInfo(StreamInfo &&) = delete;
 	StreamInfo & operator=(StreamInfo const &) = delete;
 
-	StreamInfo & operator=(StreamInfo && s) noexcept
+	StreamInfo & operator=(StreamInfo && info) noexcept
 	{
 		try
 		{
-			stream = std::move(s.stream);
-			path = std::move(s.path);
-			date = s.date;
+			stream = std::move(info.stream);
+			path = std::move(info.path);
+			date = info.date;
 			return *this;
 		}
 		catch (std::exception &)

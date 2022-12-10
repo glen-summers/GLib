@@ -11,9 +11,9 @@
 
 namespace GLib::Cpp
 {
-	std::ostream & operator<<(std::ostream & s, Fragment const & f)
+	std::ostream & operator<<(std::ostream & stm, Fragment const & f)
 	{
-		return s << "State: " << f.first << ", Value: \'" << f.second << '\'';
+		return stm << "State: " << f.first << ", Value: \'" << f.second << '\'';
 	}
 }
 
@@ -595,7 +595,7 @@ AUTO_TEST_CASE(UnterminatedBug)
 
 // #define BULK_TEST
 #ifdef BULK_TEST
-void ScanFile(std::filesystem::path const & p, std::ostream & s)
+void ScanFile(std::filesystem::path const & p, std::ostream & stm)
 {
 	std::ifstream t(p);
 	if (!t)
@@ -612,7 +612,7 @@ void ScanFile(std::filesystem::path const & p, std::ostream & s)
 	}
 	catch (std::runtime_error const & e)
 	{
-		s << p << " : " << e.what() << '\n';
+		stm << p << " : " << e.what() << '\n';
 	}
 }
 
@@ -639,7 +639,7 @@ AUTO_TEST_CASE(BulkTest)
 #endif
 	};
 
-	std::ostringstream s;
+	std::ostringstream stm;
 	for (auto const & p : paths)
 	{
 		size_t count {};
@@ -647,16 +647,16 @@ AUTO_TEST_CASE(BulkTest)
 		{
 			if (is_regular_file(de.path()) && extensions.contains(de.path().extension().string()))
 			{
-				ScanFile(de.path(), s);
+				ScanFile(de.path(), stm);
 				++count;
 			}
 		}
-		s << "BulkTest: " << p << ", Count: " << count << '\n';
+		stm << "BulkTest: " << p << ", Count: " << count << '\n';
 	}
 
 	auto state = boost::unit_test::unit_test_log.set_threshold_level(boost::unit_test::log_level::log_messages);
 	static_cast<void>(state);
-	TEST_MESSAGE(s.str());
+	TEST_MESSAGE(stm.str());
 	// static_cast<void>(boost::unit_test::unit_test_log.set_threshold_level(state)); // does no restore
 	static_cast<void>(boost::unit_test::unit_test_log.set_threshold_level(boost::unit_test::log_level::log_nothing));
 }

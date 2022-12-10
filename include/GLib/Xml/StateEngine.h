@@ -102,29 +102,29 @@ namespace GLib::Xml
 		}
 
 	private:
-		static bool IsContinuation(char const c)
+		static bool IsContinuation(char const chr)
 		{
-			return (static_cast<EnumType>(c) & continuationMask) != 0;
+			return (static_cast<EnumType>(chr) & continuationMask) != 0;
 		}
 
-		static bool IsWhiteSpace(char const c)
+		static bool IsWhiteSpace(char const chr)
 		{
-			return !IsContinuation(c) && std::isspace(c) != 0;
+			return !IsContinuation(chr) && std::isspace(chr) != 0;
 		}
 
-		static bool IsNameStart(char const c)
+		static bool IsNameStart(char const chr)
 		{
-			return IsContinuation(c) || std::isalpha(c) != 0 || c == colon || c == underscore; // check docs
+			return IsContinuation(chr) || std::isalpha(chr) != 0 || chr == colon || chr == underscore; // check docs
 		}
 
-		static bool IsName(char const c)
+		static bool IsName(char const chr)
 		{
-			return IsNameStart(c) || std::isdigit(c) != 0 || c == fullStop || c == hyphen; // check docs
+			return IsNameStart(chr) || std::isdigit(chr) != 0 || chr == fullStop || chr == hyphen; // check docs
 		}
 
-		static bool IsAllowedTextCharacter(char const c)
+		static bool IsAllowedTextCharacter(char const chr)
 		{
-			return c != leftAngleBracket;
+			return chr != leftAngleBracket;
 		}
 
 		void SetState(State const newState)
@@ -138,266 +138,266 @@ namespace GLib::Xml
 
 		////////////////////////
 		// state functions
-		State Error(char const c) const
+		State Error(char const chr) const
 		{
-			static_cast<void>(c);
+			static_cast<void>(chr);
 			return state;
 		}
 
-		State Start(char const c) const
+		State Start(char const chr) const
 		{
-			if (c == leftAngleBracket)
+			if (chr == leftAngleBracket)
 			{
 				return State::ElementStart;
 			}
-			if (IsWhiteSpace(c))
+			if (IsWhiteSpace(chr))
 			{
 				hasContent = true;
 				return state;
 			}
-			if (!isProlog && IsAllowedTextCharacter(c))
+			if (!isProlog && IsAllowedTextCharacter(chr))
 			{
 				return State::Text;
 			}
 			return State::Error;
 		}
 
-		State DocTypeDecl(char const c) const
+		State DocTypeDecl(char const chr) const
 		{
-			if (IsName(c) || IsWhiteSpace(c))
+			if (IsName(chr) || IsWhiteSpace(chr))
 			{
 				return state;
 			}
-			if (c == rightAngleBracket)
+			if (chr == rightAngleBracket)
 			{
 				return State::Start;
 			}
 			return state;
 		}
 
-		State ElementStart(char const c) const
+		State ElementStart(char const chr) const
 		{
-			if (IsNameStart(c))
+			if (IsNameStart(chr))
 			{
 				isProlog = false;
 				hasContent = true;
 				return State::ElementName;
 			}
-			if (c == forwardSlash)
+			if (chr == forwardSlash)
 			{
 				return State::ElementEnd;
 			}
-			if (c == exclamation)
+			if (chr == exclamation)
 			{
 				hasContent = true;
 				return State::Bang;
 			}
-			if (c == questionMark && !hasContent)
+			if (chr == questionMark && !hasContent)
 			{
 				return State::XmlDeclaration;
 			}
 			return State::Error;
 		}
 
-		State ElementEnd(char const c) const
+		State ElementEnd(char const chr) const
 		{
 			static_cast<void>(this);
-			if (IsNameStart(c))
+			if (IsNameStart(chr))
 			{
 				return State::ElementEndName;
 			}
 			return State::Error;
 		}
 
-		State ElementEndName(char const c) const
+		State ElementEndName(char const chr) const
 		{
-			if (IsName(c))
+			if (IsName(chr))
 			{
 				return state;
 			}
-			if (c == rightAngleBracket)
+			if (chr == rightAngleBracket)
 			{
 				return State::Start;
 			}
-			if (IsWhiteSpace(c))
+			if (IsWhiteSpace(chr))
 			{
 				return State::ElementEndSpace;
 			}
 			return State::Error;
 		}
 
-		State ElementEndSpace(char const c) const
+		State ElementEndSpace(char const chr) const
 		{
-			if (IsWhiteSpace(c))
+			if (IsWhiteSpace(chr))
 			{
 				return state;
 			}
-			if (c == rightAngleBracket)
+			if (chr == rightAngleBracket)
 			{
 				return State::Start;
 			}
 			return State::Error;
 		}
 
-		State ElementName(char const c) const
+		State ElementName(char const chr) const
 		{
-			if (IsName(c))
+			if (IsName(chr))
 			{
 				return state;
 			}
-			if (c == rightAngleBracket)
+			if (chr == rightAngleBracket)
 			{
 				return State::Start;
 			}
-			if (c == forwardSlash)
+			if (chr == forwardSlash)
 			{
 				return State::EmptyElement;
 			}
-			if (IsWhiteSpace(c))
+			if (IsWhiteSpace(chr))
 			{
 				return State::AttributeSpace;
 			}
 			return State::Error;
 		}
 
-		State EmptyElement(char const c) const
+		State EmptyElement(char const chr) const
 		{
 			static_cast<void>(this);
-			if (c == rightAngleBracket)
+			if (chr == rightAngleBracket)
 			{
 				return State::Start;
 			}
 			return State::Error;
 		}
 
-		State AttributeSpace(char const c) const
+		State AttributeSpace(char const chr) const
 		{
-			if (IsWhiteSpace(c))
+			if (IsWhiteSpace(chr))
 			{
 				return state;
 			}
-			if (c == rightAngleBracket)
+			if (chr == rightAngleBracket)
 			{
 				return State::Start;
 			}
-			if (c == forwardSlash)
+			if (chr == forwardSlash)
 			{
 				return State::EmptyElement;
 			}
-			if (IsNameStart(c))
+			if (IsNameStart(chr))
 			{
 				return State::AttributeName;
 			}
 			return State::Error;
 		}
 
-		State AttributeName(char const c) const
+		State AttributeName(char const chr) const
 		{
-			if (IsName(c))
+			if (IsName(chr))
 			{
 				return state;
 			}
-			if (IsWhiteSpace(c))
+			if (IsWhiteSpace(chr))
 			{
 				return State::AttributeNameSpace;
 			}
-			if (c == equals)
+			if (chr == equals)
 			{
 				return State::AttributeValueStart;
 			}
 			return State::Error;
 		}
 
-		State AttributeNameSpace(char const c) const
+		State AttributeNameSpace(char const chr) const
 		{
-			if (IsWhiteSpace(c))
+			if (IsWhiteSpace(chr))
 			{
 				return state;
 			}
-			if (c == equals)
+			if (chr == equals)
 			{
 				return State::AttributeValueStart;
 			}
 			return State::Error;
 		}
 
-		State AttributeValueStart(char const c) const
+		State AttributeValueStart(char const chr) const
 		{
-			if (IsWhiteSpace(c))
+			if (IsWhiteSpace(chr))
 			{
 				return state;
 			}
-			if (c == doubleQuote || c == singleQuote)
+			if (chr == doubleQuote || chr == singleQuote)
 			{
-				attributeQuoteChar = c;
+				attributeQuoteChar = chr;
 				return State::AttributeValue;
 			}
 			return State::Error;
 		}
 
-		State AttributeValue(char const c) const
+		State AttributeValue(char const chr) const
 		{
-			if (c == attributeQuoteChar)
+			if (chr == attributeQuoteChar)
 			{
 				return State::AttributeEnd;
 			}
-			if (c == ampersand)
+			if (chr == ampersand)
 			{
 				return State::AttributeEntity;
 			}
-			if (IsAllowedTextCharacter(c))
+			if (IsAllowedTextCharacter(chr))
 			{
 				return state;
 			}
 			return State::Error;
 		}
 
-		State AttributeEnd(char const c) const
+		State AttributeEnd(char const chr) const
 		{
 			static_cast<void>(this);
-			if (IsWhiteSpace(c))
+			if (IsWhiteSpace(chr))
 			{
 				return State::AttributeSpace;
 			}
-			if (c == rightAngleBracket)
+			if (chr == rightAngleBracket)
 			{
 				return State::Start;
 			}
-			if (c == forwardSlash)
+			if (chr == forwardSlash)
 			{
 				return State::EmptyElement;
 			}
 			return State::Error;
 		}
 
-		State Text(char const c) const
+		State Text(char const chr) const
 		{
-			if (c == leftAngleBracket)
+			if (chr == leftAngleBracket)
 			{
 				return State::ElementStart;
 			}
-			if (c == ampersand)
+			if (chr == ampersand)
 			{
 				return State::TextEntity;
 			}
-			if (IsAllowedTextCharacter(c))
+			if (IsAllowedTextCharacter(chr))
 			{
 				return state;
 			}
 			return State::Error;
 		}
 
-		State Bang(char const c) const
+		State Bang(char const chr) const
 		{
-			if (c == dash)
+			if (chr == dash)
 			{
 				return State::CommentStartDash;
 			}
-			if (c == leftSquareBracket)
+			if (chr == leftSquareBracket)
 			{
 				return State::CDataName;
 			}
-			if (isProlog && !hasDocTypeDecl && IsNameStart(c))
+			if (isProlog && !hasDocTypeDecl && IsNameStart(chr))
 			{
 				hasDocTypeDecl = true;
 				return State::DocTypeDecl;
@@ -405,95 +405,95 @@ namespace GLib::Xml
 			return State::Error;
 		}
 
-		State CommentStartDash(char const c) const
+		State CommentStartDash(char const chr) const
 		{
 			static_cast<void>(this);
-			if (c == dash)
+			if (chr == dash)
 			{
 				return State::Comment;
 			}
 			return State::Error;
 		}
 
-		State Comment(char const c) const
+		State Comment(char const chr) const
 		{
-			if (c == dash)
+			if (chr == dash)
 			{
 				return State::CommentEndDash;
 			}
 			return state;
 		}
 
-		State CommentEndDash(char const c) const
+		State CommentEndDash(char const chr) const
 		{
 			static_cast<void>(this);
-			if (c == dash)
+			if (chr == dash)
 			{
 				return State::CommentEnd;
 			}
 			return State::Comment;
 		}
 
-		State CommentEnd(char const c) const
+		State CommentEnd(char const chr) const
 		{
 			static_cast<void>(this);
-			if (c == rightAngleBracket)
+			if (chr == rightAngleBracket)
 			{
 				return State::Start;
 			}
 			return State::Error;
 		}
 
-		State XmlDeclaration(char const c) const
+		State XmlDeclaration(char const chr) const
 		{
-			if (c == questionMark)
+			if (chr == questionMark)
 			{
 				return State::EmptyElement;
 			}
 			return state;
 		}
 
-		State CDataName(char const c) const
+		State CDataName(char const chr) const
 		{
-			if (c == leftSquareBracket)
+			if (chr == leftSquareBracket)
 			{
 				return State::CDataValue;
 			}
 			return state;
 		}
 
-		State CDataValue(char const c) const
+		State CDataValue(char const chr) const
 		{
-			if (c == rightSquareBracket)
+			if (chr == rightSquareBracket)
 			{
 				return State::CDataEnd1;
 			}
 			return state;
 		}
 
-		State CDataEnd1(char const c) const
+		State CDataEnd1(char const chr) const
 		{
 			static_cast<void>(this);
-			if (c == rightSquareBracket)
+			if (chr == rightSquareBracket)
 			{
 				return State::CDataEnd2;
 			}
 			return State::CDataValue;
 		}
 
-		State CDataEnd2(char const c) const
+		State CDataEnd2(char const chr) const
 		{
 			static_cast<void>(this);
-			if (c == rightAngleBracket)
+			if (chr == rightAngleBracket)
 			{
 				return State::Start;
 			}
 			return State::CDataValue;
 		}
 
-		State TextEntity(char const c) const
+		State TextEntity(char const chr) const
 		{
-			if (c == semiColon)
+			if (chr == semiColon)
 			{
 				return State::Text;
 			}
@@ -501,9 +501,9 @@ namespace GLib::Xml
 			return state;
 		}
 
-		State AttributeEntity(char const c) const
+		State AttributeEntity(char const chr) const
 		{
-			if (c == semiColon)
+			if (chr == semiColon)
 			{
 				return State::AttributeValue;
 			}

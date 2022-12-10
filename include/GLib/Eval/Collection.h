@@ -30,15 +30,15 @@ namespace GLib::Eval
 		[[nodiscard]] std::string ToString() const override
 		{
 			std::ostringstream stm;
-			auto it = container.begin();
+			auto iter = container.begin();
 			auto end = container.end();
-			if (it != end)
+			if (iter != end)
 			{
-				stm << Utils::ToString(*it++);
+				stm << Utils::ToString(*iter++);
 			}
-			while (it != end)
+			while (iter != end)
 			{
-				stm << "," << Utils::ToString(*it++);
+				stm << "," << Utils::ToString(*iter++);
 			}
 			return stm.str();
 		}
@@ -51,11 +51,11 @@ namespace GLib::Eval
 			// size?
 		}
 
-		void ForEach(ValueVisitor const & f) const override
+		void ForEach(ValueVisitor const & visitor) const override
 		{
 			for (auto const & value : container)
 			{
-				f(Value<typename Container::value_type> {value});
+				visitor(Value<typename Container::value_type> {value});
 			}
 		}
 	};

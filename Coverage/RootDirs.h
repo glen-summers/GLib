@@ -5,11 +5,11 @@
 
 namespace Detail
 {
-	inline bool CommonRoot(std::filesystem::path const & p1, std::filesystem::path const & p2, std::filesystem::path & root)
+	inline bool CommonRoot(std::filesystem::path const & path1, std::filesystem::path const & path2, std::filesystem::path & root)
 	{
 		// assert, are absolute etc.
 		bool result = false;
-		for (auto it1 = p1.begin(), it2 = p2.begin(); it1 != p1.end() && it2 != p2.end(); ++it1, ++it2)
+		for (auto it1 = path1.begin(), it2 = path2.begin(); it1 != path1.end() && it2 != path2.end(); ++it1, ++it2)
 		{
 			if (*it1 != *it2)
 			{
@@ -46,13 +46,13 @@ inline void RootDirectories(std::set<std::filesystem::path> & paths)
 inline std::tuple<std::filesystem::path, std::filesystem::path> Reduce(std::filesystem::path const & path,
 																																			 std::set<std::filesystem::path> const & paths)
 {
-	for (auto const & p : paths)
+	for (auto const & pathValue : paths)
 	{
 		// avoid as calls GetFinalPathNameByHandleW?
-		auto rel = relative(path, p);
+		auto rel = relative(path, pathValue);
 		if (!rel.empty())
 		{
-			return {p, rel};
+			return {pathValue, rel};
 		}
 	}
 	throw std::runtime_error("Path not reduced");

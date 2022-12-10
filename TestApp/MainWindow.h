@@ -65,12 +65,12 @@ namespace TestApp
 		void OnPaint() noexcept override
 		{
 			log.Info("OnPaint");
-			GLib::Win::Painter const p = GetPainter();
+			GLib::Win::Painter const painter = GetPainter();
 			renderer.Verify(Handle(), ClientSize());
 			renderer.Begin();
 			renderer.Clear(D2D1::ColorF::CornflowerBlue);
 			renderer.End();
-			static_cast<void>(p);
+			static_cast<void>(painter);
 		}
 
 		void OnSize(GLib::Win::Size const & size) noexcept override

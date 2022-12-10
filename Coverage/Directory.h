@@ -88,61 +88,61 @@ public:
 template <>
 struct GLib::Eval::Visitor<Directory>
 {
-	static void Visit(Directory const & dir, std::string const & propertyName, ValueVisitor const & f)
+	static void Visit(Directory const & dir, std::string const & propertyName, ValueVisitor const & visitor)
 	{
 		if (propertyName == "name")
 		{
-			return f(Value(dir.Name()));
+			return visitor(Value(dir.Name()));
 		}
 
 		if (propertyName == "link")
 		{
-			return f(Value(dir.Link()));
+			return visitor(Value(dir.Link()));
 		}
 
 		if (propertyName == "coveragePercent")
 		{
-			return f(Value(dir.CoveragePercent()));
+			return visitor(Value(dir.CoveragePercent()));
 		}
 
 		if (propertyName == "coveredLines")
 		{
-			return f(Value(dir.CoveredLines()));
+			return visitor(Value(dir.CoveredLines()));
 		}
 
 		if (propertyName == "coverableLines")
 		{
-			return f(Value(dir.CoverableLines()));
+			return visitor(Value(dir.CoverableLines()));
 		}
 
 		if (propertyName == "coverageStyle")
 		{
-			return f(Value(dir.Style()));
+			return visitor(Value(dir.Style()));
 		}
 
 		if (propertyName == "minCoveragePercent")
 		{
-			return f(Value(dir.MinCoveragePercent()));
+			return visitor(Value(dir.MinCoveragePercent()));
 		}
 
 		if (propertyName == "minCoverageStyle")
 		{
-			return f(Value(dir.MinCoverageStyle()));
+			return visitor(Value(dir.MinCoverageStyle()));
 		}
 
 		if (propertyName == "coveredFunctions")
 		{
-			return f(Value(dir.CoveredFunctions()));
+			return visitor(Value(dir.CoveredFunctions()));
 		}
 
 		if (propertyName == "coverableFunctions")
 		{
-			return f(Value(dir.CoverableFunctions()));
+			return visitor(Value(dir.CoverableFunctions()));
 		}
 
 		if (propertyName == "coveredFunctionsPercent")
 		{
-			return f(Value(dir.CoveredFunctionsPercent()));
+			return visitor(Value(dir.CoveredFunctionsPercent()));
 		}
 
 		throw std::runtime_error("Unknown property : '" + propertyName + '\'');

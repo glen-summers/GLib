@@ -13,8 +13,8 @@ namespace GLib::Win
 
 	namespace Detail
 	{
-		inline static constexpr ULONG Read = KEY_READ;						// NOLINT(hicpp-signed-bitwise) bad macro
-		inline static constexpr ULONG AllAccess = KEY_ALL_ACCESS; // NOLINT(hicpp-signed-bitwise) bad macro
+		inline static constexpr ULONG Read = KEY_READ;
+		inline static constexpr ULONG AllAccess = KEY_ALL_ACCESS;
 		inline static constexpr size_t Position = 30;
 		inline static constexpr size_t Length = 8;
 		inline static constexpr auto TopBitsSet = 0xffffffff00000000;

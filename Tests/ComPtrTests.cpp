@@ -29,9 +29,9 @@ namespace
 template <typename T>
 struct boost::test_tools::tt_detail::print_log_value<GLib::Win::ComPtr<T>>
 {
-	void operator()(std::ostream & str, GLib::Win::ComPtr<T> const & item)
+	void operator()(std::ostream & stm, GLib::Win::ComPtr<T> const & item)
 	{
-		str << "ptr: " << Get(item) << ", Ref: " << UseCount(item);
+		stm << "ptr: " << Get(item) << ", Ref: " << UseCount(item);
 	}
 };
 

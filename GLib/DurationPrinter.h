@@ -4,12 +4,12 @@
 #include <iomanip>
 #include <ostream>
 
-inline std::ostream & operator<<(std::ostream & s, std::chrono::nanoseconds duration)
+inline std::ostream & operator<<(std::ostream & stm, std::chrono::nanoseconds duration)
 {
 	if (std::chrono::duration_cast<std::chrono::seconds>(duration).count() == 0)
 	{
 		constexpr auto toMilliseconds = 1000;
-		return s << std::setprecision(1) << std::fixed << std::chrono::duration<double>(duration).count() * toMilliseconds << "ms";
+		return stm << std::setprecision(1) << std::fixed << std::chrono::duration<double>(duration).count() * toMilliseconds << "ms";
 	}
 
 	auto const day = std::chrono::duration_cast<std::chrono::days>(duration);
@@ -39,15 +39,15 @@ inline std::ostream & operator<<(std::ostream & s, std::chrono::nanoseconds dura
 
 	if (day.count() != 0)
 	{
-		s << day.count() << '.';
+		stm << day.count() << '.';
 	}
 
-	s << hours.count() << ':' << minutes.count() << ':' << seconds.count();
+	stm << hours.count() << ':' << minutes.count() << ':' << seconds.count();
 
 	if (milliseconds != 0)
 	{
-		s << '.' << std::setprecision(effectiveDigits) << std::fixed << milliseconds;
+		stm << '.' << std::setprecision(effectiveDigits) << std::fixed << milliseconds;
 	}
 
-	return s;
+	return stm;
 }

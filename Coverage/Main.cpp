@@ -42,34 +42,34 @@ Coverage c:\Build\Main.exe C:\Report -ws -i C:\MainCode C:\Utils\ -x C:\External
 
 		std::span const args {argv, static_cast<size_t>(argc)};
 
-		auto it = args.begin();
+		auto iter = args.begin();
 		auto const end = args.end();
-		++it;
-		char const * const executable = *it++;
-		char const * const reportPath = *it++;
+		++iter;
+		char const * const executable = *iter++;
+		char const * const reportPath = *iter++;
 		bool debugChildProcesses {};
 		bool showWhiteSpace {};
 
 		Strings includes;
 		Strings excludes;
-		while (it != end)
+		while (iter != end)
 		{
-			auto const * const arg = *it++;
+			auto const * const arg = *iter++;
 			if (strcmp(arg, "-i") == 0)
 			{
-				if (it == end)
+				if (iter == end)
 				{
 					throw std::runtime_error("Missing include value");
 				}
-				includes.insert(*it++);
+				includes.insert(*iter++);
 			}
 			else if (strcmp(arg, "-x") == 0)
 			{
-				if (it == end)
+				if (iter == end)
 				{
 					throw std::runtime_error("Missing exclude value");
 				}
-				excludes.insert(*it++);
+				excludes.insert(*iter++);
 			}
 			else if (strcmp(arg, "-sub") == 0)
 			{
