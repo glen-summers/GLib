@@ -26,7 +26,7 @@ namespace GLib::Eval
 	}
 
 	template <typename T, std::enable_if_t<!Utils::Detail::IsContainer<T>::value> * = nullptr>
-	void ForEach(T value, ValueVisitor const & visitor)
+	void ForEach(T const value, ValueVisitor const & visitor)
 	{
 		static_cast<void>(value);
 		static_cast<void>(visitor);
@@ -34,7 +34,7 @@ namespace GLib::Eval
 	}
 
 	template <typename T, std::enable_if_t<Utils::Detail::IsContainer<T>::value> * = nullptr>
-	void ForEach(T collection, ValueVisitor const & visitor)
+	void ForEach(T const collection, ValueVisitor const & visitor)
 	{
 		for (auto const & value : collection)
 		{
@@ -60,7 +60,7 @@ namespace GLib::Eval
 	template <typename ValueType>
 	class Value : public ValueBase
 	{
-		ValueType value;
+		ValueType const value;
 
 	public:
 		explicit Value(ValueType value)

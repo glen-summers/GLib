@@ -73,7 +73,7 @@ namespace GLib::Win
 		{
 			void operator()(WindowHandleBase * const hWnd) const noexcept
 			{
-				if (IsWindow(hWnd))
+				if (IsWindow(hWnd) != 0)
 				{
 					Util::WarnAssertTrue(DestroyWindow(hWnd), "DestroyWindow");
 				}

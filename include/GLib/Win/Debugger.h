@@ -276,15 +276,15 @@ namespace GLib::Win
 			{
 				auto const size = static_cast<size_t>(info.nDebugStringLength / 2) - 1;
 				std::vector<wchar_t> buffer(size); // soh?
-				symbols.GetProcess(processId).Process().ReadMemory<wchar_t>(address, &buffer[0], size);
-				message = Cvt::W2A(std::wstring {&buffer[0], size});
+				symbols.GetProcess(processId).Process().ReadMemory<wchar_t>(address, buffer.data(), size);
+				message = Cvt::W2A(std::wstring {buffer.data(), size});
 			}
 			else
 			{
 				size_t const size = info.nDebugStringLength - 1;
 				std::vector<char> buffer(size); // soh?
-				symbols.GetProcess(processId).Process().ReadMemory<char>(address, &buffer[0], size);
-				message = std::string {&buffer[0], size};
+				symbols.GetProcess(processId).Process().ReadMemory<char>(address, buffer.data(), size);
+				message = std::string {buffer.data(), size};
 			}
 
 			message.erase(std::remove(message.begin(), message.end(), '\r'), message.end());

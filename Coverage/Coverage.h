@@ -17,9 +17,9 @@ class Coverage : public GLib::Win::Debugger
 
 	std::regex nameSpaceRegex {R"(^(?:[A-Za-z_][A-Za-z_0-9]*::)*)"}; // +some extra unicode chars?
 
-	std::string executable;
-	WideStrings includes;
-	WideStrings excludes;
+	std::string const executable;
+	WideStrings const includes;
+	WideStrings const excludes;
 
 	WideStrings wideFiles;
 	Processes processes;

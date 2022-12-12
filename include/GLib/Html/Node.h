@@ -1,12 +1,12 @@
 #pragma once
 
-#include <list>
 #include <string>
+#include <vector>
 
 namespace GLib::Html
 {
 	class Node;
-	using NodeList = std::pmr::list<Node>; // pmr avoids potential exception leak, try use forward list
+	using NodeList = std::vector<Node>;
 
 	class Node
 	{
@@ -76,27 +76,28 @@ namespace GLib::Html
 			return depth;
 		}
 
-		void AddFragment(std::string_view fragment)
+		void AddFragment(std::string_view const fragment)
 		{
 			children.emplace_back(this, fragment);
 		}
 
-		void AddFragment(char const * start, char const * end)
+		void AddFragment(std::string_view const start, std::string_view const end)
 		{
-			AddFragment({start, static_cast<size_t>(end - start)});
+			AddFragment({start.data(), static_cast<size_t>(end.data() - start.data())});
 		}
 
-		void AddEnumeration(std::string const & var, std::string const & childEnumeration, std::string_view childCondition, size_t enumerationDepth)
+		void AddEnumeration(std::string const & var, std::string const & childEnumeration, std::string_view const childCondition,
+												size_t const enumerationDepth)
 		{
 			children.emplace_back(this, var, childEnumeration, childCondition, enumerationDepth);
 		}
 
-		void AddConditional(std::string_view childCondition)
+		void AddConditional(std::string_view const childCondition)
 		{
 			children.emplace_back(this, childCondition, true);
 		}
 
-		[[nodiscard]] Node * Back()
+		Node * Back()
 		{
 			return &children.back();
 		}

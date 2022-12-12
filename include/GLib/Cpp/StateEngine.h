@@ -50,7 +50,7 @@ namespace GLib::Cpp
 
 		using StateFunction = State (StateEngine::*)(char) const;
 
-		bool emitWhiteSpace {};
+		bool const emitWhiteSpace {};
 		State state {};
 		StateFunction stateFunction {};
 		char lastChar {};

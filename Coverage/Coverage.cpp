@@ -66,8 +66,8 @@ void Coverage::AddLine(std::wstring const & fileName, unsigned int const lineNum
 		auto const oldByte = symProcess.Read<unsigned char>(address);
 		iter = process.AddAddress(address, Address {oldByte, symbolId});
 	}
-	iter->second.AddFileLine(fileName, lineNumber);
 
+	Address::AddFileLine(fileName, lineNumber);
 	symProcess.Write(address, debugBreakByte);
 }
 
@@ -127,7 +127,7 @@ void Coverage::CaptureData(ULONG const processId)
 			auto const & [nameSpace, typeName, functionName] = CleanupFunctionNames(symbol.Name(), parentName);
 			iter = process.AddFunction(symbol.Index(), nameSpace, typeName, functionName);
 		}
-		iter->second.Accumulate(address);
+		Function::Accumulate(address);
 	}
 
 	static_cast<void>(scopeLog);
@@ -197,7 +197,7 @@ CoverageData Coverage::GetCoverageData() const
 	{
 		for (auto const & function : process.IndexToFunction() | std::views::values)
 		{
-			for (auto const & fileName : function.GetFileLines() | std::views::keys)
+			for (auto const & fileName : Function::GetFileLines() | std::views::keys)
 			{
 				fileNameToFunctionMap[fileName].emplace(function);
 			}
@@ -218,7 +218,7 @@ CoverageData Coverage::GetCoverageData() const
 
 		for (auto const & function : functions)
 		{
-			FileLines const & fileLines = function.GetFileLines();
+			FileLines const & fileLines = Function::GetFileLines();
 
 			auto justFileNameIt = fileLines.find(filePath);
 			if (justFileNameIt == fileLines.end())

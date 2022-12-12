@@ -73,7 +73,7 @@ namespace GLib::Win
 				: p(key)
 			{}
 
-			[[nodiscard]] HKEY Get() const
+			HKEY Get() const
 			{
 				return p.get();
 			}
@@ -88,7 +88,7 @@ namespace GLib::Win
 				: value(value)
 			{}
 
-			[[nodiscard]] HKEY Get() const
+			HKEY Get() const
 			{
 				return Util::Detail::WindowsCast<HKEY>(value);
 			}
@@ -166,7 +166,7 @@ namespace GLib::Win
 			: key(std::move(key))
 		{}
 
-		[[nodiscard]] bool KeyExists(std::string_view const path) const
+		bool KeyExists(std::string_view const path) const
 		{
 			HKEY resultKey {};
 			LSTATUS const result = RegOpenKeyW(key.Get(), Cvt::A2W(path).c_str(), &resultKey);
@@ -178,22 +178,22 @@ namespace GLib::Win
 			return exists;
 		}
 
-		[[nodiscard]] std::string GetString(std::string_view const valueName) const
+		std::string GetString(std::string_view const valueName) const
 		{
 			return Detail::GetString(key.Get(), Cvt::A2W(valueName));
 		}
 
-		[[nodiscard]] uint32_t GetInt32(std::string_view const valueName) const
+		uint32_t GetInt32(std::string_view const valueName) const
 		{
 			return Detail::GetScalar<uint32_t>(key.Get(), Cvt::A2W(valueName));
 		}
 
-		[[nodiscard]] uint64_t GetInt64(std::string_view const valueName) const
+		uint64_t GetInt64(std::string_view const valueName) const
 		{
 			return Detail::GetScalar<uint64_t>(key.Get(), Cvt::A2W(valueName));
 		}
 
-		[[nodiscard]] RegistryValue Get(std::string_view const valueName) const
+		RegistryValue Get(std::string_view const valueName) const
 		{
 			auto const wideName = Cvt::A2W(valueName);
 			ULONG bytes {};
@@ -241,7 +241,7 @@ namespace GLib::Win
 			Util::AssertSuccess(result, "RegSetValueEx");
 		}
 
-		[[nodiscard]] SubKey OpenSubKey(std::string_view const path) const
+		SubKey OpenSubKey(std::string_view const path) const
 		{
 			HKEY subKey {};
 			LSTATUS const result = RegOpenKeyExW(key.Get(), Cvt::A2W(path).c_str(), 0, Detail::Read, &subKey);
@@ -249,7 +249,7 @@ namespace GLib::Win
 			return SubKey {Detail::KeyHolder {subKey}};
 		}
 
-		[[nodiscard]] SubKey CreateSubKey(std::string_view const path) const
+		SubKey CreateSubKey(std::string_view const path) const
 		{
 			HKEY subKey {};
 			LSTATUS const result =
@@ -258,7 +258,7 @@ namespace GLib::Win
 			return SubKey {Detail::KeyHolder {subKey}};
 		}
 
-		[[nodiscard]] bool DeleteSubKey(std::string_view const path) const
+		bool DeleteSubKey(std::string_view const path) const
 		{
 			return Detail::Found(::RegDeleteTreeW(key.Get(), Cvt::A2W(path).c_str()), "RegDeleteKey");
 		}

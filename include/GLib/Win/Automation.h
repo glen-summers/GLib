@@ -29,14 +29,14 @@ namespace GLib::Win
 			return ComCast<T>(pattern);
 		}
 
-		[[nodiscard]] std::string CurrentName() const
+		std::string CurrentName() const
 		{
 			Bstr bstr;
 			CheckHr(element->get_CurrentName(GetAddress(bstr).Raw()), "CurrentName");
 			return bstr.Value();
 		}
 
-		[[nodiscard]] std::string CurrentClassName() const
+		std::string CurrentClassName() const
 		{
 			Bstr bstr;
 			CheckHr(element->get_CurrentClassName(GetAddress(bstr).Raw()), "CurrentClassName");

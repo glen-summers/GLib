@@ -72,7 +72,7 @@ namespace GLib::Win::Util
 			return AssertTrue(result != FALSE, message, errorCode);
 		}
 
-		bool WarnAssertTrue(Exp::Bool auto result, std::string_view message, Exp::ULong auto errorCode) noexcept
+		bool WarnAssertTrue(Exp::Bool auto result, std::string_view message, Exp::ULong auto errorCode)
 		{
 #ifdef _DEBUG // || defined(GLIB_DEBUG)
 			if (!result)
@@ -86,7 +86,7 @@ namespace GLib::Win::Util
 			return result;
 		}
 
-		bool WarnAssertTrue(Exp::IntBool auto result, std::string_view message, Exp::ULong auto errorCode) noexcept
+		bool WarnAssertTrue(Exp::IntBool auto result, std::string_view message, Exp::ULong auto errorCode)
 		{
 			return WarnAssertTrue(result != FALSE, message, errorCode);
 		}
@@ -96,7 +96,7 @@ namespace GLib::Win::Util
 			return AssertTrue(result == ERROR_SUCCESS, message, result);
 		}
 
-		bool WarnAssertSuccess(Exp::ULong auto result, std::string_view message) noexcept
+		bool WarnAssertSuccess(Exp::ULong auto result, std::string_view message)
 		{
 			return WarnAssertTrue(result == ERROR_SUCCESS, message, result);
 		}
@@ -106,7 +106,7 @@ namespace GLib::Win::Util
 			return AssertTrue(result == ERROR_SUCCESS, message, static_cast<ULONG>(result));
 		}
 
-		bool WarnAssertSuccess(Exp::Status auto result, std::string_view message) noexcept
+		bool WarnAssertSuccess(Exp::Status auto result, std::string_view message)
 		{
 			return WarnAssertTrue(result == ERROR_SUCCESS, message, static_cast<ULONG>(result));
 		}

@@ -11,17 +11,17 @@
 
 using namespace std::string_literals;
 
-int main(int const argc, char const * argv[]) // NOLINT(bugprone-exception-escape) potential exception from catch block
+int main(int const argc, char const * argv[])
 {
-	auto const log = GLib::Flog::LogManager::GetLog("Main");
-	int errorCode = 0;
-	std::string errorMessage;
+	int errorCode {};
+	std::string_view errorMessage;
+	auto const & log = GLib::Flog::LogManager::GetLog("Main");
 
 	try
 	{
-		auto const * const desc {"Generates C++ HTML code coverage report"};
-		auto const * const syntax {"Coverage <Executable> <Report> [-sub] [-ws] [-i IncludePath]... [-x excludePath]..."};
-		auto const * const detail {R"(
+		std::string_view const desc {"Generates C++ HTML code coverage report"};
+		std::string_view const syntax {"Coverage <Executable> <Report> [-sub] [-ws] [-i IncludePath]... [-x excludePath]..."};
+		std::string_view const detail {R"(
 Executable: Path to executable
 Report    : Directory path for the generated report
 [-sub]    : Generates coverage for sub processes of main executable
@@ -37,7 +37,7 @@ Coverage c:\Build\Main.exe C:\Report -ws -i C:\MainCode C:\Utils\ -x C:\External
 		if (argc - 1 < 2)
 		{
 			std::cout << "\x1b[32m\x1b[1m" << desc << std::endl << "\x1b[33m\x1b[1m" << syntax << std::endl << detail << "\x1b[m" << std::endl;
-			return errorCode;
+			return 0;
 		}
 
 		std::span const args {argv, static_cast<size_t>(argc)};
@@ -45,8 +45,8 @@ Coverage c:\Build\Main.exe C:\Report -ws -i C:\MainCode C:\Utils\ -x C:\External
 		auto iter = args.begin();
 		auto const end = args.end();
 		++iter;
-		char const * const executable = *iter++;
-		char const * const reportPath = *iter++;
+		std::string const & executable = *iter++;
+		std::string const & reportPath = *iter++;
 		bool debugChildProcesses {};
 		bool showWhiteSpace {};
 

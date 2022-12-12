@@ -80,7 +80,7 @@ namespace Util
 		friend bool operator==(TypeIndex const & lhs, TypeIndex const & rhs) = default;
 		friend bool operator!=(TypeIndex const & lhs, TypeIndex const & rhs) = default;
 
-		[[nodiscard]] std::type_index Value() const
+		std::type_index Value() const
 		{
 			return value;
 		}

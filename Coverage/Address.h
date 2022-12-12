@@ -50,7 +50,7 @@ public:
 	// multiple lines can be returned for the same address
 	// 0. not seen multiple files returned but code is defensive just in case
 	// 1. release build of {return atomicType++;} returns 3 lines for same address
-	void AddFileLine(std::wstring const & fileName, unsigned int const lineNumber) const
+	static void AddFileLine(std::wstring const & fileName, unsigned int const lineNumber)
 	{
 		GetFileLines()[fileName].emplace(lineNumber, false);
 	}

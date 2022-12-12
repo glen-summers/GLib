@@ -99,7 +99,7 @@ namespace GLib::Win
 		}
 
 		template <UINT ExitCode = 1>
-		[[nodiscard]] Detail::TerminatorHolder<ExitCode> ScopedTerminator() const
+		Detail::TerminatorHolder<ExitCode> ScopedTerminator() const
 		{
 			return Detail::TerminatorHolder<ExitCode>(p.get());
 		}

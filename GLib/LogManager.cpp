@@ -11,12 +11,12 @@ std::string LogManager::Unmangle(std::string const & name)
 	return Compat::Unmangle(name);
 }
 
-GLib::Flog::Level LogManager::SetLevel(const Level level)
+GLib::Flog::Level LogManager::SetLevel(Level const level)
 {
 	return FileLogger::SetLogLevel(level);
 }
 
-size_t LogManager::SetMaxFileSize(const size_t size)
+size_t LogManager::SetMaxFileSize(size_t const size)
 {
 	return FileLogger::SetMaxFileSize(size);
 }
@@ -27,7 +27,7 @@ void LogManager::SetThreadName(std::string_view const name)
 	FileLogger::GetLogState().ThreadName(name);
 }
 
-std::filesystem::path LogManager::GetLogPath()
+std::filesystem::path const & LogManager::GetLogPath()
 {
 	return FileLogger::Instance().streamInfo.Path();
 }

@@ -53,23 +53,23 @@ public:
 	// called when another address seen for the same function symbolId
 	// 1. lines in same function
 	// 2. lines merged into constructor from in class assignments, can cause multiple file names per accumulated address
-	void Accumulate(Address const & address) const
+	static void Accumulate(Address const & address)
 	{
-		for (auto & [file, addressLines] : address.GetFileLines())
+		for (auto & [file, addressLines] : Address::GetFileLines())
 		{
-			for (auto & line : addressLines | std::views::keys) // map merge method?
+			for (auto const & line : addressLines | std::views::keys) // map merge method?
 			{
 				GetFileLines()[file][line] |= address.Visited();
 			}
 		}
 	}
 
-	[[nodiscard]] bool Merge(Function const & added, std::filesystem::path const & path) const
+	static bool Merge(std::filesystem::path const & path)
 	{
-		auto const addedIt = added.GetFileLines().find(path);
+		auto const addedIt = Function::GetFileLines().find(path);
 		auto const existingIt = GetFileLines().find(path);
 
-		if (existingIt == GetFileLines().end() || addedIt == added.GetFileLines().end())
+		if (existingIt == GetFileLines().end() || addedIt == Function::GetFileLines().end())
 		{
 			return false;
 		}
@@ -77,7 +77,7 @@ public:
 		bool merged {};
 		if (Overlap(existingIt->second, addedIt->second))
 		{
-			for (auto [line, covered] : addedIt->second)
+			for (auto const [line, covered] : addedIt->second)
 			{
 				existingIt->second[line] |= covered;
 			}
@@ -107,7 +107,7 @@ public:
 		return true;
 	}
 
-	[[nodiscard]] size_t CoveredLines() const
+	static size_t CoveredLines()
 	{
 		size_t total {};
 		for (auto const & lines : GetFileLines() | std::views::values)
@@ -124,7 +124,7 @@ public:
 		return total;
 	}
 
-	[[nodiscard]] size_t AllLines() const
+	static size_t AllLines()
 	{
 		size_t total {};
 		for (auto const & lines : GetFileLines() | std::views::values)

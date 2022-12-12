@@ -8,7 +8,7 @@
 
 namespace GLib::Cpp
 {
-	inline std::ostream & operator<<(std::ostream & str, State state)
+	inline std::ostream & operator<<(std::ostream & str, State const state)
 	{
 		static constexpr std::array<std::string_view, static_cast<unsigned int>(State::Count)> stateNames {
 			"Error",					 "None",			"WhiteSpace", "CommentStart",		 "CommentLine", "Continuation", "CommentBlock",
@@ -27,7 +27,7 @@ namespace GLib::Cpp
 		StateEngine engine;
 
 		std::string_view::const_iterator ptr;
-		std::string_view::const_iterator end;
+		std::string_view::const_iterator const end;
 		std::optional<std::string_view::const_iterator> lastPtr;
 		unsigned lineNumber {1};
 		unsigned startLineNumber {};
@@ -43,7 +43,7 @@ namespace GLib::Cpp
 		using reference = void;
 		// ReSharper restore All
 
-		Iterator(std::string_view::const_iterator begin, std::string_view::const_iterator const end, bool const emitWhitespace)
+		Iterator(std::string_view::const_iterator const begin, std::string_view::const_iterator const end, bool const emitWhitespace)
 			: engine(emitWhitespace)
 			, ptr(begin)
 			, end(end)
@@ -100,7 +100,7 @@ namespace GLib::Cpp
 			throw std::runtime_error(stm.str());
 		}
 
-		bool Set(State state, std::string_view::const_iterator yieldValue)
+		bool Set(State state, std::string_view::const_iterator const yieldValue)
 		{
 			bool ret = false;
 			if (yieldValue != lastPtr)

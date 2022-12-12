@@ -9,11 +9,11 @@ class Scope
 {
 	using TimePoint = std::chrono::high_resolution_clock::time_point;
 
-	GLib::Flog::Level level;
-	std::string_view prefix;
-	std::string_view scopeText;
-	std::string_view stem;
-	TimePoint start;
+	GLib::Flog::Level const level;
+	std::string_view const prefix;
+	std::string_view const scopeText;
+	std::string_view const stem;
+	TimePoint const start;
 
 public:
 	Scope(GLib::Flog::Level const level, std::string_view const prefix, std::string_view const scope, std::string_view const stem)

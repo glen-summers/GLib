@@ -4,13 +4,13 @@
 		<TidyInclude Include="$(Source)\include"/>
 		<TidyInclude Include="$(Boost)"/>
 
+		<!--TidyWarning Include="everything"/-->
 		<TidyWarning Include="all"/>
 		<TidyWarning Include="extra"/>
 		<TidyWarning Include="extra-semi"/>
 		<TidyWarning Include="extra-qualification"/>
 		<TidyWarning Include="language-extension-token"/>
 		<TidyWarning Include="no-pragma-once-outside-header"/>
-		<!-- more?-->
 
 		<TidyFlags Condition="'$(Fix)'=='true'" Include="-fix"/>
 		<TidyFlags Include="--quiet"/>
@@ -38,6 +38,8 @@
 
 			<Relative Include="$([MSBuild]::MakeRelative($(Source), %(FileToCheck.FullPath)))"/>
 		</ItemGroup>
+
+		<Exec Command='"$(Tidy)" --version'/>
 
 		<!-- run one file at a time to avoid duplicate fixes applied to headers -->
 		<Exec Command='"$(Tidy)" %(Relative.Identity) $(TidyCmd)' WorkingDirectory="$(Source)"/>

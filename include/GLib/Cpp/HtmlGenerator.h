@@ -36,7 +36,7 @@ inline void VisibleWhitespace(std::string_view const value, std::ostream & stm)
 	}
 }
 
-inline void OpenSpan(Style cls, std::ostream & stm)
+inline void OpenSpan(Style const cls, std::ostream & stm)
 {
 	stm << "<span class=\"" << static_cast<char>(cls) << "\">";
 }
@@ -90,7 +90,7 @@ inline bool IsCommonType(std::string_view const value)
 inline void Htmlify(std::string_view const code, bool const emitWhitespace, std::ostream & out)
 {
 	// clang-format off
-	static std::unordered_map<GLib::Cpp::State, Style> styles =
+	static std::unordered_map<GLib::Cpp::State, Style> const styles =
 	{
 		{ GLib::Cpp::State::WhiteSpace, Style::WhiteSpace},
 		{ GLib::Cpp::State::CommentLine, Style::Comment},
@@ -102,10 +102,10 @@ inline void Htmlify(std::string_view const code, bool const emitWhitespace, std:
 	};
 	// clang-format on
 
-	auto alphaNumUnd = [](unsigned char const chr) { return std::isalnum(chr) != 0 || chr == '_'; };
-	auto whitespace = [](unsigned char const chr) { return std::isspace(chr) != 0; };
-	auto escape = [&](std::string_view const value) { GLib::Xml::Utils::Escape(value, out); };
-	auto vis = [&](std::string_view const value) { VisibleWhitespace(value, out); };
+	auto const alphaNumUnd = [](unsigned char const chr) { return std::isalnum(chr) != 0 || chr == '_'; };
+	auto const whitespace = [](unsigned char const chr) { return std::isspace(chr) != 0; };
+	auto const escape = [&](std::string_view const value) { GLib::Xml::Utils::Escape(value, out); };
+	auto const vis = [&](std::string_view const value) { VisibleWhitespace(value, out); };
 
 	for (auto const & frag : GLib::Cpp::Holder(code, emitWhitespace))
 	{
@@ -133,14 +133,14 @@ inline void Htmlify(std::string_view const code, bool const emitWhitespace, std:
 			continue;
 		}
 
-		auto iter = styles.find(frag.first);
+		auto const iter = styles.find(frag.first);
 		if (iter == styles.end())
 		{
 			escape(frag.second);
 			continue;
 		}
 
-		auto splitter = GLib::Util::SplitterView(frag.second, "\n");
+		auto const splitter = GLib::Util::SplitterView(frag.second, "\n");
 		for (auto sit = splitter.begin(), end = splitter.end(); sit != end;)
 		{
 			GLib::Cpp::State const state = iter->first;

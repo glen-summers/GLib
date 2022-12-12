@@ -50,17 +50,17 @@ namespace GLib::Compat
 		}
 	}
 
-	inline void SetEnv(char const * name, char const * value)
+	inline void SetEnv(std::string_view const name, std::string_view const value)
 	{
-		auto const wideName = Cvt::A2W(name);
-		auto const wideValue = Cvt::A2W(value);
+		std::wstring const wideName = Cvt::A2W(name);
+		std::wstring const wideValue = Cvt::A2W(value);
 		errno_t const err = _wputenv_s(wideName.c_str(), wideValue.c_str());
 		AssertTrue(err == 0, "_wputenv_s", err);
 	}
 
-	inline std::optional<std::string> GetEnv(char const * name)
+	inline std::optional<std::string> GetEnv(std::string_view const name)
 	{
-		auto const wideName = Cvt::A2W(name);
+		std::wstring const wideName = Cvt::A2W(name);
 
 		Util::WideCharBuffer tmp;
 		size_t len = 0;
@@ -79,19 +79,19 @@ namespace GLib::Compat
 		return Cvt::W2A({tmp.Get(), len - 1});
 	}
 
-	inline void UnsetEnv(char const * name)
+	inline void UnsetEnv(std::string_view const name)
 	{
-		SetEnv(name, "");
+		SetEnv(name.data(), "");
 	}
 
-	inline std::string Unmangle(std::string const & name)
+	inline std::string Unmangle(std::string_view const name)
 	{
 		constexpr std::string_view Class = "class ";
 		constexpr std::string_view Struct = "struct ";
 
-		return name.compare(0, Class.size(), Class) == 0		 ? name.substr(Class.size())
-					 : name.compare(0, Struct.size(), Struct) == 0 ? name.substr(Struct.size())
-																												 : name; // etc...
+		return std::string {name.compare(0, Class.size(), Class) == 0			? name.substr(Class.size())
+												: name.compare(0, Struct.size(), Struct) == 0 ? name.substr(Struct.size())
+																																			: name}; // etc...
 	}
 
 	inline int64_t ProcessId()

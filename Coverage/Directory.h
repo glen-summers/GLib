@@ -11,11 +11,11 @@ class Directory
 {
 	std::string name;
 	std::string link;
-	unsigned int coveredLines;
-	unsigned int coverableLines;
-	unsigned int minCoveragePercent;
-	unsigned int coveredFunctions;
-	unsigned int coverableFunctions;
+	unsigned int const coveredLines;
+	unsigned int const coverableLines;
+	unsigned int const minCoveragePercent;
+	unsigned int const coveredFunctions;
+	unsigned int const coverableFunctions;
 
 public:
 	Directory(std::string name, std::string link, unsigned int const coveredLines, unsigned int const coverableLines,

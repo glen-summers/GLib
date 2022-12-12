@@ -23,14 +23,7 @@ namespace GLib::Detail
 
 		~ScopedFunction()
 		{
-			try
-			{
-				function();
-			}
-			catch (std::exception &)
-			{
-				std::terminate();
-			}
+			function();
 		}
 	};
 

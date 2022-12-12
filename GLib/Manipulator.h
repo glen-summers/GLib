@@ -11,7 +11,7 @@ namespace Detail
 		Argument argument;
 
 	public:
-		Manipulator(std::ostream & (*function)(std::ostream &, Argument), Argument argument)
+		Manipulator(std::ostream & (*function)(std::ostream &, Argument), Argument const argument)
 			: function {function}
 			, argument {argument}
 		{}
@@ -30,7 +30,7 @@ namespace Detail
 }
 
 template <typename Function, typename Argument>
-auto Manipulate(Function function, Argument argument)
+auto Manipulate(Function const function, Argument const argument)
 {
 	return Detail::Manipulator<Argument> {function, argument};
 }

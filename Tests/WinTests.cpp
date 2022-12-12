@@ -280,12 +280,12 @@ AUTO_TEST_CASE(TestVariant)
 	TEST("v" == v2.ToString());
 	TEST("v3" == v3.ToString());
 
-	auto v4 = v1;
+	Variant v4 = v1;
 	TEST("v" == v4.ToString());
 	v4 = v3;
 	TEST("v3" == v4.ToString());
 
-	auto v5 = std::move(v2);
+	Variant v5 = std::move(v2);
 	TEST("v" == v5.ToString());
 	TEST(VT_EMPTY == v2.Type());
 
@@ -317,7 +317,7 @@ AUTO_TEST_CASE(TestApp1)
 	Element mainWindow = aut.ElementFromHandle(hw);
 
 	TEST("TestApp" == mainWindow.CurrentName());
-	CHECK(mainWindow.CurrentClassName().find("GTL:") == 0);
+	CHECK(mainWindow.CurrentClassName().starts_with("GTL:"));
 
 	auto const wp(mainWindow.GetCurrentPattern<IUIAutomationWindowPattern>(UIA_WindowPatternId));
 

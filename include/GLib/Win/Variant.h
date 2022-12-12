@@ -84,12 +84,12 @@ namespace GLib::Win
 			WarnHr(VariantClear(&v), "VariantClear");
 		}
 
-		[[nodiscard]] VARTYPE Type() const
+		VARTYPE Type() const
 		{
 			return Detail::Vt(v);
 		}
 
-		[[nodiscard]] std::string ToString() const
+		std::string ToString() const
 		{
 			VARIANT tmp {};
 			CheckHr(VariantChangeType(&tmp, &v, 0, VT_BSTR), "VariantChangeType");

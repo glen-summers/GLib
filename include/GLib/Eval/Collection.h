@@ -31,7 +31,7 @@ namespace GLib::Eval
 		{
 			std::ostringstream stm;
 			auto iter = container.begin();
-			auto end = container.end();
+			auto const end = container.end();
 			if (iter != end)
 			{
 				stm << Utils::ToString(*iter++);

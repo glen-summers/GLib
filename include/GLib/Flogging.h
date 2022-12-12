@@ -114,7 +114,7 @@ namespace GLib::Flog
 		friend class ScopeLog;
 
 	private:
-		explicit Log(std::string name) noexcept
+		explicit Log(std::string name)
 			: name(std::move(name))
 		{}
 
@@ -127,8 +127,15 @@ namespace GLib::Flog
 		template <typename... Ts>
 		void Write(Level const level, std::string_view const format, Ts... values) const
 		{
-			Formatter::Format(Detail::Stream(), format, std::forward<Ts>(values)...);
-			CommitStream(level);
+			try
+			{
+				Formatter::Format(Detail::Stream(), format, std::forward<Ts>(values)...);
+				CommitStream(level);
+			}
+			catch (std::exception &)
+			{
+				std::terminate();
+			}
 		}
 	};
 
@@ -168,11 +175,11 @@ namespace GLib::Flog
 		static Level SetLevel(Level level);
 		static size_t SetMaxFileSize(size_t size);
 		static void SetThreadName(std::string_view name);
-		static std::filesystem::path GetLogPath();
+		static std::filesystem::path const & GetLogPath();
 
-		static auto GetLog(std::string const & name) noexcept
+		static auto GetLog(std::string name)
 		{
-			return Log(name);
+			return Log(std::move(name));
 		}
 
 		template <typename T>

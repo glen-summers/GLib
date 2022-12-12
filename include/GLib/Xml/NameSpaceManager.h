@@ -77,7 +77,7 @@ namespace GLib::Xml
 			}
 		}
 
-		[[nodiscard]] std::tuple<std::string_view, std::string_view> Normalise(std::string_view name) const
+		[[nodiscard]] std::tuple<std::string_view, std::string_view> Normalise(std::string_view const name) const
 		{
 			size_t const colon = name.find(':');
 			if (colon != std::string_view::npos)
