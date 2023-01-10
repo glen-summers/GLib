@@ -15,6 +15,8 @@ class Function
 	std::string className;
 	std::string functionName;
 
+	FileLines mutable fileLines;
+
 public:
 	Function(std::string nameSpace, std::string className, std::string functionName)
 		: nameSpace(std::move(nameSpace))
@@ -22,20 +24,7 @@ public:
 		, functionName(std::move(functionName))
 	{}
 
-	static FileLines & GetFileLines() noexcept
-	{
-		try
-		{
-			static FileLines fileLines;
-			return fileLines;
-		}
-		catch (std::exception &)
-		{
-			std::terminate();
-		}
-	}
-
-	[[nodiscard]] std::string const & NameSpace() const
+	std::string const & NameSpace() const
 	{
 		return nameSpace;
 	}
@@ -50,26 +39,31 @@ public:
 		return functionName;
 	}
 
+	FileLines const & FileLines() const
+	{
+		return fileLines;
+	}
+
 	// called when another address seen for the same function symbolId
 	// 1. lines in same function
 	// 2. lines merged into constructor from in class assignments, can cause multiple file names per accumulated address
-	static void Accumulate(Address const & address)
+	void Accumulate(Address const & address) const
 	{
-		for (auto & [file, addressLines] : Address::GetFileLines())
+		for (auto const & [file, addressLines] : address.FileLines())
 		{
 			for (auto const & line : addressLines | std::views::keys) // map merge method?
 			{
-				GetFileLines()[file][line] |= address.Visited();
+				fileLines[file][line] |= address.Visited();
 			}
 		}
 	}
 
-	static bool Merge(std::filesystem::path const & path)
+	bool Merge(Function const & added, std::filesystem::path const & path) const
 	{
-		auto const addedIt = Function::GetFileLines().find(path);
-		auto const existingIt = GetFileLines().find(path);
+		auto const addedIt = added.fileLines.find(path);
+		auto const existingIt = fileLines.find(path);
 
-		if (existingIt == GetFileLines().end() || addedIt == Function::GetFileLines().end())
+		if (existingIt == fileLines.end() || addedIt == added.fileLines.end())
 		{
 			return false;
 		}
@@ -107,10 +101,10 @@ public:
 		return true;
 	}
 
-	static size_t CoveredLines()
+	size_t CoveredLines() const
 	{
 		size_t total {};
-		for (auto const & lines : GetFileLines() | std::views::values)
+		for (auto const & lines : fileLines | std::views::values)
 		{
 			for (auto const & isCovered : lines | std::views::values)
 			{
@@ -124,10 +118,10 @@ public:
 		return total;
 	}
 
-	static size_t AllLines()
+	size_t AllLines() const
 	{
 		size_t total {};
-		for (auto const & lines : GetFileLines() | std::views::values)
+		for (auto const & lines : fileLines | std::views::values)
 		{
 			total += lines.size();
 		}

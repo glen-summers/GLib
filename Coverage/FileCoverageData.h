@@ -41,7 +41,7 @@ public:
 			auto const upperIt = functions.upper_bound(addedFunction);
 			for (auto it = lowerIt; it != upperIt; ++it)
 			{
-				if (it->Merge(path))
+				if (it->Merge(addedFunction, path))
 				{
 					accumulated = true;
 					break;
@@ -81,7 +81,7 @@ public:
 		for (auto const & function : functions) // improve
 		{
 			static_cast<void>(function);
-			if (Function::CoveredLines() != 0)
+			if (function.CoveredLines() != 0)
 			{
 				++value;
 			}

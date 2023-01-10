@@ -357,9 +357,9 @@ void HtmlReport::GenerateSourceFile(std::filesystem::path const & subPath, FileC
 	eval.SetCollection("chunks", chunks);
 
 	std::multiset<FunctionCoverage> coverage;
-	for (auto const & func : data.Functions())
+	for (auto const & function : data.Functions())
 	{
-		for (auto const & [file, l] : Function::GetFileLines())
+		for (auto const & [file, l] : function.FileLines())
 		{
 			if (file == sourceFile)
 			{
@@ -375,8 +375,8 @@ void HtmlReport::GenerateSourceFile(std::filesystem::path const & subPath, FileC
 				}
 
 				lines[zeroBasedLine].HasLink = true;
-				coverage.emplace(func.NameSpace(), func.ClassName(), func.FunctionName(), zeroBasedLine + 1,
-												 static_cast<unsigned int>(Function::CoveredLines()), static_cast<unsigned int>(Function::AllLines()));
+				coverage.emplace(function.NameSpace(), function.ClassName(), function.FunctionName(), zeroBasedLine + 1,
+												 static_cast<unsigned int>(function.CoveredLines()), static_cast<unsigned int>(function.AllLines()));
 			}
 		}
 	}
