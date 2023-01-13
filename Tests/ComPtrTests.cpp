@@ -105,7 +105,10 @@ AUTO_TEST_CASE(CtorFromSameType)
 
 	GLib::Win::ComPtr const p2m(std::move(p2));
 	TEST(2U == UseCount(p1));
-	TEST(0U == UseCount(p2));
+#pragma warning(push)
+#pragma warning(disable : 26800)
+	TEST(0U == UseCount(p2)); // moved object is ok
+#pragma warning(pop)
 	TEST(2U == UseCount(p2m));
 }
 
@@ -128,7 +131,10 @@ AUTO_TEST_CASE(CtorFromOtherType)
 
 	GLib::Win::ComPtr const p2m(std::move(p2));
 	TEST(2U == UseCount(p1));
-	TEST(0U == UseCount(p2));
+#pragma warning(push)
+#pragma warning(disable : 26800)
+	TEST(0U == UseCount(p2)); // moved object is ok
+#pragma warning(pop)
 	TEST(2U == UseCount(p2m));
 }
 
@@ -148,7 +154,10 @@ AUTO_TEST_CASE(AssignmentSameType)
 	TEST(0U == UseCount(p3));
 
 	p3 = std::move(p1);
-	TEST(0U == UseCount(p1));
+#pragma warning(push)
+#pragma warning(disable : 26800)
+	TEST(0U == UseCount(p1)); // moved object is ok
+#pragma warning(pop)
 	TEST(2U == UseCount(p2));
 	TEST(2U == UseCount(p3));
 }
@@ -168,7 +177,11 @@ AUTO_TEST_CASE(AssignmentOtherType)
 	TEST(0U == UseCount(p3));
 
 	p3 = std::move(p1);
-	TEST(0U == UseCount(p1));
+#pragma warning(push)
+#pragma warning(disable : 26800)
+	TEST(0U == UseCount(p1)); // moved object is ok
+#pragma warning(pop)
+
 	TEST(2U == UseCount(p2));
 	TEST(2U == UseCount(p3));
 }

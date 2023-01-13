@@ -11,7 +11,10 @@ namespace GLib::Win
 		{
 			void operator()(HLOCAL const handle) const noexcept
 			{
+#pragma warning(push)
+#pragma warning(disable : 6001)
 				Util::WarnAssertTrue(LocalFree(handle) == nullptr, "LocalFree");
+#pragma warning(pop)
 			}
 		};
 	}

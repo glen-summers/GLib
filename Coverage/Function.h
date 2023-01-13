@@ -9,7 +9,7 @@
 #include "Address.h"
 #include "Types.h"
 
-class Function
+class Function // NOLINT(bugprone-exception-escape)
 {
 	std::string nameSpace;
 	std::string className;
@@ -18,115 +18,25 @@ class Function
 	FileLines mutable fileLines;
 
 public:
-	Function(std::string nameSpace, std::string className, std::string functionName)
-		: nameSpace(std::move(nameSpace))
-		, className(std::move(className))
-		, functionName(std::move(functionName))
-	{}
+	Function(std::string nameSpace, std::string className, std::string functionName);
 
-	std::string const & NameSpace() const
-	{
-		return nameSpace;
-	}
+	std::string const & NameSpace() const;
 
-	[[nodiscard]] std::string const & ClassName() const
-	{
-		return className;
-	}
+	std::string const & ClassName() const;
 
-	[[nodiscard]] std::string const & FunctionName() const
-	{
-		return functionName;
-	}
+	std::string const & FunctionName() const;
 
-	FileLines const & FileLines() const
-	{
-		return fileLines;
-	}
+	FileLines const & FileLines() const;
 
-	// called when another address seen for the same function symbolId
-	// 1. lines in same function
-	// 2. lines merged into constructor from in class assignments, can cause multiple file names per accumulated address
-	void Accumulate(Address const & address) const
-	{
-		for (auto const & [file, addressLines] : address.FileLines())
-		{
-			for (auto const & line : addressLines | std::views::keys) // map merge method?
-			{
-				fileLines[file][line] |= address.Visited();
-			}
-		}
-	}
+	void Accumulate(Address const & address) const;
 
-	bool Merge(Function const & added, std::filesystem::path const & path) const
-	{
-		auto const addedIt = added.fileLines.find(path);
-		auto const existingIt = fileLines.find(path);
+	bool Merge(Function const & added, std::filesystem::path const & path) const;
 
-		if (existingIt == fileLines.end() || addedIt == added.fileLines.end())
-		{
-			return false;
-		}
+	static bool Overlap(Lines const & lines1, Lines const & lines2);
 
-		bool merged {};
-		if (Overlap(existingIt->second, addedIt->second))
-		{
-			for (auto const [line, covered] : addedIt->second)
-			{
-				existingIt->second[line] |= covered;
-			}
-			merged = true;
-		}
+	size_t CoveredLines() const;
 
-		return merged;
-	}
-
-	static bool Overlap(Lines const & lines1, Lines const & lines2)
-	{
-		if (lines1.empty() || lines2.empty())
-		{
-			return false;
-		}
-
-		if (lines1.rbegin()->first < lines2.begin()->first)
-		{
-			return false;
-		}
-
-		if (lines2.rbegin()->first < lines1.begin()->first)
-		{
-			return false;
-		}
-
-		return true;
-	}
-
-	size_t CoveredLines() const
-	{
-		size_t total {};
-		for (auto const & lines : fileLines | std::views::values)
-		{
-			for (auto const & isCovered : lines | std::views::values)
-			{
-				// improve? keep tally?
-				if (isCovered)
-				{
-					++total;
-				}
-			}
-		}
-		return total;
-	}
-
-	size_t AllLines() const
-	{
-		size_t total {};
-		for (auto const & lines : fileLines | std::views::values)
-		{
-			total += lines.size();
-		}
-		return total;
-	}
+	size_t AllLines() const;
 };
 
 inline bool operator<(Function const & function1, Function const & function2)

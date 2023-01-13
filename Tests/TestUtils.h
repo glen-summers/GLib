@@ -108,7 +108,7 @@ namespace TestUtils
 
 			// overflow?
 			accumulator *= Ten;
-			accumulator += c - '0';
+			accumulator += T(c) - '0';
 		}
 
 		return accumulator;
@@ -143,12 +143,12 @@ namespace TestUtils
 			if (!point)
 			{
 				accumulator1 *= Ten;
-				accumulator1 += c - '0';
+				accumulator1 += T(c) - '0';
 			}
 			else
 			{
 				accumulator2 *= Ten;
-				accumulator2 += c - '0';
+				accumulator2 += T(c) - '0';
 				++decimals;
 			}
 		}
@@ -169,15 +169,15 @@ namespace TestUtils
 		{
 			if (c >= '0' && c <= '9')
 			{
-				val = c - '0';
+				val = T(c) - '0';
 			}
 			else if (c >= 'A' && c <= 'F')
 			{
-				val = c - 'A' + Ten;
+				val = T(c) - 'A' + Ten;
 			}
 			else if (c >= 'a' && c <= 'f')
 			{
-				val = c - 'a' + Ten;
+				val = T(c) - 'a' + Ten;
 			}
 			else
 			{

@@ -11,10 +11,13 @@ namespace GLib::Win
 		HRSRC const resource = FindResourceW(instance, MAKEINTRESOURCEW(idValue), resourceType); // NOLINT bad macro
 		Util::AssertTrue(resource != nullptr, "FindResourceW");
 
+#pragma warning(push)
+#pragma warning(disable : 6387)
 		HGLOBAL const resourceData = LoadResource(instance, resource);
 		Util::AssertTrue(resourceData != nullptr, "LoadResource");
 
 		return {static_cast<T const *>(LockResource(resourceData)), SizeofResource(instance, resource)};
+#pragma warning(pop)
 	}
 
 	inline std::string LoadResourceString(InstanceBase * const instance, unsigned int const idValue, wchar_t const * const resourceType)

@@ -19,64 +19,24 @@ class Process // ren ProcessInfo
 	IndexToFunction indexToFunction;
 
 public:
-	explicit Process(ULONG const processId)
-		: processId {processId}
-	{}
+	explicit Process(ULONG processId);
 
-	[[nodiscard]] ULONG Id() const
-	{
-		return processId;
-	}
+	[[nodiscard]] ULONG Id() const;
 
-	[[nodiscard]] Addresses const & Addresses() const
-	{
-		return addresses;
-	}
+	[[nodiscard]] Addresses const & Addresses() const;
 
-	[[nodiscard]] Threads const & Threads() const
-	{
-		return threads;
-	}
+	[[nodiscard]] Threads const & Threads() const;
 
-	void AddThread(ULONG const threadId, GLib::Win::HandleBase * const handle)
-	{
-		threads.emplace(threadId, handle);
-	}
+	void AddThread(ULONG threadId, GLib::Win::HandleBase * handle);
 
-	void RemoveThread(ULONG const threadId)
-	{
-		threads.erase(threadId);
-	}
+	void RemoveThread(ULONG threadId);
 
-	[[nodiscard]] HANDLE FindThread(ULONG const threadId) const
-	{
-		auto const iter = threads.find(threadId);
-		if (iter == threads.end())
-		{
-			throw std::runtime_error("Thread not found");
-		}
-		return iter->second;
-	}
+	[[nodiscard]] HANDLE FindThread(ULONG threadId) const;
 
-	[[nodiscard]] IndexToFunction const & IndexToFunction() const
-	{
-		return indexToFunction;
-	}
+	[[nodiscard]] IndexToFunction const & IndexToFunction() const;
 
-	Addresses::const_iterator AddAddress(uint64_t const address, Address address1)
-	{
-		return addresses.emplace(address, address1).first;
-	}
+	Addresses::const_iterator AddAddress(uint64_t address, Address address1);
 
-	IndexToFunction::const_iterator AddFunction(ULONG const index, std::string const & nameSpace, std::string const & typeName,
-																							std::string const & functionName)
-	{
-		// double lookup to allow moving strings?
-		auto const [it, inserted] = indexToFunction.emplace(index, Function {nameSpace, typeName, functionName});
-		if (!inserted)
-		{
-			throw std::runtime_error(GLib::Formatter::Format("Duplicate function id:{0}, {1}:{2}:{3}", index, nameSpace, typeName, functionName));
-		}
-		return it;
-	}
+	IndexToFunction::const_iterator AddFunction(ULONG index, std::string const & nameSpace, std::string const & typeName,
+																							std::string const & functionName);
 };

@@ -25,23 +25,7 @@ class Coverage : public GLib::Win::Debugger
 	Processes processes;
 
 public:
-	Coverage(std::string const & executable, bool const debugChildProcesses, Strings const & includes, Strings const & excludes)
-		: Debugger(executable, debugChildProcesses)
-		, executable(executable)
-		, includes(A2W(includes))
-		, excludes(A2W(excludes))
-	{
-		GLib::Flog::Detail::Stream() << std::boolalpha;
-		log.Info("Executable: {0}, DebugSubProcess: {1}", executable, debugChildProcesses);
-		for (auto const & include : includes)
-		{
-			log.Info("Include: {0}", include);
-		}
-		for (auto const & exclude : excludes)
-		{
-			log.Info("Exclude: {0}", exclude);
-		}
-	}
+	Coverage(std::string const & executable, bool debugChildProcesses, Strings const & includes, Strings const & excludes);
 
 	[[nodiscard]] CoverageData GetCoverageData() const;
 

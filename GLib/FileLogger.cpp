@@ -68,7 +68,9 @@ StreamInfo FileLogger::GetStream() const
 	// 	Compat::LocalTime(tm, t);
 	// 	s << "_" << std::put_time(&tm, "%Y-%m-%d");
 	// }
-	std::filesystem::path logFileName = (path / baseFileName).replace_extension(".log"); // combine, check trailing etc.
+	std::filesystem::path baseLogFileName = (path / baseFileName).replace_extension(".log");
+	std::filesystem::path logFileName;
+	// combine, check trailing etc.
 	unsigned int const date = GetDate();
 
 	constexpr int maxTries = 1000;
@@ -78,7 +80,7 @@ StreamInfo FileLogger::GetStream() const
 	{
 		if (num != 0)
 		{
-			logFileName.replace_filename(baseFileName + "_" + std::to_string(num));
+			logFileName = baseLogFileName.replace_filename(baseFileName + "_" + std::to_string(num));
 		}
 
 		// RenameOldFile(logFileName.u8string());
@@ -112,7 +114,7 @@ StreamInfo FileLogger::GetStream() const
 
 			return {std::move(newStreamWriter), std::move(logFileName), date};
 		}
-		catch (...) // specific
+		catch (std::exception &)
 		{}
 	}
 	throw std::runtime_error("Exhausted possible stream names " + GLib::Cvt::P2A(logFileName));
@@ -161,7 +163,7 @@ void FileLogger::WriteToStream(GLib::Flog::Level const level, std::string_view c
 			stm << std::setw(prefixWidth) << prefix << " : " << message;
 			stm << std::endl << std::flush;
 		}
-		catch (...)
+		catch (std::exception &)
 		{
 			CloseStream();
 			throw;
@@ -199,21 +201,21 @@ void FileLogger::CloseStream() noexcept
 		{
 			WriteFooter(streamInfo.Stream());
 		}
-		catch (...)
+		catch (std::exception &)
 		{}
 
 		try
 		{
 			streamInfo.Stream().flush();
 		}
-		catch (...)
+		catch (std::exception &)
 		{}
 
 		try
 		{
 			streamInfo = StreamInfo();
 		}
-		catch (...)
+		catch (std::exception &)
 		{}
 	}
 }

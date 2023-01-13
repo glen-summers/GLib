@@ -2,7 +2,7 @@
 
 #include "Types.h"
 
-class Address
+class Address // NOLINT(bugprone-exception-escape)
 {
 	unsigned char const oldData;
 	ULONG const symbolId;
@@ -11,41 +11,17 @@ class Address
 	mutable bool visited {};
 
 public:
-	explicit Address(unsigned char const oldData, ULONG const symbolId)
-		: oldData(oldData)
-		, symbolId(symbolId)
-	{}
+	Address(unsigned char oldData, ULONG symbolId);
 
-	unsigned char OldData() const
-	{
-		return oldData;
-	}
+	unsigned char OldData() const;
 
-	FileLines const & FileLines() const
-	{
-		return fileLines;
-	}
+	FileLines const & FileLines() const;
 
-	bool Visited() const
-	{
-		return visited;
-	}
+	bool Visited() const;
 
-	void Visit() const
-	{
-		visited = true;
-	}
+	void Visit() const;
 
-	ULONG SymbolId() const
-	{
-		return symbolId;
-	}
+	ULONG SymbolId() const;
 
-	// multiple lines can be returned for the same address
-	// 0. not seen multiple files returned but code is defensive just in case
-	// 1. release build of {return atomicType++;} returns 3 lines for same address
-	void AddFileLine(std::wstring const & fileName, unsigned int const lineNumber) const
-	{
-		fileLines[fileName].emplace(lineNumber, false);
-	}
+	void AddFileLine(std::wstring const & fileName, unsigned int lineNumber) const;
 };

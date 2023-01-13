@@ -6,7 +6,7 @@ namespace GLib::Win
 {
 	namespace Detail
 	{
-		inline std::string ClassName(HWND const hWnd)
+		inline std::string ClassName(WindowHandleBase * const hWnd)
 		{
 			GLib::Util::WideCharBuffer stm;
 			for (;;)
@@ -26,24 +26,25 @@ namespace GLib::Win
 	class MessageDebug
 	{
 	public:
-		static void Write(std::string const & context, HWND const hWnd, void const * param)
+		static void Write(std::string const & context, WindowHandleBase * const hWnd, void const * param)
 		{
-			std::string className = IsWindow(hWnd) != 0 ? Detail::ClassName(hWnd) : "<unknown>";
+			std::string const className = IsWindow(hWnd) != 0 ? Detail::ClassName(hWnd) : "<unknown>";
 			Debug::Write("{0} ClassName:{1}, Param:{2}, hWnd:{3}", context, className, param, hWnd);
 		}
 
 		template <typename T>
-		static void Write(T * source, HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam, LRESULT result)
+		static void Write(T * source, WindowHandleBase * hWnd, UINT message, WPARAM wParam, LPARAM lParam, LRESULT result)
 		{
-			bool isWindow = IsWindow(hWnd);
-			std::string sourceName = isWindow && source ? Compat::Unmangle(typeid(*source).name()) : "<unknown>"; // +hex value odf source
+			bool const isWindow = IsWindow(hWnd);
+			std::string const sourceName = isWindow && source ? Compat::Unmangle(typeid(*source).name()) : "<unknown>"; // +hex value odf source
 
 			std::string msgName;
+			auto constexpr MaxMsg = 0x8000;
 			if (message < WM_USER)
 			{
 				msgName = MessageStrings()[message];
 			}
-			else if (message < 0x8000)
+			else if (message < MaxMsg)
 			{
 				msgName = "WM_USER+" + std::to_string(message - WM_USER);
 			}
@@ -52,7 +53,7 @@ namespace GLib::Win
 				msgName = "unknown:" + std::to_string(message);
 			}
 
-			std::string className = isWindow ? Detail::ClassName(hWnd) : "<unknown>";
+			std::string const className = isWindow ? Detail::ClassName(hWnd) : "<unknown>";
 
 			if (message == WM_NOTIFY) // check
 			{

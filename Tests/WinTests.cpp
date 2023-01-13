@@ -287,11 +287,19 @@ AUTO_TEST_CASE(TestVariant)
 
 	Variant v5 = std::move(v2);
 	TEST("v" == v5.ToString());
+
+#pragma warning(push)
+#pragma warning(disable : 26800)
 	TEST(VT_EMPTY == v2.Type());
+#pragma warning(pop)
 
 	v5 = std::move(v3);
 	TEST("v3" == v5.ToString());
+
+#pragma warning(push)
+#pragma warning(disable : 26800)
 	TEST(VT_EMPTY == v3.Type());
+#pragma warning(pop)
 }
 
 AUTO_TEST_CASE(TestApp0)
