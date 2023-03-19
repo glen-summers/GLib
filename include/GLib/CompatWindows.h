@@ -106,7 +106,9 @@ namespace GLib::Compat
 
 	inline std::string ProcessName()
 	{
-		return Cvt::P2A(std::filesystem::path(ProcessPath()).filename());
+		std::string_view const exe {".exe"};
+		std::string value = Cvt::P2A(std::filesystem::path(ProcessPath()).filename());
+		return (value.ends_with(exe)) ? value.erase(value.size() - exe.size()) : value;
 	}
 
 	inline std::string CommandLine()

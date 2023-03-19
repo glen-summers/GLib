@@ -68,8 +68,7 @@ StreamInfo FileLogger::GetStream() const
 	// 	Compat::LocalTime(tm, t);
 	// 	s << "_" << std::put_time(&tm, "%Y-%m-%d");
 	// }
-	std::filesystem::path baseLogFileName = (path / baseFileName).replace_extension(".log");
-	std::filesystem::path logFileName;
+	std::filesystem::path logFileName = (path / baseFileName);
 	// combine, check trailing etc.
 	unsigned int const date = GetDate();
 
@@ -80,7 +79,7 @@ StreamInfo FileLogger::GetStream() const
 	{
 		if (num != 0)
 		{
-			logFileName = baseLogFileName.replace_filename(baseFileName + "_" + std::to_string(num));
+			logFileName.replace_filename(baseFileName + "_" + std::to_string(num)).replace_extension(".log"); // is this needed
 		}
 
 		// RenameOldFile(logFileName.u8string());

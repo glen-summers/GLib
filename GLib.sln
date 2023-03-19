@@ -3,32 +3,32 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Tests", "..\Tests\Tests.vcxproj", "{4FA66CBF-F1FA-417B-96A7-09B2D78B201A}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Tests", "Tests\Tests.vcxproj", "{4FA66CBF-F1FA-417B-96A7-09B2D78B201A}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SolutionItems", "SolutionItems", "{E4242C09-3560-4051-A84A-5D38CA1712AA}"
 	ProjectSection(SolutionItems) = preProject
-		..\.clang-format = ..\.clang-format
-		..\.clang-tidy = ..\.clang-tidy
+		.clang-tidy = .clang-tidy
 		..\.editorconfig = ..\.editorconfig
-		..\dockerFile = ..\dockerFile
+		dockerFile = dockerFile
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GLib", "..\GLib\GLib.vcxproj", "{AE9CCD38-5A24-4794-AC41-BA9BB82F8B13}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GLib", "GLib\GLib.vcxproj", "{AE9CCD38-5A24-4794-AC41-BA9BB82F8B13}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Coverage", "..\Coverage\Coverage.vcxproj", "{2D35D71B-4E6F-4627-BAAB-D5863E3052CD}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Coverage", "Coverage\Coverage.vcxproj", "{2D35D71B-4E6F-4627-BAAB-D5863E3052CD}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TestApp", "..\TestApp\TestApp.vcxproj", "{2BE55510-E3E4-4BA0-BED3-1EAB3CE81A5C}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TestApp", "TestApp\TestApp.vcxproj", "{2BE55510-E3E4-4BA0-BED3-1EAB3CE81A5C}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{460AF721-72CA-4B41-96F5-5072AC36A51E}"
 	ProjectSection(SolutionItems) = preProject
-		..\boost.version = ..\boost.version
-		build.build = build.build
-		..\cmake\common.cmake = ..\cmake\common.cmake
-		Default.props = Default.props
-		format.build = format.build
+		.clang-format = .clang-format
+		boost.version = boost.version
+		msvc\build.build = msvc\build.build
+		cmake\common.cmake = cmake\common.cmake
+		msvc\Default.props = msvc\Default.props
+		msvc\format.build = msvc\format.build
 		..\go.cmd = ..\go.cmd
-		..\go.sh = ..\go.sh
-		tidy.build = tidy.build
+		go.sh = go.sh
+		msvc\tidy.build = msvc\tidy.build
 	EndProjectSection
 EndProject
 Global
