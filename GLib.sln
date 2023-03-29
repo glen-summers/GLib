@@ -7,9 +7,19 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Tests", "Tests\Tests.vcxpro
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SolutionItems", "SolutionItems", "{E4242C09-3560-4051-A84A-5D38CA1712AA}"
 	ProjectSection(SolutionItems) = preProject
+		.clang-format = .clang-format
 		.clang-tidy = .clang-tidy
-		..\.editorconfig = ..\.editorconfig
+		.editorconfig = .editorconfig
+		.gitignore = .gitignore
+		boost.version = boost.version
+		msvc\build.build = msvc\build.build
+		cmake\common.cmake = cmake\common.cmake
+		msvc\Default.props = msvc\Default.props
 		dockerFile = dockerFile
+		msvc\format.build = msvc\format.build
+		go.cmd = go.cmd
+		go.sh = go.sh
+		msvc\tidy.build = msvc\tidy.build
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GLib", "GLib\GLib.vcxproj", "{AE9CCD38-5A24-4794-AC41-BA9BB82F8B13}"
@@ -17,19 +27,6 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Coverage", "Coverage\Coverage.vcxproj", "{2D35D71B-4E6F-4627-BAAB-D5863E3052CD}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TestApp", "TestApp\TestApp.vcxproj", "{2BE55510-E3E4-4BA0-BED3-1EAB3CE81A5C}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{460AF721-72CA-4B41-96F5-5072AC36A51E}"
-	ProjectSection(SolutionItems) = preProject
-		.clang-format = .clang-format
-		boost.version = boost.version
-		msvc\build.build = msvc\build.build
-		cmake\common.cmake = cmake\common.cmake
-		msvc\Default.props = msvc\Default.props
-		msvc\format.build = msvc\format.build
-		..\go.cmd = ..\go.cmd
-		go.sh = go.sh
-		msvc\tidy.build = msvc\tidy.build
-	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -74,9 +71,6 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-		{460AF721-72CA-4B41-96F5-5072AC36A51E} = {E4242C09-3560-4051-A84A-5D38CA1712AA}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {F018344D-BD74-45EA-8360-D06266D9F6E4}

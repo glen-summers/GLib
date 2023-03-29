@@ -26,6 +26,7 @@ namespace GLib
 
 	public:
 		constexpr Span() noexcept = default;
+
 		constexpr Span(pointer ptr, size_type size)
 			: ptr {ptr}
 			, size {size}

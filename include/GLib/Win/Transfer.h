@@ -1,5 +1,6 @@
 #pragma once
 
+#include <Unknwn.h>
 #include <utility>
 
 namespace GLib::Win
@@ -35,6 +36,11 @@ namespace GLib::Win
 		void ** Void()
 		{
 			return reinterpret_cast<void **>(&rawValue); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast) required for COM interop
+		}
+
+		IUnknown ** Unknown()
+		{
+			return reinterpret_cast<IUnknown **>(&rawValue); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast) required for COM interop
 		}
 	};
 }

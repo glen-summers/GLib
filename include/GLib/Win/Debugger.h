@@ -22,6 +22,7 @@ namespace GLib::Win
 		inline LOAD_DLL_DEBUG_INFO       const & LoadDll          (DEBUG_EVENT const & event) { return event.u.LoadDll; }           // NOLINT
 		inline UNLOAD_DLL_DEBUG_INFO     const & UnloadDll        (DEBUG_EVENT const & event) { return event.u.UnloadDll; }         // NOLINT
 		inline OUTPUT_DEBUG_STRING_INFO  const & DebugString      (DEBUG_EVENT const & event) { return event.u.DebugString; }       // NOLINT
+
 		// clang-format on
 
 		inline uint64_t ConvertAddress(void const * address)

@@ -11,6 +11,7 @@ namespace GLib::Win
 	using HandleBase = std::remove_pointer_t<HANDLE>;
 	using IconBase = std::remove_pointer_t<HICON>;
 	using InstanceBase = std::remove_pointer_t<HINSTANCE>;
+	using HdcBase = std::remove_pointer_t<HDC>;
 	using WindowHandleBase = std::remove_pointer_t<HWND>;
 	using WndProcBase = std::remove_pointer_t<WNDPROC>;
 	using KeyBase = std::remove_pointer_t<HKEY>;

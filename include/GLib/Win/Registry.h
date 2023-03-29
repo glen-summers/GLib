@@ -66,7 +66,7 @@ namespace GLib::Win
 
 		class KeyHolder
 		{
-			std::unique_ptr<HKEY__, KeyCloser> p;
+			std::unique_ptr<KeyBase, KeyCloser> p;
 
 		public:
 			explicit KeyHolder(KeyBase * const key)

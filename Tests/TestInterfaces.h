@@ -32,6 +32,7 @@ ITest1ExtendedAlt : ITest1
 {
 	virtual HRESULT STDMETHODCALLTYPE ITest1ExtendedMethodAlt() = 0;
 };
+
 // NOLINTEND
 
 template <typename T>

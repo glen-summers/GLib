@@ -41,6 +41,7 @@ namespace GLib::Cpp
 		using difference_type = void;
 		using pointer = void;
 		using reference = void;
+
 		// ReSharper restore All
 
 		Iterator(std::string_view::const_iterator const begin, std::string_view::const_iterator const end, bool const emitWhitespace)

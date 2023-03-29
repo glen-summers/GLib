@@ -20,10 +20,10 @@ int APIENTRY wWinMain(_In_ GLib::Win::InstanceBase * const hInstance, _In_opt_ G
 	try
 	{
 		GLib::Win::Mta const com;
-		auto cmd = GLib::Cvt::W2A(lpCmdLine);
+		std::string const cmd = GLib::Cvt::W2A(lpCmdLine);
 		log.Info("Cmd: [{0}]", cmd);
 
-		GLib::Util::Splitter const split {cmd, " "};
+		GLib::Util::Splitter const split {cmd.c_str(), " "};
 		unsigned int exitTime {1};
 		for (auto it = split.begin(); it != split.end(); ++it)
 		{

@@ -51,10 +51,12 @@ namespace GLib::Win::Symbols
 	{
 		ULONG index {};
 		ULONG typeIndex {};
+
 		enum SymTagEnum tag
 		{
 			SymTagNull
 		};
+
 		std::string name;
 		uint64_t displacement {};
 

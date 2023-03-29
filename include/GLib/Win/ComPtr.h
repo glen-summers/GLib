@@ -87,6 +87,11 @@ namespace GLib::Win
 		T * ptr {};
 
 	public:
+		static UUID UUid()
+		{
+			return GetUuId<T>;
+		}
+
 		ComPtr() noexcept = default;
 
 		explicit ComPtr(std::nullptr_t) noexcept {}

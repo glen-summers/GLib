@@ -98,7 +98,7 @@ namespace GLib::Win::D2d
 			return resize;
 		}
 
-		void Clear(D2D1 ::ColorF const & colour) const
+		void Clear(D2D1::ColorF const & colour) const
 		{
 			renderTarget->Clear(colour);
 		}

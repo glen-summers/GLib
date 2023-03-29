@@ -229,7 +229,7 @@ namespace GLib::Win
 		[[nodiscard]] Painter GetPainter() const
 		{
 			PAINTSTRUCT paintStruct {};
-			auto * context = BeginPaint(handle.get(), &paintStruct);
+			HdcBase * const context = BeginPaint(handle.get(), &paintStruct);
 			return Painter {PaintInfo {paintStruct, handle.get(), context}};
 		}
 
@@ -245,12 +245,14 @@ namespace GLib::Win
 
 #pragma push_macro("MessageBox")
 #undef MessageBox
+
 		[[nodiscard]] int MessageBox(std::string const & message, std::string const & caption, UINT const type = MB_OK) const
 		{
 			int const result = MessageBoxW(handle.get(), Cvt::A2W(message).c_str(), Cvt::A2W(caption).c_str(), type);
 			Util::AssertTrue(result != 0, "MessageBoxW");
 			return result;
 		}
+
 #pragma pop_macro("MessageBox")
 
 		template <typename R, typename P>
@@ -290,27 +292,46 @@ namespace GLib::Win
 		}
 
 		virtual void OnSize(Size const & /**/) noexcept {}
+
 		virtual void OnGetMinMaxInfo(MINMAXINFO & /**/) noexcept {}
+
 		virtual void OnCommand(int /*command*/) noexcept {}
+
 		virtual CloseResult OnClose() noexcept
 		{
 			return CloseResult::Allow;
 		}
+
 		virtual void OnDestroy() noexcept {}
+
 		virtual void OnNcDestroy() noexcept {}
+
 		virtual void OnUser(WPARAM /*w*/, LPARAM /*p*/) noexcept {}
+
 		virtual void OnNotify(NMHDR const & /*hdr*/) noexcept {}
+
 		virtual void OnChar(int /*char*/) noexcept {}
+
 		virtual void OnKeyDown(int /*key*/) noexcept {}
+
 		virtual void OnLeftButtonDown(Point const & /**/) noexcept {}
+
 		virtual void OnLeftButtonUp(Point const & /**/) noexcept {}
+
 		virtual void OnContextMenu(Point const & /**/) noexcept {}
+
 		virtual void OnMouseMove(Point const & /**/) noexcept {}
+
 		virtual void OnMouseWheel(Point const & /**/, int /*delta*/) noexcept {}
+
 		virtual void OnCaptureChanged() noexcept {}
+
 		virtual void OnGetDlgCode(int /*key*/, MSG const & /**/, LRESULT & /**/) {}
+
 		virtual void OnPaint() noexcept {}
+
 		virtual void OnTimer() noexcept {}
+
 		virtual void OnEraseBackground() noexcept {}
 
 		void OnMessage(UINT const message, WPARAM const wParam, LPARAM const lParam, LRESULT & result) noexcept

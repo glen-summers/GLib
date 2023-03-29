@@ -57,6 +57,7 @@ namespace GLib::Xml
 		using difference_type = void;
 		using pointer = void;
 		using reference = void;
+
 		// ReSharper restore All
 
 		Iterator(std::string_view::const_iterator begin, std::string_view::const_iterator const end, NameSpaceManager * manager)

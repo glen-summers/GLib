@@ -54,6 +54,7 @@ namespace GLib::Util
 				using difference_type = void;
 				using pointer = void;
 				using reference = void;
+
 				// ReSharper restore All
 
 				explicit Iterator(Splitter const & splitter)
