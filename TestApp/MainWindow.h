@@ -18,9 +18,9 @@ namespace TestApp
 	class MainWindow : public GLib::Win::Window
 	{
 		inline static GLib::Flog::Log const log = GLib::Flog::LogManager::GetLog<MainWindow>();
-
-		GLib::Win::D2d::Factory factory;
-		GLib::Win::D2d::Renderer renderer {factory};
+		GLib::Win::D2d::Renderer renderer {Handle(), ClientSize()};
+		GLib::Win::ComPtr<ID2D1Brush> blackBrush = renderer.CreateBrush(D2D1::ColorF::Black);
+		GLib::Win::ComPtr<ID2D1Brush> whiteBrush = renderer.CreateBrush(D2D1::ColorF::White);
 
 	public:
 		MainWindow(HINSTANCE /*instance*/, GLib::Win::Size const & /*size*/, unsigned int const exitTimeSeconds)
@@ -66,18 +66,26 @@ namespace TestApp
 		{
 			log.Info("OnPaint");
 			GLib::Win::Painter const painter = GetPainter();
-			renderer.Verify(Handle(), ClientSize());
+
+			renderer.Verify();
 			renderer.Begin();
 			renderer.Clear(D2D1::ColorF::CornflowerBlue);
+
+			D2D1_RECT_F rect {100.F, 100.F, 200.F, 200.F};
+			renderer.DrawRect(rect, blackBrush, 1.0F);
+
+			D2D1_ELLIPSE ellipse {350.F, 100.F, 100.F, 70.F};
+			renderer.DrawEllipse(ellipse, whiteBrush, 1.0F);
+
 			renderer.End();
 			static_cast<void>(painter);
 		}
 
-		void OnSize(GLib::Win::Size const & size) noexcept override
+		void OnSize() noexcept override
 		{
 			try
 			{
-				if (renderer.Resize(size))
+				if (renderer.Resize())
 				{
 					Invalidate(false);
 				}

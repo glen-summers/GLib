@@ -19,12 +19,13 @@ int APIENTRY wWinMain(_In_ GLib::Win::InstanceBase * const hInstance, _In_opt_ G
 
 	try
 	{
-		GLib::Win::Mta const com;
+		GLib::Win::Sta const com;
 		std::string const cmd = GLib::Cvt::W2A(lpCmdLine);
 		log.Info("Cmd: [{0}]", cmd);
 
-		GLib::Util::Splitter const split {cmd.c_str(), " "};
-		unsigned int exitTime {1};
+		GLib::Util::Splitter const split {cmd, " "};
+		unsigned int constexpr defaultExitTime {5};
+		unsigned int exitTime {defaultExitTime};
 		for (auto it = split.begin(); it != split.end(); ++it)
 		{
 			if (*it == "-exitTime" && ++it != split.end())

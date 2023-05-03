@@ -291,7 +291,7 @@ namespace GLib::Win
 			return exchange ? std::exchange(handled, newValue) : handled;
 		}
 
-		virtual void OnSize(Size const & /**/) noexcept {}
+		virtual void OnSize() noexcept {}
 
 		virtual void OnGetMinMaxInfo(MINMAXINFO & /**/) noexcept {}
 
@@ -355,7 +355,7 @@ namespace GLib::Win
 
 				case WM_SIZE:
 				{
-					return OnSize(Detail::SizeFromParam(lParam));
+					return OnSize();
 				}
 
 				case WM_GETMINMAXINFO:
